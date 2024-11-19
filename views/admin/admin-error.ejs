@@ -1,0 +1,66 @@
+<%- include("../../views/partials/admin/header2") %>
+    <section class="content-main">
+        <div class="row mt-60">
+            <div class="col-sm-12">
+                <div class="w-50 mx-auto text-center">
+                    <img src="/assets/admin2/imgs/theme/404.png" width="350" alt="Page Not Found">
+                    <h3 class="mt-40 mb-15">Oops! Page not found</h3>
+                    <p>It's looking like you may have taken a wrong turn. Don't worry... it happens to the best of us.
+                        Here's a little tip that might help you get back on track.</p>
+                    <a href="/admin/dashboard" class="btn btn-primary mt-4"><i class="material-icons md-keyboard_return"></i>
+                        Back
+                        to main</a>
+                </div>
+            </div>
+        </div>
+    </section>
+<%- include("../../views/partials/admin/footer2") %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Handle logout action with fetch
+    document.getElementById('logoutLink').addEventListener('click', function (event) {
+        event.preventDefault(); // Prevent the default link behavior
+
+        // Send fetch request to logout
+        fetch('/admin/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ action: 'logout' })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success SweetAlert
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Logged Out',
+                        text: data.message, // Message from the backend
+                        timer: 2000, // Wait for 2 seconds before redirect
+                        showConfirmButton: false // Hide the confirm button
+                    }).then(() => {
+                        // Redirect after showing SweetAlert
+                        window.location.replace('/admin/login');
+                    });
+                } else {
+                    // If logout failed, show an error SweetAlert
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Logout Failed',
+                        text: data.message, // Message from the backend
+                        confirmButtonText: 'Try Again'
+                    });
+                }
+            })
+            .catch(error => {
+                // Handle any network errors
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred. Please try again later.',
+                    confirmButtonText: 'Okay'
+                });
+            });
+    });
+</script>

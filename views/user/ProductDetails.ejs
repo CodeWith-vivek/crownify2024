@@ -1,0 +1,661 @@
+<%- include("../../views/partials/user/headershopdetails") %>
+    <section class="shop-details">
+        <div class="product__details__pic">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="product__details__breadcrumb">
+                            <a href="/">Home</a>
+                            <a href="/shop">Shop</a>
+                            <span>Product Details</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-3 col-md-3">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <% product.productImage.forEach((img, index)=> { %>
+                                <li class="nav-item">
+                                    <a class="nav-link <%= index === 0 ? 'active' : '' %>" data-toggle="tab"
+                                        href="#tabs-<%= index + 1 %>" role="tab">
+                                        <div class="product__thumb__pic set-bg"
+                                            data-setbg="/uploads/product-image/<%= img %>">
+                                        </div>
+                                    </a>
+                                </li>
+                                <% }) %>
+                        </ul>
+                    </div>
+                    <div class="col-lg-6 col-md-9">
+                        <div class="tab-content">
+                            <% product.productImage.forEach((img, index)=> { %>
+                                <div class="tab-pane <%= index === 0 ? 'active' : '' %>" id="tabs-<%= index + 1 %>"
+                                    role="tabpanel">
+                                    <div class="product__details__pic__item img-magnifier-container">
+                                        <img id="myimage-<%= index %>" src="/uploads/product-image/<%= img %>"
+                                            alt="<%= product.productName %>" class="zoomable-image">
+                                    </div>
+                                </div>
+                                <% }) %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="product__details__content">
+            <div class="container">
+                <div class="row d-flex justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="product__details__text">
+                            <h4>
+                                <%= product.productName %>
+                            </h4>
+
+                            <div class="rating">
+                                <% for (let i=0; i < 5; i++) { %>
+                                    <i class="fa <%= i < product.rating ? 'fa-star' : 'fa-star-o' %>"></i>
+                                    <% } %>
+                                        <span> - <%= product.reviewsCount %> Reviews</span>
+                            </div>
+                            <h3>₹<%= product.salePrice.toFixed(2) %><span>₹<%= product.regularPrice.toFixed(2) %></span>
+                            </h3>
+                            <h2></h2>
+                            <p>
+                                <%= product.description %>
+                            </p>
+
+                            <!-- Stock Display -->
+                            <div id="stock-display" style="color:gray;">Please select both size and color to see stock
+                            </div>
+
+                            <div class="product__details__option">
+                                <!-- Size Selection -->
+                                <div class="product__details__option">
+                                    <!-- Size Selection -->
+                                    <div class="product__details__option__size">
+                                        <span>Size:</span>
+                                        <% let uniqueSizes=[]; product.variants.forEach(function(variant) { if
+                                            (!uniqueSizes.includes(variant.size)) { uniqueSizes.push(variant.size); }
+                                            }); let index=0; %>
+                                            <% uniqueSizes.forEach(function(size) { %>
+                                                <label for="size-<%= index %>" class="size-label">
+                                                    <%= size %>
+                                                        <input type="radio" id="size-<%= index %>" name="size"
+                                                            value="<%= size %>" data-index="<%= index %>"
+                                                            onclick="updateStockDisplay()" <% let
+                                                            hasAvailableColor=product.variants.some(variant=> {
+                                                        return variant.size === size && variant.quantity > 0;
+                                                        });
+                                                        if (!hasAvailableColor) { %> disabled <% } %>>
+                                                </label>
+                                                <% index++; %>
+                                                    <% }); %>
+                                    </div>
+
+                                    <!-- Color Selection -->
+                                    <div class="product__details__option__color">
+                                        <span>Color:</span>
+                                        <div class="color-options-container">
+                                            <% product.variants.forEach(function(variant, index) { %>
+                                                <label class="color-label" for="color-<%= index %>"
+                                                    data-size="<%= variant.size %>">
+                                                    <input type="radio" id="color-<%= index %>" name="color"
+                                                        value="<%= variant.color %>" data-size="<%= variant.size %>"
+                                                        data-quantity="<%= variant.quantity %>"
+                                                        onclick="updateStockDisplay()">
+                                                    <% if (["No color", "Multi" ].includes(variant.color)) { %>
+                                                        <span class="color-name"
+                                                            style="font-weight: 600; top: -15px; padding: 3px; font-size: 18px;
+                                                                                         background: linear-gradient(to right, #f32170, #ff6b08, #cf23cf, #eedd44);
+                                                                                         -webkit-text-fill-color: transparent;
+                                                                                         -webkit-background-clip: text;">
+                                                            <%= variant.color %>
+                                                        </span>
+                                                        <% } else { %>
+                                                            <span class="color-swatch"
+                                                                style="background-color: <%= variant.color %>; "></span>
+                                                            <% } %>
+                                                </label>
+                                                <% }); %>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Add to Cart Button -->
+                            </div>
+
+                            <div class="product__details__cart__option">
+                                <span>Default Quantity : </span>
+                                <div class="quantity">
+                                    <div class="pro-qty">
+                                        <!-- <button class="qtybtn inc">▲</button> -->
+                                        <input type="number" value="1" min="1" max="6" id="quantityInput" readonly>
+                                        <!-- <button class="qtybtn dec" style="    top: 11px;
+    right: 15px;">▼</button> -->
+                                    </div>
+                                </div>
+                                <a href="#" class="primary-btn" id="addToCartBtn" disabled>Add to Cart</a>
+                            </div>
+                            <div class="product__details__btns__option">
+                                <a href="#"><i class="fa fa-heart"></i> Add to Wishlist</a>
+                            </div>
+                            <div class="product__details__last__option">
+                                <h5><span>Guaranteed Safe Checkout</span></h5>
+                                <img src="/assets/usershop/img/shop-details/details-payment.png" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Section Begin -->
+    <section class="related spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3 class="related-title">Related Products</h3>
+                </div>
+            </div>
+            <div class="row">
+                <% relatedProducts.forEach(product=> { %>
+                    <div class="col-lg-3 col-md-6 col-sm-6">
+                        <div class="product__item <%= product.isBlocked ? 'blocked' : '' %>"
+                            onclick="window.location.href='/product/<%= product._id %>'">
+                            <div class="product__item__pic set-bg"
+                                data-setbg="/uploads/product-image/<%= product.productImage[0] %>">
+                                <span class="label">New</span>
+                                <ul class="product__hover">
+                                    <li><a href="#" onclick="event.preventDefault(); event.stopPropagation();"><img
+                                                src="/assets/usershop/img/icon/heart.png" alt=""></a></li>
+                                </ul>
+                            </div>
+                            <div class="product__item__text">
+                                <h6>
+                                    <%= product.productName %>
+                                </h6>
+
+                                <a href="#" class="add-cart"
+                                    onclick="event.preventDefault(); event.stopPropagation(); handleAddToCart('<%= product._id %>')">+
+                                    Add To Cart</a>
+                                <div class="rating">
+                                    <% for (let i=0; i < 5; i++) { %>
+                                        <i class="fa <%= i < product.rating ? 'fa-star' : 'fa-star-o' %>"></i>
+                                        <% } %>
+                                </div>
+                                <h5>₹<%= product.regularPrice.toFixed(2) %>
+                                </h5>
+                                </h5>
+                                <div class="product__color__select" onclick="event.stopPropagation();">
+                                    <% if (Array.isArray(product.color) && product.color.length> 0) { %>
+                                        <% product.color.forEach(color=> { %>
+                                            <label for="pc-<%= color %>">
+                                                <input type="radio" name="color" id="pc-<%= color %>"
+                                                    value="<%= color %>"> <!-- Ensure value is set -->
+                                                <% if (color==="Multi" ) { %>
+                                                    <span
+                                                        style="border: 1px solid #000; padding: 3px; border-radius: 4px;">
+                                                        Multi
+                                                    </span>
+                                                    <% } else if (["No color", "Patterned" ].includes(color)) { %>
+                                                        <span
+                                                            style="border: 1px solid #000; padding: 3px; border-radius: 4px;">
+                                                            <%= color %>
+                                                        </span>
+                                                        <% } else { %>
+                                                            <span
+                                                                style="background-color: <%= color %>; border-radius: 50%; width: 20px; height: 20px;"></span>
+                                                            <% } %>
+                                            </label>
+                                            <% }) %>
+                                                <% } else { %>
+                                                    <p>No colors available</p>
+                                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+            </div>
+        </div>
+    </section>
+
+    <%- include("../../views/partials/user/footershopdetails") %>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script>
+            // Global variables to track selection state
+            let currentSize = null;
+            let currentColor = null;
+
+            // Initialize the page
+            document.addEventListener('DOMContentLoaded', function () {
+                // Initially hide all color options
+                document.querySelectorAll('.color-label').forEach(label => {
+                    label.style.display = 'none';
+                });
+
+                // Set up initial state
+                updateAddToCartButton();
+                setupStockCheck()
+                setupCartNavigation();
+            });
+
+            // Size selection handling
+            document.querySelectorAll('input[name="size"]').forEach(sizeInput => {
+
+                sizeInput.addEventListener('change', function () {
+                    const selectedSize = this.value;
+                    console.log("doool", selectedSize);
+
+
+                    currentSize = selectedSize;
+                    console.log("Selected size:", selectedSize);
+
+                    // Reset color selection
+                    resetColorSelection();
+
+                    // Show only relevant colors for selected size
+                    showRelevantColors(selectedSize);
+
+                    // Reset stock display since size has changed
+                    const stockDisplay = document.getElementById('stock-display');
+                    stockDisplay.textContent = 'Please select both size and color to see stock';
+                    stockDisplay.style.color = 'gray';
+
+                    // Reset quantity to 1 when size changes
+                    const quantityInput = document.getElementById('quantityInput');
+                    quantityInput.value = 1; // Reset quantity to 1
+
+                    // Update UI state
+                    updateAddToCartButton();
+
+                    // Add a slight delay before updating the stock display
+                    setTimeout(() => {
+                        updateStockDisplay();
+                    }, 10);
+                });
+            });
+            // Color selection handling
+            document.querySelectorAll('input[name="color"]').forEach(colorInput => {
+                colorInput.addEventListener('change', function () {
+                    if (!currentSize) {
+                        this.checked = false;
+                        Swal.fire({
+                            icon: 'info', // Type of alert (options: success, error, warning, info, question)
+                            title: 'Incomplete Selection',
+                            text: 'Please select a size first.',
+                            confirmButtonText: 'OK', // Text for the confirmation button
+                            customClass: {
+                                confirmButton: 'btn btn-warning', // Optional: Add custom classes to the button for styling
+                            },
+                        });
+                        return;
+                    }
+
+                    const selectedColor = this.value;
+                    currentColor = selectedColor;
+                    console.log("Selected color:", selectedColor);
+
+                    // Update color swatch highlighting
+                    updateColorSwatchHighlight(this);
+
+                    // Fetch stock information for the selected size and color
+                    updateStockDisplay(); // This will now fetch stock regardless of quantity
+
+                    // Update the Add to Cart button state
+                    updateAddToCartButton();
+                });
+            });
+
+            function resetColorSelection() {
+                // Clear color selection state
+                currentColor = null;
+                document.querySelectorAll('input[name="color"]').forEach(input => {
+                    input.checked = false;
+                });
+                removeColorHighlight();
+
+                // Reset stock display
+                const stockDisplay = document.getElementById('stock-display');
+                stockDisplay.textContent = 'Please select a color for the chosen size';
+                stockDisplay.style.color = 'gray';
+            }
+
+            function showRelevantColors(selectedSize) {
+                const productId = '<%= product._id %>';
+                const stockDisplay = document.getElementById('stock-display');
+
+                // Show all color options for the selected size
+                document.querySelectorAll('.color-label').forEach(label => {
+                    const colorInput = label.querySelector('input[name="color"]');
+                    if (label.dataset.size === selectedSize) {
+                        label.style.display = 'inline-block'; // Show the color option
+                        const color = colorInput.value;
+
+                        // Fetch stock for each color
+                        fetch(`/product/${productId}/stock?size=${encodeURIComponent(selectedSize)}&color=${encodeURIComponent(color)}`)
+                            .then(response => response.json())
+
+                            .catch(error => {
+                                console.error('Error fetching stock for color:', error);
+                            });
+                    } else {
+                        label.style.display = 'none'; // Hide color options that don't match the selected size
+                    }
+                });
+
+                // Reset stock display
+                stockDisplay.textContent = "Please select a color to see stock";
+                stockDisplay.style.color = 'gray';
+            }
+            function updateColorSwatchHighlight(selectedInput) {
+                removeColorHighlight();
+                const swatch = selectedInput.parentElement.querySelector('.color-swatch');
+                if (swatch) {
+                    swatch.classList.add('selected');
+                }
+            }
+
+            function removeColorHighlight() {
+                document.querySelectorAll('.color-swatch').forEach(swatch => {
+                    swatch.classList.remove('selected');
+                });
+            }
+            function updateStockDisplayWithQuantity(totalStock) {
+                const stockDisplay = document.getElementById('stock-display');
+                const remainingStock = totalStock;
+
+                if (remainingStock === 0) {
+                    stockDisplay.textContent = 'Out of stock';
+                    stockDisplay.style.color = 'red';
+                } else if (remainingStock <= 10) {
+                    stockDisplay.textContent = `Stock available: ${remainingStock}`;
+                    stockDisplay.style.color = 'orange';
+                } else {
+                    stockDisplay.textContent = 'In Stock';
+                    stockDisplay.style.color = 'green';
+                }
+            }
+
+
+            function updateStockDisplay() {
+                const stockDisplay = document.getElementById('stock-display');
+
+                if (!currentSize) {
+                    stockDisplay.textContent = 'Please select a size to see available colors';
+                    stockDisplay.style.color = 'gray';
+                    return;
+                }
+
+                if (!currentColor) {
+                    stockDisplay.textContent = 'Please select a color';
+                    stockDisplay.style.color = 'gray';
+                    return;
+                }
+
+                const productId = '<%= product._id %>';
+                fetch(`/product/${productId}/stock?size=${encodeURIComponent(currentSize)}&color=${encodeURIComponent(currentColor)}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Stock request failed');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.stock !== undefined) {
+
+                            updateStockDisplayWithQuantity(data.stock);
+                        } else {
+                            stockDisplay.textContent = 'Variant not found';
+                            stockDisplay.style.color = 'red';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching stock:', error);
+                        stockDisplay.textContent = 'Error checking stock';
+                        stockDisplay.style.color = 'red';
+                    });
+            }
+            function updateAddToCartButton() {
+                const addToCartBtn = document.getElementById('addToCartBtn');
+                if (currentSize && currentColor) {
+                    // Fetch stock to ensure button is only enabled when stock > 0
+                    const productId = '<%= product._id %>';
+                    fetch(`/product/${productId}/stock?size=${encodeURIComponent(currentSize)}&color=${encodeURIComponent(currentColor)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.stock > 0) {
+                                addToCartBtn.classList.remove('disabled');
+                                addToCartBtn.removeAttribute('disabled');
+                            } else {
+                                addToCartBtn.classList.add('disabled');
+                                addToCartBtn.setAttribute('disabled', 'true');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching stock:', error);
+                            addToCartBtn.classList.add('disabled');
+                            addToCartBtn.setAttribute('disabled', 'true');
+                        });
+                } else {
+                    addToCartBtn.classList.add('disabled');
+                    addToCartBtn.setAttribute('disabled', 'true');
+                }
+            }
+
+            function setupStockCheck() {
+                const quantity = 1; // Fixed quantity
+                const stockDisplay = document.getElementById('stock-display');
+
+                document.querySelectorAll('.qtybtn').forEach(button => {
+                    button.addEventListener('click', async function () {
+                        const productId = '<%= product._id %>';
+                        const size = currentSize; // Ensure this variable is set when a size is selected
+                        const color = currentColor; // Ensure this variable is set when a color is selected
+
+                        if (size && color) {
+                            // Fetch stock data for the selected size and color
+                            const response = await fetch(`/product/${productId}/stock?size=${encodeURIComponent(size)}&color=${encodeURIComponent(color)}`);
+                            const data = await response.json();
+
+                            if (data.stock !== undefined) {
+                                // Check if stock is sufficient for the fixed quantity
+                                if (data.stock >= quantity) {
+                                    stockDisplay.textContent = `In stock: ${data.stock}`;
+                                    stockDisplay.style.color = 'green';
+                                } else {
+                                    stockDisplay.textContent = 'Out of stock';
+                                    stockDisplay.style.color = 'red';
+                                }
+                            } else {
+                                stockDisplay.textContent = 'Stock information unavailable';
+                                stockDisplay.style.color = 'gray';
+                            }
+                        } else {
+                          Swal.fire({
+                                icon: 'warning', // Type of alert (options: success, error, warning, info, question)
+                                title: 'Incomplete Selection',
+                                text: 'Please select both size and color.',
+                                confirmButtonText: 'OK', // Text for the confirmation button
+                                customClass: {
+                                    confirmButton: 'btn btn-warning', // Optional: Add custom classes to the button for styling
+                                },
+                            });
+                        }
+                    });
+                });
+            }
+            // Add to Cart functionality
+            document.getElementById('addToCartBtn').addEventListener('click', async function (event) {
+                event.preventDefault();
+
+                if (!currentSize || !currentColor) {
+                    Swal.fire({
+                        icon: 'warning', // Type of alert (options: success, error, warning, info, question)
+                        title: 'Incomplete Selection',
+                        text: 'Please select both size and color before adding to cart.',
+                        confirmButtonText: 'OK', // Text for the confirmation button
+                        customClass: {
+                            confirmButton: 'btn btn-warning', // Optional: Add custom classes to the button for styling
+                        },
+                    });
+                    return;
+                }
+
+                const productId = '<%= product._id %>';
+                const quantity = document.getElementById('quantityInput').value;
+
+
+
+                // Add to cart API call
+                try {
+                    const response = await fetch('/cart/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            productId,
+                            size: currentSize,
+                            color: currentColor,
+                            quantity
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Item added to cart successfully!',
+                            // showCancelButton: true,
+                            // confirmButtonText: 'Go to Cart',
+                            // cancelButtonText: 'Continue Shopping',
+                            // customClass: {
+                            //     confirmButton: 'btn btn-success',
+                            //     cancelButton: 'btn btn-secondary',
+                            // },
+                        }).then((result) => {
+                            // if (result.isConfirmed) {
+                                window.location.href = '/cart';
+                            // }
+                        });
+                        
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Failed',
+                            text: data.message || 'Failed to add product to cart.',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                confirmButton: 'btn btn-danger',
+                            },
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error adding to cart:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while adding the product to the cart.',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'btn btn-danger',
+                        },
+                    });
+                }
+            });
+
+            function setupCartNavigation() {
+                document.querySelectorAll('.site-header__cart').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.location.href = '/cart';
+                    });
+                });
+            }
+
+            // Related products "Add to Cart" handler
+            function handleAddToCart(productId) {
+                // Implement related products add to cart functionality
+                fetch('/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        productId: productId,
+                        quantity: 1  // Default quantity for related products
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                              Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Product added to cart successfully!',
+                                // confirmButtonText: 'OK',
+                                // customClass: {
+                                //     confirmButton: 'btn btn-success',
+                                // },
+                            });
+                        } else {
+                           Swal.fire({
+                                icon: 'error',
+                                title: 'Failed',
+                                text: data.message || 'Failed to add product to cart.',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    confirmButton: 'btn btn-danger',
+                                },
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                       Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while adding the product to the cart.',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                confirmButton: 'btn btn-danger',
+                            },
+                        });
+                    });
+            }
+
+            // Initialize magnifier functionality if needed
+            function initMagnifier() {
+                const magnifierGlass = document.createElement('div');
+                magnifierGlass.setAttribute('class', 'img-magnifier-glass');
+
+                document.querySelectorAll('.zoomable-image').forEach(img => {
+                    img.parentElement.style.position = 'relative';
+                    img.parentElement.appendChild(magnifierGlass.cloneNode(true));
+
+                    // Add magnifier glass functionality here if needed
+                });
+            }
+
+            // Call initialization functions when document is ready
+            document.addEventListener('DOMContentLoaded', function () {
+                initMagnifier();
+            })
+            document.addEventListener('DOMContentLoaded', () => {
+                const cartLinks = document.querySelectorAll('.site-header__cart');
+
+                cartLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        console.log('Cart link clicked');
+                        e.stopPropagation(); // Prevent bubbling to avoid duplicate handlers
+                        window.location.href = '/cart';
+                        e.preventDefault(); // Prevent default navigation
+                    });
+                });
+            });
+
+        </script>

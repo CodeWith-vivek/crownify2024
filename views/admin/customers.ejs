@@ -1,0 +1,202 @@
+<%- include("../../views/partials/admin/header2") %>
+    <section class="content-main">
+        <div class="content-header">
+            <h2 class="content-title">Customers list</h2>
+           
+        </div>
+        <div class="card mb-4">
+            <header class="card-header">
+                <div class="row gx-3">
+                    <div class="col-lg-4 col-md-6 me-auto">
+                        <input type="text" placeholder="Search..." class="form-control">
+                    </div>
+                   
+                </div>
+            </header> <!-- card-header end// -->
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Registered</th>
+                                <th class="text-center action1"> Action </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% users.forEach(user=> { %>
+                                <tr>
+                                    <td>
+                                        <a href="#" class="itemside">
+                                            <div class="left img-sm img-avatar"
+                                                style="border-radius: 50%; width: 40px; height: 40px; background-color: <%= user.avatar ? 'transparent' : 'black' %>; display: flex; align-items: center; justify-content: center;">
+                                                <% if (user.avatar) { %>
+                                                    <img src="<%= user.avatar %>" class="img-sm img-avatar"
+                                                        alt="Userpic">
+                                                    <% } else { %>
+                                                        <span
+                                                            style="color: white; font-weight: bold; font-size: 1.2em;">
+                                                            <%= user.name ? user.name[0].toUpperCase() : '?' %>
+                                                                <!-- Display first letter of the name -->
+                                                        </span>
+                                                        <% } %>
+                                            </div>
+                                            <div class="info pl-3">
+                                                <h6 class="mb-0 title">
+                                                    <%= user.name %>
+                                                </h6>
+                                            </div>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <%= user.email %>
+                                    </td>
+                                    <td>
+                                        <span
+                                            class="badge rounded-pill alert-<%= user.isBlocked ? 'danger' : 'success' %>">
+                                            <%= user.isBlocked ? 'Disabled' : 'Active' %> <!-- Check user status -->
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <% if (user.createdOn) { %>
+                                            <%= user.createdOn.toLocaleDateString() %> <!-- Format created date -->
+                                                <% } else { %>
+                                                    N/A
+                                                    <% } %>
+                                    </td>
+                                    <td class="text-center">
+                                        <% if(user.isBlocked===false){%>
+                                            <button class="btn " style=" background-color: #ff4757;width: 90px;"">
+                            <a href=" /admin/blockCustomer?id=<%=user._id%>" class="text-white">Block</a>
+
+                                            </button>
+                                            <%} else {%>
+                                                <button class="btn " style="width: 90px; background-color: #488a62;">
+                                                    <a href="/admin/unblockCustomer?id=<%=user._id%>"
+                                                        class="text-white">Unblock</a>
+
+                                                </button>
+                                                <%}%>
+
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table> <!-- table-responsive.// -->
+                </div>
+            </div> <!-- card-body end// -->
+        </div> <!-- card end// -->
+        <div class="pagination-area mt-15 mb-50">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    <% if (totalPages> 1) { %>
+
+                        <!-- Previous Arrow -->
+                        <% if (currentPage> 1) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<%= currentPage - 1 %>">&laquo;</a>
+                            </li>
+                            <% } %>
+
+                                <!-- First Page -->
+                                <li class="page-item <%= (currentPage === 1) ? 'active' : '' %>">
+                                    <a class="page-link" href="?page=1">01</a>
+                                </li>
+
+                                <!-- Ellipsis after First Page -->
+                                <% if (currentPage> 4) { %>
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    <% } %>
+
+                                        <!-- Pages around the current page -->
+                                        <% for (let i=Math.max(2, currentPage - 1); i <=Math.min(totalPages - 1,
+                                            currentPage + 1); i++) { %>
+                                            <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+                                                <a class="page-link" href="?page=<%= i %>">
+                                                    <%= i.toString().padStart(2, '0' ) %>
+                                                </a>
+                                            </li>
+                                            <% } %>
+
+                                                <!-- Ellipsis before Last Page -->
+                                                <% if (currentPage < totalPages - 3) { %>
+                                                    <li class="page-item disabled"><span class="page-link">...</span>
+                                                    </li>
+                                                    <% } %>
+
+                                                        <!-- Last Page -->
+                                                        <% if (totalPages> 1) { %>
+                                                            <li
+                                                                class="page-item <%= (currentPage === totalPages) ? 'active' : '' %>">
+                                                                <a class="page-link" href="?page=<%= totalPages %>">
+                                                                    <%= totalPages.toString().padStart(2, '0' ) %>
+                                                                </a>
+                                                            </li>
+                                                            <% } %>
+
+                                                                <!-- Next Arrow -->
+                                                                <% if (currentPage < totalPages) { %>
+                                                                    <li class="page-item">
+                                                                        <a class="page-link"
+                                                                            href="?page=<%= parseInt(currentPage) + 1 %>">&raquo;</a>
+                                                                    </li>
+                                                                    <% } %>
+
+                                                                        <% } %>
+                </ul>
+            </nav>
+        </div>
+
+    </section>
+    <%- include("../../views/partials/admin/footer2") %>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Handle logout action with fetch
+        document.getElementById('logoutLink').addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent the default link behavior
+
+            // Send fetch request to logout
+            fetch('/admin/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action: 'logout' })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success SweetAlert
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Logged Out',
+                            text: data.message, // Message from the backend
+                            timer: 2000, // Wait for 2 seconds before redirect
+                            showConfirmButton: false // Hide the confirm button
+                        }).then(() => {
+                            // Redirect after showing SweetAlert
+                            window.location.replace('/admin/login');
+                        });
+                    } else {
+                        // If logout failed, show an error SweetAlert
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Logout Failed',
+                            text: data.message, // Message from the backend
+                            confirmButtonText: 'Try Again'
+                        });
+                    }
+                })
+                .catch(error => {
+                    // Handle any network errors
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred. Please try again later.',
+                        confirmButtonText: 'Okay'
+                    });
+                });
+        });
+    </script>

@@ -1,0 +1,40 @@
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+<%- include("../../views/partials/user/header") %>
+    <div id="page-content">
+        <!-- Lookbook Start -->
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12">
+                    <div class="empty-page-content text-center">
+                        <h1>404 Page Not Found</h1>
+                        <p>The page you requested does not exist.</p>
+                        <p><a href="http://localhost:3000/" class="btn btn--has-icon-after">Continue shopping <i
+                                    class="fa fa-caret-right" aria-hidden="true"></i></a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Lookbook Start -->
+    </div>
+    <%- include("../../views/partials/user/footer") %>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+                const cartLinks = document.querySelectorAll('.site-header__cart');
+
+                cartLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        console.log('Cart link clicked');
+
+                        // Prevent any existing event handlers
+                        e.stopPropagation();
+
+                        // Ensure default navigation
+                        window.location.href = '/cart';
+
+                        // Prevent default link behavior
+                        e.preventDefault();
+                    });
+                });
+            });
+    </script>

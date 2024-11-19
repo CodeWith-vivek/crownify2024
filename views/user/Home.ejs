@@ -1,0 +1,279 @@
+<%- include("../../views/partials/user/header") %>
+    <!--Body Content-->
+    <div id="page-content">
+        <!--Home slider-->
+        <div class="slideshow slideshow-wrapper pb-section">
+            <div class="home-slideshow">
+                <div class="slide slideshow--medium">
+                    <div class="blur-up lazyload">
+                        <img class="blur-up lazyload" data-src="assets/images/slideshow-banners/hero14.jpg"
+                            src="assets/images/slideshow-banners/hero14.jpg" alt="Outfit of Today"
+                            title="Outfit of Today" />
+                        <div class="slideshow__text-wrap slideshow__overlay classic middle">
+                            <div class="slideshow__text-content classic left">
+                                <div class="container">
+                                    <div class="wrap-caption left">
+                                        <h2 class="h1 mega-title slideshow__title">Caps of Today</h2>
+                                        <span class="mega-subtitle slideshow__subtitle">Trending in 2024</span>
+                                        <a href="/shop"><span class="btn">SHOP NOW</span></a>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide slideshow--medium">
+                    <div class="blur-up lazyload">
+                        <img class="blur-up lazyload" data-src="assets/images/slideshow-banners/img19.jpg"
+                            src="assets/images/slideshow-banners/img19.jpg" alt="Accessories" title="Accessories" />
+                        <div class="slideshow__text-wrap slideshow__overlay classic middle">
+                            <div class="slideshow__text-content classic left">
+                                <div class="container">
+                                    <div class="wrap-caption left">
+                                        <h2 class="h1 mega-title slideshow__title">Collections</h2>
+                                        <span class="mega-subtitle slideshow__subtitle">New Collection </span>
+                                        <a href="/shop"><span class="btn">SHOP NOW</span></a>
+                                       
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--End Home slider-->
+        <div class="container-fluid crownify2 d-flex justify-content-center align-items-center">
+            <img src="assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+
+        </div>
+
+        <!--Feature Content-->
+        <div class="section feature-content">
+            <div class="container">
+                <div class="row">
+                    <div class="feature-row">
+                        <div class="col-12 col-sm-12 col-md-6 feature-row__item text-center">
+                            <img class="blur-up lazyload" data-src="assets/images/collection/nikecap.jpg"
+                                src="assets/images/collection/nikecap" alt="Hot hoodies jackets"
+                                title="Hot hoodies jackets" />
+                        </div>
+                        <div
+                            class="col-12 col-sm-12 col-md-6 feature-row__item feature-row__text feature-row__text--left text-left">
+                            <div class="row-text">
+                                <h2 class="h2">Shop From Top Brand</h2>
+                                <p>Cover all your style in caps</p>
+                                <a href="/brand" class="btn">SHOP NOW</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Feature Content-->
+
+        <!--Feature Content-->
+        <div class="section feature-content">
+            <div class="container">
+                <div class="row">
+                    <div class="feature-row">
+                        <div
+                            class="col-12 col-sm-12 col-md-6 feature-row__item feature-row__text feature-row__text--right text-right">
+                            <div class="row-text">
+                                <h2 class="h2">Shop By category</h2>
+                                <p> Caps & Hats are waiting for you !</p>
+                                <a href="/shop" class="btn">SHOP NOW</a>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-12 col-md-6 feature-row__item text-center">
+                            <img class="blur-up lazyload" data-src="assets/images/collection/cap4.jpg"
+                                src="assets/images/collection/cap4.jpg" alt="Shoes Collection"
+                                title="Shoes Collection" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Feature Content-->
+        <div class="container-fluid crownify d-flex justify-content-center align-items-center">
+            <img src="assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+
+        </div>
+        <!--Hero Banner With Text-->
+        <div class="section hero hero--medium hero__overlay bg-size">
+            <img class="bg-img" src="assets/images/parallax-banners/banner2.jpg" alt="" />
+            <div class="hero__inner">
+                <div class="container">
+                    <div class="wrap-text right text-medium font-bold">
+                        <h2 class="h2 mega-title">MAKE IT PERSONAL</h2>
+                        <div class="rte-setting mega-subtitle">Make your jewels even more meaningful by <br>
+                            personalizing them
+                            with a name, monogram, coordinates, date,<br> or a special message.</div>
+                        <a href="#" class="btn">personalize Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--End Hero Banner With Text-->
+        <div class="container-fluid crownify4 d-flex justify-content-center align-items-center">
+            <img src="assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+
+        </div>
+
+        <!--Shop these looks-->
+    <div class="section">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12">
+                    <div class="section-header text-center">
+                        <h2 class="h2">Shop these looks</h2>
+                        <p>Shop from hundreds of collections for a fashionable look.</p>
+                    </div>
+                    <div class="productSlider grid-products grid-products-hover-gry">
+                        <% products.forEach(product=> { %>
+                            <div class="col-12 item">
+                                <!-- start product image -->
+                                <div class="product-image">
+                                    <a href="/product/<%= product._id %>" class="grid-view-item__link">
+                                        <!-- image -->
+                                        <img class="primary blur-up lazyload"
+                                            data-src="/uploads/product-image/<%= product.productImage[0] %>"
+                                            src="/uploads/product-image/<%= product.productImage[0] %>"
+                                            alt="<%= product.productName %>" title="<%= product.productName %>">
+                                        <!-- End image -->
+                                        <!-- Hover image -->
+                                        <img class="hover blur-up lazyload"
+                                            data-src="/uploads/product-image/<%= product.productImage[1] %>"
+                                            src="/uploads/product-image/<%= product.productImage[1] %>"
+                                            alt="<%= product.productName %>" title="<%= product.productName %>">
+                                        <!-- End hover image -->
+                                    </a>
+                                    <!-- end product image -->
+                                    <!-- Start product button -->
+                                    <form class="variants add" action="#" method="post">
+                                        <button class="btn btn-addto-cart" type="button" tabindex="0">Add To Cart</button>
+                                    </form>
+                                    <div class="button-set">
+                                        <div class="wishlist-btn">
+                                            <a class="wishlist add-to-wishlist" href="wishlist.html">
+                                                <i class="icon anm anm-heart-l"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <!-- end product button -->
+                                </div>
+                                <!-- end product image -->
+                                <!--start product details -->
+                                <div class="product-details text-center">
+                                    <!-- product name -->
+                                    <div class="product-name">
+                                        <a href="/product/<%= product._id %>">
+                                            <%= product.productName %>
+                                        </a>
+                                    </div>
+                                    <!-- End product name -->
+                                    <!-- product price -->
+                                    <div class="product-price">
+                                        <span class="price">$<%= product.salePrice.toFixed(2) %></span>
+                                    </div>
+                                    <!-- End product price -->
+                                </div>
+                                <!-- End product details -->
+                            </div>
+                            <% }); %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        <!--End Shop these looks-->
+
+        <!--Feature Content-->
+        <div class="section feature-content">
+            <div class="container">
+                <div class="row">
+                    <div class="feature-row">
+                        <div class="col-12 col-sm-12 col-md-6 feature-row__item text-center">
+                            <img class="blur-up lazyload" data-src="assets/images/collection/post1.jpg"
+                                src="assets/images/collection/post1.jpg" alt="Nuke New Arrivals"
+                                title="Nuke New Arrivals" />
+                        </div>
+                        <div
+                            class="col-12 col-sm-12 col-md-6 feature-row__item feature-row__text feature-row__text--left text-left">
+                            <div class="row-text">
+                                <h2 class="h2">Nuke New Arrivals</h2>
+                                <p>Fresh arrivals are here to take over your closet!</p>
+                                <a href="#" class="btn">Explore Now</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Feature Content-->
+
+        <!--Three Column Products-->
+       
+        <!--End Three Column Products-->
+
+        <!-- Instagram Section-->
+     
+        <!--End Instagram Section-->
+
+    </div>
+    <!--End Body Content-->
+    <div class="container-fluid crownify4 d-flex justify-content-center align-items-center">
+        <img src="assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+
+    </div>
+    <!--Logo Slider-->
+    <div class="section logo-section">
+        <div class="container-secondary">
+            <div class="row">
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12">
+                    <div class="section-header text-center">
+                        <h2 class="h2">Top Brands</h2>
+                    </div>
+                    <div class="logo-bar">
+                        <div class="logo-bar__item">
+                            <img src="assets/images/logo/puma7.png" alt="" title="" />
+                        </div>
+                        <div class="logo-bar__item">
+                            <img src="assets/images/logo/Urbanmonkey1.png" alt="" title="" />
+                        </div>
+                        <div class="logo-bar__item">
+                            <img src="assets/images/logo/nike2.png" alt="" title="" />
+                        </div>
+                        <div class="logo-bar__item">
+                            <img src="assets/images/logo/Adidas.png" alt="" title="" />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--End Footer-->
+<%- include("../../views/partials/user/footer") %>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+            const cartLinks = document.querySelectorAll('.site-header__cart');
+
+            cartLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    console.log('Cart link clicked');
+
+                    // Prevent any existing event handlers
+                    e.stopPropagation();
+
+                    // Ensure default navigation
+                    window.location.href = '/cart';
+
+                    // Prevent default link behavior
+                    e.preventDefault();
+                });
+            });
+        });
+</script>

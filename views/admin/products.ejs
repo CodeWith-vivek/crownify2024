@@ -1,0 +1,283 @@
+<%- include("../../views/partials/admin/header2") %>
+<section class="content-main">
+<div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Products</h2>
+        </div>
+    </div>
+
+    <header class="card-header text-center mb-20">
+        <form action="" method="get" class="d-inline">
+            <div class="input-group input-group-sm border border-1 border-grey rounded-pill"
+                style="width: 500px; margin-left: 230px;">
+                <input type="text" class="form-control border-0 rounded-pill" placeholder="Search products or brands"
+                    name="search">
+                <button class="btn border-0" type="submit">Search</button>
+            </div>
+        </form>
+    </header>
+
+    <div class="right mt-5">
+        <table class="table ">
+            <thead>
+                <tr>
+                    <th scope="col"><b>Product name</b></th>
+                    <th scope="col"><b>Brand</b></th>
+                    <th scope="col"><b>Category</b></th>
+                    <th scope="col"><b>Sale Price</b></th>
+                    <th scope="col"><b>Offer Price</b></th>
+                    <th scope="col"><b>Offer</b></th>
+                    <th scope="col"><b>Quantity</b></th>
+                    <th scope="col"><b>Action</b></th>
+                    <th scope="col"><b>Edit</b></th>
+                </tr>
+            </thead>
+            <tbody>
+        <% for (let i=data.length - 1; i>= 0; i--) { %>
+            <tr>
+                <td>
+                    <%= data[i].productName %>
+                </td>
+                <td>
+                    <%= data[i].brand %>
+                </td>
+                <td>
+                    <%= data[i].category ? data[i].category.name : 'No Category' %>
+                </td>
+                <td>
+                    <%= data[i].salePrice %>
+                </td>
+                <td>
+                    <% if (data[i].productOffer) { %>
+                        <%= data[i].productOffer %>
+                            <% } else { %>
+                                0%
+                                <% } %>
+                </td>
+                <td>
+                    <% if (locals.data[i].productOffer===0) { %>
+                        <button class="btn btn-info" onclick="addOffer('<%= data[i]._id %>')" style="width: 100px;">
+                            <a href="#" class="text-white">Add Offer</a>
+                        </button>
+                        <% } else { %>
+                            <button class="btn btn-info" onclick="removeOffer('<%= data[i]._id %>')" style="width: 100px;">
+                                <a href="#" class="text-white">Remove</a>
+                            </button>
+                            <% } %>
+                </td>
+                <td>
+                    <%= data[i].quantity %>
+                </td>
+                <td>
+                    <% if (data[i].isBlocked===false) { %>
+                        <button class="btn btn-danger" style="width: 80px;">
+                            <a href="/admin/blockProduct?id=<%= data[i]._id %>" class="text-white"
+                                style="text-decoration: none;">Block</a>
+                        </button>
+                        <% } else { %>
+                            <button class="btn btn-success" style="width: 80px;">
+                                <a href="/admin/unblockProduct?id=<%= data[i]._id %>" class="text-white"
+                                    style="text-decoration: none;">Unblock</a>
+                            </button>
+                            <% } %>
+                </td>
+                <td>
+                    <button class="btn btn-info" style="width: 80px;">
+                        <a href="/admin/editProduct?id=<%= data[i]._id %>" class="text-white"
+                            style="text-decoration: none;">Edit</a>
+                    </button>
+                </td>
+            </tr>
+            <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                <% if (totalPages> 1) { %>
+                    <% if (currentPage> 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %>">&laquo;</a>
+                        </li>
+                        <% } %>
+
+                        <li class="page-item <%= (currentPage === 1) ? 'active' : '' %>">
+                                <a class="page-link" href="?page=1">01</a>
+                        </li>
+
+                            <% if (currentPage> 4) { %>
+                        <li class="page-item disabled"><span class="page-link">...</span>
+                        </li>
+                                <% } %>
+
+                                    <% for (let i=Math.max(2, currentPage - 1); i <=Math.min(totalPages - 1, currentPage
+                                        + 1); i++) { %>
+                                        <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+                                            <a class="page-link" href="?page=<%= i %>">
+                                                <%= i.toString().padStart(2, '0' ) %>
+                                            </a>
+                                        </li>
+                                        <% } %>
+
+                                            <% if (currentPage < totalPages - 3) { %>
+                                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                                                <% } %>
+
+                                                    <% if (totalPages> 1) { %>
+                                                        <li
+                                                            class="page-item <%= (currentPage === totalPages) ? 'active' : '' %>">
+                                                            <a class="page-link" href="?page=<%= totalPages %>">
+                                                                <%= totalPages.toString().padStart(2, '0' ) %>
+                                                            </a>
+                                                        </li>
+                                                        <% } %>
+
+                                                            <% if (currentPage < totalPages) { %>
+                                                                <li class="page-item">
+                                                                    <a class="page-link"
+                                                                        href="?page=<%= parseInt(currentPage) + 1 %>">&raquo;</a>
+                                                                </li>
+                                                                <% } %>
+                                                                    <% } %>
+            </ul>
+        </nav>
+    </div>
+
+    <%- include("../../views/partials/admin/footer2") %>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    async function addOffer(productId) {
+        const { value: amount } = await Swal.fire({
+            title: "Offer in percentage",
+            input: "number",
+            inputLabel: "percentage",
+            inputPlaceholder: "%"
+        });
+
+        // Check if the amount is valid
+        if (amount === null || amount === '' || isNaN(amount) || amount < 0 || amount > 100) {
+            Swal.fire("Invalid Input", "Please enter a valid percentage between 0 and 100.", "error");
+            return; // Exit the function if the input is invalid
+        }
+
+        $.ajax({
+            url: "/admin/addProductOffer",
+            method: "post",
+            data: {
+                percentage: amount,
+                productId: productId
+            },
+            success: (response) => {
+                console.log("Response from server:", response);
+                if (response.status === true) {
+                    Swal.fire("Offer added", "The offer has been added successfully", "success").then(() => {
+                        location.reload(); // Reload after the alert is closed
+                    });
+                } else {
+                    // Show the error message from the server
+                    Swal.fire("Failed", response.message || "Unable to add offer", "error");
+                }
+            },
+            error: (xhr, status, error) => {
+                console.error("AJAX error:", error);
+                Swal.fire("Error", "An error occurred while adding the offer", "error");
+            }
+        });
+    }
+
+        async function removeOffer(productId) {
+            try{
+                Swal.fire({
+                    title:"Remove offer",
+                    text:"Are you sure you want to remove this offer",
+                    icon:"warning",
+                    showCancelButton:true,
+                    confirmButtonColor:"#3085d6",
+                    cancelButtonColor:"d33",
+                    confirmButtonText:"Yes,remove it!",
+                    timer:5000,
+                    timerProgressBar:true
+                }).then(async (result)=>{
+                    if(result.isConfirmed){
+                        $.ajax({
+                            url:"/admin/removeProductOffer",
+                            method:"post",
+                            data:{
+                                productId:productId
+                            },
+                            success:(response)=>{
+                                if(response.status===true){
+                                    Swal.fire("Removed","The offer has been removed","success")
+                                    location.reload()
+                                }else if(response.status===false){
+                                    Swal.fire("failed")
+                                }else{
+                                    alert("failed")
+                                }
+                            }
+
+                        })
+                    }
+                })
+            }catch(error){
+                console.error(error)
+
+            }
+
+            
+        }
+
+    </script>
+  
+    <script>
+        // Handle logout action with fetch
+        document.getElementById('logoutLink').addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent the default link behavior
+
+            // Send fetch request to logout
+            fetch('/admin/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action: 'logout' })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success SweetAlert
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Logged Out',
+                            text: data.message, // Message from the backend
+                            timer: 2000, // Wait for 2 seconds before redirect
+                            showConfirmButton: false // Hide the confirm button
+                        }).then(() => {
+                            // Redirect after showing SweetAlert
+                            window.location.replace('/admin/login');
+                        });
+                    } else {
+                        // If logout failed, show an error SweetAlert
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Logout Failed',
+                            text: data.message, // Message from the backend
+                            confirmButtonText: 'Try Again'
+                        });
+                    }
+                })
+                .catch(error => {
+                    // Handle any network errors
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred. Please try again later.',
+                        confirmButtonText: 'Okay'
+                    });
+                });
+        });
+    </script>
+
+    

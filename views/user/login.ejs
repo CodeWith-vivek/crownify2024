@@ -1,0 +1,254 @@
+<%- include("../../views/partials/user/header2") %>
+    <section class="ftco-section">
+        <div class="container">
+
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="wrap d-md-flex">
+                        <div class="text-wrap p-4 p-lg-5 d-flex img d-flex align-items-end"
+                            style="background-image: url(assets/images/loginpic.webp);">
+                            <div class="text w-100">
+                                <h2 class="mb-4">Welcome to Login page</h2>
+                                <p>Far far away, behind the word mountains, far from the countries Vokalia and
+                                    Consonantia,
+                                    there live the blind texts.</p>
+                            </div>
+                        </div>
+
+                        <div class="login-wrap p-4 p-md-5"
+                            style="background-image: url(assets/images/logindesign4.png); background-size: cover; background-position: center; background-repeat: no-repeat;">
+                            <h3 class="mb-3" style="font-weight: 600;">Login</h3>
+                            <% if (messages.error) { %>
+                                <div style="color: red;">
+                                    <%= messages.error %>
+                                </div>
+                                <% } %>
+
+
+                                    <form method="post" action="/login" class="signup-form" id="signform">
+                                        <div class="row">
+
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label class="label" for="email">Email Address</label>
+                                                    <input type="email" class="form-control" name="email"
+                                                        value="<%= data ? data.email : '' %>" id="email"
+                                                        placeholder="Enter email">
+                                                    <div id="error1" class="error-message"></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label class="label" for="password">Password</label>
+                                                    <div class="input-group">
+                                                        <input type="password" id="password" class="form-control"
+                                                            name="password" placeholder="Password">
+                                                        <span class="input-group-text" id="toggle-password"
+                                                            style="cursor: pointer;">
+                                                            <i class="fa fa-eye" id="eye-icon"></i>
+                                                        </span>
+                                                    </div>
+
+
+                                                    <div id="error2" class="error-message"></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-12 my-4">
+                                                <div class="form-group">
+                                                    <div class="w-100">
+                                                        <label class="checkbox-wrap checkbox-primary">
+                                                            <a href="/forget-password">Forgot Password ?</a>
+
+                                                        </label>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 text-center">
+                                                <div class="form-group ">
+                                                    <button type="submit"
+                                                        class="btn btn-secondary submit ">Login</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </form>
+                                    <div class="social-wrap">
+    <p class="or">
+        <span>or</span>
+    </p>
+    <p class="mb-3 text-center">Sign in with this Google</p>
+    <p class="social-media d-flex justify-content-center">
+        <a href="/auth/google" class="social-icon google d-flex align-items-center justify-content-center"
+            onclick="showLoginAlert(event)">
+            <span class="fa fa-google"></span>
+        </a>
+    </p>
+</div>
+<div class="w-100 text-center">
+    <p class="mt-4">Don't have an account? <a href="/signup">Sign up here</a></p>
+</div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <%- include("../../views/partials/user/footer") %>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            const emailid = document.getElementById("email");
+            const passid = document.getElementById("password");
+            const error1 = document.getElementById("error1");
+            const error2 = document.getElementById("error2");
+            let emailValid = false;
+            let passValid = false;
+
+            function emailValidateChecking() {
+                const emailValue = emailid.value.toLowerCase().trim();
+                const emailpattern = /^[a-zA-Z0-9._-]+@(gmail\.com|yahoo\.com|icloud\.com|outlook\.com)$/;
+                if (!emailpattern.test(emailValue)) {
+                    error1.style.display = "block";
+                    error1.innerHTML = "Not a valid email id";
+                    emailValid = false;
+                } else {
+                    error1.style.display = "block";
+                    error1.innerHTML = "";
+                    emailValid = true;
+                }
+            }
+
+            function passValidationChecking() {
+                const passValue = passid.value.trim();
+                const passpattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+                if (!passpattern.test(passValue)) {
+                    error2.style.display = "block";
+                    error2.innerHTML = "Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character";
+                    passValid = false;
+                } else {
+                    error2.style.display = "block";
+                    error2.innerHTML = "";
+                    passValid = true;
+                }
+            }
+
+            passid.addEventListener('input', passValidationChecking);
+            emailid.addEventListener('input', emailValidateChecking);
+
+            document.getElementById('signform').addEventListener('submit', function (event) {
+                event.preventDefault(); // Prevent form from submitting normally
+
+                // Validate email and password fields
+                emailValidateChecking();
+                passValidationChecking();
+
+                if (emailValid && passValid) {
+                    // If validation passes, proceed with fetch
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+
+                    fetch('/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, password }),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Login Successful',
+                                    text: 'You have successfully logged in.',
+                                    showConfirmButton: false,  // Hide the OK button
+                                    timer: 1000,  // Set timer for 3 seconds
+                                    // timerProgressBar: true, 
+                                }).then(() => {
+                                    window.location.href = data.redirectUrl; // Redirect to the desired page
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Login failed',
+                                    text: data.message,
+                                    confirmButtonText: 'Try Again',
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Something went wrong. Please try again later.',
+                                confirmButtonText: 'Okay',
+                            });
+                        });
+                } else {
+                    // If validation fails, display alert for invalid inputs
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Blank Input',
+                        text: 'Do not leave any field blank.',
+                        confirmButtonText: 'Try Again',
+                    });
+                }
+            });
+        </script>
+
+        <script>
+            document.getElementById('toggle-password').addEventListener('click', function () {
+                const passwordInput = document.getElementById('password');
+                const eyeIcon = document.getElementById('eye-icon');
+
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    eyeIcon.classList.remove('fa-eye');
+                    eyeIcon.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    eyeIcon.classList.remove('fa-eye-slash');
+                    eyeIcon.classList.add('fa-eye');
+                }
+            });
+        </script>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+        <script>
+            function showLoginAlert(event) {
+                event.preventDefault(); // Prevent default link behavior
+                swal({
+                    title: "Logging In",
+                    text: "Successfully logging  in using with Google.",
+                    icon: "success",
+                    buttons: false,
+                    timer: 1200,
+                }).then(() => {
+                    // Redirect to Google authentication after alert
+                    window.location.href = "/auth/google";
+                });
+            }
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                    const cartLinks = document.querySelectorAll('.site-header__cart');
+
+                    cartLinks.forEach(link => {
+                        link.addEventListener('click', (e) => {
+                            console.log('Cart link clicked');
+
+                            // Prevent any existing event handlers
+                            e.stopPropagation();
+
+                            // Ensure default navigation
+                            window.location.href = '/cart';
+
+                            // Prevent default link behavior
+                            e.preventDefault();
+                        });
+                    });
+                });
+        </script>

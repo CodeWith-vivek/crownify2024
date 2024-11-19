@@ -1,0 +1,348 @@
+<%- include("../../views/partials/user/headershop") %>
+
+    <!-- Breadcrumb Section Begin -->
+    <section class="breadcrumb-option">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="breadcrumb__text">
+                        <h4>Shop</h4>
+                        <div class="breadcrumb__links">
+                            <a href="/">Home</a>
+                            <span>Shop</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Breadcrumb Section End -->
+
+    <!-- Shop Section Begin -->
+    <section class="shop spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="shop__sidebar">
+                        <div class="shop__sidebar__search">
+                            <form action="#">
+                                <input type="text" placeholder="Search...">
+                                <button type="submit"><span class="icon_search"></span></button>
+                            </form>
+                        </div>
+                        <div class="shop__sidebar__accordion">
+                            <div class="accordion" id="accordionExample">
+                                <div class="card">
+                                    <div class="card-heading">
+                                        <a data-toggle="collapse" data-target="#collapseOne">Categories</a>
+                                    </div>
+                                    <div id="collapseOne" class="collapse show" data-parent="#accordionExample">
+                                        <div class="card-body">
+                                            <div class="shop__sidebar__categories">
+                                                <ul class="nice-scroll">
+                                                    <% categories.forEach(category=> { %>
+                                                        <li><a href="#">
+                                                                <%= category.name %> (<%= category.productCount || 0 %>)
+                                                            </a></li>
+                                                        <% }); %>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-heading">
+                                        <a data-toggle="collapse" data-target="#collapseTwo">Branding</a>
+                                    </div>
+                                    <div id="collapseTwo" class="collapse show" data-parent="#accordionExample">
+                                        <div class="card-body">
+                                            <div class="shop__sidebar__brand">
+                                                <ul>
+                                                    <% if (brands.length===0) { %>
+                                                        <li>No brands available</li>
+                                                        <% } else { %>
+                                                            <% brands.forEach(brand=> { %>
+                                                                <li>
+                                                                    <a href="#">
+
+                                                                        <!-- Display the first image -->
+                                                                        <%= brand.brandName %>
+                                                                    </a>
+                                                                </li>
+                                                                <% }); %>
+                                                                    <% } %>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-heading">
+                                        <a data-toggle="collapse" data-target="#collapseThree">Filter Price</a>
+                                    </div>
+                                    <div id="collapseThree" class="collapse show" data-parent="#accordionExample">
+                                        <div class="card-body">
+                                            <div class="shop__sidebar__price">
+                                                <ul>
+                                                    <li><a href="#">₹0.00 - ₹1000.00</a></li>
+                                                    <li><a href="#">₹1000.00 - ₹2000.00</a></li>
+                                                    <li><a href="#">₹2000.00 - ₹5000.00</a></li>
+                                                    <li><a href="#">₹5000.00 - ₹10000.00</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-heading">
+                                        <a data-toggle="collapse" data-target="#collapseSize">Size</a>
+                                    </div>
+                                    <div id="collapseSize" class="collapse show" data-parent="#accordionExample">
+                                        <div class="card-body">
+                                            <div class="shop__sidebar__size">
+                                                <ul>
+                                                    <% if (uniqueSizes.length> 0) { %>
+                                                        <% uniqueSizes.forEach((sizeOption)=> { %>
+                                                            <label for="<%= sizeOption %>">
+                                                                <%= sizeOption %>
+                                                                    <input type="radio" id="<%= sizeOption %>"
+                                                                        name="size" value="<%= sizeOption %>">
+                                                            </label>
+                                                            <% }) %>
+                                                                <% } else { %>
+                                                                    <p>No sizes available</p>
+                                                                    <% } %>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-heading">
+                                        <a data-toggle="collapse" data-target="#collapseFive">Colors</a>
+                                    </div>
+                                    <div id="collapseFive" class="collapse show" data-parent="#accordionExample">
+                                        <div class="card-body">
+                                            <div class="shop__sidebar__color">
+                                                <label class="c-1" for="sp-1">
+                                                    <input type="radio" id="sp-1">
+                                                </label>
+                                                <label class="c-2" for="sp-2">
+                                                    <input type="radio" id="sp-2">
+                                                </label>
+                                                <label class="c-3" for="sp-3">
+                                                    <input type="radio" id="sp-3">
+                                                </label>
+                                                <label class="c-4" for="sp-4">
+                                                    <input type="radio" id="sp-4">
+                                                </label>
+                                                <label class="c-5" for="sp-5">
+                                                    <input type="radio" id="sp-5">
+                                                </label>
+                                                <label class="c-6" for="sp-6">
+                                                    <input type="radio" id="sp-6">
+                                                </label>
+                                                <label class="c-7" for="sp-7">
+                                                    <input type="radio" id="sp-7">
+                                                </label>
+                                                <label class="c-8" for="sp-8">
+                                                    <input type="radio" id="sp-8">
+                                                </label>
+                                                <label class="c-9" for="sp-9">
+                                                    <input type="radio" id="sp-9">
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-9">
+                    <div class="shop__product__option">
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 col-sm-6">
+                                <div class="shop__product__option__left">
+                                    <p>Showing
+                                        <%= (currentPage - 1) * productsPerPage + 1 %>–
+                                            <%= Math.min(currentPage * productsPerPage, totalProducts) %>
+                                                of <%= totalProducts %> results
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <% products.forEach(product=> { %>
+                            <div class="col-lg-4 col-md-6 col-sm-6">
+                                <div class="product__item <%= product.isBlocked ? 'blocked' : '' %>">
+                                    <!-- Updated the click handler to use the correct route -->
+                                    <div class="product-click-wrapper"
+                                        onclick="window.location.href='/product/<%= product._id %>'">
+                                        <div class="product__item__pic set-bg"
+                                            data-setbg="/uploads/product-image/<%= product.productImage[0] %>">
+                                            <% if (product.isOnSale) { %>
+                                                <span class="label">Sale</span>
+                                                <% } %>
+                                                    <ul class="product__hover">
+                                                        <li><a href="#"
+                                                                onclick="event.preventDefault(); event.stopPropagation(); handleWishlist('<%= product._id %>')">
+                                                                <img src="/assets/usershop/img/icon/heart.png" alt="">
+                                                            </a></li>
+                                                    </ul>
+                                        </div>
+                                        <div class="product__item__text">
+                                            <h6>
+                                                <%= product.productName %>
+                                            </h6>
+                                            <!-- Modified add-cart to prevent navigation -->
+                                            <a href="#" class="add-cart"
+                                                onclick="event.preventDefault(); event.stopPropagation(); handleAddToCart('<%= product._id %>')">
+                                                + Add To Cart
+                                            </a>
+                                            <div class="rating">
+                                                <% for (let i=0; i < 5; i++) { %>
+                                                    <i
+                                                        class="fa <%= i < product.rating ? 'fa-star' : 'fa-star-o' %>"></i>
+                                                    <% } %>
+                                            </div>
+                                            <h5>
+                                            
+                                                ₹<%= product.salePrice.toFixed(2) %><span  style="padding-left: 10px;   text-decoration: line-through; color: rgb(179, 179, 179); font-size: 0.9em; margin-right: 8px;">₹<%= product.regularPrice.toFixed(2) %>
+                                                        </span>
+                                                
+                                            </h5>
+                                            <div class="product__color__select" onclick="event.stopPropagation();">
+                                                <% if (product.colors && product.colors.length> 0) { %>
+                                                    <% product.colors.forEach(color=> { %>
+                                                        <label class="c-<%= color.id %>" for="pc-<%= color.id %>">
+                                                            <input type="radio" id="pc-<%= color.id %>">
+                                                        </label>
+                                                        <% }); %>
+                                                            <% } else { %>
+                                                                <p></p>
+                                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="product__pagination mt-3 mb-4">
+                                <nav aria-label="Page navigation">
+                                    <ul class="pagination justify-content-center">
+                                        <% if (totalPages> 1) { %>
+
+                                            <!-- Previous Arrow -->
+                                            <% if (currentPage> 1) { %>
+                                                <li class="page-item">
+                                                    <a class="page-link rounded-circle"
+                                                        href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                                                        <span aria-hidden="true">&laquo;</span>
+                                                    </a>
+                                                </li>
+                                                <% } else { %>
+                                                    <li class="page-item disabled">
+                                                        <span class="page-link rounded-circle"
+                                                            aria-hidden="true">&laquo;</span>
+                                                    </li>
+                                                    <% } %>
+
+                                                        <!-- First Page -->
+                                                        <li
+                                                            class="page-item <%= (currentPage === 1) ? 'active' : '' %>">
+                                                            <a class="page-link rounded-circle" href="?page=1">01</a>
+                                                        </li>
+
+                                                        <!-- Ellipsis after First Page -->
+                                                        <% if (currentPage> 4) { %>
+                                                            <li class="page-item disabled"><span
+                                                                    class="page-link">...</span></li>
+                                                            <% } %>
+
+                                                                <!-- Pages around the current page -->
+                                                                <% for (let i=Math.max(2, currentPage - 1); i
+                                                                    <=Math.min(totalPages - 1, currentPage + 1); i++) {
+                                                                    %>
+                                                                    <li
+                                                                        class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+                                                                        <a class="page-link rounded-circle"
+                                                                            href="?page=<%= i %>">
+                                                                            <%= i.toString().padStart(2, '0' ) %>
+                                                                        </a>
+                                                                    </li>
+                                                                    <% } %>
+
+                                                                        <!-- Ellipsis before Last Page -->
+                                                                        <% if (currentPage < totalPages - 3) { %>
+                                                                            <li class="page-item disabled"><span
+                                                                                    class="page-link">...</span></li>
+                                                                            <% } %>
+
+                                                                                <!-- Last Page -->
+                                                                                <li
+                                                                                    class="page-item <%= (currentPage === totalPages) ? 'active' : '' %>">
+                                                                                    <a class="page-link rounded-circle"
+                                                                                        href="?page=<%= totalPages %>">
+                                                                                        <%= totalPages.toString().padStart(2, '0'
+                                                                                            ) %>
+                                                                                    </a>
+                                                                                </li>
+
+                                                                                <!-- Next Arrow -->
+                                                                                <% if (currentPage < totalPages) { %>
+                                                                                    <li class="page-item">
+                                                                                        <a class="page-link rounded-circle"
+                                                                                            href="?page=<%= currentPage + 1 %>"
+                                                                                            aria-label="Next">
+                                                                                            <span
+                                                                                                aria-hidden="true">&raquo;</span>
+                                                                                        </a>
+                                                                                    </li>
+                                                                                    <% } else { %>
+                                                                                        <li class="page-item disabled">
+                                                                                            <span
+                                                                                                class="page-link rounded-circle"
+                                                                                                aria-hidden="true">&raquo;</span>
+                                                                                        </li>
+                                                                                        <% } %>
+
+                                                                                            <% } %>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <%- include("../../views/partials/user/footershop") %>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+                const cartLinks = document.querySelectorAll('.site-header__cart');
+
+                cartLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        console.log('Cart link clicked');
+
+                        // Prevent any existing event handlers
+                        e.stopPropagation();
+
+                        // Ensure default navigation
+                        window.location.href = '/cart';
+
+                        // Prevent default link behavior
+                        e.preventDefault();
+                    });
+                });
+            });
+    </script>
+  
