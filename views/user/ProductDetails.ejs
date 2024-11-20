@@ -102,7 +102,7 @@
                                                     <input type="radio" id="color-<%= index %>" name="color"
                                                         value="<%= variant.color %>" data-size="<%= variant.size %>"
                                                         data-quantity="<%= variant.quantity %>"
-                                                        onclick="updateStockDisplay()">
+                                                        onclick="updateStockDisplay()" >
                                                     <% if (["No color", "Multi" ].includes(variant.color)) { %>
                                                         <span class="color-name"
                                                             style="font-weight: 600; top: -15px; padding: 3px; font-size: 18px;
@@ -113,7 +113,7 @@
                                                         </span>
                                                         <% } else { %>
                                                             <span class="color-swatch"
-                                                                style="background-color: <%= variant.color %>; "></span>
+                                                                style="background-color: <%= variant.color %>; border:1px solid black;"></span>
                                                             <% } %>
                                                 </label>
                                                 <% }); %>
@@ -191,7 +191,7 @@
                                     <% if (Array.isArray(product.color) && product.color.length> 0) { %>
                                         <% product.color.forEach(color=> { %>
                                             <label for="pc-<%= color %>">
-                                                <input type="radio" name="color" id="pc-<%= color %>"
+                                                <input type="radio" name="color" id="pc-<%= color %>" 
                                                     value="<%= color %>"> <!-- Ensure value is set -->
                                                 <% if (color==="Multi" ) { %>
                                                     <span

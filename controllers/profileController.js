@@ -3,6 +3,7 @@ const nodemailer =require("nodemailer")
 const bcrypt =require("bcrypt")
 const env= require("dotenv").config();
 const session =require("express-session")
+const Address=require("../models/addressSchema")
 
 const securePassword = async (password) => {
   try {
@@ -180,6 +181,83 @@ const verifyOtpForgot = async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error" });
     }
 };
+const addAddress = async (req, res) => {
+  const userId = req.session.user;
+  const {
+    addressType,
+    name: fullName,
+    country,
+    phone: mobileNumber,
+    pincode: postalCode,
+    home: flatHouseCompany,
+    area: areaStreet,
+    landmark,
+    town: city,
+    state,
+    isPrimary, // Optional: to set this address as primary
+  } = req.body;
+
+  console.log(req.body);
+
+  // Input validation
+  if (
+    !addressType ||
+    !fullName ||
+    !country ||
+    !mobileNumber ||
+    !postalCode ||
+    !flatHouseCompany ||
+    !areaStreet ||
+    !city ||
+    !state
+  ) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  // Create a new address object
+  const newAddress = {
+    addressType,
+    fullName,
+    country,
+    mobileNumber,
+    postalCode,
+    flatHouseCompany,
+    areaStreet,
+    landmark,
+    city,
+    state,
+    isPrimary: isPrimary === "true", // Convert to boolean if sent as a string
+  };
+
+  try {
+    // If the new address is to be set as primary, unset primary from other addresses
+    if (newAddress.isPrimary) {
+      await Address.updateOne(
+        { userId },
+        { $set: { "addresses.$[].isPrimary": false } } // Unset primary from all addresses
+      );
+    }
+
+    // Find the user by userId and update their addresses array
+    const updatedAddress = await Address.findOneAndUpdate(
+      { userId }, // Filter by userId
+      { $push: { addresses: newAddress } }, // Push new address to the addresses array
+      { new: true, upsert: true } // Create a new document if not found
+    );
+
+    res.status(201).json({
+      message: "Address added successfully!",
+      data: updatedAddress, // Include the updated address list
+    });
+  } catch (error) {
+    console.error("Error adding address:", error);
+    res.status(500).json({
+      message: "Error adding address. Please try again.",
+      error: error.message, // Optionally include error message for debugging
+    });
+  }
+};
+
 
   
 
@@ -326,6 +404,7 @@ module.exports={
     forgotNewPassword,
     userProfile,
     loadOtpPage,
-    loadAddAddressPage
+    loadAddAddressPage,
+    addAddress
     
 }

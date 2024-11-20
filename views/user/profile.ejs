@@ -245,15 +245,13 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="tab-pane fade" id="address" role="tabpanel"
-                                        aria-labelledby="address-tab">
+                                    <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
                                         <div class="row">
                                             <% if (user.addresses && user.addresses.length> 0) { %>
                                                 <% user.addresses.forEach((addr)=> { %>
                                                     <div class="col-lg-6">
                                                         <div class="card mb-3 mb-lg-0">
-                                                            <div
-                                                                class="card-header d-flex justify-content-between align-items-center">
+                                                            <div class="card-header d-flex justify-content-between align-items-center">
                                                                 <h5 class="mb-0">Billing Address</h5>
                                                                 <% if (addr.isPrimary) { %>
                                                                     <span class="badge bg-success">Primary</span>
@@ -261,24 +259,20 @@
                                                             </div>
                                                             <div class="card-body">
                                                                 <address>
-                                                                    <%= addr.address %><br>
-                                                                        <%= addr.city %>, <%= addr.state %><br>
-                                                                                <%= addr.zip %>
+                                                                    <%= addr.flatHouseCompany %>, <%= addr.areaStreet %><br>
+                                                                            <%= addr.city %>, <%= addr.state %> - <%= addr.postalCode %><br>
+                                                                                        <%= addr.country %><br>
+                                                                                            Phone: <%= addr.mobileNumber %>
                                                                 </address>
                                                                 <div class="d-flex justify-content-between">
-                                                                    <form action="/user/toggle-primary/<%= addr._id %>"
-                                                                        method="POST" style="margin: 0;">
+                                                                    <form action="/user/toggle-primary/<%= addr._id %>" method="POST" style="margin: 0;">
                                                                         <button class="btn-small" type="submit">
-                                                                            <%= addr.isPrimary ? 'Unset Primary'
-                                                                                : 'Set as Primary' %>
+                                                                            <%= addr.isPrimary ? 'Unset Primary' : 'Set as Primary' %>
                                                                         </button>
                                                                     </form>
-                                                                    <a href="/user/edit-address/<%= addr._id %>"
-                                                                        class="btn-small">Edit</a>
-                                                                    <form action="/user/delete-address/<%= addr._id %>"
-                                                                        method="POST" style="margin: 0;">
-                                                                        <button class="btn-small text-danger"
-                                                                            type="submit">Delete</button>
+                                                                    <a href="/user/edit-address/<%= addr._id %>" class="btn-small">Edit</a>
+                                                                    <form action="/user/delete-address/<%= addr._id %>" method="POST" style="margin: 0;">
+                                                                        <button class="btn-small text-danger" type="submit">Delete</button>
                                                                     </form>
                                                                 </div>
                                                             </div>
@@ -287,20 +281,17 @@
                                                     <% }) %>
                                                         <% } else { %>
                                                             <div class="col-12">
-                                                                <h3 class="text-center">No addresses found. Add a new
-                                                                    address!</h3>
+                                                                <h3 class="text-center">No addresses found. Add a new address!</h3>
                                                             </div>
                                                             <% } %>
                                                                 <!-- Add Address Card -->
                                                                 <div class="col-lg-6 mt-4">
                                                                     <div class="card address-card">
                                                                         <div class="card-body text-center">
-                                                                            <h5 class="add-address-title"
-                                                                                style="color: brown;">Add Address</h5>
+                                                                            <h5 class="add-address-title" style="color: brown;">Add Address</h5>
                                                                             <div class="plus-button">
                                                                                 <a href="/user/addAddress" class="btn">
-                                                                                    <span
-                                                                                        style="font-size: 1.5rem; font-weight: bold;">+</span>
+                                                                                    <span style="font-size: 1.5rem; font-weight: bold;">+</span>
                                                                                 </a>
                                                                             </div>
                                                                         </div>

@@ -87,7 +87,8 @@ router.post("/resend-otp-forgot",restrictLoggedInUser,profileController.resendOt
 router.get("/reset-password",restrictLoggedInUser,preventCache,profileController.getResetPassPage)
 router.post("/reset-password",restrictLoggedInUser,preventCache,profileController.forgotNewPassword)
 router.get("/profile", userAuth, profileController.userProfile) 
-  router.get("/user/addAddress", profileController.loadAddAddressPage);
+  router.get("/user/addAddress",userAuth, profileController.loadAddAddressPage);
+  router.post("/addAddress",userAuth,profileController.addAddress);
 
 //user cartManagement
 
