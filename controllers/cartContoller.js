@@ -109,12 +109,14 @@ const addToCart = async (req, res) => {
       });
     }
 
+    // Find or create the cart for the user
     let cart = await Cart.findOne({ userId: req.session.user });
     if (!cart) {
       console.log("Creating new cart for user:", req.session.user);
       cart = new Cart({ userId: req.session.user, items: [] });
     }
 
+    // Find the product to add to the cart
     const product = await Product.findById(productId);
     if (!product) {
       console.error("Product not found:", productId);
@@ -123,6 +125,7 @@ const addToCart = async (req, res) => {
         .json({ success: false, message: "Product not found" });
     }
 
+    // Check for the product variant
     const variant = product.variants.find(
       (v) => v.size === size && v.color === color
     );
@@ -137,6 +140,7 @@ const addToCart = async (req, res) => {
       });
     }
 
+    // Check if the item already exists in the cart
     const existingItemIndex = cart.items.findIndex(
       (item) =>
         item.productId.equals(productId) &&
@@ -147,6 +151,7 @@ const addToCart = async (req, res) => {
     const totalPrice = (product.salePrice || product.regularPrice) * quantity;
 
     if (existingItemIndex > -1) {
+      // Update existing item
       const newQuantity =
         cart.items[existingItemIndex].quantity + parseInt(quantity);
       if (newQuantity > variant.quantity) {
@@ -157,7 +162,6 @@ const addToCart = async (req, res) => {
         });
       }
 
-      // Update existing item
       cart.items[existingItemIndex].quantity = newQuantity;
       cart.items[existingItemIndex].totalPrice = totalPrice; // Update total price
       console.log(
@@ -193,6 +197,13 @@ const addToCart = async (req, res) => {
 
     // Save the cart
     await cart.save();
+
+    // Update the User document to reference the cart
+    await User.findByIdAndUpdate(
+      req.session.user,
+      { $addToSet: { cart: cart._id } },
+      { new: true }
+    );
 
     return res.status(200).json({
       success: true,

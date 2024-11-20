@@ -182,7 +182,7 @@ const verifyOtpForgot = async (req, res) => {
     }
 };
 const addAddress = async (req, res) => {
-  const userId = req.session.user;
+  const userId = req.session.user; // Ensure this is the correct user ID
   const {
     addressType,
     name: fullName,
@@ -197,7 +197,8 @@ const addAddress = async (req, res) => {
     isPrimary, // Optional: to set this address as primary
   } = req.body;
 
-  console.log(req.body);
+  console.log("Request Body:", req.body);
+  console.log("User ID from session:", userId);
 
   // Input validation
   if (
@@ -214,40 +215,59 @@ const addAddress = async (req, res) => {
     return res.status(400).json({ message: "All fields are required." });
   }
 
-  // Create a new address object
-  const newAddress = {
-    addressType,
-    fullName,
-    country,
-    mobileNumber,
-    postalCode,
-    flatHouseCompany,
-    areaStreet,
-    landmark,
-    city,
-    state,
-    isPrimary: isPrimary === "true", // Convert to boolean if sent as a string
-  };
-
   try {
+    // Fetch the user's current addresses count
+    const user = await User.findById(userId).populate("addresses");
+
+    if (user.addresses.length >= 4) {
+      return res.status(400).json({
+        message: "You cannot add more than 4 addresses.",
+      });
+    }
+
+    // Create a new address object
+    const newAddress = {
+      addressType,
+      fullName,
+      country,
+      mobileNumber,
+      postalCode,
+      flatHouseCompany,
+      areaStreet,
+      landmark,
+      city,
+      state,
+      isPrimary: isPrimary === "true", // Convert to boolean if sent as a string
+    };
+
     // If the new address is to be set as primary, unset primary from other addresses
     if (newAddress.isPrimary) {
-      await Address.updateOne(
-        { userId },
+      await Address.updateMany(
+        { userId }, // Ensure you're targeting the correct user
         { $set: { "addresses.$[].isPrimary": false } } // Unset primary from all addresses
       );
     }
 
-    // Find the user by userId and update their addresses array
-    const updatedAddress = await Address.findOneAndUpdate(
-      { userId }, // Filter by userId
-      { $push: { addresses: newAddress } }, // Push new address to the addresses array
+    // Create the address in the Address collection
+    const addressDocument = await Address.create({
+      userId, // Associate the address with the user
+      ...newAddress,
+    });
+
+    console.log("Address Document Created:", addressDocument);
+
+    // Update the user's addresses array in the User collection
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $push: { addresses: addressDocument._id } }, // Push the new address ID to the addresses array
       { new: true, upsert: true } // Create a new document if not found
     );
 
+    console.log("Updated User Document:", updatedUser);
+
     res.status(201).json({
       message: "Address added successfully!",
-      data: updatedAddress, // Include the updated address list
+      data: addressDocument, // Include the created address
     });
   } catch (error) {
     console.error("Error adding address:", error);
@@ -257,8 +277,6 @@ const addAddress = async (req, res) => {
     });
   }
 };
-
-
   
 
 
@@ -361,22 +379,22 @@ const forgotNewPassword = async (req, res) => {
       .json({ success: false, message: "An internal server error occurred." });
   }
 };
-const userProfile=async(req,res)=>{
-  try {
+const userProfile = async (req, res) => {
+    try {
+        const userId = req.session.user;
 
-    const userId=req.session.user;
-    const userData=await User.findById(userId)
-    res.render("profile",{
-      user:userData,
-    })
+        // Fetch user data
+        const userData = await User.findById(userId).populate('addresses'); // Assuming addresses are populated
 
-    
-  } catch (error) {
-    console.error("error for retrieve data",error)
-    res.redirect("/pageNotFound")
-  }
-
-}
+        // If the user has addresses, they will be included in userData
+        res.render("profile", {
+            user: userData,
+        });
+    } catch (error) {
+        console.error("Error retrieving data:", error);
+        res.redirect("/pageNotFound");
+    }
+};
 const loadAddAddressPage = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -394,6 +412,229 @@ const loadAddAddressPage = async (req, res) => {
     res.status(500).send("Server error");
   }
 };
+const setPrimaryAddress=async (req,res)=>{
+  try {
+      const userId = req.session.user;
+      console.log(userId);
+      
+    const addressId = req.params.id;
+    console.log("Received addressId:", addressId); // Debug log
+
+    // Verify user is logged in
+    if (!req.session.user ) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
+
+    // const userId = req.session.user._id;
+    console.log("User ID from session:", userId); // Debug log
+
+    // Update all addresses to non-primary
+    await Address.updateMany(
+      { userId: userId },
+      { $set: { isPrimary: false } }
+    );
+
+    // Set the selected address as primary
+    const updatedAddress = await Address.findByIdAndUpdate(
+      addressId,
+      { $set: { isPrimary: true } },
+      { new: true }
+    );
+
+    if (!updatedAddress) {
+      return res.status(404).json({
+        success: false,
+        message: "Address not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Primary address updated successfully",
+    });
+  } catch (error) {
+    console.error("Error setting primary address:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while updating primary address",
+    });
+  }
+}
+const deleteUserAddress =async(req,res)=>{
+  try {
+    const addressId = req.params.id;
+    const userId = req.session.user;
+
+    // Verify the address belongs to the user
+    const address = await Address.findOne({ _id: addressId, userId: userId });
+    if (!address) {
+      return res.status(404).json({
+        success: false,
+        message: "Address not found",
+      });
+    }
+
+    const deletedAddress = await Address.findOneAndDelete({
+      _id: addressId,
+      userId: userId,
+    });
+
+    // If we deleted a primary address, set another one as primary
+    if (deletedAddress.isPrimary) {
+      const firstAddress = await Address.findOne({ userId: userId });
+      if (firstAddress) {
+        await Address.findByIdAndUpdate(firstAddress._id, {
+          $set: { isPrimary: true },
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: "Address deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting address:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while deleting address",
+    });
+  }
+}
+const editUserAddress = async (req, res) => {
+  try {
+    const userId = req.session.user;
+
+    // Use Promise.all for concurrent fetching
+    const [userData, address] = await Promise.all([
+      User.findById(userId),
+      Address.findOne({
+        _id: req.params.id,
+        userId: userId, // More explicit userId check
+      }),
+    ]);
+
+    // Enhanced logging with more context
+    console.log({
+      message: "Edit Address Details",
+      userId: userId,
+      addressId: req.params.id,
+      addressFound: !!address,
+    });
+
+    // More robust error handling
+    if (!userData) {
+      req.flash("error", "User not found");
+      return res.redirect("/login");
+    }
+
+    if (!address) {
+      req.flash("error", "Address not found or you don't have permission");
+      return res.redirect("/profile");
+    }
+
+    // Render with additional context
+    res.render("editAddress", {
+      address,
+      user: userData,
+      pageTitle: "Edit Address",
+    });
+  } catch (error) {
+    // More detailed error logging
+    console.error("Edit Address Error:", {
+      message: error.message,
+      stack: error.stack,
+      userId: req.session.user,
+      addressId: req.params.id,
+    });
+
+    req.flash("error", "An unexpected error occurred");
+    res.redirect("/user/profile#address");
+  }
+};
+const updateUserAddress = async (req, res) => {
+  try {
+    const addressId = req.params.id;
+    const userId = req.session.user;
+
+    // Destructure the request body
+    const {
+      addressType,
+      name,
+      country,
+      phone,
+      pincode,
+      home,
+      area,
+      landmark,
+      town,
+      state,
+    } = req.body;
+
+    // Find and update the address
+    const updatedAddress = await Address.findOneAndUpdate(
+      {
+        _id: addressId,
+        userId: userId,
+      },
+      {
+        $set: {
+          addressType,
+          fullName: name,
+          country,
+          mobileNumber: phone,
+          postalCode: pincode,
+          flatHouseCompany: home,
+          areaStreet: area,
+          landmark,
+          city: town,
+          state,
+        },
+      },
+      {
+        new: true, // Return the updated document
+        runValidators: true, // Run model validations
+      }
+    );
+
+    // Check if address was found and updated
+    if (!updatedAddress) {
+      return res.status(404).json({
+        success: false,
+        message:
+          "Address not found or you do not have permission to edit this address",
+      });
+    }
+
+    // Send success response
+    res.status(200).json({
+      success: true,
+      message: "Address updated successfully",
+      address: updatedAddress,
+    });
+  } catch (error) {
+    console.error("Update Address Error:", error);
+
+    // Handle specific validation errors
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        message: Object.values(error.errors).map((err) => err.message)[0],
+      });
+    }
+
+    // Generic error response
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while updating the address",
+    });
+  }
+};
+
+
 
 module.exports={
     getForgotPassPage,
@@ -405,6 +646,10 @@ module.exports={
     userProfile,
     loadOtpPage,
     loadAddAddressPage,
-    addAddress
+    addAddress,
+    setPrimaryAddress,
+    deleteUserAddress,
+    editUserAddress,
+    updateUserAddress
     
 }

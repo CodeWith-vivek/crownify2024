@@ -89,6 +89,11 @@ router.post("/reset-password",restrictLoggedInUser,preventCache,profileControlle
 router.get("/profile", userAuth, profileController.userProfile) 
   router.get("/user/addAddress",userAuth, profileController.loadAddAddressPage);
   router.post("/addAddress",userAuth,profileController.addAddress);
+  router.post("/set-primary-address/:id",userAuth,profileController.setPrimaryAddress);
+  router.post("/delete-address/:id",userAuth,profileController.deleteUserAddress)
+  
+  router.get("/edit-address/:id",userAuth,profileController.editUserAddress);
+  router.post("/update-address/:id", userAuth,profileController.updateUserAddress);
 
 //user cartManagement
 
