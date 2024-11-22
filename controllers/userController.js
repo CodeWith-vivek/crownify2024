@@ -170,9 +170,18 @@ const signup = async (req, res) => {
     // If email was sent successfully
     if (emailSent) {
       const hashedPassword = await securePassword(password);
+      let avatarPath = req.file
+        ? "/uploads/avatars/" + req.file.filename
+        : null;
 
       req.session.userOtp = otp;
-      req.session.userData = { name, phone, email, password: hashedPassword };
+      req.session.userData = {
+        name,
+        phone,
+        email,
+        password: hashedPassword,
+        avatar: avatarPath,
+      };
 
       return res.json({
         success: true,
@@ -202,11 +211,13 @@ const verifyOtp = async (req, res) => {
 
     if (otp === sessionOtp) {
       const user = req.session.userData;
+      const avatarPath = user.avatar ? user.avatar : null; 
       const newUser = new User({
         name: user.name,
         email: user.email,
         phone: user.phone,
         password: user.password,
+        avatar: avatarPath,
       });
       await newUser.save();
       req.session.user = newUser._id;

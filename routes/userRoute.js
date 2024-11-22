@@ -5,8 +5,21 @@ const userController =require("../controllers/userController");
 const cartController =require("../controllers/cartContoller")
 const passport = require("passport");
 const profileController =require("../controllers/profileController")
+const checkoutController=require("../controllers/checkoutController")
 const {userAuth}=require("../middlewares/auth")
 const preventCache=require("../middlewares/prevent")
+const multer = require("multer");
+const path = require("path");
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/"); // Specify your uploads directory
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname)); // Append the current timestamp to the file name
+  },
+});
+const upload = multer({ storage: storage });
 function restrictLoggedInUser(req, res, next) {
   if (req.isAuthenticated && req.isAuthenticated()) {
     // Redirect to a specific page if the user is already logged in
@@ -94,6 +107,11 @@ router.get("/profile", userAuth, profileController.userProfile)
   
   router.get("/edit-address/:id",userAuth,profileController.editUserAddress);
   router.post("/update-address/:id", userAuth,profileController.updateUserAddress);
+router.post("/update-user",userAuth,profileController.updateProfileDetails);
+router.post("/validate-current-password",userAuth,profileController.validatCurrentPassword);
+
+
+
 
 //user cartManagement
 
@@ -103,6 +121,10 @@ router.get("/product/:id/overall-stock", cartController.getOverallStock);
 router.post("/cart/add",cartController.addToCart);
 router.delete("/cart/remove", cartController.deleteFromCart);
 router.post("/cart/update",cartController.updateCart)
+router.get("/checkout", userAuth, checkoutController.loadCheckout);
+router.post('/checkout/validate',userAuth,checkoutController.validateQuantity)
+
+
 
 
 module.exports=router

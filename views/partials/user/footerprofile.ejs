@@ -1,3 +1,11 @@
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
 <div class="container-fluid crownify4 d-flex justify-content-center align-items-center">
     <img src="assets/images/logo/Crownify_logo_text.png" class="custom-logo">
 
@@ -83,6 +91,468 @@
     </div>
 </footer>
 <span id="site-scroll"><i class="icon anm anm-angle-up-r"></i></span>
+<script>
+    function confirmPrimaryAddress(event, addressId) {
+        event.preventDefault();
+        console.log("Function called with addressId:", addressId); // Debug log
+
+        Swal.fire({
+            title: 'Set as Primary Address?',
+            text: 'Do you want to set this as your primary address?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, set it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/set-primary-address/${addressId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin'  // Important for sessions
+                })
+                    .then(async response => {
+                        console.log("Response status:", response.status); // Debug log
+
+                        if (!response.ok) {
+                            const text = await response.text();
+                            console.log("Error response body:", text); // Debug log
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Success response:", data); // Debug log
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'Primary address updated successfully.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Failed!',
+                                text: data.message || 'Failed to update primary address.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'An error occurred while updating primary address. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    });
+            }
+        });
+    }
+
+    function confirmDeleteAddress(event, addressId) {
+        event.preventDefault();
+
+        Swal.fire({
+            title: 'Delete Address?',
+            text: 'Are you sure you want to delete this address?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/delete-address/${addressId}`, {
+                    method: 'POST',
+                    headers: {
+                        // Add CSRF token if you're using it
+                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content,
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: 'Address deleted successfully.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                const addressCard = event.target.closest('.col-lg-6');
+                                if (addressCard) {
+                                    addressCard.remove();
+                                    // checkAndUpdateAddressDisplay();
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Failed!',
+                                text: data.message || 'Failed to delete address.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'An error occurred while deleting the address. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    });
+            }
+        });
+    }
+    function editAddress(event, addressId) {
+        event.preventDefault();
+        const updatedData = {
+            flatHouseCompany: document.querySelector('#flatHouseCompany').value,
+            areaStreet: document.querySelector('#areaStreet').value,
+            city: document.querySelector('#city').value,
+            state: document.querySelector('#state').value,
+            postalCode: document.querySelector('#postalCode').value,
+            country: document.querySelector('#country').value,
+            mobileNumber: document.querySelector('#mobileNumber').value,
+            additionalInfo: document.querySelector('#additionalInfo').value,
+        };
+
+        fetch(`/edit-address/${addressId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any necessary authentication headers here
+            },
+            body: JSON.stringify(updatedData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Handle successful response (e.g., refresh the page or update the UI)
+                    window.location.reload(); // Reload to reflect changes
+                } else {
+                    throw new Error('Failed to edit address');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Error', 'Failed to edit address', 'error');
+            });
+    }
+</script>
+
+<script>
+    document.getElementById('name').addEventListener('input', function () {
+        const name = this.value.trim();
+        const nameError = document.getElementById('nameError');
+        const regex = /^[A-Za-z\s]+$/;
+
+        if (name === '') {
+            nameError.textContent = 'Name cannot be blank';
+        } else if (name.length < 3) {
+            nameError.textContent = 'Name must be at least 3 characters long';
+        } else if (!regex.test(name)) {
+            nameError.textContent = 'Name must only contain letters and spaces';
+        } else {
+            nameError.textContent = '';
+        }
+    });
+
+    // Real-time validation for the phone number
+    document.getElementById('phone').addEventListener('input', function () {
+        const phone = this.value.trim();
+        const phoneError = document.getElementById('phoneError');
+
+        if (!/^\d{10}$/.test(phone)) {
+            phoneError.textContent = 'Please enter a valid 10-digit phone number';
+        } else {
+            phoneError.textContent = '';
+        }
+    });
+
+    // Real-time validation for the current password
+    document.getElementById('password').addEventListener('input', async function () {
+        const password = this.value;
+        const passwordError = document.getElementById('passwordError');
+        const npasswordField = document.getElementById('npassword');
+        const cpasswordField = document.getElementById('cpassword');
+
+        if (password.length < 8) {
+            passwordError.textContent = 'Current password must be at least 8 characters long';
+            npasswordField.disabled = true; // Disable new password fields
+            cpasswordField.disabled = true;
+        } else {
+            passwordError.textContent = '';
+
+            // Validate current password with the backend
+            try {
+                const response = await fetch('/validate-current-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password }) // Send the current password to validate
+                });
+                const result = await response.json();
+                if (result.valid) {
+                    npasswordField.disabled = false; // Enable new password fields
+                    cpasswordField.disabled = false;
+                } else {
+                    npasswordField.disabled = true; // Disable new password fields
+                    cpasswordField.disabled = true;
+                    passwordError.textContent = 'Incorrect current password'; // Show error if password is incorrect
+                }
+            } catch (error) {
+                console.error('Error validating password:', error);
+                passwordError.textContent = 'Error validating password. Please try again.';
+            }
+        }
+    });
+
+    // Real-time validation for the new password
+    document.getElementById('npassword').addEventListener('input', function () {
+        const npassword = this.value;
+        const cpassword = document.getElementById('cpassword').value;
+        const newPasswordError = document.getElementById('newPasswordError');
+
+        if (npassword.length < 8) {
+            newPasswordError.textContent = 'New password must be at least 8 characters long';
+        } else if (npassword !== cpassword) {
+            newPasswordError.textContent = 'Passwords do not match';
+        } else {
+            newPasswordError.textContent = '';
+        }
+    });
+
+    // Real-time validation for the confirm password
+    document.getElementById('cpassword').addEventListener('input', function () {
+        const cpassword = this.value;
+        const npassword = document.getElementById('npassword').value;
+        const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+        if (cpassword !== npassword) {
+            confirmPasswordError.textContent = 'Passwords do not match';
+        } else {
+            confirmPasswordError.textContent = '';
+        }
+    });
+
+    // Form submission logic
+    document.getElementById('updateForm').addEventListener('submit', async function (e) {
+        e.preventDefault(); // Prevent the default form submission
+
+        // Check for validation errors
+        const errors = document.querySelectorAll('.error-message');
+        let hasErrors = false;
+
+        errors.forEach(error => {
+            if (error.textContent !== '') {
+                hasErrors = true;
+            }
+        });
+
+        if (hasErrors) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: 'Please fix the errors before submitting.',
+            });
+            return; // Stop form submission
+        }
+
+        // If no errors, proceed with form submission
+        const name = document.getElementById('name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const password = document.getElementById('password').value;
+        const npassword = document.getElementById('npassword').value;
+
+        try {
+            const response = await fetch('/update-user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, phone, password, npassword }),
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'User  details updated successfully!',
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: result.error || 'Error updating user details.',
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Something went wrong. Please try again later.',
+            });
+        }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const cartLinks = document.querySelectorAll('.site-header__cart');
+
+        cartLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                console.log('Cart link clicked');
+
+                // Prevent any existing event handlers
+                e.stopPropagation();
+
+                // Ensure default navigation
+                window.location.href = '/cart';
+
+                // Prevent default link behavior
+                e.preventDefault();
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const changePictureBtn = document.querySelector(".change-picture-btn");
+        const avatarUpload = document.getElementById("avatar-upload");
+        const cropModal = document.getElementById("crop-modal");
+        const cropImage = document.getElementById("crop-image");
+        const cropSaveBtn = document.getElementById("crop-save-btn");
+        const cropCancelBtn = document.getElementById("crop-cancel-btn");
+        const closeModalBtn = document.getElementById("close-modal-btn");
+        let cropper;
+
+        // Trigger file upload dialog
+        changePictureBtn.addEventListener("click", () => {
+            avatarUpload.click();
+        });
+
+        // Initialize Cropper.js on image select
+        avatarUpload.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (!file.type.startsWith('image/')) {
+                    alert('Please upload an image file');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    cropImage.src = event.target.result;
+                    cropModal.style.display = "block";
+
+                    // Destroy existing cropper instance if it exists
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+
+                    // Initialize new cropper
+                    cropper = new Cropper(cropImage, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        dragMode: 'move',
+                        autoCropArea: 0.8,
+                        restore: false,
+                        guides: true,
+                        center: true,
+                        highlight: false,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true,
+                        toggleDragModeOnDblclick: false,
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Save cropped image
+        cropSaveBtn.addEventListener("click", async () => {
+            try {
+                if (!cropper) {
+                    throw new Error('No image to crop');
+                }
+
+                const canvas = cropper.getCroppedCanvas({
+                    width: 300,  // Set desired dimensions
+                    height: 300,
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high',
+                });
+
+                const blob = await new Promise(resolve => {
+                    canvas.toBlob(resolve, 'image/jpeg', 0.8);
+                });
+
+                const formData = new FormData();
+                formData.append('avatar', blob, 'avatar.jpg');
+
+                const response = await fetch('/upload-avatar', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update avatar preview
+                    const avatar = document.querySelector('.avatar');
+                    avatar.style.backgroundImage = `url(${data.avatarUrl}?${new Date().getTime()})`;
+                    avatar.textContent = ''; // Clear any initial letter
+
+                    // Close modal and cleanup
+                    closeModal();
+
+                    // Show success message
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Profile picture updated successfully',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    });
+                } else {
+                    throw new Error(data.message || 'Failed to upload avatar');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to update profile picture. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+
+        // Function to close modal and cleanup
+        function closeModal() {
+            cropModal.style.display = "none";
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            cropImage.src = '';
+            avatarUpload.value = ''; // Reset file input
+        }
+
+        // Close modal handlers
+        cropCancelBtn.addEventListener("click", closeModal);
+        closeModalBtn.addEventListener("click", closeModal);
+    });
+</script>
 
 
 <!-- Including Jquery -->

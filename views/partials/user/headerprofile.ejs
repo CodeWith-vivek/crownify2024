@@ -34,8 +34,66 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="/assets2/css/main.css">
-    
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.min.css" rel="stylesheet">
+<style>
+       .avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 2px solid red;
+            background-color: #ffffff00;
+            color: rgb(214, 0, 0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .change-picture-btn {
+            background-color: #E5A4A4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .modal {
+    /* display: none;
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
 
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+.save-btn:hover{
+    background-color: #e14141;
+
+}
+.error-message {
+    color: red; /* Make sure error messages are visible */
+    font-size: 0.9em; /* Adjust font size if necessary */
+    margin-top: 5px; /* Add some space above the error message */
+}
+
+</style>
 
 
 </head>
@@ -224,5 +282,55 @@
             <img src="assets/images/logo/Crownify_logo_text.png" class="custom-logo">
 
         </div>
+            <main class="main">
+                <div class="page-header breadcrumb-wrap">
+                    <div class="container">
+                        <div class="breadcrumb">
+                            <a href="/" rel="nofollow" style="color: aliceblue;">Home</a>
+                            <span></span> Pages
+                            <span></span> Account
+                        </div>
+                    </div>
+                </div>
+            
+                <section class="pt-150 pb-150">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-12 m-auto">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="dashboard-menu">
+                                            <ul class="nav flex-column" role="tablist">
+                                                <li class="nav-item">
+                                                    <a class="nav-link active" id="dashboard-tab" data-bs-toggle="tab"
+                                                        href="#dashboard" role="tab" aria-controls="dashboard"
+                                                        aria-selected="false"><i
+                                                            class="fi-rs-settings-sliders mr-10"></i>Dashboard</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="#orders"
+                                                        role="tab" aria-controls="orders" aria-selected="false"><i
+                                                            class="fi-rs-shopping-bag mr-10"></i>Orders</a>
+                                                </li>
+            
+                                                <li class="nav-item">
+                                                    <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address"
+                                                        role="tab" aria-controls="address" aria-selected="true"><i
+                                                            class="fi-rs-marker mr-10"></i>My Address</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab"
+                                                        href="#account-detail" role="tab" aria-controls="account-detail"
+                                                        aria-selected="true"><i class="fi-rs-user mr-10"></i>Account details</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="/logout"><i
+                                                            class="fi-rs-sign-out mr-10"></i>Logout</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                <div class="tab-content dashboard-content">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     

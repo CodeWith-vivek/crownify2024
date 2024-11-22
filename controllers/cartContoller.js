@@ -397,6 +397,11 @@ const updateCart = async (req, res) => {
 
     const shippingCharge = 40; // Your fixed shipping charge
     const total = subtotal + shippingCharge;
+    console.log("subbbbbb",subtotal);
+
+    console.log("toooooootal",total);
+    
+    
 
     // Save the updated cart
     await cart.save();

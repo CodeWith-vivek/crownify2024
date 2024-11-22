@@ -4,6 +4,17 @@ const bcrypt =require("bcrypt")
 const env= require("dotenv").config();
 const session =require("express-session")
 const Address=require("../models/addressSchema")
+const express = require("express");
+const sharp = require("sharp");
+
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs").promises;
+// Adjust the import according to your project structure
+
+// Configure multer to use memory storage
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const securePassword = async (password) => {
   try {
@@ -389,6 +400,7 @@ const userProfile = async (req, res) => {
         // If the user has addresses, they will be included in userData
         res.render("profile", {
             user: userData,
+            
         });
     } catch (error) {
         console.error("Error retrieving data:", error);
@@ -633,6 +645,133 @@ const updateUserAddress = async (req, res) => {
     });
   }
 };
+const uploadProfilePic=async(req,res)=>{
+   try {
+     if (!req.file) {
+       return res
+         .status(400)
+         .json({ success: false, message: "No file uploaded" });
+     }
+
+     // Create uploads directory if it doesn't exist
+     const uploadsDir = path.join(__dirname, "../public/uploads/avatars");
+     await fs.mkdir(uploadsDir, { recursive: true });
+
+     // Generate unique filename
+     const filename = `avatar-${req.user._id}-${Date.now()}.jpg`;
+     const filepath = path.join(uploadsDir, filename);
+
+     // Process and save image
+     await sharp(req.file.buffer)
+       .resize(300, 300, {
+         fit: "cover",
+         position: "center",
+       })
+       .jpeg({ quality: 90 })
+       .toFile(filepath);
+
+     // Update user's avatar in database
+     const avatarUrl = `/uploads/avatars/${filename}`;
+     await User.findByIdAndUpdate(req.user._id, {
+       avatar: avatarUrl,
+       updatedAt: new Date(),
+     });
+
+     // Delete old avatar file if it exists
+     if (req.user.avatar) {
+       const oldAvatarPath = path.join(__dirname, "../public", req.user.avatar);
+       try {
+         await fs.access(oldAvatarPath);
+         await fs.unlink(oldAvatarPath);
+       } catch (error) {
+         console.log("No old avatar file to delete");
+       }
+     }
+
+     res.json({
+       success: true,
+       avatarUrl: avatarUrl,
+     });
+   } catch (error) {
+     console.error("Avatar upload error:", error);
+     res.status(500).json({
+       success: false,
+       message: "Error uploading avatar",
+     });
+   }
+}
+
+const updateProfileDetails=async(req,res)=>{
+  const { name, phone, password, npassword } = req.body;
+  const userId = req.session.user; // Assume user is logged in
+
+  try {
+    const user = await User.findById(userId);
+
+    // Validate current password if provided
+    if (password) {
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.json({
+          success: false,
+          error: "Incorrect current password",
+        });
+      }
+    }
+
+    // Update fields if they have changed
+    if (name && name !== user.name) user.name = name;
+    if (phone && phone !== user.phone) user.phone = phone;
+    if (npassword) user.password = await bcrypt.hash(npassword, 10);
+
+    await user.save();
+    res.json({ success: true });
+  } catch (error) {
+    res.json({ success: false, error: error.message });
+  }
+
+}
+const validatCurrentPassword= async(req,res)=>{
+  const {  password } = req.body; // Assuming you send userId to identify the user
+  const userId = req.session.user;
+
+  try {
+    // Retrieve the user from the database
+    const user = await User.findById(userId); // Replace with your method to get the user
+
+    if (!user) {
+      return res.status(404).json({ valid: false, message: "User  not found" });
+    }
+
+    // Compare the entered password with the stored hashed password
+    const isValid = await bcrypt.compare(password, user.password); // Assuming user.password is the hashed password
+
+    res.json({ valid: isValid });
+  } catch (error) {
+    console.error("Error validating password:", error);
+    res.status(500).json({ valid: false, message: "Internal server error" });
+  }
+}
+
+const loadUserOrders=async(req,res)=>{
+
+   try {
+     const userId = req.session.user;
+
+     // Fetch user data
+     const userData = await User.findById(userId) // Assuming addresses are populated
+
+     // If the user has addresses, they will be included in userData
+     res.render("userOrder", {
+       user: userData,
+       activeTab: "orders",
+     });
+   } catch (error) {
+     console.error("Error retrieving data:", error);
+     res.redirect("/pageNotFound");
+   }
+
+}
 
 
 
@@ -650,6 +789,12 @@ module.exports={
     setPrimaryAddress,
     deleteUserAddress,
     editUserAddress,
-    updateUserAddress
+    updateUserAddress,
+    uploadProfilePic,
+    updateProfileDetails,
+    validatCurrentPassword,
+ 
+    loadUserOrders
+
     
 }

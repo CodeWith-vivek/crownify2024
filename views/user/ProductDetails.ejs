@@ -86,7 +86,7 @@
                                                             hasAvailableColor=product.variants.some(variant=> {
                                                         return variant.size === size && variant.quantity > 0;
                                                         });
-                                                        if (!hasAvailableColor) { %> disabled <% } %>>
+                                                        if (!hasAvailableColor) { %>  <% } %>>
                                                 </label>
                                                 <% index++; %>
                                                     <% }); %>

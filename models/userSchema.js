@@ -79,7 +79,7 @@ const userSchema = new Schema(
     redeemedUsers: [
       {
         type: Schema.Types.ObjectId,
-        ref: "User  ",
+        ref: "User",
       },
     ],
     searchHistory: [
@@ -97,16 +97,20 @@ const userSchema = new Schema(
         },
       },
     ],
-    addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }], // Reference to Address
+    addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }],
+
+    // Remove default value for avatar, leaving it empty if no image is uploaded
+    avatar: {
+      type: String,
+      required: false, // avatar is now optional
+    },
   },
   {
-    collection: "users", // Specify the collection name
-    timestamps: true, // Add createdAt and updatedAt fields
+    collection: "users",
+    timestamps: true,
   }
 );
 
-const User = mongoose.model("User  ", userSchema);
+const User = mongoose.model("User", userSchema);
+
 module.exports = User;
-
-
-

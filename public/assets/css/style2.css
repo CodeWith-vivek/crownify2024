@@ -12125,7 +12125,7 @@ textarea.form-control {
   color: red;
   font-size: 14px;
   margin-top: 5px;
-  display: none;
+  
   text-align: left;
 }
 
@@ -12298,5 +12298,4 @@ textarea.form-control {
                                       border-width: medium;
                                         border-color: #80efa6;
                                     }
-                  
-                                  
+
