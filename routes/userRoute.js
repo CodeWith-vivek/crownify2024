@@ -8,6 +8,7 @@ const profileController =require("../controllers/profileController")
 const checkoutController=require("../controllers/checkoutController")
 const {userAuth}=require("../middlewares/auth")
 const preventCache=require("../middlewares/prevent")
+const orderController=require("../controllers/orderController")
 const multer = require("multer");
 const path = require("path");
 
@@ -123,6 +124,10 @@ router.delete("/cart/remove", cartController.deleteFromCart);
 router.post("/cart/update",cartController.updateCart)
 router.get("/checkout", userAuth, checkoutController.loadCheckout);
 router.post('/checkout/validate',userAuth,checkoutController.validateQuantity)
+
+//order
+
+router.post("/checkout",userAuth,orderController.placeOrder)
 
 
 
