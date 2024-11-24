@@ -99,8 +99,8 @@
                                                             data-size="<%= item.size %>" data-color="<%= item.color %>"
                                                             style="border: none;">-</button>
 
-                                                        <input type="number" value="<%= item.quantity %>" readonly min="1"
-                                                            max="5"
+                                                        <input type="number" value="<%= item.quantity %>" readonly
+                                                            min="1" max="5"
                                                             id="quantityInput_<%= item.product._id %>_<%= item.size %>_<%= item.color %>"
                                                             class="quantity-input" style="border: none;"
                                                             data-max-stock="<%= item.selectedVariantStockLevel %>">
@@ -171,7 +171,7 @@
     </section>
     <%- include("../../views/partials/user/footershop") %>
         <script>
-          document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener('DOMContentLoaded', () => {
                 const checkoutButton = document.querySelector('a[href="/checkout"]');
 
                 if (checkoutButton) {
@@ -476,7 +476,7 @@
                         });
                 }
             });
-          
-          
+
+
 
         </script>

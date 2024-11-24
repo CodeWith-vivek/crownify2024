@@ -17,22 +17,36 @@
         </div>
     </section>
     <!-- Breadcrumb Section End -->
+    <div class="container-fluid crownify4 d-flex justify-content-center align-items-center">
+        <img src="assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+    
+    </div>
+
 
     <!-- Shop Section Begin -->
-    <section class="shop spad">
+    <section class="shop spad" style="background-color:white;">
         <div class="container">
             <div class="row">
                 <div class="col-lg-3">
                     <div class="shop__sidebar">
-                        <div class="shop__sidebar__search">
+                        <!-- <div class="shop__sidebar__search">
                             <form action="#">
                                 <input type="text" placeholder="Search...">
+                                <button type="submit"><span class="icon_search"></span></button>
+                            </form>
+                        </div> -->
+                        <div class="shop__sidebar__search">
+                            <form action="/shop" method="GET">
+                                <input type="hidden" name="sort" value="<%= sort || '' %>"> <!-- Preserve current sort option -->
+                                <input type="hidden" name="page" value="<%= currentPage || 1 %>"> <!-- Preserve current page -->
+                            <input type="text" id="searchInput" name="search" placeholder="Search..." value="<%= search || '' %>">
+                            <div id="productResults"></div>
                                 <button type="submit"><span class="icon_search"></span></button>
                             </form>
                         </div>
                         <div class="shop__sidebar__accordion">
                             <div class="accordion" id="accordionExample">
-                                <div class="card">
+                                <div class="card" style="background: transparent;">
                                     <div class="card-heading">
                                         <a data-toggle="collapse" data-target="#collapseOne">Categories</a>
                                     </div>
@@ -50,7 +64,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
+                                <div class="card"style="background: transparent;">
                                     <div class="card-heading">
                                         <a data-toggle="collapse" data-target="#collapseTwo">Branding</a>
                                     </div>
@@ -76,7 +90,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
+                                <div class="card"style="background: transparent;">
                                     <div class="card-heading">
                                         <a data-toggle="collapse" data-target="#collapseThree">Filter Price</a>
                                     </div>
@@ -93,31 +107,35 @@
                                         </div>
                                     </div>
                                 </div>
+                           
                                 <div class="card">
                                     <div class="card-heading">
-                                        <a data-toggle="collapse" data-target="#collapseSize">Size</a>
+                                        <a data-toggle="collapse" data-target="#collapseFour">Size</a>
                                     </div>
-                                    <div id="collapseSize" class="collapse show" data-parent="#accordionExample">
+                                    <div id="collapseFour" class="collapse show" data-parent="#accordionExample">
                                         <div class="card-body">
                                             <div class="shop__sidebar__size">
-                                                <ul>
-                                                    <% if (uniqueSizes.length> 0) { %>
-                                                        <% uniqueSizes.forEach((sizeOption)=> { %>
-                                                            <label for="<%= sizeOption %>">
-                                                                <%= sizeOption %>
-                                                                    <input type="radio" id="<%= sizeOption %>"
-                                                                        name="size" value="<%= sizeOption %>">
-                                                            </label>
-                                                            <% }) %>
-                                                                <% } else { %>
-                                                                    <p>No sizes available</p>
-                                                                    <% } %>
-                                                </ul>
+                                                <label for="ONESIZE">ONESIZE
+                                                    <input type="radio" id="ONESIZE">
+                                                </label>
+                                                <label for="S/M">S / M
+                                                    <input type="radio" id="s/m">
+                                                </label>
+                                                <label for="M/L">M / L
+                                                    <input type="radio" id="m/l">
+                                                </label>
+                                                <label for="L/XL">L / XL
+                                                    <input type="radio" id="l/xl">
+                                                </label>
+                                                <label for="YOUTH">YOUTH
+                                                    <input type="radio" id="YOUTH">
+                                                </label>
+                                               
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
+                                <div class="card" style="background: transparent;">
                                     <div class="card-heading">
                                         <a data-toggle="collapse" data-target="#collapseFive">Colors</a>
                                     </div>
@@ -170,10 +188,49 @@
                                                 of <%= totalProducts %> results
                                     </p>
                                 </div>
+                                
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-6">
+                                <!-- <div class="shop__product__option__right">
+                                    <p>Sort by Price:</p>
+                                    <select>
+                                        <option value="">Low To High</option>
+                                        <option value="">High To Low</option>
+                                        <option value="">aA-zZ</option>
+                                        <option value="">zZ-aA</option>
+                                        <option value="">New Arrivals</option>
+                                        <option value="">Featured</option>
+                                        <option value="">Popularity</option>
+                                    </select>
+                                    <select id="sortOptions" onchange="sortProducts()">
+                                        <option value="priceLowHigh" <%=sort==="priceLowHigh" ? "selected" : "" %>>Low To High (Price)</option>
+                                        <option value="priceHighLow" <%=sort==="priceHighLow" ? "selected" : "" %>>High To Low (Price)</option>
+                                        <option value="alphaAsc" <%=sort==="alphaAsc" ? "selected" : "" %>>A-Z</option>
+                                        <option value="alphaDesc" <%=sort==="alphaDesc" ? "selected" : "" %>>Z-A</option>
+                                        <option value="newArrivals" <%=sort==="newArrivals" ? "selected" : "" %>>New Arrivals</option>
+                                        <option value="popularity" <%=sort==="popularity" ? "selected" : "" %>>Popularity</option>
+                                    </select>
+                                </div> -->
+                                <div class="shop__product__option__right">
+                                    <p>Sort by Price:</p>
+                                    <form action="/shop" method="GET" id="sortForm">
+                                        <input type="hidden" name="search" value="<%= search || '' %>">
+                                        <select name="sort" onchange="document.getElementById('sortForm').submit();">
+                                            <option value="" <%=sort==='' ? 'selected' : '' %>>Default</option>
+                                            <option value="priceLowHigh" <%=sort==='priceLowHigh' ? 'selected' : '' %>>Low To High</option>
+                                            <option value="priceHighLow" <%=sort==='priceHighLow' ? 'selected' : '' %>>High To Low</option>
+                                            <option value="alphaAsc" <%=sort==='alphaAsc' ? 'selected' : '' %>>A-Z</option>
+                                            <option value="alphaDesc" <%=sort==='alphaDesc' ? 'selected' : '' %>>Z-A</option>
+                                            <option value="newArrivals" <%=sort==='newArrivals' ? 'selected' : '' %>>New Arrivals</option>
+                                            <option value="popularity" <%=sort==='popularity' ? 'selected' : '' %>>Popularity</option>
+                                        </select>
+                                    </form>
+                                </div>
                             </div>
 
                         </div>
                     </div>
+                    
                     <div class="row">
                         <% products.forEach(product=> { %>
                             <div class="col-lg-4 col-md-6 col-sm-6">
@@ -182,7 +239,7 @@
                                     <div class="product-click-wrapper"
                                         onclick="window.location.href='/product/<%= product._id %>'">
                                         <div class="product__item__pic set-bg"
-                                            data-setbg="/uploads/product-image/<%= product.productImage[0] %>">
+                                            data-setbg="/uploads/product-image/<%= product.productImage[0] %>" style="    border-radius: 15px">
                                             <% if (product.isOnSale) { %>
                                                 <span class="label">Sale</span>
                                                 <% } %>
@@ -326,6 +383,86 @@
 
     <%- include("../../views/partials/user/footershop") %>
     <script>
+        // function sortProducts() {
+        //         const sortValue = document.getElementById("sortOptions").value;
+        //         const currentUrl = new URL(window.location.href);
+        //         currentUrl.searchParams.set("sort", sortValue); // Set sort parameter
+        //         currentUrl.searchParams.set("page", 1); // Reset to the first page
+        //         window.location.href = currentUrl.toString();
+        //     }
+            document.getElementById("searchInput").addEventListener("input", async (e) => {
+    //                 const query = e.target.value;
+    //                 const sort = document.getElementById("sortSelect").value; // Optional sorting dropdown
+
+    //                 try {
+    //                     const response = await fetch(`/shop?search=${encodeURIComponent(query)}&sort=${sort}`);
+    //                     const products = await response.json();
+    //                     displayProducts(products);
+    //                 } catch (error) {
+    //                     console.error("Error fetching search results:", error);
+    //                 }
+    //             });
+
+    //             function displayProducts(products) {
+    //                 const productContainer = document.getElementById("productResults");
+    //                 productContainer.innerHTML = "";
+
+    //                 if (products.length === 0) {
+    //                     productContainer.innerHTML = "<p>No products found</p>";
+    //                     return;
+    //                 }
+
+    //                 products.forEach((product) => {
+    //                     const productHTML = `
+    //   <div class="product-item">
+    //     <img src="${product.productImage}" alt="${product.productName}" />
+    //     <h3>${product.productName}</h3>
+    //     <p>Price: ₹${product.salePrice}</p>
+    //     <p>Size: ${product.size?.join(", ") || "N/A"}</p>
+    //     <p>Color: ${product.color || "N/A"}</p>
+    //   </div>
+    // `;
+    //                     productContainer.innerHTML += productHTML;
+    //                 });
+    //             }
+
+    document.addEventListener('DOMContentLoaded', () => {
+                    document.getElementById("searchInput").addEventListener("input", async (e) => {
+                        const query = e.target.value;
+                        const sort = document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : ''; // Ensure sortSelect exists
+
+                        try {
+                            const response = await fetch(`/shop?search=${encodeURIComponent(query)}&sort=${sort}`);
+                            const products = await response.json();
+                            displayProducts(products);
+                        } catch (error) {
+                            console.error("Error fetching search results:", error);
+                        }
+                    });
+
+                    function displayProducts(products) {
+                        const productContainer = document.getElementById("productResults");
+                        productContainer.innerHTML = "";
+
+                        if (products.length === 0) {
+                            productContainer.innerHTML = "<p>No products found</p>";
+                            return;
+                        }
+
+                        products.forEach((product) => {
+                            const productHTML = `
+                <div class="product-item">
+                    <img src="${product.productImage}" alt="${product.productName}" />
+                    <h3>${product.productName}</h3>
+                    <p>Price: ₹${product.salePrice}</p>
+                    <p>Size: ${product.size?.join(", ") || "N/A"}</p>
+                    <p>Color: ${product.color || "N/A"}</p>
+                </div>
+            `;
+                            productContainer.innerHTML += productHTML;
+                        });
+                    }
+                });
         document.addEventListener('DOMContentLoaded', () => {
                 const cartLinks = document.querySelectorAll('.site-header__cart');
 

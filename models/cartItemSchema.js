@@ -32,9 +32,26 @@ const cartItemSchema = new Schema({
     type: String,
     required: true,
   },
+  orderStatus: {
+    type: String,
+    enum: ["Placed", "Shipped", "Delivered", "canceled","Return requested","Returned"],
+    default: "Placed",
+  },
   regularPrice: {
     type: Number,
     required: true,
+  },
+  returnRequest: {
+    type: String,
+    enum: ["Pending", "Approved", "Rejected"],
+    default: "Pending",
+  },
+
+  returnComment: {
+    type: String,
+  },
+  returnComments: {
+    type: String,
   },
   salePrice: {
     type: Number,
@@ -43,6 +60,10 @@ const cartItemSchema = new Schema({
   totalPrice: {
     type: Number,
     required: true,
+  },
+  cancelComment: {
+    type: String,
+   
   },
 });
 

@@ -6,6 +6,7 @@ const session =require("express-session")
 const Address=require("../models/addressSchema")
 const express = require("express");
 const sharp = require("sharp");
+const Order=require("../models/orderSchema")
 
 const multer = require("multer");
 const path = require("path");
@@ -396,11 +397,18 @@ const userProfile = async (req, res) => {
 
         // Fetch user data
         const userData = await User.findById(userId).populate('addresses'); // Assuming addresses are populated
+        const userOrders = await Order.find({ userId })
+          .populate("items.productId")
+          .sort({
+            orderedAt: -1,
+          });
+        console.log("Ajith",userOrders);
+        
 
         // If the user has addresses, they will be included in userData
         res.render("profile", {
-            user: userData,
-            
+          user: userData,
+          orders: userOrders,
         });
     } catch (error) {
         console.error("Error retrieving data:", error);
@@ -411,13 +419,7 @@ const loadAddAddressPage = async (req, res) => {
   try {
     const userId = req.session.user;
     const userData = await User.findById(userId);
-    // For fresh page loads, no `addressData` will exist
-    // const addressData = req.session.addressData || {};
-
-    // // Clear session data after retrieval (optional, for fresh inputs)
-    // req.session.addressData = null;
-
-    // Render the Add Address form
+    
     res.render("addAddress", { user: userData });
   } catch (error) {
     console.error("Error loading add address page:", error);
@@ -753,26 +755,6 @@ const validatCurrentPassword= async(req,res)=>{
   }
 }
 
-const loadUserOrders=async(req,res)=>{
-
-   try {
-     const userId = req.session.user;
-
-     // Fetch user data
-     const userData = await User.findById(userId) // Assuming addresses are populated
-
-     // If the user has addresses, they will be included in userData
-     res.render("userOrder", {
-       user: userData,
-       activeTab: "orders",
-     });
-   } catch (error) {
-     console.error("Error retrieving data:", error);
-     res.redirect("/pageNotFound");
-   }
-
-}
-
 
 
 module.exports={
@@ -794,7 +776,7 @@ module.exports={
     updateProfileDetails,
     validatCurrentPassword,
  
-    loadUserOrders
+   
 
     
 }

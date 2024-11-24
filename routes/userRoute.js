@@ -110,6 +110,8 @@ router.get("/profile", userAuth, profileController.userProfile)
   router.post("/update-address/:id", userAuth,profileController.updateUserAddress);
 router.post("/update-user",userAuth,profileController.updateProfileDetails);
 router.post("/validate-current-password",userAuth,profileController.validatCurrentPassword);
+router.post("/cancel-item",userAuth,orderController.cancelOrder)
+router.post("/return-item",userAuth,orderController.returnItem)
 
 
 

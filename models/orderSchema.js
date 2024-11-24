@@ -25,18 +25,7 @@ const orderSchema = new Schema(
       enum: ["Pending", "Completed", "Failed", "Refunded"],
       default: "Pending",
     },
-    orderStatus: {
-      type: String,
-      enum: [
-        "Placed",
-        "Confirmed",
-        "Shipped",
-        "Delivered",
-        "Cancelled",
-        "Returned",
-      ],
-      default: "Placed",
-    },
+   
     totalAmount: {
       type: Number,
       required: true,

@@ -126,6 +126,219 @@ const placeOrder = async (req, res) => {
   }
 };
 
+const cancelOrder = async (req, res) => {
+  try {
+    console.log("Request body:", req.body);
+
+    const {
+      orderId,
+      productSize,
+      productColor,
+      cancelComment,
+    } = req.body;
+
+    // Validate required fields
+    if (!orderId || !productSize || !productColor) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+        receivedData: req.body,
+      });
+    }
+
+    const userId = req.session.user;
+
+    // Find the order
+    const order = await Order.findOne({ _id: orderId, userId });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // Find the specific item in the order using size and color
+    const orderItemIndex = order.items.findIndex((item) => {
+      // Add null checks
+      if (!item.variant) return false;
+
+      // Convert sizes to uppercase for case-insensitive comparison
+      const itemSize = item.variant.size.toUpperCase();
+      const requestSize = productSize.toUpperCase();
+
+      // Convert colors to uppercase for case-insensitive comparison
+      const itemColor = item.variant.color.toUpperCase();
+      const requestColor = productColor.toUpperCase();
+
+      return itemSize === requestSize && itemColor === requestColor;
+    });
+
+    if (orderItemIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found in order",
+        debug: {
+          receivedData: {
+            size: productSize,
+            color: productColor,
+          },
+          availableItems: order.items.map((item) => ({
+            variant: item.variant,
+          })),
+        },
+      });
+    }
+
+    const orderItem = order.items[orderItemIndex];
+
+    if (orderItem.orderStatus === "canceled") {
+      return res.status(400).json({
+        success: false,
+        message: "This item is already canceled",
+      });
+    }
+
+    // Get the productId from the orderItem
+    const productIdFromOrder = orderItem.productId;
+
+    // Find the product and update its stock
+    const product = await Product.findById(productIdFromOrder);
+    if (product) {
+      const variantIndex = product.variants.findIndex(
+        (v) =>
+          v.size.toUpperCase() === productSize.toUpperCase() &&
+          v.color.toUpperCase() === productColor.toUpperCase()
+      );
+
+      if (variantIndex !== -1) {
+        product.variants[variantIndex].quantity += orderItem.quantity;
+        await product.save();
+      }
+    }
+
+    // Update the order item status to canceled
+    order.items[orderItemIndex].orderStatus = "canceled";
+    if (cancelComment) {
+      order.items[orderItemIndex].cancelComment = cancelComment;
+    }
+
+    // If all items are canceled, update the overall order status
+    const allItemsCanceled = order.items.every(
+      (item) => item.orderStatus === "canceled"
+    );
+    if (allItemsCanceled) {
+      order.orderStatus = "canceled";
+    }
+
+    await order.save();
+
+    res.json({
+      success: true,
+      message: "Product canceled successfully from order",
+      updatedOrder: order,
+    });
+  } catch (error) {
+    console.error("Cancel product error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Error canceling product from order",
+      receivedData: req.body,
+    });
+  }
+};
+const returnItem = async (req, res) => {
+  try {
+    console.log("Request body:", req.body);
+
+    const { orderId, productSize, productColor, returnComment } = req.body;
+
+    // Validate required fields
+    if (!orderId || !productSize || !productColor) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+        receivedData: req.body,
+      });
+    }
+
+    const userId = req.session.user;
+
+    // Find the order
+    const order = await Order.findOne({ _id: orderId, userId });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // Find the specific item in the order using size and color
+    const orderItemIndex = order.items.findIndex((item) => {
+      if (!item.variant) return false;
+
+      const itemSize = item.variant.size.toUpperCase();
+      const requestSize = productSize.toUpperCase();
+
+      const itemColor = item.variant.color.toUpperCase();
+      const requestColor = productColor.toUpperCase();
+
+      return itemSize === requestSize && itemColor === requestColor;
+    });
+
+    if (orderItemIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found in order",
+        debug: {
+          receivedData: {
+            size: productSize,
+            color: productColor,
+          },
+          availableItems: order.items.map((item) => ({
+            variant: item.variant,
+          })),
+        },
+      });
+    }
+
+    const orderItem = order.items[orderItemIndex];
+
+    if (
+      orderItem.orderStatus === "Return requested" 
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "This item is already in the return process",
+      });
+    }
+
+    // Update the order item status to return_pending
+    order.items[orderItemIndex].orderStatus = "Return requested";
+    if (returnComment) {
+      order.items[orderItemIndex].returnComment = returnComment;
+    }
+
+    await order.save();
+
+    res.json({
+      success: true,
+      message: "Return request submitted successfully",
+      updatedOrder: order,
+    });
+  } catch (error) {
+    console.error("Return request error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Error requesting return for product",
+      receivedData: req.body,
+    });
+  }
+};
+
 module.exports={
     placeOrder,
+    cancelOrder,
+    returnItem
 }

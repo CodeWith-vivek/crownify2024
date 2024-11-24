@@ -349,54 +349,427 @@ const logout = async (req, res) => {
   }
 };
 
+// const loadShopPage = async (req, res) => {
+//   try {
+//     let search = req.query.search || "";
+
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = 12;
+
+//     const products = await Product.find({
+//       isBlocked: false,
+//       productName: { $regex: ".*" + search + ".*", $options: "i" },
+//     })
+//       .limit(limit)
+//       .skip((page - 1) * limit)
+//       .exec();
+
+//     const categories = await Category.find();
+//     const brands = await Brand.find({ isBlocked: false });
+
+//     const uniqueSizes = [
+//       ...new Set(products.flatMap((product) => product.size || [])),
+//     ];
+
+//     const count = await Product.countDocuments({
+//       isBlocked: false,
+//       productName: { $regex: ".*" + search + ".*", $options: "i" },
+//     });
+
+//     const userId = req.session.user;
+//     let userData = null;
+//     if (userId) {
+//       userData = await User.findOne({ _id: userId });
+//     }
+
+//     return res.render("Shop", {
+//       user: userData,
+//       products,
+//       categories,
+//       brands,
+//       uniqueSizes,
+//       search,
+//       currentPage: page,
+//       totalPages: Math.ceil(count / limit),
+//       productsPerPage: limit,
+//       totalProducts: count,
+//     });
+//   } catch (error) {
+//     console.log("Shop page not found", error);
+//     res.status(500).send("server error");
+//   }
+// };
+
+// const loadShopPage = async (req, res) => {
+//   try {
+//     let search = req.query.search || "";
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = 12;
+
+//     // Handle sorting
+//     const sortOption = req.query.sort || ""; // Default: no sorting
+//     let sortCriteria = {};
+
+//     switch (sortOption) {
+//       case "priceLowHigh":
+//         sortCriteria = { salePrice: 1 }; // Ascending price
+//         break;
+//       case "priceHighLow":
+//         sortCriteria = { salePrice: -1 }; // Descending price
+//         break;
+//       case "alphaAsc":
+//         sortCriteria = { productName: 1 }; // Alphabetical A-Z
+//         break;
+//       case "alphaDesc":
+//         sortCriteria = { productName: -1 }; // Alphabetical Z-A
+//         break;
+//       case "newArrivals":
+//         sortCriteria = { createdAt: -1 }; // Newest first
+//         break;
+//       case "popularity":
+//         sortCriteria = { popularity: -1 }; // Custom popularity field
+//         break;
+//       default:
+//         sortCriteria = {}; // No sorting
+//     }
+
+//     // Fetch products with sorting, pagination, and search
+//     const products = await Product.find({
+//       isBlocked: false,
+//       productName: { $regex: ".*" + search + ".*", $options: "i" },
+//     })
+//       .sort(sortCriteria) // Apply sorting
+//       .limit(limit)
+//       .skip((page - 1) * limit)
+//       .exec();
+
+//     // Fetch additional data
+//     const categories = await Category.find();
+//     const brands = await Brand.find({ isBlocked: false });
+
+//     // Extract unique sizes from products
+//     const uniqueSizes = [
+//       ...new Set(products.flatMap((product) => product.size || [])),
+//     ];
+
+//     // Get total product count for pagination
+//     const count = await Product.countDocuments({
+//       isBlocked: false,
+//       productName: { $regex: ".*" + search + ".*", $options: "i" },
+//     });
+
+//     // Fetch user data if logged in
+//     const userId = req.session.user;
+//     let userData = null;
+//     if (userId) {
+//       userData = await User.findOne({ _id: userId });
+//     }
+
+//     // Render the Shop page
+//     return res.render("Shop", {
+//       user: userData,
+//       products,
+//       categories,
+//       brands,
+//       uniqueSizes,
+//       search,
+//       sort: sortOption, // Pass the current sort option for frontend
+//       currentPage: page,
+//       totalPages: Math.ceil(count / limit),
+//       productsPerPage: limit,
+//       totalProducts: count,
+//     });
+//   } catch (error) {
+//     console.log("Shop page not found", error);
+//     res.status(500).send("server error");
+//   }
+// };
+// const loadShopPage = async (req, res) => {
+//   try {
+//     let search = req.query.search || "";
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = 12;
+
+//     // Handle sorting
+//     const sortOption = req.query.sort || ""; // Default: no sorting
+//     let sortCriteria = {};
+
+//     switch (sortOption) {
+//       case "priceLowHigh":
+//         sortCriteria = { salePrice: 1 }; // Ascending price
+//         break;
+//       case "priceHighLow":
+//         sortCriteria = { salePrice: -1 }; // Descending price
+//         break;
+//       case "alphaAsc":
+//         sortCriteria = { productName: 1 }; // Alphabetical A-Z
+//         break;
+//       case "alphaDesc":
+//         sortCriteria = { productName: -1 }; // Alphabetical Z-A
+//         break;
+//       case "newArrivals":
+//         sortCriteria = { createdAt: -1 }; // Newest first
+//         break;
+//       case "popularity":
+//         sortCriteria = { popularity: -1 }; // Custom popularity field
+//         break;
+//       default:
+//         sortCriteria = {}; // No sorting
+//     }
+
+//     // Create a regex pattern for case-insensitive search
+//     const searchPattern = new RegExp(search, "i");
+
+//     // Fetch products with sorting, pagination, and search by multiple fields
+//     const products = await Product.find({
+//       isBlocked: false,
+//       $or: [
+//         { productName: { $regex: searchPattern } }, // Match name
+//         { size: { $regex: searchPattern } }, // Match size
+//         { color: { $regex: searchPattern } }, // Match color
+//       ],
+//     })
+//       .sort(sortCriteria) // Apply sorting
+//       .limit(limit)
+//       .skip((page - 1) * limit)
+//       .exec();
+
+//     // Fetch additional data
+//     const categories = await Category.find();
+//     const brands = await Brand.find({ isBlocked: false });
+
+//     // Extract unique sizes from products
+//     const uniqueSizes = [
+//       ...new Set(products.flatMap((product) => product.size || [])),
+//     ];
+
+//     // Get total product count for pagination
+//     const count = await Product.countDocuments({
+//       isBlocked: false,
+//       $or: [
+//         { productName: { $regex: searchPattern } },
+//         { size: { $regex: searchPattern } },
+//         { color: { $regex: searchPattern } },
+//       ],
+//     });
+
+//     // Fetch user data if logged in
+//     const userId = req.session.user;
+//     let userData = null;
+//     if (userId) {
+//       userData = await User.findOne({ _id: userId });
+//     }
+
+//     // Render the Shop page
+//     return res.render("Shop", {
+//       user: userData,
+//       products,
+//       categories,
+//       brands,
+//       uniqueSizes,
+//       search,
+//       sort: sortOption, // Pass the current sort option for frontend
+//       currentPage: page,
+//       totalPages: Math.ceil(count / limit),
+//       productsPerPage: limit,
+//       totalProducts: count,
+//     });
+//   } catch (error) {
+//     console.log("Shop page not found", error);
+//     res.status(500).send("server error");
+//   }
+// };
+
+// const loadShopPage = async (req, res) => {
+//   try {
+//     let search = req.query.search || "";
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = 12;
+
+//     // Handle sorting
+//     const sortOption = req.query.sort || ""; // Default: no sorting
+//     let sortCriteria = {};
+//     let aggregationPipeline = [];
+
+//     switch (sortOption) {
+//       case "priceLowHigh":
+//         sortCriteria = { salePrice: 1 }; // Ascending price
+//         break;
+//       case "priceHighLow":
+//         sortCriteria = { salePrice: -1 }; // Descending price
+//         break;
+//       case "alphaAsc":
+//       case "alphaDesc":
+//         const sortOrder = sortOption === "alphaAsc" ? 1 : -1;
+//         aggregationPipeline.push({
+//           $addFields: {
+//             productNameLower: { $toLower: "$productName" },
+//           },
+//         });
+//         aggregationPipeline.push({ $sort: { productNameLower: sortOrder } });
+//         break;
+//       case "newArrivals":
+//         sortCriteria = { createdAt: -1 }; // Newest first
+//         break;
+//       case "popularity":
+//         sortCriteria = { popularity: -1 }; // Custom popularity field
+//         break;
+//       default:
+//         sortCriteria = {}; // No sorting
+//     }
+
+//     // Add sorting stage if criteria is directly usable
+//     if (Object.keys(sortCriteria).length > 0) {
+//       aggregationPipeline.push({ $sort: sortCriteria });
+//     }
+
+//     // Add match stage for filtering products
+//     aggregationPipeline.unshift({
+//       $match: {
+//         isBlocked: false,
+//         productName: { $regex: ".*" + search + ".*", $options: "i" },
+//       },
+//     });
+
+//     // Pagination stages
+//     aggregationPipeline.push({ $skip: (page - 1) * limit }, { $limit: limit });
+
+//     // Execute aggregation pipeline
+//     const products = await Product.aggregate(aggregationPipeline);
+
+//     // Fetch additional data
+//     const categories = await Category.find();
+//     const brands = await Brand.find({ isBlocked: false });
+
+//     // Extract unique sizes from products
+//     const uniqueSizes = [
+//       ...new Set(products.flatMap((product) => product.size || [])),
+//     ];
+
+//     // Get total product count for pagination
+//     const count = await Product.countDocuments({
+//       isBlocked: false,
+//       productName: { $regex: ".*" + search + ".*", $options: "i" },
+//     });
+
+//     // Fetch user data if logged in
+//     const userId = req.session.user;
+//     let userData = null;
+//     if (userId) {
+//       userData = await User.findOne({ _id: userId });
+//     }
+
+//     // Render the Shop page
+//     return res.render("Shop", {
+//       user: userData,
+//       products,
+//       categories,
+//       brands,
+//       uniqueSizes,
+//       search,
+//       sort: sortOption, // Pass the current sort option for frontend
+//       currentPage: page,
+//       totalPages: Math.ceil(count / limit),
+//       productsPerPage: limit,
+//       totalProducts: count,
+//     });
+//   } catch (error) {
+//     console.log("Shop page not found", error);
+//     res.status(500).send("server error");
+//   }
+// };
+
+
 const loadShopPage = async (req, res) => {
   try {
     let search = req.query.search || "";
-
     const page = parseInt(req.query.page) || 1;
     const limit = 12;
 
+    // Handle sorting
+    const sortOption = req.query.sort || ""; // Default: no sorting
+    let sortCriteria = {};
+
+    switch (sortOption) {
+      case "priceLowHigh":
+        sortCriteria = { salePrice: 1 }; // Ascending price
+        break;
+      case "priceHighLow":
+        sortCriteria = { salePrice: -1 }; // Descending price
+        break;
+      case "alphaAsc":
+        sortCriteria = { productName: 1 }; // Alphabetical A-Z
+        break;
+      case "alphaDesc":
+        sortCriteria = { productName: -1 }; // Alphabetical Z-A
+        break;
+      case "newArrivals":
+        sortCriteria = { createdAt: -1 }; // Newest first
+        break;
+      case "popularity":
+        sortCriteria = { popularity: -1 }; // Custom popularity field
+        break;
+      default:
+        sortCriteria = {}; // No sorting
+    }
+
+    // Fetch products with search, sorting, and pagination
     const products = await Product.find({
       isBlocked: false,
-      productName: { $regex: ".*" + search + ".*", $options: "i" },
+      $or: [
+        { productName: { $regex: search, $options: "i" } },
+        { size: { $regex: search, $options: "i" } },
+        { color: { $regex: search, $options: "i" } },
+      ],
     })
+      .sort(sortCriteria) // Apply sorting
       .limit(limit)
       .skip((page - 1) * limit)
       .exec();
 
+    // Fetch categories and brands
     const categories = await Category.find();
     const brands = await Brand.find({ isBlocked: false });
 
+    // Extract unique sizes from the products
     const uniqueSizes = [
       ...new Set(products.flatMap((product) => product.size || [])),
     ];
 
+    // Count total products for pagination
     const count = await Product.countDocuments({
       isBlocked: false,
-      productName: { $regex: ".*" + search + ".*", $options: "i" },
+      $or: [
+        { productName: { $regex: search, $options: "i" } },
+        { size: { $regex: search, $options: "i" } },
+        { color: { $regex: search, $options: "i" } },
+      ],
     });
 
+    // Fetch user data if logged in
     const userId = req.session.user;
     let userData = null;
     if (userId) {
       userData = await User.findOne({ _id: userId });
     }
 
+    // Render the Shop page
     return res.render("Shop", {
       user: userData,
       products,
       categories,
       brands,
       uniqueSizes,
-      search,
+      search, // Pass the search term for frontend
+      sort: sortOption, // Pass the sort option for frontend
       currentPage: page,
       totalPages: Math.ceil(count / limit),
       productsPerPage: limit,
       totalProducts: count,
     });
   } catch (error) {
-    console.log("Shop page not found", error);
-    res.status(500).send("server error");
+    console.log("Error loading shop page:", error);
+    res.status(500).send("Server error");
   }
 };
 const loadProductDetails = async (req, res) => {

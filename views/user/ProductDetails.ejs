@@ -1,6 +1,6 @@
 <%- include("../../views/partials/user/headershopdetails") %>
     <section class="shop-details">
-        <div class="product__details__pic">
+        <div class="product__details__pic" style="background-color: #e2e0c8;">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
@@ -19,7 +19,7 @@
                                     <a class="nav-link <%= index === 0 ? 'active' : '' %>" data-toggle="tab"
                                         href="#tabs-<%= index + 1 %>" role="tab">
                                         <div class="product__thumb__pic set-bg"
-                                            data-setbg="/uploads/product-image/<%= img %>">
+                                            data-setbg="/uploads/product-image/<%= img %>"style=" border-radius: 10px">
                                         </div>
                                     </a>
                                 </li>
@@ -33,7 +33,7 @@
                                     role="tabpanel">
                                     <div class="product__details__pic__item img-magnifier-container">
                                         <img id="myimage-<%= index %>" src="/uploads/product-image/<%= img %>"
-                                            alt="<%= product.productName %>" class="zoomable-image">
+                                            alt="<%= product.productName %>" class="zoomable-image" style="    border-radius: 14px">
                                     </div>
                                 </div>
                                 <% }) %>
@@ -529,16 +529,10 @@
                             icon: 'success',
                             title: 'Success!',
                             text: 'Item added to cart successfully!',
-                            // showCancelButton: true,
-                            // confirmButtonText: 'Go to Cart',
-                            // cancelButtonText: 'Continue Shopping',
-                            // customClass: {
-                            //     confirmButton: 'btn btn-success',
-                            //     cancelButton: 'btn btn-secondary',
-                            // },
+             
                         }).then((result) => {
                             // if (result.isConfirmed) {
-                                window.location.href = '/cart';
+                            location.reload();
                             // }
                         });
                         
@@ -625,7 +619,11 @@
                                 confirmButton: 'btn btn-danger',
                             },
                         });
-                    });
+                    }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = data.redirectTo; // Redirect to login
+                    }
+                });
             }
 
             // Initialize magnifier functionality if needed
