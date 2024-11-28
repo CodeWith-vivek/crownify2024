@@ -248,7 +248,7 @@ table .form-check {
 }
 
 .text-primary {
-  color: #088178 !important;
+      color: #cd3535 !important;
 }
 
 .bg-primary-light {
@@ -534,11 +534,11 @@ b {
 }
 
 .menu-aside .menu-item.active .icon {
-  color: #088178;
+    color: #d00c0c;
 }
 
 .menu-aside .menu-item.active .menu-link {
-  background-color: rgba(8, 129, 120, 0.2);
+    background-color: rgb(178 6 6 / 30%);
 }
 
 .menu-aside .menu-item.active .submenu a.active {
@@ -643,7 +643,7 @@ b {
 
 .pagination-area .page-item.active .page-link, .pagination-area .page-item:hover .page-link {
   color: #fff;
-  background: #088178;
+  background: #e03b3b;
 }
 
 .pagination-area .page-item .page-link {
@@ -690,7 +690,7 @@ b {
   padding: 10px 40px;
   color: #ffffff;
   border: none;
-  background-color: #088178;
+  background-color:#810808;
   border-radius: 4px;
 }
 
@@ -722,7 +722,7 @@ b {
 .btn.btn-md {
   padding: 0.5rem 0.95rem;
   font-weight: 500;
-  background-color: #088178;
+  background-color: #8a0000;
   color: #ffffff;
 }
 
@@ -821,6 +821,11 @@ b {
 .btn-light:hover i {
   color: #fff;
 }
+.btn-info{
+  background-color: #8a5a5a;
+    border-color: #8a5a5a;
+
+}
 
 .btn-light i {
   color: #adb5bd;
@@ -829,11 +834,28 @@ b {
 .rounded {
   border-radius: 4px !important;
 }
+.btn-danger{
+  background-color: #e03a3a;
+    border-color: #e03a3a;
+}
+.btn.btn-primary:hover{
+ background-color:  #ca2929;
+}
+.btn-info:hover{
+  
+      background-color: #a24040;
+      border-color: #a24040;
+    
+}
 
 .btn-drag {
   padding: 5px 2px;
   display: inline-block;
   cursor: ns-resize !important;
+}
+.btn-success{
+      background-color: #3d7644;
+        border-color: #3d7644;
 }
 
 .btn-sm {
@@ -1109,6 +1131,7 @@ textarea.form-control {
 }
 
 .icontext .icon {
+  background-color: aliceblue;
   position: relative;
   -ms-flex-negative: 0;
       flex-shrink: 0;
@@ -2233,6 +2256,9 @@ a.itemside:hover .title {
           transform: translate(-50%, -50%);
   top: 100%;
 }
+body.dark .card-body{
+  background-color: #2a2a29;;
+}
 
 .card-user .card-body {
   text-align: center;
@@ -2744,7 +2770,9 @@ ul.row, ul.row-sm {
 }
 
 .pb-30 {
+  margin-top: 206px;
   padding-bottom: 30px !important;
+  background-color: #000000;
 }
 
 .pb-35 {
@@ -4169,12 +4197,12 @@ footer.main-footer {
 }
 
 body.dark {
-  background-color: #222736;
+  background-color: black;
   color: #fff;
 }
 
 body.dark .content-main {
-  background-color: #222736;
+  background-color: #000000;
   color: #f6f6f6;
 }
 
@@ -4192,8 +4220,8 @@ body.dark .brand-wrap .logo {
 }
 
 body.dark .navbar-aside {
-  background-color: #2f3446;
-  border-right: 1px solid #383e50;
+  background-color: #2e2626;
+  border-right: 1px solid #2e2626;
 }
 
 body.dark .navbar-aside .aside-top {
@@ -4201,7 +4229,7 @@ body.dark .navbar-aside .aside-top {
 }
 
 body.dark h1, body.dark h2, body.dark h3, body.dark h4, body.dark h5, body.dark h6 {
-  color: #000000;
+  color: #dc5555;
 }
 
 body.dark .menu-aside .menu-item .icon {
@@ -4239,8 +4267,8 @@ body.dark .menu-aside .submenu a:hover {
 }
 
 body.dark .main-header {
-  background-color: #2f3446;
-  border-bottom: 1px solid #2f3446;
+  background-color: #2e2626;
+  border-bottom: 1px solid #2e2626;
 }
 
 body.dark .main-header .nav-item > a {
@@ -4251,9 +4279,13 @@ body.dark .main-header .nav-link:hover, body.dark .main-header .nav-link.active 
   background-color: #383e50;
   color: #fff;
 }
+.justify-content-center{
+  
+  background-color: #000000;
+}
 
 body.dark .card, body.dark .card-header {
-  background-color: #2a3042;
+  background-color: #312f2f;
 }
 
 body.dark .card {
@@ -4261,7 +4293,7 @@ body.dark .card {
 }
 
 body.dark .card-header {
-  border-color: #383e50;
+  border-color: #000000;
 }
 
 body.dark .box {

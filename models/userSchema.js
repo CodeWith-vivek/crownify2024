@@ -99,7 +99,7 @@ const userSchema = new Schema(
     ],
     addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }],
 
-    // Remove default value for avatar, leaving it empty if no image is uploaded
+   
     avatar: {
       type: String,
       required: false, // avatar is now optional

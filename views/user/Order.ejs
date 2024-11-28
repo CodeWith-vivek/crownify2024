@@ -1,35 +1,186 @@
 <%- include("../../views/partials/user/headerprofile") %>
 
     <div class="col-md-9">
-        <div class="tab-content dashboard-content">
-
-            <div class="tab-pane fade active show" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
-                <div class="card">
-                    <div class="card-header">
-
-                        <h5 class="mb-0">Hello <%= user.name %>! </h5>
+        <div id="orderModal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2>Order Details - #<span id="modalOrderId"></span></h2>
+                <div id="orderDetails">
+                    <div class="order-info mb-4">
+                        <p><strong>Name:</strong> <span id="modalCustomer"></span></p>
+                        <p><strong>Order Date:</strong> <span id="modalDate"></span></p>
                     </div>
-                    <div class="card-body">
-                        <p>From your account dashboard, you can easily check &amp; view your
-                            <a href="/orders">recent orders</a>, manage your
-                            <a href="/Address">shipping and billing addresses</a>, and
-                            <a href="/AccountDetails">edit your password and account details</a>.
-                        </p>
-                        <br>
-                        <p>E-mail : <%= user.email %>
-                        </p>
-                        <p>Phone : <%= user.phone %>
-                        </p>
+                    <h3>Items</h3>
+                    <div class="products-list" id="modalItems">
+                        <!-- Products will be dynamically inserted here -->
                     </div>
                 </div>
             </div>
+        </div>
+        <div id="cancelModal" class="modal">
+            <div class="modal-content p-4">
+                <h4>Cancel Item</h4>
+                <p><strong>Order ID:</strong> <span id="cancelOrderId"></span></p>
+                <div class="d-flex align-items-start mb-3">
+                    <img id="cancelProductImage" src="" alt="Product Image" class="me-3 rounded" width="100"
+                        height="100">
+                    <div>
+                        <p><strong>Product Name:</strong> <span id="cancelProductName"></span></p>
+                        <p><strong>Size:</strong> <span id="cancelProductSize"></span></p>
+                        <p><strong>Color:</strong> <span id="cancelProductColor"></span></p>
+                        <p><strong>Price:</strong> ₹<span id="cancelProductPrice"></span></p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cancelComment">Reason for cancellation:</label>
+                    <textarea id="cancelComment" class="form-control" rows="3"
+                        placeholder="Enter your reason"></textarea>
+                </div>
+                <div class="d-flex justify-content-between mt-3">
+                    <button id="submitCancellation" class="btn btn-primary">Submit</button>
+                    <button onclick="closeModal('cancelModal')" class="btn btn-secondary">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="returnModal" class="modal">
+            <div class="modal-content p-4">
+                <h4>Return Item</h4>
+                <p><strong>Order ID:</strong> <span id="returnOrderId"></span></p>
+                <div class="d-flex align-items-start mb-3">
+                    <img id="returnProductImage" src="" alt="Product Image" class="me-3 rounded" width="100"
+                        height="100">
+                    <div>
+                        <p><strong>Product Name:</strong> <span id="returnProductName"></span></p>
+                        <p><strong>Size:</strong> <span id="returnProductSize"></span></p>
+                        <p><strong>Color:</strong> <span id="returnProductColor"></span></p>
+                        <p><strong>Price:</strong> ₹<span id="returnProductPrice"></span></p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="returnComment">Reason for return:</label>
+                    <textarea id="returnComment" class="form-control" rows="3"
+                        placeholder="Enter your reason"></textarea>
+                </div>
+                <div class="d-flex justify-content-between mt-3">
+                    <button id="submitReturn" class="btn btn-primary">Submit</button>
+                    <button onclick="closeModal('returnModal')" class="btn btn-secondary">Close</button>
+                </div>
+            </div>
+        </div>
 
 
 
+        <div class="tab-content dashboard-content">
+
+            <div id="orders">
+
+                <div class="container mt-4">
+                    <div class="card">
+                        <div class="card-body" style="padding: 0px;">
+                            <div class="card-header">
+                                <h5 class="mb-0">Your Orders</h5>
+                            </div>
+
+                            <div class="row mb-3 d-none d-md-flex text-muted">
+                                <div class="col-md-4 ps-5">PRODUCT</div>
+                                <div class="col-md-2">QUANTITY</div>
+                                <div class="col-md-2">PRICE</div>
+                                <div class="col-md-2">STATUS</div>
+                                <div class="col-md-2">ACTIONS</div>
+                            </div>
+                            <div class="order-list">
+                                <% if (orders.length===0) { %>
+                                    <div class="alert alert-warning" role="alert"> You have not ordered anything yet.
+                                    </div>
+                                    <% } else { %>
+                                        <% orders.forEach(order=> { %>
+                                            <div class="order-item p-3 mb-3 rounded border"
+                                                data-order-id="<%= order._id %>" data-customer-name="<%= user.name %>"
+                                                data-order-date="<%= order.createdAt %>"
+                                                data-address="<%= order.shippingAddress || 'N/A' %>"
+                                                data-items='<%= JSON.stringify(order.items) %>'
+                                                data-timeline='<%= JSON.stringify(order.timeline || []) %>'>
+                                                <div class="row align-items-center">
+                                                    <% order.items.forEach(item=> { %>
+                                                        <div class="col-12 col-md-4 mb-3 mb-md-0">
+                                                            <div class="d-flex align-items-center">
+                                                                <img src="/uploads/product-image/<%= item.productImage || 'https://via.placeholder.com/60' %>"
+                                                                    alt="<%= item.productId?.productName || 'Product' %>"
+                                                                    class="me-3 rounded" width="60" height="60">
+                                                                <div>
+                                                                    <div class="fw-medium">
+                                                                        <%= item.productId?.productName
+                                                                            || 'Product Name' %>
+                                                                    </div>
+                                                                    <div class="text-muted">₹<%=
+                                                                            item.productId?.salePrice ||
+                                                                            item.productId?.regularPrice || 0 %>
+                                                                    </div>
+                                                                    <div class="text-muted">
+                                                                        <%= item.variant.size %>
+                                                                    </div>
+                                                                    <div class="text-muted">
+                                                                        <%= item.variant.color || 'N/A' %>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6 col-md-2 mb-2 mb-md-0">
+                                                            <div class="d-md-none text-muted fs-6 mb-1">QUANTITY</div>
+                                                            <div class="quantity-control fs-6"><span class="mx-2 fs">
+                                                                    <%= item.quantity || 0 %>
+                                                                </span></div>
+                                                        </div>
+                                                        <div class="col-6 col-md-2 mb-2 mb-md-0">
+                                                            <div class="d-md-none text-muted fs-6 mb-1">PRICE</div>
+                                                            <div class="fs">₹<%= (item.productId?.salePrice ||
+                                                                    item.productId?.regularPrice || 0) * item.quantity
+                                                                    %>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6 col-md-2 mb-2 mb-md-0">
+                                                            <div class="d-md-none text-muted fs-6 mb-1">STATUS</div>
+                                                            <span
+                                                                class="<%= order.orderStatus === 'Delivered' ? 'text-success' : 'text-warning' %>">
+                                                                <%= item.orderStatus || 'Pending' %>
+                                                            </span>
+                                                        </div>
+                                                        <div class="col-6 col-md-2">
+                                                            <button
+                                                                class="btn btn-dark btn-outline-secondary btn w-100 w-md-auto mb-1 view-order"
+                                                                style="font-size : smaller;">
+                                                                View <i class="bi bi-chevron-down ms-1"></i>
+                                                            </button>
+                                                            <% if (order.orderStatus==='Placed' ||
+                                                                order.orderStatus==='Confirmed' ) { %>
+                                                                <button
+                                                                    class="btn btn-danger btn-outline-secondary btn w-100 w-md-auto mb-1"
+                                                                    style="font-size: smaller;">
+                                                                    Cancel Order <i class="bi bi-chevron-down ms-1"></i>
+                                                                </button>
+                                                                <% } %>
+                                                                    <% if (order.orderStatus==='Delivered' ) { %>
+                                                                        <button
+                                                                            class="btn btn-warning btn-outline-secondary btn w-100 w-md-auto mb-1"
+                                                                            style="font-size: smaller;">
+                                                                            Return <i
+                                                                                class="bi bi-chevron-down ms-1"></i>
+                                                                        </button>
+                                                                        <% } %>
+                                                        </div>
+                                                        <% }); %>
+                                                </div>
+                                            </div>
+                                            <% }); %>
+                                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
- 
-
     <%- include("../../views/partials/user/footerprofile") %>
         <script>
 

@@ -34,10 +34,7 @@ const placeOrder = async (req, res) => {
         throw new Error(`Product not found: ${cartItem.productId}`);
       }
 
-      // Log the variant information for debugging
-      console.log("Product:", product.productName);
-      console.log("Requested size:", cartItem.variant.size);
-      console.log("Requested color:", cartItem.variant.color);
+
 
       // Check if the variant exists in the product variants array
       const variantIndex = product.variants.findIndex(
@@ -128,7 +125,7 @@ const placeOrder = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
   try {
-    console.log("Request body:", req.body);
+  
 
     const {
       orderId,
@@ -249,7 +246,7 @@ const cancelOrder = async (req, res) => {
 };
 const returnItem = async (req, res) => {
   try {
-    console.log("Request body:", req.body);
+  
 
     const { orderId, productSize, productColor, returnComment } = req.body;
 
@@ -336,6 +333,7 @@ const returnItem = async (req, res) => {
     });
   }
 };
+
 
 module.exports={
     placeOrder,

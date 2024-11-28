@@ -20,13 +20,13 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
-    rel="stylesheet">
-    
+        rel="stylesheet">
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    
+
     <link rel="stylesheet" href="/assets/usershop/css/style.css" type="text/css">
-    <link rel="stylesheet" href="assets/css/style.css">
-    
+    <link rel="stylesheet" href="/assets/css/style.css">
+
     <link rel="stylesheet" href="assets/css/style2.css">
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
@@ -42,77 +42,127 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .pagination .page-item .page-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    margin: 0 5px;
-    font-weight: bold;
-    color: #333;
-    border: 1px solid #ddd;
-    transition: background-color 0.3s ease, color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            margin: 0 5px;
+            font-weight: bold;
+            color: #333;
+            border: 1px solid #ddd;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .pagination .page-item .page-link:hover {
+            background-color: #573535;
+            color: #fff;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #591e1e;
+            color: #fff;
+            border-color: #591e1e;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #ccc;
+            cursor: not-allowed;
+            border-color: #ddd;
+        }
+
+        .pagination .page-link.rounded-circle {
+            border-radius: 50%;
+        }
+
+        .empty-cart-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Center vertically if needed */
+            min-height: 50vh;
+            /* Ensure it takes the full height of the screen */
+            text-align: center;
+            /* Center the text and content */
+        }
+
+        .empty-cart-content {
+            max-width: 500px;
+            /* Optional: Control the width of the content */
+            margin: auto;
+            /* Ensure centering in non-flex environments */
+        }
+
+        .empty-cart-actions {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* Center the items horizontally */
+            gap: 10px;
+            /* Add space between buttons */
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .product-image {
+            margin-right: 10px;
+        }
+
+        .product-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-details-small p {
+            font-size: 12px;
+            /* Adjust this value as needed */
+            margin-bottom: 0px;
+            /* Adjust this value as needed */
+        }
+        .image-container {
+          
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
-.pagination .page-item .page-link:hover {
-    background-color: #573535;
-    color: #fff;
+.image-container img {
+    cursor: pointer;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease; /* Smooth transition */
 }
 
-.pagination .page-item.active .page-link {
-    background-color: #591e1e;
-    color: #fff;
-    border-color: #591e1e;
+.default-image {
+    opacity: 1; /* Show default image by default */
 }
 
-.pagination .page-item.disabled .page-link {
-    color: #ccc;
-    cursor: not-allowed;
-    border-color: #ddd;
+.hover-image {
+    opacity: 0; /* Hide hover image by default */
 }
 
-.pagination .page-link.rounded-circle {
-    border-radius: 50%;
-}
-
-.empty-cart-section {
-    display: flex;
-    justify-content: center;
-    align-items: center; /* Center vertically if needed */
-    min-height: 50vh; /* Ensure it takes the full height of the screen */
-    text-align: center; /* Center the text and content */
-}
-.empty-cart-content {
-    max-width: 500px; /* Optional: Control the width of the content */
-    margin: auto; /* Ensure centering in non-flex environments */
-}
-.empty-cart-actions {
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* Center the items horizontally */
-    gap: 10px; /* Add space between buttons */
-}
-.product-info {
-    display: flex;
-    align-items: center;
-}
-
-.product-image {
-    margin-right: 10px;
-}
-
-.product-details {
-    display: flex;
-    flex-direction: column;
-}
-.product-details-small p{
-    font-size: 12px; /* Adjust this value as needed */
-    margin-bottom: 0px; /* Adjust this value as needed */
-}
-
-
-    </style>
+.image-container:hover .default-image {
     
+   
+    opacity: 0; /* Hide default image on hover */
+}
+
+.image-container:hover .hover-image {
+  
+    transition-duration: 2ms;
+    opacity: 1; /* Show hover image on hover */
+}
+ .image-container:hover{
+    cursor: pointer;
+ }
+    </style>
+
 
 
 </head>
@@ -239,17 +289,20 @@
                         <div class="site-header__search">
                             <button type="button" class="search-trigger"><i class="icon anm anm-search-l"></i></button>
                         </div>
+                        
                         <div class="site-header__wishlist">
                             <button type="button" class="wishlist-trigger">
                                 <i class="icon anm anm-heart-l"></i>
                             </button>
                         </div>
                         <div class="site-cart mr-3">
-                            <a href="/cart" class="site-header__cart" title="Cart">
+                            <a href="/cart
+                                                                            " class="site-header__cart" title="Cart">
                                 <i class="icon anm anm-bag-l"></i>
-                           
+                        
                             </a>
                         </div>
+                        
 
                         <!-- Conditional Elements -->
                         <% if (locals.user) { %>
@@ -263,7 +316,7 @@
                                     </li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-wallet"></i> Wallet</a>
                                     </li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-box"></i> Orders</a>
+                                    <li><a class="dropdown-item" href="/orders"><i class="fa-solid fa-box"></i> Orders</a>
                                     </li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-ticket-alt"></i>
                                             Coupons</a></li>

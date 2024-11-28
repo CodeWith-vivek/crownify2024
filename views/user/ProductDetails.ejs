@@ -19,7 +19,7 @@
                                     <a class="nav-link <%= index === 0 ? 'active' : '' %>" data-toggle="tab"
                                         href="#tabs-<%= index + 1 %>" role="tab">
                                         <div class="product__thumb__pic set-bg"
-                                            data-setbg="/uploads/product-image/<%= img %>"style=" border-radius: 10px">
+                                            data-setbg="/uploads/product-image/<%= img %>" style=" border-radius: 10px">
                                         </div>
                                     </a>
                                 </li>
@@ -33,7 +33,8 @@
                                     role="tabpanel">
                                     <div class="product__details__pic__item img-magnifier-container">
                                         <img id="myimage-<%= index %>" src="/uploads/product-image/<%= img %>"
-                                            alt="<%= product.productName %>" class="zoomable-image" style="    border-radius: 14px">
+                                            alt="<%= product.productName %>" class="zoomable-image"
+                                            style="    border-radius: 14px">
                                     </div>
                                 </div>
                                 <% }) %>
@@ -86,7 +87,7 @@
                                                             hasAvailableColor=product.variants.some(variant=> {
                                                         return variant.size === size && variant.quantity > 0;
                                                         });
-                                                        if (!hasAvailableColor) { %>  <% } %>>
+                                                        if (!hasAvailableColor) { %> <% } %>>
                                                 </label>
                                                 <% index++; %>
                                                     <% }); %>
@@ -102,7 +103,7 @@
                                                     <input type="radio" id="color-<%= index %>" name="color"
                                                         value="<%= variant.color %>" data-size="<%= variant.size %>"
                                                         data-quantity="<%= variant.quantity %>"
-                                                        onclick="updateStockDisplay()" >
+                                                        onclick="updateStockDisplay()">
                                                     <% if (["No color", "Multi" ].includes(variant.color)) { %>
                                                         <span class="color-name"
                                                             style="font-weight: 600; top: -15px; padding: 3px; font-size: 18px;
@@ -164,21 +165,22 @@
                         <div class="product__item <%= product.isBlocked ? 'blocked' : '' %>"
                             onclick="window.location.href='/product/<%= product._id %>'">
                             <div class="product__item__pic set-bg"
-                                data-setbg="/uploads/product-image/<%= product.productImage[0] %>">
-                                <span class="label">New</span>
-                                <ul class="product__hover">
+                                data-setbg="/uploads/product-image/<%= product.productImage[0] %>"
+                                data-hoverbg="/uploads/product-image/<%= product.productImage[1] %>">
+                                <!-- <span class="label">New</span> -->
+                                <!-- <ul class="product__hover">
                                     <li><a href="#" onclick="event.preventDefault(); event.stopPropagation();"><img
                                                 src="/assets/usershop/img/icon/heart.png" alt=""></a></li>
-                                </ul>
+                                </ul> -->
                             </div>
                             <div class="product__item__text">
                                 <h6>
                                     <%= product.productName %>
                                 </h6>
 
-                                <a href="#" class="add-cart"
+                                <!-- <a href="#" class="add-cart"
                                     onclick="event.preventDefault(); event.stopPropagation(); handleAddToCart('<%= product._id %>')">+
-                                    Add To Cart</a>
+                                    Add To Cart</a> -->
                                 <div class="rating">
                                     <% for (let i=0; i < 5; i++) { %>
                                         <i class="fa <%= i < product.rating ? 'fa-star' : 'fa-star-o' %>"></i>
@@ -187,32 +189,54 @@
                                 <h5>₹<%= product.regularPrice.toFixed(2) %>
                                 </h5>
                                 </h5>
-                                <div class="product__color__select" onclick="event.stopPropagation();">
-                                    <% if (Array.isArray(product.color) && product.color.length> 0) { %>
-                                        <% product.color.forEach(color=> { %>
-                                            <label for="pc-<%= color %>">
-                                                <input type="radio" name="color" id="pc-<%= color %>" 
-                                                    value="<%= color %>"> <!-- Ensure value is set -->
-                                                <% if (color==="Multi" ) { %>
-                                                    <span
-                                                        style="border: 1px solid #000; padding: 3px; border-radius: 4px;">
-                                                        Multi
-                                                    </span>
-                                                    <% } else if (["No color", "Patterned" ].includes(color)) { %>
-                                                        <span
-                                                            style="border: 1px solid #000; padding: 3px; border-radius: 4px;">
-                                                            <%= color %>
-                                                        </span>
-                                                        <% } else { %>
-                                                            <span
-                                                                style="background-color: <%= color %>; border-radius: 50%; width: 20px; height: 20px;"></span>
-                                                            <% } %>
-                                            </label>
-                                            <% }) %>
-                                                <% } else { %>
-                                                    <p>No colors available</p>
-                                                    <% } %>
-                                </div>
+                                <% if (product) { %>
+                                    <h1>
+                                        <%= product.name %>
+                                    </h1>
+                                    <div>
+                                        <img src="<%= product.image %>" alt="<%= product.name %>">
+                                    </div>
+                                    <div>
+
+                                        <div class="product__color__select" onclick="event.stopPropagation();">
+                                            <% const uniqueColors=[...new Set(product.variants.map(variant=>
+                                                variant.color))];
+                                                %>
+                                                <% if (uniqueColors.length> 0) { %>
+                                                    <% uniqueColors.forEach(color=> { %>
+                                                        <label for="pc-<%= color %>" style="padding-right: 15px;
+                                                    margin-left: 5px;">
+                                                            <input type="radio" name="color" id="pc-<%= color %>"
+                                                                value="<%= color %>">
+                                                            <% if (color==="Multi" ) { %>
+                                                                <span style="
+                                                            font-weight: 600;
+                                                            top: 0px;
+                                                            padding: 0px 10px; /* Padding left and right */
+                                                            font-size: 18px;
+                                                            position: relative; /* Add positioning */
+                                                            background: linear-gradient(to right, #f32170, #ff6b08, #cf23cf, #eedd44);
+                                                            -webkit-text-fill-color: transparent;
+                                                            -webkit-background-clip: text;
+                                                            right: 30px; /* Now this works */
+                                                        ">
+                                                                    Multi
+                                                                </span>
+
+                                                                <% } else { %>
+                                                                    <span
+                                                                        style="background-color: <%= color %>; border-radius: 50%; width: 20px; height: 20px; display: inline-block; border: 1px solid black;right:90px"></span>
+                                                                    <% } %>
+                                                        </label>
+                                                        <% }); %>
+                                                            <% } else { %>
+                                                                <p>No colors available</p>
+                                                                <% } %>
+                                        </div>
+                                    </div>
+                                    <% } else { %>
+                                        <p>Product not found.</p>
+                                        <% } %>
                             </div>
                         </div>
                     </div>
@@ -222,7 +246,7 @@
     </section>
 
     <%- include("../../views/partials/user/footershopdetails") %>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <script>
             // Global variables to track selection state
@@ -301,11 +325,13 @@
                     // Update color swatch highlighting
                     updateColorSwatchHighlight(this);
 
+
                     // Fetch stock information for the selected size and color
                     updateStockDisplay(); // This will now fetch stock regardless of quantity
 
                     // Update the Add to Cart button state
                     updateAddToCartButton();
+
                 });
             });
 
@@ -351,13 +377,18 @@
                 stockDisplay.style.color = 'gray';
             }
             function updateColorSwatchHighlight(selectedInput) {
+                console.log('Updating color swatch highlight for:', selectedInput.value);
+                // Remove highlight from all swatches
                 removeColorHighlight();
+
+                // Find the swatch for the selected input
                 const swatch = selectedInput.parentElement.querySelector('.color-swatch');
+
                 if (swatch) {
-                    swatch.classList.add('selected');
+                    console.log('Highlighting swatch:', swatch);
+                    swatch.classList.add('selected'); // Add highlight to the selected swatch
                 }
             }
-
             function removeColorHighlight() {
                 document.querySelectorAll('.color-swatch').forEach(swatch => {
                     swatch.classList.remove('selected');
@@ -472,7 +503,7 @@
                                 stockDisplay.style.color = 'gray';
                             }
                         } else {
-                          Swal.fire({
+                            Swal.fire({
                                 icon: 'warning', // Type of alert (options: success, error, warning, info, question)
                                 title: 'Incomplete Selection',
                                 text: 'Please select both size and color.',
@@ -529,13 +560,13 @@
                             icon: 'success',
                             title: 'Success!',
                             text: 'Item added to cart successfully!',
-             
+
                         }).then((result) => {
                             // if (result.isConfirmed) {
                             location.reload();
                             // }
                         });
-                        
+
                     } else {
                         Swal.fire({
                             icon: 'error',
@@ -587,7 +618,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                              Swal.fire({
+                            Swal.fire({
                                 icon: 'success',
                                 title: 'Success!',
                                 text: 'Product added to cart successfully!',
@@ -597,7 +628,7 @@
                                 // },
                             });
                         } else {
-                           Swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: 'Failed',
                                 text: data.message || 'Failed to add product to cart.',
@@ -610,7 +641,7 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                       Swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: 'Error',
                             text: 'An error occurred while adding the product to the cart.',
@@ -620,10 +651,10 @@
                             },
                         });
                     }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = data.redirectTo; // Redirect to login
-                    }
-                });
+                        if (result.isConfirmed) {
+                            window.location.href = data.redirectTo; // Redirect to login
+                        }
+                    });
             }
 
             // Initialize magnifier functionality if needed
@@ -655,5 +686,26 @@
                     });
                 });
             });
+            document.addEventListener('DOMContentLoaded', () => {
+                    const productItems = document.querySelectorAll('.product__item__pic');
+
+                    productItems.forEach(item => {
+                        const defaultBg = item.getAttribute('data-setbg');
+                        const hoverBg = item.getAttribute('data-hoverbg');
+
+                        // Set initial background image
+                        item.style.backgroundImage = `url(${defaultBg})`;
+
+                        // Change background image on hover
+                        item.addEventListener('mouseover', () => {
+                            item.style.backgroundImage = `url(${hoverBg})`;
+                        });
+
+                        // Revert back to original image on mouse out
+                        item.addEventListener('mouseout', () => {
+                            item.style.backgroundImage = `url(${defaultBg})`;
+                        });
+                    });
+                });
 
         </script>

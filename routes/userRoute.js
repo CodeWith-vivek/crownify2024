@@ -91,6 +91,8 @@ router.get("/shop", userController.loadShopPage);
 
 router.get("/product/:id", userController.loadProductDetails);
 
+
+
 // user profile management
 
 router.get("/forget-password",preventCache,restrictLoggedInUser,profileController.getForgotPassPage)
@@ -112,6 +114,9 @@ router.post("/update-user",userAuth,profileController.updateProfileDetails);
 router.post("/validate-current-password",userAuth,profileController.validatCurrentPassword);
 router.post("/cancel-item",userAuth,orderController.cancelOrder)
 router.post("/return-item",userAuth,orderController.returnItem)
+router.get("/orders", userAuth, profileController.loadUserOrder);
+router.get("/Address",userAuth,profileController.loadUserAddress)
+router.get("/AccountDetails",userAuth,profileController.loadUserAccountDetails)
 
 
 
@@ -120,7 +125,7 @@ router.post("/return-item",userAuth,orderController.returnItem)
 
 router.get("/cart",cartController.loadCartPage)
 router.get("/product/:id/stock", cartController.getVarientQuantity);
-router.get("/product/:id/overall-stock", cartController.getOverallStock);
+
 router.post("/cart/add",cartController.addToCart);
 router.delete("/cart/remove", cartController.deleteFromCart);
 router.post("/cart/update",cartController.updateCart)
@@ -130,6 +135,7 @@ router.post('/checkout/validate',userAuth,checkoutController.validateQuantity)
 //order
 
 router.post("/checkout",userAuth,orderController.placeOrder)
+
 
 
 

@@ -212,3 +212,133 @@
 
     // Additional event listeners and functions can be added here as needed
 </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const changePictureBtn = document.querySelector(".change-picture-btn");
+        const avatarUpload = document.getElementById("avatar-upload");
+        const cropModal = document.getElementById("crop-modal");
+        const cropImage = document.getElementById("crop-image");
+        const cropSaveBtn = document.getElementById("crop-save-btn");
+        const cropCancelBtn = document.getElementById("crop-cancel-btn");
+        const closeModalBtn = document.getElementById("close-modal-btn");
+        let cropper;
+
+        // Trigger file upload dialog
+        changePictureBtn.addEventListener("click", () => {
+            avatarUpload.click();
+        });
+
+        // Initialize Cropper.js on image select
+        avatarUpload.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (!file.type.startsWith('image/')) {
+                    alert('Please upload an image file');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    cropImage.src = event.target.result;
+                    cropModal.style.display = "block";
+
+                    // Destroy existing cropper instance if it exists
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+
+                    // Initialize new cropper
+                    cropper = new Cropper(cropImage, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        dragMode: 'move',
+                        autoCropArea: 0.8,
+                        restore: false,
+                        guides: true,
+                        center: true,
+                        highlight: false,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true,
+                        toggleDragModeOnDblclick: false,
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Save cropped image
+        cropSaveBtn.addEventListener("click", async () => {
+            try {
+                if (!cropper) {
+                    throw new Error('No image to crop');
+                }
+
+                const canvas = cropper.getCroppedCanvas({
+                    width: 300,  // Set desired dimensions
+                    height: 300,
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high',
+                });
+
+                const blob = await new Promise(resolve => {
+                    canvas.toBlob(resolve, 'image/jpeg', 0.8);
+                });
+
+                const formData = new FormData();
+                formData.append('avatar', blob, 'avatar.jpg');
+
+                const response = await fetch('/upload-avatar', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update avatar preview
+                    const avatar = document.querySelector('.avatar');
+                    avatar.style.backgroundImage = `url(${data.avatarUrl}?${new Date().getTime()})`;
+                    avatar.textContent = ''; // Clear any initial letter
+
+                    // Close modal and cleanup
+                    closeModal();
+
+                    // Show success message
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Profile picture updated successfully',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    });
+                } else {
+                    throw new Error(data.message || 'Failed to upload avatar');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to update profile picture. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+
+        // Function to close modal and cleanup
+        function closeModal() {
+            cropModal.style.display = "none";
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            cropImage.src = '';
+            avatarUpload.value = ''; // Reset file input
+        }
+
+        // Close modal handlers
+        cropCancelBtn.addEventListener("click", closeModal);
+        closeModalBtn.addEventListener("click", closeModal);
+    });
+</script>

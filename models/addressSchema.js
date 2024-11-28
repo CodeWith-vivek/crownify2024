@@ -5,12 +5,12 @@ const addressSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User ", // Removed extra space
+      ref: "User ", 
       required: true,
     },
     addressType: {
       type: String,
-      enum: ["Home", "Office", "Other"], // Specify common address types
+      enum: ["Home", "Office", "Other"], 
       required: true,
     },
     fullName: {
@@ -62,7 +62,7 @@ const addressSchema = new Schema(
       default: false,
     },
   },
-  { timestamps: true } // Adds createdAt and updatedAt timestamps
+  { timestamps: true } 
 );
 
 const Address = mongoose.model("Address", addressSchema);

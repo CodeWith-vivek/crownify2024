@@ -1,146 +1,148 @@
 <%- include("../../views/partials/user/headershop") %>
 
-    <section class="breadcrumb-option">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="breadcrumb__text">
-                        <h4>Check Out</h4>
-                        <div class="breadcrumb__links">
-                            <a href="./index.html">Home</a>
-                            <a href="./shop.html">Shop</a>
-                            <span>Check Out</span>
-                        </div>
+<section class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb__text">
+                    <h4>Check Out</h4>
+                    <div class="breadcrumb__links">
+                        <a href="./index.html">Home</a>
+                        <a href="./shop.html">Shop</a>
+                        <span>Check Out</span>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
- 
-    <section class="checkout spad">
-        <div class="container">
-            <div class="checkout__form">
+    </div>
+</section>
+
+<section class="checkout spad">
+    <div class="container">
+        <div class="checkout__form">
             <form id="checkoutForm" action="/checkout" method="POST">
-                    <div class="row">
-                        <div class="col-lg-7 col-md-5">
-                            <% addresses.forEach(address=> { %>
-                                <div class="card mb-3 mb-lg-3">
-                                    <div class="card-header d-flex justify-content-between align-items-center"
-                                        style="background-color: #cf8484;">
-                                        <h5 class="mb-0">Address</h5>
-                                        <% if (address.isPrimary) { %>
-                                            <span class="badge bg-success"
-                                                style="margin-right: 23px; color:white; background-color: #703535 !important;">Primary</span>
-                                            <% } %>
-                                    </div>
-                                    <div class="card-body">
-                                        <address>
-                                            <%= address.fullName %><br>
-                                                <%= address.flatHouseCompany %>, <%= address.areaStreet %><br>
-                                                        <%= address.city %>, <%= address.state %> - <%= address.postalCode
-                                                                    %><br>
-                                                                    <%= address.mobileNumber %><br>
-                                        </address>
-                                        <div class="d-flex justify-content-between">
-                                            <% if (!address.isPrimary) { %>
-                                                <a href="#" class="btn-small btn-link"
-                                                    onclick="confirmPrimaryAddress(event, '<%= address._id %>')">
-                                                    Set as Primary
-                                                </a>
+                <div class="row">
+                    <div class="col-lg-7 col-md-5">
+                        <% if (addresses.length===0) { %>
+                            <h2>No address added yet.</h2>
+                            <% } else { %>
+                                <% addresses.forEach(address=> { %>
+                                    <div class="card mb-3 mb-lg-3">
+                                        <div class="card-header d-flex justify-content-between align-items-center"
+                                            style="background-color: #cf8484;">
+                                            <h5 class="mb-0">Address</h5>
+                                            <% if (address.isPrimary) { %>
+                                                <span class="badge bg-success"
+                                                    style="margin-right: 23px; color:white; background-color: #703535 !important;">Primary</span>
                                                 <% } %>
                                         </div>
+                                        <div class="card-body">
+                                            <address>
+                                                <%= address.fullName %><br>
+                                                    <%= address.flatHouseCompany %>, <%= address.areaStreet %><br>
+                                                            <%= address.city %>, <%= address.state %> - <%=
+                                                                        address.postalCode %><br>
+                                                                        <%= address.mobileNumber %><br>
+                                            </address>
+                                            <div class="d-flex justify-content-between">
+                                                <% if (!address.isPrimary) { %>
+                                                    <a href="#" class="btn-small btn-link"
+                                                        onclick="confirmPrimaryAddress(event, '<%= address._id %>')">
+                                                        Set as Primary
+                                                    </a>
+                                                    <% } %>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <% }); %>
-                                    <button class="btn btn-primary"
-                                        style="width: 150px; background-color: #703535; margin-left: 20px;">Add
-                                        Address</button>
-                        </div>
-                        <div class="col-lg-5 col-md-7">
-                            <div class="checkout__order">
-                                <h4 class="order__title">Your order</h4>
-                                <table class="table">
-                                    <thead>
+                                    <% }); %>
+                                        <% } %>
+                                            <!-- Common Add Address Button -->
+                                            <a class="btn btn-primary"
+                                                style="width: 150px; background-color: #703535; margin-left: 20px; color: rgb(251, 251, 251);"
+                                                href="/user/addAddress">Add Address</a>
+                    </div>
+                    <div class="col-lg-5 col-md-7">
+                        <div class="checkout__order">
+                            <h4 class="order__title">Your order</h4>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% products.forEach(product=> { %>
                                         <tr>
-                                            <th>Product</th>
-                                            <th>Quantity</th>
-                                            <th>Price</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% products.forEach(product=> { %>
-                                            <tr>
-                                                <td>
-                                                    <div class="product-info">
-                                                        <div class="product-image">
-                                                            <img src="/uploads/product-image/<%= product.productImage %>"
-                                                                style="width: 50px; height: 50px; margin-right: 10px;">
-                                                        </div>
-                                                        <div class="product-details product-details-small">
-                                                            <p>
-                                                                <b>
-                                                                    <%= product.productName %>
-                                                                </b>
-                                                            </p>
-                                                            <p>
-                                                                <%= product.productBrand %>
-                                                            </p>
-                                                            <p>
-                                                                <%= product.size %>
-                                                            </p>
-                                                            <p>
-                                                                <%= product.color %>
-                                                            </p>
-                                                        </div>
+                                            <td>
+                                                <div class="product-info">
+                                                    <div class="product-image">
+                                                        <img src="/uploads/product-image/<%= product.productImage %>"
+                                                            style="width: 50px; height: 50px; margin-right: 10px;">
                                                     </div>
-                                                </td>
-                                                <td>
-                                                    <input type="text" name="quantities[]" value="<%= product.quantity %>"
-                                                        readonly
-                                                        style="width: 50px; border: none; background: transparent;">
-                                                    <input type="hidden" name="products[]" value="<%= product.productId %>">
-                                            
-                                                    <input type="hidden" name="sizes[]" value="<%= product.size %>"> <!-- Add this line for size -->
-                                                    <input type="hidden" name="colors[]" value="<%= product.color %>"> <!-- Add this line for color -->
-                                                </td>
-                                                <td>$
-                                                    <%= product.itemTotal %>
-                                                </td>
-                                            </tr>
-                                            <% }); %>
-                                    </tbody>
-                                </table>
-                                <ul class="checkout__total__all">
-                                    <li>Subtotal <span>$<%= subtotal.toFixed(2) %></span>
-                                        <input type="hidden" name="subtotal" value="<%= subtotal %>">
-                                    </li>
-                                    <li>Shipping <span style="color: gray; font-size: 14px;">$<%= shipping.toFixed(2) %>
-                                                </span>
-                                        <input type="hidden" name="shipping" value="<%= shipping %>">
-                                    </li>
-                                    <li>Total <span>$<%= total.toFixed(2) %></span>
-                                        <input type="hidden" name="total" value="<%= total %>">
-                                    </li>
-                                </ul>
-                                <h4 class="order__title">Payment Method</h4>
-                                <div class="checkout__input__checkbox">
-                                    <label for="payment">
-                                        Cash On Delivery
-                                        <input type="radio" id="payment" name="paymentMethod" value="COD" >
-                                        <span class="checkmark"></span>
-                                    </label>
-                                </div>
+                                                    <div class="product-details product-details-small">
+                                                        <p><b>
+                                                                <%= product.productName %>
+                                                            </b></p>
+                                                        <p>
+                                                            <%= product.productBrand %>
+                                                        </p>
+                                                        <p>
+                                                            <%= product.size %>
+                                                        </p>
+                                                        <p>
+                                                            <%= product.color %>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <input type="text" name="quantities[]" value="<%= product.quantity %>"
+                                                    readonly
+                                                    style="width: 50px; border: none; background: transparent;">
+                                                <input type="hidden" name="products[]" value="<%= product.productId %>">
+                                                <input type="hidden" name="sizes[]" value="<%= product.size %>">
+                                                <input type="hidden" name="colors[]" value="<%= product.color %>">
+                                            </td>
+                                            <td>₹<%= product.itemTotal %>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                </tbody>
+                            </table>
+                            <ul class="checkout__total__all">
+                                <li>Subtotal <span>₹<%= subtotal.toFixed(2) %></span>
+                                    <input type="hidden" name="subtotal" value="<%= subtotal %>">
+                                </li>
+                                <li>Shipping <span style="color: gray; font-size: 14px;">₹<%= shipping.toFixed(2) %>
+                                            </span>
+                                    <input type="hidden" name="shipping" value="<%= shipping %>">
+                                </li>
+                                <li>Total <span>₹<%= total.toFixed(2) %></span>
+                                    <input type="hidden" name="total" value="<%= total %>">
+                                </li>
+                            </ul>
+                            <h4 class="order__title">Payment Method</h4>
+                            <div class="checkout__input__checkbox">
+                                <label for="payment">
+                                    Cash On Delivery
+                                    <input type="radio" id="payment" name="paymentMethod" value="COD">
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                            <% if (addresses.length> 0) { %>
                                 <input type="hidden" name="primaryAddressId"
                                     value="<%= addresses.find(address => address.isPrimary)._id %>">
-                                <button type="submit" class="site-btn">Proceed to
-                                    Checkout</button>
-                            </div>
+                                <% } %>
+                                    <button type="submit" class="site-btn">Proceed to Checkout</button>
                         </div>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
-    </section>
+    </div>
+</section>
     <%- include("../../views/partials/user/footershop") %>
     <script>
      

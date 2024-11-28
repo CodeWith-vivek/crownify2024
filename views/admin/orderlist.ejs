@@ -1,0 +1,294 @@
+<%- include("../../views/partials/admin/header2") %>
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Order List</h2>
+        </div>
+        <div>
+            <!-- <form method="GET" action="/admin/orderlist"> -->
+                <input type="text" name="search" placeholder="Search order ID" class="form-control bg-white"
+                    value="<%= search || '' %>" style="color: black;">
+            <!-- </form> -->
+        </div>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3">
+                <div class="col-lg-4 col-md-6 me-auto">
+                    <!-- <form method="GET" action="/admin/orderlist">
+                        <input type="text" name="search" placeholder="Search..." class="form-control"
+                            value="<%= search || '' %>" />
+                    </form> -->
+                </div>
+               
+                <div class="col-lg-2 col-6 col-md-3">
+                    <!-- <select class="form-select">
+                        <option>Show 20</option>
+                        <option>Show 30</option>
+                        <option>Show 40</option>
+                    </select> -->
+                </div>
+                <div class="col-lg-2 col-6 col-md-3">
+                    <select class="form-select">
+                        <option>Status</option>
+                        <option>Returned </option>
+                        <option>canceled</option>
+                        <option>Delivered</option>
+                        <option>Placed</option>
+                        <option>Shipped</option>
+                        <option>Return request</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Product</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Date</th>
+                            <th scope="col" class="text-end"></th>
+                            <th scope="col" class="text-start">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.forEach((order)=> { %>
+                            <% order.items.forEach((item)=> { %>
+                                <tr>
+                                    <td>
+                                        <%= item.productId.toString().substring(23, 27) %>
+                                    </td>
+                                    <td><b>
+                                            <%= order.userId.name %>
+                                        </b></td>
+                                    <td>
+                                        <%= order.userId.email %>
+                                    </td>
+                                    <td>
+                                        <img src="/uploads/product-image/<%= item.productImage %>" alt="Product"
+                                            style="width: 50px; height: 50px; border-radius: 5px;" />
+                                        <br>
+                                        <small><b>Product:</b>
+                                            <%= item.productName %>
+                                        </small><br>
+                                        <small><b>price:</b>
+                                            <%= item.salePrice || "N/A" %>
+                                        </small><br>
+                                        <small><b>Size:</b>
+                                            <%= item.variant.size || "N/A" %>
+                                        </small><br>
+                                        <small><b>Color:</b>
+                                            <%= item.variant.color || "N/A" %>
+                                        </small><br>
+                                        <small><b>Qty:</b>
+                                            <%= item.quantity || "N/A" %>
+                                        </small>
+                                    </td>
+                                    <td>₹<%= item.totalPrice %>
+                                    </td>
+                                    <td>
+                                        <span id="oldStatus" class="badge rounded-pill status-badge alert-<%= 
+                                            item.orderStatus === " Delivered" ? "success" : item.orderStatus==="Shipped" ? "info" :
+                                            item.orderStatus==="Returned" ? "danger" : item.orderStatus==="canceled" ? "secondary" : "warning" %>" >
+                                            <%= item.orderStatus %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <%= new Date(order.orderedAt).toLocaleDateString() %>
+                                    </td>
+                                    <td class="text-end">
+                                     
+                                            <a href="/admin/orderDetails/<%= order._id %>?itemId=<%= item._id %>" class="btn btn-md rounded font-sm"> Details</a>
+                                            <!-- <a href="/admin/orderDetails" class="btn btn-md rounded font-sm">Details</a> -->
+                                        
+                                        <td>
+                                            <div class="dropdown">
+                                                <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                    Update Status
+                                                </a>
+                                                <div class="dropdown-menu">
+                                                    <form id="statusForm" action="/admin/update-status" method="POST">
+                                                        <input type="hidden" name="orderId" value="<%= order._id %>" />
+                                                        <input type="hidden" name="productSize" value="<%= item.variant.size %>" />
+                                                        <input type="hidden" name="productColor" value="<%= item.variant.color %>" />
+                                                    
+                                                        <button type="submit" name="newStatus" value="Placed" class="dropdown-item">Placed</button>
+                                                        <button type="submit" name="newStatus" value="Shipped" class="dropdown-item">Shipped</button>
+                                                        <button type="submit" name="newStatus" value="Delivered" class="dropdown-item">Delivered</button>
+                                                        <button type="submit" name="newStatus" value="Returned" class="dropdown-item">Returned</button>
+                                                        <button type="submit" name="newStatus" value="canceled" class="dropdown-item">canceled</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                                    <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+   
+    <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                <% if (totalPages> 1) { %>
+    
+                    <!-- Previous Arrow -->
+                    <% if (currentPage> 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %>">&laquo;</a>
+                        </li>
+                        <% } %>
+    
+                            <!-- First Page -->
+                            <li class="page-item <%= (currentPage === 1) ? 'active' : '' %>">
+                                <a class="page-link" href="?page=1">01</a>
+                            </li>
+    
+                            <!-- Ellipsis after First Page -->
+                            <% if (currentPage> 4) { %>
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                                <% } %>
+    
+                                    <!-- Pages around the current page -->
+                                    <% for (let i=Math.max(2, currentPage - 1); i <=Math.min(totalPages - 1, currentPage +
+                                        1); i++) { %>
+                                        <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+                                            <a class="page-link" href="?page=<%= i %>">
+                                                <%= i.toString().padStart(2, '0' ) %>
+                                            </a>
+                                        </li>
+                                        <% } %>
+    
+                                            <!-- Ellipsis before Last Page -->
+                                            <% if (currentPage < totalPages - 3) { %>
+                                                <li class="page-item disabled"><span class="page-link">...</span>
+                                                </li>
+                                                <% } %>
+    
+                                                    <!-- Last Page -->
+                                                    <% if (totalPages> 1) { %>
+                                                        <li
+                                                            class="page-item <%= (currentPage === totalPages) ? 'active' : '' %>">
+                                                            <a class="page-link" href="?page=<%= totalPages %>">
+                                                                <%= totalPages.toString().padStart(2, '0' ) %>
+                                                            </a>
+                                                        </li>
+                                                        <% } %>
+    
+                                                            <!-- Next Arrow -->
+                                                            <% if (currentPage < totalPages) { %>
+                                                                <li class="page-item">
+                                                                    <a class="page-link"
+                                                                        href="?page=<%= parseInt(currentPage) + 1 %>">&raquo;</a>
+                                                                </li>
+                                                                <% } %>
+    
+                                                                    <% } %>
+            </ul>
+        </nav>
+    </div>
+
+</section>
+
+
+<%- include("../../views/partials/admin/footer2") %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  
+   document.addEventListener("DOMContentLoaded", () => {
+        const dropdownForms = document.querySelectorAll(".dropdown-menu form");
+
+        dropdownForms.forEach((form) => {
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const newStatus = event.submitter.value; // Use event.submitter to get the clicked button's value
+                const orderId = form.querySelector('input[name="orderId"]').value;
+                const productSize = form.querySelector('input[name="productSize"]').value;
+                const productColor = form.querySelector('input[name="productColor"]').value;
+
+                // SweetAlert confirmation
+                Swal.fire({
+                    icon: 'question',
+                    title: 'Are you sure?',
+                    text: `Do you want to update the status to "${newStatus}"?`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, update it!',
+                    cancelButtonText: 'No, cancel',
+                    reverseButtons: true
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            const response = await fetch("/admin/update-status", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({
+                                    orderId,
+                                    productSize,
+                                    productColor,
+                                    newStatus
+                                }),
+                            });
+
+                            const result = await response.json();
+
+                            if (result.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    text: 'Order status updated successfully!',
+                                });
+                                // Update UI
+                                const statusBadge = form.closest("tr").querySelector(".status-badge");
+                                if (statusBadge) {
+                                    statusBadge.textContent = newStatus;
+                                    statusBadge.className = `badge rounded-pill status-badge ${newStatus === "Delivered" ? "alert-success" :
+                                            newStatus === "Shipped" ? "alert-info" :
+                                                newStatus === "Canceled" ? "alert-danger" :
+                                                    "alert-warning"
+                                        }`;
+                                }
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Failed to Update Status',
+                                    text: result.message,
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        } catch (error) {
+                            console.error("Error updating status:", error);
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'An error occurred while updating the status. Please try again.',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    } else {
+                        console.log('Status update canceled.');
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+
+
+  

@@ -278,7 +278,7 @@
                                     text: result.message || 'Address updated successfully',
                                     icon: 'success',
                                     confirmButtonText: 'OK'
-                                }).then(() => window.location.href = '/profile#address');
+                                }).then(() => window.location.href = '/Address');
                             } else {
                                 const error = await response.json();
                                 Swal.fire({

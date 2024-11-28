@@ -1,0 +1,75 @@
+<div class="container-fluid crownify4 d-flex justify-content-center align-items-center">
+    <img src="/assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+
+</div>
+<script src="assets/js/vendor/jquery-3.3.1.min.js"></script>
+<script src="assets/js/vendor/modernizr-3.6.0.min.js"></script>
+<script src="assets/js/vendor/jquery.cookie.js"></script>
+<script src="assets/js/vendor/wow.min.js"></script>
+<script src="assets/js/vendor/instagram-feed.js"></script>
+<!-- Including Javascript -->
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/plugins.js"></script>
+<script src="assets/js/popper.min.js"></script>
+<script src="assets/js/lazysizes.js"></script>
+<script src="assets/js/main.js"></script>
+<!--Instagram Js-->
+<script src="assets/js/jquery2.min.js"></script>
+<script src="assets/js/popper2.js"></script>
+<script src="assets/js/bootstrap2.min.js"></script>
+<script src="assets/js/main2.js"></script>
+
+
+<script>
+    var userFeed = new Instafeed({
+        get: 'user',
+        userId: '8983165779',
+        accessToken: '8983165779.1677ed0.f3242e4ff60b428a81c25d118e02f44f',
+        resolution: 'low_resolution',
+        sortBy: 'most-recent',
+        limit: 8,
+        template: '<div class="insta-img"><a href="{{link}}" target="_blank"><img src="{{image}}" /></a></div>',
+    });
+    userFeed.run();
+</script>
+<!--End Instagram Js-->
+<!--For Newsletter Popup-->
+<script>
+    jQuery(document).ready(function () {
+        jQuery('.closepopup').on('click', function () {
+            jQuery('#popup-container').fadeOut();
+            jQuery('#modalOverly').fadeOut();
+        });
+
+        var visits = jQuery.cookie('visits') || 0;
+        visits++;
+        jQuery.cookie('visits', visits, { expires: 1, path: '/' });
+        console.debug(jQuery.cookie('visits'));
+        if (jQuery.cookie('visits') > 1) {
+            jQuery('#modalOverly').hide();
+            jQuery('#popup-container').hide();
+        } else {
+            var pageHeight = jQuery(document).height();
+            jQuery('<div id="modalOverly"></div>').insertBefore('body');
+            jQuery('#modalOverly').css("height", pageHeight);
+            jQuery('#popup-container').show();
+        }
+        if (jQuery.cookie('noShowWelcome')) { jQuery('#popup-container').hide(); jQuery('#active-popup').hide(); }
+    });
+
+    jQuery(document).mouseup(function (e) {
+        var container = jQuery('#popup-container');
+        if (!container.is(e.target) && container.has(e.target).length === 0) {
+            container.fadeOut();
+            jQuery('#modalOverly').fadeIn(200);
+            jQuery('#modalOverly').hide();
+        }
+    });
+</script>
+<!--End For Newsletter Popup-->
+</div>
+</body>
+
+<!-- belle/home12-category.html   11 Nov 2019 12:33:20 GMT -->
+
+</html>

@@ -67,7 +67,7 @@
                                                         <h6>
                                                             <%= item.product.productName %>
                                                         </h6>
-                                                        <p>Price: <%= item.product.salePrice %>
+                                                        <p>Price: <b><%= item.product.salePrice %></b>
                                                         </p>
                                                     </div>
                                                 </td>
@@ -145,19 +145,20 @@
     padding-bottom: 28px;">
                     <div class="cart-summary" style="  background-color: #f3efe9; padding: 20px 20px 20px 20px">
                         <div class="summary-card">
-                            <h6>CART TOTAL</h6>
-                            <ul class="list-unstyled">
-                                <li class="summary-row">
+                            <h6 class="text-center">CART TOTAL</h6>
+                  
+                            <ul class="list-unstyled col-12">
+                                <li class="summary-row d-flex justify-content-between">
                                     <span>Subtotal</span>
-                                    <span>₹<%= subtotal.toFixed(2) %></span>
+                                    <span style="color: #f94242;">₹<%= subtotal.toFixed(2) %></span>
                                 </li>
-                                <li class="summary-row">
+                                <li class="summary-row d-flex justify-content-between">
                                     <span>Shipping</span>
                                     <span>₹<%= shippingCharge.toFixed(2) %></span>
                                 </li>
-                                <li class="summary-row total">
-                                    <strong>Total</strong>
-                                    <strong>₹<%= total.toFixed(2) %></strong>
+                                <li class="summary-row total d-flex justify-content-between">
+                                    <span>Total</span>
+                                    <strong style="color: #f94242;">₹<%= total.toFixed(2) %></strong>
                                 </li>
                             </ul>
                             <a href="/checkout" class="btn btn-primary w-100 " style="border-radius: 0px;">Proceed to
@@ -377,22 +378,7 @@
                     }
                 }
 
-                function updateStockStatus(productId, size, color, currentQuantity) {
-                    const stockStatusElement = document.querySelector(`.stock-status[data-product -id="${productId}"][data-size="${size}"][data-color="${color}"]`);
-                    const maxStock = parseInt(stockStatusElement.getAttribute('data-max-stock'));
-                    const remainingStock = maxStock - currentQuantity;
-
-                    if (remainingStock <= 0) {
-                        stockStatusElement.textContent = 'Out of Stock';
-                        stockStatusElement.style.color = 'rgb(237, 50, 50)';
-                    } else if (remainingStock <= 10) {
-                        stockStatusElement.textContent = `${remainingStock} left`;
-                        stockStatusElement.style.color = 'rgb(255, 165, 0)';
-                    } else {
-                        stockStatusElement.textContent = 'In Stock';
-                        stockStatusElement.style.color = 'rgb(32, 167, 32)';
-                    }
-                }
+              
             });
 
             document.addEventListener('DOMContentLoaded', () => {

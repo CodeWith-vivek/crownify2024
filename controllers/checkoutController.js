@@ -27,7 +27,7 @@ const loadCheckout = async (req, res) => {
       return res.redirect("/cart"); // Redirect if all items have zero quantity
     }
 
-    console.log("itemssss", validCartItems);
+
 
     // Calculate subtotal
     const subtotal = validCartItems.reduce((total, item) => {
@@ -37,14 +37,14 @@ const loadCheckout = async (req, res) => {
       );
     }, 0);
 
-    console.log("Subtotal:", subtotal);
+
 
     // Shipping cost
     const shipping = 40;
 
     // Calculate total
     const total = subtotal + shipping;
-    console.log("Total:", total);
+
 
     // Prepare products array for rendering
     const products = validCartItems.map((item) => {
@@ -64,8 +64,7 @@ const loadCheckout = async (req, res) => {
       };
     });
 
-    console.log("Products:", products);
-    console.log("wooooooh",userData);
+
     const user=await User.findOne({_id:userId})
   
     
@@ -111,8 +110,7 @@ const validateQuantity = async (req, res) => {
       const currentProduct = await Product.findById(item.productId).lean();
 
       // Log the current product and cart item
-      console.log("Current Product:", currentProduct);
-      console.log("Cart Item:", item);
+
 
       // Validate product existence
       if (!currentProduct) {
@@ -125,7 +123,7 @@ const validateQuantity = async (req, res) => {
 
       // Find the specific variant
       const cartItemVariant = item.variant;
-      console.log("Cart Item Variant:", cartItemVariant);
+     
 
       // Find the specific variant using the cart item's variant details
       const variant = currentProduct.variants.find(
@@ -134,10 +132,7 @@ const validateQuantity = async (req, res) => {
           v.size.toLowerCase() === cartItemVariant.size.toLowerCase()
       );
 
-      console.log("Found Variant:", variant);
 
-      // Log the found variant
-      console.log("Found Variant:", variant);
 
       // Comprehensive stock validation
       if (!variant) {

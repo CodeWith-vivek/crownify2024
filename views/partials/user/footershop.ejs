@@ -83,20 +83,6 @@
     </div>
 </footer>
 <span id="site-scroll"><i class="icon anm anm-angle-up-r"></i></span>
-<script>
-    $(document).ready(function () {
-            $('img.zoom').imageZoom({
-                zoomRange: [1, 3],
-                zoomType: 'standard',
-                lensOpacity: 0.5,
-                lensShape: 'round',
-                zoomWindowWidth: 400,
-                zoomWindowHeight: 400,
-                zoomWindowOffsetX: 10,
-                zoomWindowOffsetY: 0
-            });
-        });
-</script>
 
 
 <!-- Including Jquery -->
@@ -129,52 +115,10 @@
 <script src="/assets/usershop/js/main.js"></script>
 
 
-<script>
-    var userFeed = new Instafeed({
-        get: 'user',
-        userId: '8983165779',
-        accessToken: '8983165779.1677ed0.f3242e4ff60b428a81c25d118e02f44f',
-        resolution: 'low_resolution',
-        sortBy: 'most-recent',
-        limit: 8,
-        template: '<div class="insta-img"><a href="{{link}}" target="_blank"><img src="{{image}}" /></a></div>',
-    });
-    userFeed.run();
-</script>
+
 <!--End Instagram Js-->
 <!--For Newsletter Popup-->
-<script>
-    jQuery(document).ready(function () {
-        jQuery('.closepopup').on('click', function () {
-            jQuery('#popup-container').fadeOut();
-            jQuery('#modalOverly').fadeOut();
-        });
 
-        var visits = jQuery.cookie('visits') || 0;
-        visits++;
-        jQuery.cookie('visits', visits, { expires: 1, path: '/' });
-        console.debug(jQuery.cookie('visits'));
-        if (jQuery.cookie('visits') > 1) {
-            jQuery('#modalOverly').hide();
-            jQuery('#popup-container').hide();
-        } else {
-            var pageHeight = jQuery(document).height();
-            jQuery('<div id="modalOverly"></div>').insertBefore('body');
-            jQuery('#modalOverly').css("height", pageHeight);
-            jQuery('#popup-container').show();
-        }
-        if (jQuery.cookie('noShowWelcome')) { jQuery('#popup-container').hide(); jQuery('#active-popup').hide(); }
-    });
-
-    jQuery(document).mouseup(function (e) {
-        var container = jQuery('#popup-container');
-        if (!container.is(e.target) && container.has(e.target).length === 0) {
-            container.fadeOut();
-            jQuery('#modalOverly').fadeIn(200);
-            jQuery('#modalOverly').hide();
-        }
-    });
-</script>
 <!--End For Newsletter Popup-->
 </div>
 </body>

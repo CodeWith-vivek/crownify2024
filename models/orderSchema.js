@@ -9,11 +9,11 @@ const orderSchema = new Schema(
       ref: "User",
       required: true,
     },
-    items: [cartItemSchema], // List of ordered items
+    items: [cartItemSchema], 
     shippingAddress: {
       type: Schema.Types.ObjectId,
       ref: "Address",
-      required: true, // Links to the primary address of the user
+      required: true, 
     },
     paymentMethod: {
       type: String,
@@ -40,17 +40,17 @@ const orderSchema = new Schema(
     },
     grandTotal: {
       type: Number,
-      required: true, // totalAmount - discount + shippingCharge
+      required: true, 
     },
     orderedAt: {
       type: Date,
       default: Date.now,
     },
     deliveredAt: {
-      type: Date, // Updates when the order is marked as delivered
+      type: Date,
     },
     trackingId: {
-      type: String, // Optional field for order tracking
+      type: String, 
     },
   },
   { timestamps: true }

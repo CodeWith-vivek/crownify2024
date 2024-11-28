@@ -47,5 +47,8 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/",nocache(), userRoute);
 app.use("/admin",nocache(),adminRoute)
 const PORT = process.env.PORT || 3000;
+app.use((req,res)=>{
+  res.status(404).render("page-404")
+})
 app.listen(PORT, () => console.log(`server running on ${PORT}`));
 

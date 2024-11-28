@@ -4,16 +4,16 @@ const { Schema } = mongoose;
 const productVariantSchema = new Schema({
   color: {
     type: String,
-    required: true, // Color is now an individual property of each variant
+    required: true, 
   },
   size: {
     type: String,
     enum: ["ONESIZE", "S / M", "M / L", "L / XL", "YOUTH"],
-    required: true, // Size is now an individual property of each variant
+    required: true, 
   },
   quantity: {
     type: Number,
-    required: true, // Quantity for each color-size combination
+    required: true, 
     default: 1,
   },
 });
@@ -51,19 +51,14 @@ const productSchema = new Schema(
     },
     productImage: {
       type: [String],
-      required: true, // Multiple images can still be stored
+      required: true, 
     },
-    variants: [productVariantSchema], // Add an array for storing multiple variants
+    variants: [productVariantSchema], 
     isBlocked: {
       type: Boolean,
       default: false,
     },
-    // status: {
-    //   type: String,
-    //   enum: ["In Stock", "out of stock", "Discontinued"],
-    //   required: true,
-    //   default: "In Stock",
-    // },
+  
   },
   { timestamps: true }
 );

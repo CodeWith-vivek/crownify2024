@@ -19,8 +19,7 @@ const getProductAddPage = async (req, res) => {
 const addProducts = async (req, res) => {
   try {
     const products = req.body;
-    console.log("Request Body:", req.body);
-    console.log("Uploaded Files:", req.files);
+
 
     const productExists = await Product.findOne({
       productName: products.productName,
@@ -54,10 +53,6 @@ const addProducts = async (req, res) => {
     if (!category) {
       return res.status(400).json("Invalid category name");
     }
-
-    console.log("Colors:", products.colors);
-    console.log("Sizes:", products.sizes);
-    console.log("Quantities:", products.quantities);
 
     const variants = [];
 
@@ -110,6 +105,7 @@ const getAllProducts = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 6;
 
+    // Fetch products with search, pagination, and category population
     const productData = await Product.find({
       $or: [
         { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
@@ -119,8 +115,19 @@ const getAllProducts = async (req, res) => {
       .limit(limit)
       .skip((page - 1) * limit)
       .populate("category")
-      .exec();
+      .lean(); // Use lean() to improve performance
 
+    // Calculate total quantity for each product
+    productData.forEach((product) => {
+      product.totalQuantity = product.variants
+        ? product.variants.reduce(
+            (sum, variant) => sum + (variant.quantity || 0),
+            0
+          )
+        : 0; // Default to 0 if variants is undefined
+    });
+
+    // Fetch additional data for filters
     const count = await Product.countDocuments({
       $or: [
         { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
@@ -133,7 +140,7 @@ const getAllProducts = async (req, res) => {
 
     if (category && brand) {
       res.render("products", {
-        data: productData,
+        data: productData, // Send enhanced product data
         currentPage: page,
         totalPages: Math.ceil(count / limit),
         cat: category,
@@ -229,9 +236,7 @@ const editProduct = async (req, res) => {
   try {
     const productId = req.params.id;
     const updates = req.body;
-    console.log("Request Body:", req.body);
-    console.log("Uploaded Files:", req.files);
-
+ 
     // Find the product to update
     const product = await Product.findById(productId);
     if (!product) {

@@ -46,5 +46,9 @@ router.get("/editProduct",adminAuth,productController.getEditProduct)
 router.post("/editProduct/:id",adminAuth,uploads.array("images",4),productController.editProduct)
 router.post("/deleteImage",adminAuth,productController.deleteSingleImage)
 
+//odrder managemenr
 
+router.get("/orderlist",adminAuth,adminController.loadOrderlist)
+router.get("/orderDetails/:id",adminAuth,adminController.loadOrderDetails)
+router.post("/update-status",adminAuth,adminController.updateOrderStatusByAdmin);
 module.exports=router

@@ -520,8 +520,8 @@ mark,
 }
 
 .img-fluid {
-    max-width: 47%;
-    height: auto;
+max-width: 54px;
+    height: 54px;
 }
 
 .img-thumbnail {
@@ -721,8 +721,8 @@ pre code {
 .col-xl-auto {
     position: relative;
     width: 100%;
-    padding-right: 15px;
-    padding-left: 15px;
+    padding-right: 0px;
+        padding-left: 0px;
 }
 
 .col {

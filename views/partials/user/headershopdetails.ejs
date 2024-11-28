@@ -62,45 +62,58 @@
             /* Hide the cursor over the image */
         }
 
-   .color-option {
-    display: inline-block;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    margin: 5px;
-    cursor: pointer;
-    border: 2px solid transparent;
-  }
+        .color-option {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin: 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
 
- 
-.color-swatch{
-     width: 26px; 
-                                                            height: 26px; 
-                                                            border-radius: 50%; 
-                                                            display: inline-block;
-                                                            border: 2px solid #fdfdfd;
-}
-/* .color-swatch.selected {
-  border: 6px solid greenyellow; /* Or any visible style for highlighting */
-} */
-.color-name:active{
 
-background-color: black;
-	
+        .color-swatch {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-block;
+            border: 2px solid #fdfdfd;
+        }
+
+  
+        .color-name:active {
+
+            background-color: black;
+
+        }
+
+        .qtybtn {
+            background-color: transparent;
+            border: none;
+            font-size: 20px;
+            /* Adjust size as needed */
+            cursor: pointer;
+            padding: 5px;
+            color: black;
+            /* Set the text color to black */
+        }
+
+     .color-swatch.selected {
+    border: 2px solid blue; /* Change this to your desired highlight style */
 }
-.qtybtn {
-    background-color: transparent;
-    border: none;
-    font-size: 20px; /* Adjust size as needed */
-    cursor: pointer;
-    padding: 5px;
-    color: black; /* Set the text color to black */
+.product__item__pic {
+    background-size: cover;
+    background-position: center;
+    transition: background-image 0.3s ease; /* Smooth transition */
 }
-.color-swatch:focus{
-    border:2px solid greenyellow
+
+.product__item__pic:hover {
+    /* On hover, change the background-image using the data-hoverbg attribute */
+    background-image: url(""); /* Placeholder, will be updated dynamically */
 }
     </style>
-   
+
 
 
 </head>
@@ -230,7 +243,7 @@ background-color: black;
                                     </li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-wallet"></i> Wallet</a>
                                     </li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-box"></i> Orders</a>
+                                    <li><a class="dropdown-item" href="/orders"><i class="fa-solid fa-box"></i> Orders</a>
                                     </li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-ticket-alt"></i>
                                             Coupons</a></li>
