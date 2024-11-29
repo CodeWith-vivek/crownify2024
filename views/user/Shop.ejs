@@ -19,7 +19,7 @@
     <!-- Breadcrumb Section End -->
     <div class="container-fluid crownify4 d-flex justify-content-center align-items-center">
         <img src="assets/images/logo/Crownify_logo_text.png" class="custom-logo">
-    
+
     </div>
 
 
@@ -29,12 +29,15 @@
             <div class="row">
                 <div class="col-lg-3">
                     <div class="shop__sidebar">
-                   
+
                         <div class="shop__sidebar__search">
                             <form action="/shop" method="GET">
-                                <input type="hidden" name="sort" value="<%= sort || '' %>"> <!-- Preserve current sort option -->
-                                <input type="hidden" name="page" value="<%= currentPage || 1 %>"> <!-- Preserve current page -->
-                            <input type="text" id="searchInput" name="search" placeholder="Search..." value="<%= search || '' %>">
+                                <input type="hidden" name="sort" value="<%= sort || '' %>">
+                                <!-- Preserve current sort option -->
+                                <input type="hidden" name="page" value="<%= currentPage || 1 %>">
+                                <!-- Preserve current page -->
+                                <input type="text" id="searchInput" name="search" placeholder="Search..."
+                                    value="<%= search || '' %>">
                                 <button type="submit"><span class="icon_search"></span></button>
                             </form>
                         </div>
@@ -58,7 +61,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card"style="background: transparent;">
+                                <div class="card" style="background: transparent;">
                                     <div class="card-heading">
                                         <a data-toggle="collapse" data-target="#collapseTwo">Branding</a>
                                     </div>
@@ -84,7 +87,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card"style="background: transparent;">
+                                <div class="card" style="background: transparent;">
                                     <div class="card-heading">
                                         <a data-toggle="collapse" data-target="#collapseThree">Filter Price</a>
                                     </div>
@@ -101,7 +104,7 @@
                                         </div>
                                     </div>
                                 </div>
-                           
+
                                 <div class="card">
                                     <div class="card-heading">
                                         <a data-toggle="collapse" data-target="#collapseFour">Size</a>
@@ -124,7 +127,7 @@
                                                 <label for="YOUTH">YOUTH
                                                     <input type="radio" id="YOUTH">
                                                 </label>
-                                               
+
                                             </div>
                                         </div>
                                     </div>
@@ -182,23 +185,29 @@
                                                 of <%= totalProducts %> results
                                     </p>
                                 </div>
-                                
+
                             </div>
                             <div class="col-lg-6 col-md-6 col-sm-6">
-                           
+
                                 <div class="shop__product__option__right">
-                                  
+
                                     <form action="/shop" method="GET" id="sortForm">
                                         <p>Sort by Price:</p>
                                         <input type="hidden" name="search" value="<%= search || '' %>">
                                         <select name="sort" onchange="document.getElementById('sortForm').submit();">
                                             <option value="" <%=sort==='' ? 'selected' : '' %>>Default</option>
-                                            <option value="priceLowHigh" <%=sort==='priceLowHigh' ? 'selected' : '' %>>Low To High</option>
-                                            <option value="priceHighLow" <%=sort==='priceHighLow' ? 'selected' : '' %>>High To Low</option>
-                                            <option value="alphaAsc" <%=sort==='alphaAsc' ? 'selected' : '' %>>A-Z</option>
-                                            <option value="alphaDesc" <%=sort==='alphaDesc' ? 'selected' : '' %>>Z-A</option>
-                                            <option value="newArrivals" <%=sort==='newArrivals' ? 'selected' : '' %>>New Arrivals</option>
-                                            <option value="popularity" <%=sort==='popularity' ? 'selected' : '' %>>Popularity</option>
+                                            <option value="priceLowHigh" <%=sort==='priceLowHigh' ? 'selected' : '' %>
+                                                >Low To High</option>
+                                            <option value="priceHighLow" <%=sort==='priceHighLow' ? 'selected' : '' %>
+                                                >High To Low</option>
+                                            <option value="alphaAsc" <%=sort==='alphaAsc' ? 'selected' : '' %>>A-Z
+                                            </option>
+                                            <option value="alphaDesc" <%=sort==='alphaDesc' ? 'selected' : '' %>>Z-A
+                                            </option>
+                                            <option value="newArrivals" <%=sort==='newArrivals' ? 'selected' : '' %>>New
+                                                Arrivals</option>
+                                            <option value="popularity" <%=sort==='popularity' ? 'selected' : '' %>
+                                                >Popularity</option>
                                         </select>
                                     </form>
                                 </div>
@@ -206,7 +215,7 @@
 
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <% products.forEach(product=> { %>
                             <div class="col-lg-4 col-md-6 col-sm-6">
@@ -226,21 +235,23 @@
                                                             </a></li>
                                                     </ul>
                                         </div> -->
-                                        <div class="product__item__pic" style="border-radius: 15px;">
+                                        <div class="product__item__pic" style="border-radius: 25px;">
                                             <div class="image-container">
                                                 <!-- Default image -->
-                                                <img src="/uploads/product-image/<%= product.productImage[0] %>" class="default-image" alt="Product Image" />
-                                        
+                                                <img src="/uploads/product-image/<%= product.productImage[0] %>"
+                                                    class="default-image" alt="Product Image" />
+
                                                 <!-- Hover image -->
                                                 <% if (product.productImage[1]) { %>
-                                                    <img src="/uploads/product-image/<%= product.productImage[1] %>" class="hover-image" alt="Hover Image" />
+                                                    <img src="/uploads/product-image/<%= product.productImage[1] %>"
+                                                        class="hover-image" alt="Hover Image" />
                                                     <% } %>
                                             </div>
-                                        
+
                                             <% if (product.isOnSale) { %>
                                                 <span class="label">Sale</span>
                                                 <% } %>
-                                        
+
                                                     <!-- <ul class="product__hover">
                                                         <li>
                                                             <a href="#"
@@ -250,26 +261,43 @@
                                                         </li>
                                                     </ul> -->
                                         </div>
-                                        <div class="product__item__text" >
+                                        <div class="product__item__text">
                                             <h6>
                                                 <%= product.productName %>
                                             </h6>
                                             <!-- Modified add-cart to prevent navigation -->
                                             <a href="#" class="add-cart"
                                                 onclick="event.preventDefault(); event.stopPropagation(); handleAddToCart('<%= product._id %>')">
-                                               
+
                                             </a>
+                                        <div class="rating-container">
                                             <div class="rating">
                                                 <% for (let i=0; i < 5; i++) { %>
-                                                    <i
-                                                        class="fa <%= i < product.rating ? 'fa-star' : 'fa-star-o' %>"></i>
+                                                    <i class="fa <%= i < product.rating ? 'fa-star' : 'fa-star-o' %>"></i>
                                                     <% } %>
                                             </div>
+                                            <div class="stock-status">
+                                                <%  const totalQuantity=product.variants ?
+                                                    product.variants.reduce((sum, variant)=> sum + variant.quantity, 0) : 0;
+                                                    %>
+                                                    <% if (totalQuantity> 10) { %>
+                                                        <span style="color: green;">In stock</span>
+                                                        <% } else if (totalQuantity>= 1) { %>
+                                                            <span style="color: orange;">
+                                                                <%= totalQuantity %> left
+                                                            </span>
+                                                            <% } else { %>
+                                                                <span style="color: red;">Out of stock</span>
+                                                                <% } %>
+                                            </div>
+                                        </div>
                                             <h5>
-                                            
-                                                ₹<%= product.salePrice.toFixed(2) %><span  style="padding-left: 10px;   text-decoration: line-through; color: rgb(179, 179, 179); font-size: 0.9em; margin-right: 8px;">₹<%= product.regularPrice.toFixed(2) %>
-                                                        </span>
-                                                
+
+                                                ₹<%= product.salePrice.toFixed(2) %><span
+                                                        style="padding-left: 10px;   text-decoration: line-through; color: rgb(179, 179, 179); font-size: 0.9em; margin-right: 8px;">₹
+                                                        <%= product.regularPrice.toFixed(2) %>
+                                                    </span>
+
                                             </h5>
                                             <div class="product__color__select" onclick="event.stopPropagation();">
                                                 <% if (product.colors && product.colors.length> 0) { %>
@@ -382,11 +410,11 @@
     </section>
 
     <%- include("../../views/partials/user/footershop") %>
-    <script>
-  
-      
-     
-        document.addEventListener('DOMContentLoaded', () => {
+        <script>
+
+
+
+            document.addEventListener('DOMContentLoaded', () => {
                 const cartLinks = document.querySelectorAll('.site-header__cart');
 
                 cartLinks.forEach(link => {
@@ -404,5 +432,4 @@
                     });
                 });
             });
-    </script>
-  
+        </script>

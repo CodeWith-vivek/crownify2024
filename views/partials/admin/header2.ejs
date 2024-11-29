@@ -16,6 +16,14 @@
     <!-- Template CSS -->
     <link href="/assets/admin2/css/main.css" rel="stylesheet" type="text/css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <style> 
+        .error-message{
+            color: red;
+        }
+    </style>
 
 </head>
 
@@ -31,54 +39,52 @@
                 </button>
             </div>
         </div>
-        <nav>
-            <ul class="menu-aside">
-                <li class="menu-item active">
-                    <a class="menu-link" href="/admin/dashboard"> <i class="icon material-icons md-home"></i>
-                        <span class="text">Dashboard</span>
-                    </a>
-                </li>
-
-                <li class="menu-item  ">
-                    <a class="menu-link" href="/admin/addProducts"> <i class="icon material-icons md-add_business"></i>
-                        <span class="text">Add Products</span>
-                    </a>
-
-                </li>
-                <li class="menu-item ">
-                    <a class="menu-link" href="/admin/orderlist"> <i class="icon material-icons md-shopping_cart"></i>
-                        <span class="text">Orders</span>
-                    </a>
-
-                </li>
-                <li class="menu-item ">
-                    <a class="menu-link" href="/admin/products"> <i class="icon material-icons md-shopping_bag"></i>
-                        <span class="text">Products</span>
-                    </a>
-
-                </li>
-
-                <li class="menu-item ">
-                    <a class="menu-link" href="/admin/users"> <i class="icon material-icons md-people"></i>
-                        <span class="text">Customers</span>
-                    </a>
-                </li>
-                <li class="menu-item ">
-                    <a class="menu-link" href="/admin/category"><i class="icon material-icons md-category"></i>
-
-
-                        <span class="text">Category</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a class="menu-link" href="/admin/brands"> <i class="icon material-icons md-stars"></i>
-                        <span class="text">Brands</span> </a>
-                </li>
-
-
-                <br>
-                <br>
-        </nav>
+    <nav>
+        <ul class="menu-aside">
+            <li class="menu-item active">
+                <a class="menu-link" href="/admin/dashboard">
+                    <i class="icon material-icons md-home"></i>
+                    <span class="text">Dashboard</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/addProducts">
+                    <i class="icon material-icons md-add_business"></i>
+                    <span class="text">Add Products</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/orderlist">
+                    <i class="icon material-icons md-shopping_cart"></i>
+                    <span class="text">Orders</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/products">
+                    <i class="icon material-icons md-shopping_bag"></i>
+                    <span class="text">Products</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/users">
+                    <i class="icon material-icons md-people"></i>
+                    <span class="text">Customers</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/category">
+                    <i class="icon material-icons md-category"></i>
+                    <span class="text">Category</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/brands">
+                    <i class="icon material-icons md-stars"></i>
+                    <span class="text">Brands</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
     </aside>
     <main class="main-wrap">
         <header class="main-header navbar">

@@ -7,12 +7,12 @@
                 </div>
             </div>
             <div class="col-lg-12">
-                
                 <div class="card mb-4">
-                    
                     <div class="card-body">
                         <form method="post" action="/admin/editProduct/<%= product._id %>" enctype="multipart/form-data"
-                            onsubmit="return validateForm()">
+                            onsubmit="return validateForm()" id="productForm">
+
+                            <!-- Product Name -->
                             <div class="mb-4">
                                 <label for="product_name" class="form-label">Product Name</label>
                                 <input type="text" name="productName" value="<%= product.productName %>"
@@ -58,16 +58,19 @@
                                                     <option value="YOUTH" <%=variant.size==='YOUTH' ? 'selected' : '' %>
                                                         >YOUTH</option>
                                                 </select>
+                                                <div class="error-message" id="size-error-0"></div>
                                             </div>
                                             <div class="col-lg-4 mb-2">
                                                 <label class="form-label">Color</label>
                                                 <input name="colors[]" type="text" class="form-control border"
                                                     placeholder="Color" value="<%= variant.color %>">
+                                                <div class="error-message" id="color-error-0"></div>
                                             </div>
                                             <div class="col-lg-4 mb-2">
                                                 <label class="form-label">Quantity</label>
                                                 <input name="quantities[]" type="number" class="form-control border"
                                                     placeholder="Quantity" value="<%= variant.quantity %>">
+                                                <div class="error-message" id="quantity-error-0"></div>
                                             </div>
                                             <% if (index> 0) { %>
                                                 <div class="col-lg-12 mb-2">
@@ -89,16 +92,19 @@
                                                             <option value="L / XL">L / XL</option>
                                                             <option value="YOUTH">YOUTH</option>
                                                         </select>
+                                                        <div class="error-message" id="size-error-0"></div>
                                                     </div>
                                                     <div class="col-lg-4 mb-2">
                                                         <label class="form-label">Color</label>
                                                         <input name="colors[]" type="text" class="form-control border"
                                                             placeholder="Color">
+                                                        <div class="error-message" id="color-error-0"></div>
                                                     </div>
                                                     <div class="col-lg-4 mb-2">
                                                         <label class="form-label">Quantity</label>
                                                         <input name="quantities[]" type="number"
                                                             class="form-control border" placeholder="Quantity">
+                                                        <div class="error-message" id="quantity-error-0"></div>
                                                     </div>
                                                 </div>
                                                 <% } %>
@@ -144,8 +150,8 @@
                                     <label class="form-label">Category</label>
                                     <select class="form-select border" name="category">
                                         <% for (let i=0; i < cat.length; i++) { %>
-                                            <option value="<%= cat[i].name %>" <%=cat[i].name===product.category
-                                                ? 'selected' : '' %>>
+                                            <option value="<%= cat[i].name.trim() %>"
+                                                <%=cat[i].name.trim()===product.category ? 'selected' : '' %>>
                                                 <%= cat[i].name %>
                                             </option>
                                             <% } %>
@@ -153,6 +159,20 @@
                                     <div id="category-error" class="error-message"></div>
                                 </div>
                             </div>
+                            <!-- <div class="row">
+                                <div class="col-sm-6 mb-3">
+                                    <label class="form-label">Category</label>
+                                    <select class="form-select border" name="category">
+                                        <% for (let i=0; i < cat.length; i++) { %>
+                                            <option value="<%= cat[i]._id %>" <%=cat[i]._id.toString()===product.category._id.toString()
+                                                ? 'selected' : '' %>>
+                                                <%= cat[i].name %>
+                                            </option>
+                                            <% } %>
+                                    </select>
+                                    <div id="category-error" class="error-message"></div>
+                                </div>
+                            </div> -->
 
                             <!-- Image Upload -->
                             <div class="card mb-2">
@@ -164,9 +184,11 @@
                                         <% product.productImage.forEach((image, index)=> { %>
                                             <div class="col-md-3 mb-3 position-relative">
                                                 <div class="image-container position-relative">
-                                                    <img class="rounded img-fluid" style="width: 100px; height: 120px; object-fit: cover;"
+                                                    <img class="rounded img-fluid"
+                                                        style="width: 100px; height: 120px; object-fit: cover;"
                                                         src="/uploads/product-image/<%= image %>" alt="Product image">
-                                                    <button type="button" onclick="deleteSingleImage('<%= image %>', '<%= product._id %>')"
+                                                    <button type="button"
+                                                        onclick="deleteSingleImage('<%= image %>', '<%= product._id %>')"
                                                         class="btn btn-danger btn-sm position-absolute"
                                                         style="top: 5px; right: 5px; padding: 2px 6px;">
                                                         ×
@@ -244,8 +266,8 @@
 
                             <!-- Submit Button -->
                             <div>
-                                <button class="btn btn-md rounded font-sm hover-up" id="updatebtn" type="submit"
-                                    onclick="validateAndSubmit()">Update</button>
+                                <button class="btn btn-md rounded font-sm hover-up" id="updatebtn"
+                                    type="submit">Update</button>
                             </div>
                         </form>
                     </div>
@@ -254,6 +276,7 @@
         </div>
     </section>
     <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.getElementById('addSizeColorBtn').addEventListener('click', function () {
             const container = document.getElementById('sizeColorContainer');
@@ -296,80 +319,103 @@
     <%- include("../../views/partials/admin/footer2") %>
 
         <script>
-            function validateAndSubmit() {
-                if (validateForm()) {
-                    document.forms[0].submit();
+         
+    function validateForm() {
+        clearErrorMessages();
+
+        // Select elements using querySelector for more reliable selection
+        const name = document.querySelector('input[name="productName"]').value.trim();
+        const description = document.querySelector('textarea[name="description"]').value.trim();
+        const brand = document.querySelector('select[name="brand"]').value;
+        const price = document.querySelector('input[name="regularPrice"]').value;
+        const salePrice = document.querySelector('input[name="salePrice"]').value;
+        const category = document.querySelector('select[name="category"]').value;
+
+        let isValid = true;
+
+        // Product Name Validation
+        if (name === "") {
+            displayErrorMessage('productName-error', 'Please enter a product name.');
+            isValid = false;
+        }
+
+        // Description Validation
+        if (description === "") {
+            displayErrorMessage('description-error', 'Please enter a product description.');
+            isValid = false;
+        }
+
+        // Brand Validation
+        if (brand === "") {
+            displayErrorMessage('brand-error', 'Please select a brand.');
+            isValid = false;
+        }
+
+        // Price Validations
+        if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
+            displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
+            isValid = false;
+        }
+
+        if (!/^\d+(\.\d{1,2})?$/.test(salePrice) || parseFloat(salePrice) < 0) {
+            displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
+            isValid = false;
+        }
+
+        if (parseFloat(price) <= parseFloat(salePrice)) {
+            displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
+            isValid = false;
+        }
+
+        // Category Validation
+        if (category === "") {
+            displayErrorMessage('category-error', 'Please select a category.');
+            isValid = false;
+        }
+
+        // Size, Color, Quantity Validation
+        const sizeColorGroups = document.querySelectorAll('.size-color-group');
+        sizeColorGroups.forEach((group, index) => {
+            const size = group.querySelector('select[name="sizes[]"]').value;
+            const color = group.querySelector('input[name="colors[]"]').value.trim();
+            const quantity = group.querySelector('input[name="quantities[]"]').value;
+
+            if (size === "") {
+                displayErrorMessage(`size-error-${index}`, 'Please select a size.');
+                isValid = false;
+            }
+            if (color === "") {
+                displayErrorMessage(`color-error-${index}`, 'Please enter a color.');
+                isValid = false;
+            }
+            if (quantity.trim() === "" || parseInt(quantity) < 0) {
+                displayErrorMessage(`quantity-error-${index}`, 'Please enter a valid quantity.');
+                isValid = false;
+            }
+        });
+
+        
+
+        return isValid;
+    }
+
+         function displayErrorMessage(elementId, message) {
+                const errorElement = document.getElementById(elementId);
+                if (errorElement) {
+                    errorElement.innerText = message;
+                    errorElement.style.display = "block";
                 }
             }
 
-            function validateForm() {
-                let imageDatas = false
-                console.log("validate form");
-                clearErrorMessages();
-                const name = document.getElementsByName('productName')[0].value;
-                const description = document.getElementsByName('descriptionData')[0].value;
-                const brand = document.getElementsByName('brand')[0].value;
-                const price = document.getElementsByName('regularPrice')[0].value;
-                const saleprice = document.getElementsByName('salePrice')[0].value;
-                const color = document.getElementsByName('color')[0].value;
-                const category = document.getElementsByName('category')[0].value;
-                const images = document.getElementById('input1')
-                const quantity = document.getElementsByName('quantity')
-                const size = document.getElementsByName('size')[0].value;
-                imageDatas = document.getElementById("imageDatas")?.value;
-                let isValid = true;
-                if (name.trim() === "") {
-                    displayErrorMessage('productName-error', 'Please enter a product name.');
-                    isValid = false;
-                }
-
-                if (description === '') {
-                    displayErrorMessage('description-error', 'Please enter a product description.');
-                    isValid = false;
-                }
-
-                if (parseInt(quantity) < 0) {
-                    displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
-                    isValid = false;
-                }
-
-                if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
-                    displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
-                    isValid = false;
-                }
-                if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
-                    displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
-                    isValid = false;
-                }
-
-                if (color.trim() === "") {
-                    displayErrorMessage('color-error', 'Please enter a color.');
-                    isValid = false;
-                }
-                if (size === '') {
-                    displayErrorMessage('size-error', 'Please select a size.');
-                    isValid = false;
-                }
-                if (!imageDatas && images.files.length === 0) {
-                    displayErrorMessage("images-error", 'Please select an image.');
-                    isValid = false;
-                }
-                return isValid;
-            }
-
-            function displayErrorMessage(elementId, message) {
-                var errorElement = document.getElementById(elementId);
-                errorElement.innerText = message;
-                errorElement.style.display = "block";
-            }
-
+            // Clear Error Messages Function
             function clearErrorMessages() {
                 const errorElements = document.getElementsByClassName('error-message');
                 Array.from(errorElements).forEach(element => {
                     element.innerText = '';
+                    element.style.display = "none";
                 });
-                const errorMessage = document.getElementById('errorMessage');
             }
+
 
             function viewImage1(event) {
                 document.getElementById('imgView1').src = URL.createObjectURL(event.target.files[0])
@@ -469,8 +515,78 @@
                     })
                 })
             }
+     
         </script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+         document.getElementById('productForm').addEventListener('submit', function (e) {
+                e.preventDefault(); // Prevent default form submission
+
+                // Run validation
+                if (!validateForm()) {
+                    return; // Stop if validation fails
+                }
+
+                // If validation passes, submit form
+                const form = e.target;
+                const formData = new FormData(form);
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            // Attempt to get the error message from the response
+                            return response.json().then(err => {
+                                throw new Error(err.message || 'Network response was not ok');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(result => {
+                        if (result.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: result.message || 'Product updated successfully',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = '/admin/products';
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: result.message || 'Something went wrong',
+                                confirmButtonText: 'Try Again'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Check if the error has a response with a message
+                        if (error.response) {
+                            console.error('Response data:', error.response.data);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Submission Error',
+                                text: 'Unable to submit product: ' + (error.response.data.message || error.message),
+                                confirmButtonText: 'OK'
+                            });
+                        } else {
+                            // Fallback for general errors
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Submission Error',
+                                text: 'Unable to submit product: ' + error.message,
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    });
+            });
+
+        </script>
+ 
         <script>
             // Handle logout action with fetch
             document.getElementById('logoutLink').addEventListener('click', function (event) {

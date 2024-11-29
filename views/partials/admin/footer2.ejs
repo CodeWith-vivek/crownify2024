@@ -14,6 +14,23 @@
     </div>
 </footer>
 </main>
+<script>
+    // Function to set the active class based on the current route
+    document.addEventListener('DOMContentLoaded', () => {
+        const currentPath = window.location.pathname; // Get the current route
+        const menuLinks = document.querySelectorAll('.menu-link');
+
+        menuLinks.forEach(link => {
+            // Match the href with the current path
+            if (link.getAttribute('href') === currentPath) {
+                link.parentElement.classList.add('active'); // Add active to the parent <li>
+            } else {
+                link.parentElement.classList.remove('active'); // Remove active from other <li>
+            }
+        });
+    });
+</script>
+
 <script src="/assets/admin2/js/vendors/jquery-3.6.0.min.js"></script>
 <script src="/assets/admin2/js/vendors/bootstrap.bundle.min.js"></script>
 <script src="/assets/admin2/js/vendors/select2.min.js"></script>
