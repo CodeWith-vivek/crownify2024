@@ -20,17 +20,16 @@ const addProducts = async (req, res) => {
   try {
     const products = req.body;
 
-    const productExists = await Product.findOne({
-      productName: products.productName,
+  const productExists = await Product.findOne({
+    productName: new RegExp(`^${products.productName}$`, "i"), 
+  });
+
+  if (productExists) {
+    return res.status(400).json({
+      success: false,
+      message: "Product already exists, please try with another name",
     });
-    if (productExists) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Product already exists, please try with another name",
-        });
-    }
+  }
 
     const images = [];
     const uploadDir = path.join(__dirname, "../public/uploads/product-image");
@@ -311,7 +310,7 @@ const editProduct = async (req, res) => {
           .status(400)
           .json({
             success: false,
-            message: "You cannot upload more than 4 images.",
+            message: "You cannot upload more than 4 images. you need to delete previous one to add image.",
           });
       }
 

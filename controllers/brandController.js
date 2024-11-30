@@ -23,26 +23,32 @@ const getBrandPage=async(req,res)=>{
 
 }
 
-const addBrand=async(req,res)=>{
-    try{
-        const brand=req.body.name
-        const findbrand =await Brand.findOne({brand})
-        if(!findbrand){
-            const image=req.file.filename
-            const newBrand =new Brand({
-                brandName:brand,
-                brandImage:image,
-            })
-            await newBrand.save()
-            res.redirect("/admin/brands")
-        }
+const addBrand = async (req, res) => {
+  try {
+    const brand = req.body.name;
 
-    }catch(error){
-        res.redirect("/admin/pageerror")
+ 
+    const findBrand = await Brand.findOne({
+      brandName: new RegExp(`^${brand}$`, "i"),
+    });
 
+    if (!findBrand) {
+      const image = req.file.filename;
+      const newBrand = new Brand({
+        brandName: brand,
+        brandImage: image,
+      });
+      await newBrand.save();
+      res.redirect("/admin/brands");
+    } else {
+   
+      res.redirect("/admin/brands?error=Brand already exists");
     }
-}
-
+  } catch (error) {
+    console.error(error); 
+    res.redirect("/admin/pageerror");
+  }
+};
 const blockBrand =async(req,res)=>{
     try {
         const id=req.query.id
