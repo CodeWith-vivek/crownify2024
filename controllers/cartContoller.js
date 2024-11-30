@@ -4,6 +4,7 @@ const Cart = require("../models/cartSchema");
 const Product = require("../models/productSchema");
 const User = require("../models/userSchema");
 
+// code to lad cart page 
 
 const loadCartPage = async (req, res) => {
   try {
@@ -89,6 +90,7 @@ const loadCartPage = async (req, res) => {
   }
 };
 
+// code to add items to cart
 
 const addToCart = async (req, res) => {
   try {
@@ -201,6 +203,10 @@ const addToCart = async (req, res) => {
     });
   }
 };
+
+
+// code to get stock of each variant 
+
 const getVarientQuantity = async (req, res) => {
   try {
     const { id } = req.params;
@@ -242,6 +248,9 @@ const updateStockAfterAdd = async (productId, size, color, quantity) => {
     await product.save();
   }
 };
+
+// code to delete item from cart
+
 const deleteFromCart = async (req, res) => {
   try {
     const { productId, size, color } = req.body; 
@@ -301,6 +310,9 @@ const deleteFromCart = async (req, res) => {
     });
   }
 };
+
+// code to update cart
+
 const updateCart = async (req, res) => {
   try {
     const { productId, size, color, quantity } = req.body;

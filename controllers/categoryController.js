@@ -1,6 +1,7 @@
 const Category = require("../models/categorySchema");
 const Product = require("../models/productSchema");
 
+// code to load category in admin side
 
 const categoryInfo = async (req, res) => {
   try {
@@ -25,7 +26,8 @@ const categoryInfo = async (req, res) => {
   }
 };
 
-// Adding a new category
+// code to add a new category
+
 const addCategory = async (req, res) => {
   let { name, description } = req.body;
   try {
@@ -54,7 +56,8 @@ const addCategory = async (req, res) => {
   }
 };
 
-// Adding a category offer
+//code to add category offer
+
 const addCategoryOffer = async (req, res) => {
   try {
     const percentage = parseInt(req.body.percentage);
@@ -98,7 +101,8 @@ const addCategoryOffer = async (req, res) => {
   }
 };
 
-// Removing a category offer
+//code to  remove category offer
+
 const removeCategoryOffer = async (req, res) => {
   try {
     const categoryId = req.body.categoryId;
@@ -136,6 +140,8 @@ const getListCategory=async(req,res)=>{
   }
 }
 
+
+
 const getUnlistCategory=async(req,res)=>{
   try {
     let id = req.query.id;
@@ -146,6 +152,9 @@ const getUnlistCategory=async(req,res)=>{
   }
 
 }
+
+//code to load edit Category
+
 const getEditCategory =async(req,res)=>{
   try {
     const id =req.query.id
@@ -158,6 +167,9 @@ const getEditCategory =async(req,res)=>{
   }
 
 }
+
+//code to edit category
+
 const editCategory = async (req, res) => {
   try {
     const id = req.params.id;

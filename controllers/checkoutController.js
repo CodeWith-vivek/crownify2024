@@ -2,6 +2,8 @@ const User=require("../models/userSchema")
 const Cart=require("../models/cartSchema")
 const Product=require("../models/productSchema")
 
+//code to load checkout page
+
 const loadCheckout = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -83,6 +85,8 @@ const loadCheckout = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
+
+//code to validate the quantity 
 
 const validateQuantity = async (req, res) => {
   try {

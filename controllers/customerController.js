@@ -1,5 +1,8 @@
 const { query } = require("express");
 const User=require("../models/userSchema")
+
+//code to load users list
+
 const customerInfo=async(req,res)=>{
     try{
         let search=""
@@ -39,6 +42,9 @@ const customerInfo=async(req,res)=>{
 
     }
 }
+
+//code to block the user
+
 const customerBlocked=async(req,res)=>{
      try {
        let id = req.query.id;

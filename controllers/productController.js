@@ -6,6 +6,8 @@ const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
 
+//code to load product add page
+
 const getProductAddPage = async (req, res) => {
   try {
     const category = await Category.find({ isListed: true });
@@ -15,6 +17,8 @@ const getProductAddPage = async (req, res) => {
     res.redirect("/admin/pageerror");
   }
 };
+
+//code to add products
 
 const addProducts = async (req, res) => {
   try {
@@ -106,6 +110,9 @@ const addProducts = async (req, res) => {
       });
   }
 };
+
+//code to load list of products page
+
 const getAllProducts = async (req, res) => {
   try {
     const search = req.query.search || "";
@@ -159,7 +166,9 @@ const getAllProducts = async (req, res) => {
   } catch (error) {
     res.redirect("/admin/pageerror");
   }
-};
+}; 
+
+//code to add product offer
 
 const addProductOffer = async (req, res) => {
   try {
@@ -187,6 +196,8 @@ const addProductOffer = async (req, res) => {
   }
 };
 
+//code to remove product offer
+
 const removeProductOffer = async (req, res) => {
   try {
     const { productId } = req.body;
@@ -203,6 +214,8 @@ const removeProductOffer = async (req, res) => {
   }
 };
 
+//code to block the product
+
 const blockProduct = async (req, res) => {
   try {
     let id = req.query.id;
@@ -213,6 +226,9 @@ const blockProduct = async (req, res) => {
   }
 };
 
+
+//code to unblock the product
+
 const unblockProduct = async (req, res) => {
   try {
     let id = req.query.id;
@@ -222,6 +238,8 @@ const unblockProduct = async (req, res) => {
     res.redirect("/admin/pageerror");
   }
 };
+
+//code to load edit product page
 
 const getEditProduct = async (req, res) => {
   try {
@@ -238,6 +256,8 @@ const getEditProduct = async (req, res) => {
     res.redirect("/admin/pageerror");
   }
 };
+
+//code to edit product in admin side
 
 const editProduct = async (req, res) => {
   try {
@@ -377,6 +397,9 @@ const editProduct = async (req, res) => {
       });
   }
 };
+
+//code to delete the image
+
 const deleteSingleImage = async (req, res) => {
   try {
     const { imageNameToServer, productIdToServer } = req.body;

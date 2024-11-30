@@ -1,5 +1,9 @@
 const Brand=require("../models/brandSchema")
 const Product=require("../models/productSchema")
+
+
+//code to load brand page admin side
+
 const getBrandPage=async(req,res)=>{
     try {
         const page=parseInt(req.query.page) || 1
@@ -22,6 +26,8 @@ const getBrandPage=async(req,res)=>{
 
 
 }
+
+//code to add new brand
 
 const addBrand = async (req, res) => {
   try {
@@ -49,6 +55,9 @@ const addBrand = async (req, res) => {
     res.redirect("/admin/pageerror");
   }
 };
+
+//code to block brand
+
 const blockBrand =async(req,res)=>{
     try {
         const id=req.query.id
@@ -62,6 +71,9 @@ const blockBrand =async(req,res)=>{
     
 }
 
+
+// code to block brand
+
 const unBlockBrand =async(req,res)=>{
     try{
         const id = req.query.id;
@@ -74,6 +86,10 @@ const unBlockBrand =async(req,res)=>{
     }
 
 }
+
+// code to delete brand
+
+
 const deleteBrand=async(req,res)=>{
     try {
         const {id} =req.query;

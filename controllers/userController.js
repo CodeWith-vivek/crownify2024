@@ -5,6 +5,9 @@ const Brand = require("../models/brandSchema");
 const env = require("dotenv").config();
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
+
+// code for secure password
+
 const securePassword = async (password) => {
   try {
     const passwordHash = await bcrypt.hash(password, 10);
@@ -14,7 +17,7 @@ const securePassword = async (password) => {
   }
 };
 
-//for loading homepage
+//code for loading homepage
 
 const loadHomepage = async (req, res) => {
   try {
@@ -35,7 +38,7 @@ const loadHomepage = async (req, res) => {
   }
 };
 
-//page not found
+//code for page not found
 
 const pageNotFound = async (req, res) => {
   try {
@@ -46,7 +49,7 @@ const pageNotFound = async (req, res) => {
   }
 };
 
-// load signup page
+// code load signup page
 
 const loadSignup = async (req, res) => {
   try {
@@ -61,7 +64,7 @@ const loadSignup = async (req, res) => {
   }
 };
 
-//otp page load
+//code to load otp page 
 
 const loadOtpverify = async (req, res) => {
   try {
@@ -70,7 +73,7 @@ const loadOtpverify = async (req, res) => {
       return res.redirect("/signup");
     }
 
-    // Always reset the countdown timer to 120 seconds
+   
     req.session.countdownTime = 120; 
 
     res.render("verify-otp", {
@@ -82,6 +85,8 @@ const loadOtpverify = async (req, res) => {
     res.status(500).send("server error");
   }
 };
+
+//code to generate otp
 
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -128,7 +133,7 @@ async function sendVerificationEmail(email, otp) {
   }
 }
 
-//sign up function
+//code for sign up 
 
 const signup = async (req, res) => {
   try {
@@ -205,6 +210,9 @@ const signup = async (req, res) => {
     });
   }
 };
+
+//code to verify otp
+
 const verifyOtp = async (req, res) => {
   try {
     const { otp } = req.body;
@@ -241,6 +249,9 @@ const verifyOtp = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+//code to resend otp
+
 const resendOtp = async (req, res) => {
   try {
     const userData = req.session.userData;
@@ -269,6 +280,9 @@ const resendOtp = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error." });
   }
 };
+
+//code to load login page
+
 const loadLogin = async (req, res) => {
   try {
     if (!req.session.user) {
@@ -335,6 +349,9 @@ const loadLogin = async (req, res) => {
     });
   }
 };
+
+//code to logout the user
+
 const logout = async (req, res) => {
   try {
     req.session.destroy((err) => {
@@ -350,7 +367,7 @@ const logout = async (req, res) => {
   }
 };
 
-
+//code to load shop page
 
 const loadShopPage = async (req, res) => {
   try {
@@ -359,11 +376,10 @@ const loadShopPage = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 12;
   
-    // Handle sorting
+ 
     const sortOption = req.query.sort || "";
     let sortCriteria = {};
 
-    // Sorting logic
     switch (sortOption) {
       case "priceLowHigh":
         sortCriteria = { salePrice: 1 };
@@ -414,14 +430,8 @@ const loadShopPage = async (req, res) => {
       .populate("category", "name") 
       .exec();
 
-   
-   
     const count = await Product.countDocuments(productsQuery);
 
- 
- 
-
-   
     const [categories, brands, userData] = await Promise.all([
       Category.find({ isListed: true }),
       Brand.find({ isBlocked: false }),
@@ -463,6 +473,8 @@ const loadShopPage = async (req, res) => {
       .send("An unexpected error occurred while loading the shop page");
   }
 };
+
+//code to load product details page
 
 
 const loadProductDetails = async (req, res) => {

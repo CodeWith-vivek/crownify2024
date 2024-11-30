@@ -15,6 +15,8 @@ const fs = require("fs").promises;
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+//code for secure password
+
 const securePassword = async (password) => {
   try {
     const passwordHash = await bcrypt.hash(password, 10);
@@ -23,9 +25,14 @@ const securePassword = async (password) => {
     console.log("password hash error", error);
   }
 };
+
+//code to generate otp
+
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
+
+//code to load forgot password page
 
 const getForgotPassPage = async (req, res) => {
   try {
@@ -35,6 +42,8 @@ const getForgotPassPage = async (req, res) => {
     res.render("forgot-password");
   } catch (error) {}
 };
+
+//code to send verification email
 
 const sendVerificationEmail = async (email, otp) => {
   try {
@@ -81,6 +90,8 @@ const sendVerificationEmail = async (email, otp) => {
   }
 };
 
+//code to load otp page
+
 const loadOtpPage = async (req, res) => {
   if (!req.session.userOtp || !req.session.email) {
   
@@ -94,6 +105,8 @@ const loadOtpPage = async (req, res) => {
     countdownTime,
   });
 };
+
+
 
 const forgotEmailValid = async (req, res) => {
   try {
@@ -157,6 +170,9 @@ const forgotEmailValid = async (req, res) => {
     });
   }
 };
+
+// code to verify otp forgot
+
 const verifyOtpForgot = async (req, res) => {
   try {
     const { otp } = req.body;
@@ -177,6 +193,8 @@ const verifyOtpForgot = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+// code to add new address
 const addAddress = async (req, res) => {
   const userId = req.session.user; 
   const {
@@ -265,6 +283,9 @@ const addAddress = async (req, res) => {
     });
   }
 };
+
+//code to resend otp forgot
+
 const resendOtpForgot = async (req, res) => {
   try {
     const userEmail = req.session.email;
@@ -296,6 +317,8 @@ const resendOtpForgot = async (req, res) => {
   }
 };
 
+// code to load reset pass page
+
 const getResetPassPage = async (req, res) => {
   try {
     if (req.session.isLoggedIn) {
@@ -307,6 +330,8 @@ const getResetPassPage = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
+
+//code to set new password
 
 const forgotNewPassword = async (req, res) => {
   try {
@@ -355,6 +380,9 @@ const forgotNewPassword = async (req, res) => {
       .json({ success: false, message: "An internal server error occurred." });
   }
 };
+
+// code to load user profile 
+
 const userProfile = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -377,6 +405,9 @@ const userProfile = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
+
+// code to load add address page
+
 const loadAddAddressPage = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -388,6 +419,9 @@ const loadAddAddressPage = async (req, res) => {
     res.status(500).send("Server error");
   }
 };
+
+// code to set primary address
+
 const setPrimaryAddress = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -434,6 +468,9 @@ const setPrimaryAddress = async (req, res) => {
     });
   }
 };
+
+//code to delete address
+
 const deleteUserAddress = async (req, res) => {
   try {
     const addressId = req.params.id;
@@ -475,6 +512,9 @@ const deleteUserAddress = async (req, res) => {
     });
   }
 };
+
+//code to load edit address page
+
 const editUserAddress = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -509,6 +549,9 @@ const editUserAddress = async (req, res) => {
     res.redirect("/user/profile#address");
   }
 };
+
+//code to edit user address
+
 const updateUserAddress = async (req, res) => {
   try {
     const addressId = req.params.id;
@@ -588,6 +631,8 @@ const updateUserAddress = async (req, res) => {
   }
 };
 
+//code to update user profile details
+
 const updateProfileDetails = async (req, res) => {
   const { name, phone, password, npassword } = req.body;
   const userId = req.session.user;
@@ -617,6 +662,9 @@ const updateProfileDetails = async (req, res) => {
     res.json({ success: false, error: error.message });
   }
 };
+
+//code to validate current password
+
 const validatCurrentPassword = async (req, res) => {
   const { password } = req.body; 
   const userId = req.session.user;
@@ -638,6 +686,9 @@ const validatCurrentPassword = async (req, res) => {
     res.status(500).json({ valid: false, message: "Internal server error" });
   }
 };
+
+//code to load user order list page
+
 const loadUserOrder = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -660,6 +711,9 @@ const loadUserOrder = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
+
+//code to load user Address
+
 const loadUserAddress = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -682,6 +736,8 @@ const loadUserAddress = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
+
+//code to load user account details page
 
 const loadUserAccountDetails = async (req, res) => {
   try {

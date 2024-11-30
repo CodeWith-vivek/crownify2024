@@ -3,6 +3,9 @@ const Product = require("../models/productSchema");
 const Cart = require("../models/cartSchema"); 
 const Address = require("../models/addressSchema");
 
+
+//code to place order
+
 const placeOrder = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -106,15 +109,15 @@ const placeOrder = async (req, res) => {
 
     await order.save();
 
-    // Clear the cart after order placement
+   
     await Cart.deleteOne({ userId });
 
-    // Return order details along with items
+  
     res.json({
       success: true,
       message: "Order placed successfully",
       orderId: order._id,
-      orderedItems: orderProducts, // Ordered items from cart
+      orderedItems: orderProducts, 
     });
   } catch (error) {
     console.error("Order placement error:", error);
@@ -124,6 +127,10 @@ const placeOrder = async (req, res) => {
     });
   }
 };
+
+
+// code to cancel order
+
 
 const cancelOrder = async (req, res) => {
   try {
@@ -246,6 +253,9 @@ const cancelOrder = async (req, res) => {
     });
   }
 };
+
+//code to return item
+
 const returnItem = async (req, res) => {
   try {
   

@@ -4,15 +4,24 @@ const bcrypt = require("bcrypt");
 const Order = require("../models/orderSchema");
 const Product = require("../models/productSchema");
 const { session } = require("passport");
+
+
+//admin side page error
+
 const pageerror = async (req, res) => {
   res.render("admin-error");
 };
+
+//admin login 
 const loadLogin = (req, res) => {
   if (req.session.admin) {
     return res.redirect("/admin/dashboard");
   }
   res.render("admin-login", { message: null });
 };
+
+
+//admin login code
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -39,6 +48,9 @@ const login = async (req, res) => {
     return res.json({ success: false, message: "An error occurred" }); 
   }
 };
+
+// code to load dashboard
+
 const loadDashboard = async (req, res) => {
   if (req.session.admin) {
     try {
@@ -51,7 +63,8 @@ const loadDashboard = async (req, res) => {
   }
 };
 
-// to load
+//code to logout admin
+
 const logout = async (req, res) => {
   try {
     req.session.destroy((err) => {
@@ -60,7 +73,6 @@ const logout = async (req, res) => {
         return res.json({ success: false, message: "Error logging out" });
       }
 
-      // Send success response instead of redirecting
       res.json({ success: true, message: "Logged out successfully" });
     });
   } catch (error) {
@@ -70,6 +82,7 @@ const logout = async (req, res) => {
 };
 
 
+// code to load orderlist in admin side
 
 const loadOrderlist = async (req, res) => {
   try {
@@ -110,6 +123,8 @@ const loadOrderlist = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+ 
+//code to change status of order by admin
 
 const updateOrderStatusByAdmin = async (req, res) => {
   try {
@@ -231,6 +246,8 @@ const updateOrderStatusByAdmin = async (req, res) => {
   }
 };
 
+
+//code to load order details page
 
 const loadOrderDetails = async (req, res) => {
   if (req.session.admin) {
