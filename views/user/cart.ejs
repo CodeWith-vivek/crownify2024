@@ -180,7 +180,7 @@
                         e.preventDefault();
 
                         try {
-                            // First do client-side validation
+                         
                             const cartItems = document.querySelectorAll('.cart-item');
                             let hasClientSideOutOfStock = false;
                             let clientSideOutOfStockProducts = [];
@@ -210,7 +210,6 @@
                                 return;
                             }
 
-                            // If client-side validation passes, do server-side validation
                             const response = await fetch('/checkout/validate', {
                                 method: 'POST',
                                 headers: {
@@ -221,7 +220,7 @@
                             const data = await response.json();
 
                             if (!data.success) {
-                                // If server validation fails
+                              
                                 Swal.fire({
                                     title: 'Stock Validation Failed',
                                     html: `
@@ -241,7 +240,7 @@
                                     confirmButtonText: 'OK'
                                 });
                             } else {
-                                // If all validations pass, proceed to checkout
+                          
                                 window.location.href = '/checkout';
                             }
 
@@ -264,13 +263,13 @@
                     link.addEventListener('click', (e) => {
                         console.log('Cart link clicked');
 
-                        // Prevent any existing event handlers
+                     
                         e.stopPropagation();
 
-                        // Ensure default navigation
+                       
                         window.location.href = '/cart';
 
-                        // Prevent default link behavior
+                       
                         e.preventDefault();
                     });
                 });
@@ -342,13 +341,13 @@
                             if (data.success) {
                                 console.log('Cart updated successfully:', data);
 
-                                // Update the item total for this specific product
+                              
                                 const itemRow = document.querySelector(`tr.cart-item td.product-total[data-product-id="${productId}"][data-size="${size}"][data-color="${color}"]`);
                                 if (itemRow) {
                                     itemRow.textContent = `₹${parseFloat(data.itemTotal).toFixed(2)}`;
                                 }
 
-                                // Update cart summary
+                             
                                 updateCartSummary(data.cartSummary);
                             } else {
                                 console.error('Error updating cart:', data.message);
@@ -359,19 +358,19 @@
 
 
                 function updateCartSummary(summary) {
-                    // Update subtotal
+                  
                     const subtotalElement = document.querySelector('.summary-row span:nth-child(2)');
                     if (subtotalElement) {
                         subtotalElement.textContent = `₹${parseFloat(summary.subtotal).toFixed(2)}`;
                     }
 
-                    // Update shipping charge
+                 
                     const shippingElement = document.querySelector('.summary-row:nth-child(2) span:nth-child(2)');
                     if (shippingElement) {
                         shippingElement.textContent = `₹${parseFloat(summary.shippingCharge).toFixed(2)}`;
                     }
 
-                    // Update total
+                 
                     const totalElement = document.querySelector('.summary-row.total strong:nth-child(2)');
                     if (totalElement) {
                         totalElement.textContent = `₹${parseFloat(summary.total).toFixed(2)}`;
@@ -382,19 +381,17 @@
             });
 
             document.addEventListener('DOMContentLoaded', () => {
-                // Existing code for quantity adjustment...
-
-                // Add event listener for removing items from the cart
+             
                 const removeButtons = document.querySelectorAll('.cart__close');
 
                 removeButtons.forEach(button => {
                     button.addEventListener('click', () => {
                         const productId = button.getAttribute('data-product-id');
-                        const row = button.closest('tr.cart-item'); // Get the closest row
-                        const size = row.querySelector('td:nth-child(3) p').innerText; // Get size from the row
-                        const color = row.querySelector('.product-color:nth-child(4) p').innerText; // Get color from the row
+                        const row = button.closest('tr.cart-item'); 
+                        const size = row.querySelector('td:nth-child(3) p').innerText;
+                        const color = row.querySelector('.product-color:nth-child(4) p').innerText; 
 
-                        // Use SweetAlert for confirmation
+                       
                         Swal.fire({
                             title: 'Are you sure?',
                             text: "You won't be able to revert this!",
@@ -417,30 +414,30 @@
                     console.log('Size:', size);
                     console.log('Color:', color);
                     fetch(`/cart/remove`, {
-                        method: 'DELETE', // Use DELETE method
+                        method: 'DELETE', 
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({ productId, size, color }),
 
-                        // Send productId, size, and color
+                   
                     })
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
                                 console.log('Item removed successfully:', data);
-                                // Remove the row from the DOM
+                             
                                 const row = document.querySelector(`tr.cart-item[data-product-id="${productId}"]`);
                                 if (row) {
                                     row.remove();
                                 }
-                                // Optionally show a success message
+                             
                                 Swal.fire(
                                     'Removed!',
                                     'Your item has been removed from the cart.',
                                     'success'
                                 ).then(() => {
-                                    // Refresh the page after the alert is closed
+                                   
                                     location.reload();
                                 });
                             } else {

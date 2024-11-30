@@ -140,14 +140,13 @@
             emailid.addEventListener('input', emailValidateChecking);
 
             document.getElementById('signform').addEventListener('submit', function (event) {
-                event.preventDefault(); // Prevent form from submitting normally
-
-                // Validate email and password fields
+                event.preventDefault();
+              
                 emailValidateChecking();
                 passValidationChecking();
 
                 if (emailValid && passValid) {
-                    // If validation passes, proceed with fetch
+                  
                     const email = document.getElementById('email').value;
                     const password = document.getElementById('password').value;
 
@@ -165,11 +164,11 @@
                                     icon: 'success',
                                     title: 'Login Successful',
                                     text: 'You have successfully logged in.',
-                                    showConfirmButton: false,  // Hide the OK button
-                                    timer: 1000,  // Set timer for 3 seconds
-                                    // timerProgressBar: true, 
+                                    showConfirmButton: false, 
+                                    timer: 1000, 
+                                   
                                 }).then(() => {
-                                    window.location.href = data.redirectUrl; // Redirect to the desired page
+                                    window.location.href = data.redirectUrl;
                                 });
                             } else {
                                 Swal.fire({
@@ -189,7 +188,7 @@
                             });
                         });
                 } else {
-                    // If validation fails, display alert for invalid inputs
+                  
                     Swal.fire({
                         icon: 'warning',
                         title: 'Blank Input',
@@ -219,7 +218,7 @@
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
         <script>
             function showLoginAlert(event) {
-                event.preventDefault(); // Prevent default link behavior
+                event.preventDefault(); 
                 swal({
                     title: "Logging In",
                     text: "Successfully logging  in using with Google.",
@@ -227,7 +226,7 @@
                     buttons: false,
                     timer: 1200,
                 }).then(() => {
-                    // Redirect to Google authentication after alert
+                   
                     window.location.href = "/auth/google";
                 });
             }
@@ -240,13 +239,13 @@
                         link.addEventListener('click', (e) => {
                             console.log('Cart link clicked');
 
-                            // Prevent any existing event handlers
+                        
                             e.stopPropagation();
 
-                            // Ensure default navigation
+                          
                             window.location.href = '/cart';
 
-                            // Prevent default link behavior
+                           
                             e.preventDefault();
                         });
                     });

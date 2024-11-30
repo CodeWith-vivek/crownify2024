@@ -6,32 +6,32 @@ const loadCheckout = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    // Fetch user data with addresses
+  
     const userData = await User.findById(userId).populate("addresses");
 
-    // Fetch cart items and populate product details
+   
     const cartItems = await Cart.findOne({ userId }).populate({
       path: "items.productId",
       model: "Product",
     });
 
-    // Check if the cart is empty or contains items with zero quantity
+   
     if (!cartItems || !cartItems.items || cartItems.items.length === 0) {
-      return res.redirect("/cart"); // Redirect to cart page
+      return res.redirect("/cart"); 
     }
 
-    // Filter out items with zero quantity
+  
     const validCartItems = cartItems.items.filter((item) => item.quantity > 0);
 
     if (validCartItems.length === 0) {
-      return res.redirect("/cart"); // Redirect if all items have zero quantity
+      return res.redirect("/cart");
     }
 
 
 
-    // Calculate subtotal
+ 
     const subtotal = validCartItems.reduce((total, item) => {
-      const product = item.productId; // Populated product details
+      const product = item.productId;
       return (
         total + item.quantity * (product.salePrice || product.regularPrice)
       );
@@ -39,27 +39,27 @@ const loadCheckout = async (req, res) => {
 
 
 
-    // Shipping cost
+   
     const shipping = 40;
 
-    // Calculate total
+   
     const total = subtotal + shipping;
 
 
-    // Prepare products array for rendering
+  
     const products = validCartItems.map((item) => {
-      const product = item.productId; // Populated product details
+      const product = item.productId;
       const price = product.salePrice || product.regularPrice || 0;
       const itemTotaleach = item.quantity * price;
       return {
         productId: product._id,
         productName: product.productName,
         productImage: product.productImage[0],
-        productBrand: product.brand, // Adjust field names as per your schema
+        productBrand: product.brand,
         quantity: item.quantity,
         itemTotal: itemTotaleach,
-        size: item.variant?.size || null, // Handle cases where `variant` is undefined
-        color: item.variant?.color || null, // Handle cases where `variant` is undefined
+        size: item.variant?.size || null,
+        color: item.variant?.color || null,
         price: price,
       };
     });
@@ -69,15 +69,11 @@ const loadCheckout = async (req, res) => {
   
     
 
-    // Render the checkout page with the required data
     res.render("checkout", {
       user,
-  
-     
-     
       products,
       addresses: userData.addresses,
-      cartItems: validCartItems, // Pass only the valid items
+      cartItems: validCartItems,
       subtotal,
       shipping,
       total,
@@ -90,7 +86,7 @@ const loadCheckout = async (req, res) => {
 
 const validateQuantity = async (req, res) => {
   try {
-    // Get user's cart
+   
     const userId = req.session.user;
     const cart = await Cart.findOne({ userId }).populate("items.productId");
 
@@ -102,17 +98,10 @@ const validateQuantity = async (req, res) => {
     }
 
     const outOfStockItems = [];
-    const invalidItems = [];
-
-    // Check each cart item with fresh product data
     for (const item of cart.items) {
-      // Fetch the most current product data INSIDE the loop
+     
       const currentProduct = await Product.findById(item.productId).lean();
 
-      // Log the current product and cart item
-
-
-      // Validate product existence
       if (!currentProduct) {
         outOfStockItems.push({
           productName: "Unknown Product",
@@ -121,11 +110,11 @@ const validateQuantity = async (req, res) => {
         continue;
       }
 
-      // Find the specific variant
+     
       const cartItemVariant = item.variant;
      
 
-      // Find the specific variant using the cart item's variant details
+    
       const variant = currentProduct.variants.find(
         (v) =>
           v.color.toLowerCase() === cartItemVariant.color.toLowerCase() &&
@@ -134,18 +123,18 @@ const validateQuantity = async (req, res) => {
 
 
 
-      // Comprehensive stock validation
+     
       if (!variant) {
         outOfStockItems.push({
           productName: currentProduct.productName,
-          size: item.size || "undefined", // Log size
-          color: item.color || "undefined", // Log color
+          size: item.size || "undefined", 
+          color: item.color || "undefined",
           message: "Product variant no longer available",
         });
         continue;
       }
 
-      // Check quantity and stock
+    
       if (variant.stockLevel === 0) {
         outOfStockItems.push({
           productName: currentProduct.productName,
@@ -165,7 +154,7 @@ const validateQuantity = async (req, res) => {
       }
     }
 
-    // Handle out of stock or invalid items
+   
     if (outOfStockItems.length > 0) {
       return res.json({
         success: false,

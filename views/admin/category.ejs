@@ -150,9 +150,9 @@
 
         <script>
             function handleFormSubmit(event) {
-                    event.preventDefault(); // Prevent the default form submission
+                    event.preventDefault(); 
 
-                    // Show SweetAlert confirmation dialog
+                  
                     Swal.fire({
                         title: 'Are you sure?',
                         text: "You are about to create a new category. Do you want to proceed?",
@@ -164,7 +164,7 @@
                         cancelButtonText: 'Cancel'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            // If the user confirms, submit the form
+                          
                             event.target.submit();
                         }
                     });
@@ -181,7 +181,7 @@
                         cancelButtonText: 'Cancel'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            // Redirect to the provided URL
+                          
                             window.location.href = url;
                         }
                     });
@@ -267,14 +267,14 @@
                     inputPlaceholder: "%",
                 });
 
-                // Check if the amount is valid (not empty, not negative, and not zero)
+             
                 if (amount === null || amount === "" || amount <= 0) {
                     Swal.fire(
                         "Invalid Input",
                         "Please enter a positive percentage value greater than zero.",
                         "error"
                     );
-                    return; // Exit the function if the input is invalid
+                    return; 
                 }
 
                 try {
@@ -314,11 +314,11 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         
         <script>
-            // Handle logout action with fetch
+          
             document.getElementById('logoutLink').addEventListener('click', function (event) {
-                event.preventDefault(); // Prevent the default link behavior
+                event.preventDefault(); 
 
-                // Send fetch request to logout
+               
                 fetch('/admin/logout', {
                     method: 'POST',
                     headers: {
@@ -329,29 +329,29 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Show success SweetAlert
+                        
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Logged Out',
-                                text: data.message, // Message from the backend
-                                timer: 2000, // Wait for 2 seconds before redirect
-                                showConfirmButton: false // Hide the confirm button
+                                text: data.message, 
+                                timer: 2000, 
+                                showConfirmButton: false 
                             }).then(() => {
-                                // Redirect after showing SweetAlert
+                               
                                 window.location.replace('/admin/login');
                             });
                         } else {
-                            // If logout failed, show an error SweetAlert
+                         
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Logout Failed',
-                                text: data.message, // Message from the backend
+                                text: data.message,
                                 confirmButtonText: 'Try Again'
                             });
                         }
                     })
                     .catch(error => {
-                        // Handle any network errors
+                      
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',

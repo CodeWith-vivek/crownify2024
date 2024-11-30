@@ -11,9 +11,7 @@ const Order = require("../models/orderSchema");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs").promises;
-// Adjust the import according to your project structure
 
-// Configure multer to use memory storage
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -32,7 +30,7 @@ function generateOtp() {
 const getForgotPassPage = async (req, res) => {
   try {
     if (req.session.isLoggedIn) {
-      return res.redirect("/"); // Or to the user's dashboard or profile
+      return res.redirect("/"); 
     }
     res.render("forgot-password");
   } catch (error) {}
@@ -85,26 +83,26 @@ const sendVerificationEmail = async (email, otp) => {
 
 const loadOtpPage = async (req, res) => {
   if (!req.session.userOtp || !req.session.email) {
-    // If no OTP or email session exists, redirect to the password reset page
+  
     return res.redirect("/forget-password");
   }
 
   // Render OTP page
-  const countdownTime = req.session.countdownTime || 120; // Set countdown to 120 seconds or the stored value
+  const countdownTime = req.session.countdownTime || 120; 
   res.render("forgetPass-otp", {
-    userData: req.session.email, // Pass the email to the view
-    countdownTime, // Pass countdown time to the view
+    userData: req.session.email, 
+    countdownTime,
   });
 };
 
 const forgotEmailValid = async (req, res) => {
   try {
-    // Prevent caching of the page to avoid resubmission
+    
     res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
     res.setHeader("Pragma", "no-cache");
     res.setHeader("Expires", "0");
 
-    // Redirect if the user is already logged in
+  
     if (req.session.isLoggedIn) {
       return res.json({
         success: false,
@@ -124,13 +122,13 @@ const forgotEmailValid = async (req, res) => {
         req.session.userOtp = otp;
         req.session.email = email;
 
-        // Check for email change and reset countdown time if necessary
+        
         const currentEmail = findUser.email;
         const previousEmail = req.session.previousEmail;
 
         if (previousEmail !== currentEmail) {
           req.session.previousEmail = currentEmail;
-          req.session.countdownTime = 120; // Reset the countdown
+          req.session.countdownTime = 120; 
         }
 
         return res.json({
@@ -145,7 +143,7 @@ const forgotEmailValid = async (req, res) => {
         });
       }
     } else {
-      // Email not found case
+      
       return res.json({
         success: false,
         message: "Email not found.",
@@ -169,7 +167,7 @@ const verifyOtpForgot = async (req, res) => {
     }
 
     if (otp === sessionOtp) {
-      req.session.userOtp = null; // Clear OTP after verification
+      req.session.userOtp = null;
       return res.json({ success: true, redirectUrl: "/reset-password" });
     } else {
       return res.json({ success: false, message: "Invalid OTP" });
@@ -180,7 +178,7 @@ const verifyOtpForgot = async (req, res) => {
   }
 };
 const addAddress = async (req, res) => {
-  const userId = req.session.user; // Ensure this is the correct user ID
+  const userId = req.session.user; 
   const {
     addressType,
     name: fullName,
@@ -192,10 +190,10 @@ const addAddress = async (req, res) => {
     landmark,
     town: city,
     state,
-    isPrimary, // Optional: to explicitly set this address as primary
+    isPrimary, 
   } = req.body;
 
-  // Input validation
+
   if (
     !addressType ||
     !fullName ||
@@ -211,32 +209,31 @@ const addAddress = async (req, res) => {
   }
 
   try {
-    // Fetch the user
+   
     const user = await User.findById(userId).populate("addresses");
 
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    // Check if user already has 4 addresses
+   
     if (user.addresses.length >= 4) {
       return res.status(400).json({
         message: "You cannot add more than 4 addresses.",
       });
     }
 
-    // Determine if this address should be primary
-    const setAsPrimary = isPrimary === "true" || user.addresses.length === 0; // Auto-set primary if it's the first address
+    const setAsPrimary = isPrimary === "true" || user.addresses.length === 0; 
 
-    // If setting as primary, update other addresses to unset their primary status
+  
     if (setAsPrimary) {
       await Address.updateMany(
-        { userId }, // Target all addresses for this user
-        { $set: { isPrimary: false } } // Unset primary status
+        { userId },
+        { $set: { isPrimary: false } } 
       );
     }
 
-    // Create the new address
+  
     const newAddress = await Address.create({
       userId,
       addressType,
@@ -249,10 +246,10 @@ const addAddress = async (req, res) => {
       landmark,
       city,
       state,
-      isPrimary: setAsPrimary, // Set the primary status
+      isPrimary: setAsPrimary, 
     });
 
-    // Add the new address to the user's address list
+ 
     user.addresses.push(newAddress._id);
     await user.save();
 
@@ -264,7 +261,7 @@ const addAddress = async (req, res) => {
     console.error("Error adding address:", error);
     res.status(500).json({
       message: "Error adding address. Please try again.",
-      error: error.message, // Optionally include error message for debugging
+      error: error.message,
     });
   }
 };
@@ -302,7 +299,7 @@ const resendOtpForgot = async (req, res) => {
 const getResetPassPage = async (req, res) => {
   try {
     if (req.session.isLoggedIn) {
-      return res.redirect("/"); // Or to the user's dashboard or profile
+      return res.redirect("/");
     }
 
     res.render("reset-password");
@@ -316,40 +313,40 @@ const forgotNewPassword = async (req, res) => {
     const { password, cPassword } = req.body;
     const email = req.session.email;
 
-    // Check if email is present in session
+
     if (!email) {
       return res
         .status(400)
         .json({ success: false, message: "No email found in session." });
     }
 
-    // Check if passwords match
+   
     if (password !== cPassword) {
       return res
         .status(400)
         .json({ success: false, message: "Passwords do not match." });
     }
 
-    // Hash the new password
+   
     const passwordHash = await securePassword(password);
 
-    // Update user's password in the database
+   
     await User.updateOne(
       { email: email },
       { $set: { password: passwordHash } }
     );
 
-    // Clear session variables and log in the user
+  
     req.session.userOtp = null;
     req.session.email = null;
     req.session.countdownTime = null;
     req.session.previousEmail = null;
-    // Log in the user
+   
 
     return res.json({
       success: true,
       message: "Your password has been reset successfully.",
-      redirect: "/login", // Redirect to a dashboard or home page
+      redirect: "/login", 
     });
   } catch (error) {
     console.error("Error in resetting password:", error);
@@ -362,15 +359,15 @@ const userProfile = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    // Fetch user data
-    const userData = await User.findById(userId).populate("addresses"); // Assuming addresses are populated
+   
+    const userData = await User.findById(userId).populate("addresses"); 
     const userOrders = await Order.find({ userId })
       .populate("items.productId")
       .sort({
         orderedAt: -1,
       });
 
-    // If the user has addresses, they will be included in userData
+   
     res.render("profile", {
       user: userData,
       orders: userOrders,
@@ -397,7 +394,7 @@ const setPrimaryAddress = async (req, res) => {
 
     const addressId = req.params.id;
 
-    // Verify user is logged in
+    
     if (!req.session.user) {
       return res.status(401).json({
         success: false,
@@ -405,13 +402,13 @@ const setPrimaryAddress = async (req, res) => {
       });
     }
 
-    // Update all addresses to non-primary
+   
     await Address.updateMany(
       { userId: userId },
       { $set: { isPrimary: false } }
     );
 
-    // Set the selected address as primary
+  
     const updatedAddress = await Address.findByIdAndUpdate(
       addressId,
       { $set: { isPrimary: true } },
@@ -442,7 +439,7 @@ const deleteUserAddress = async (req, res) => {
     const addressId = req.params.id;
     const userId = req.session.user;
 
-    // Verify the address belongs to the user
+    
     const address = await Address.findOne({ _id: addressId, userId: userId });
     if (!address) {
       return res.status(404).json({
@@ -456,7 +453,7 @@ const deleteUserAddress = async (req, res) => {
       userId: userId,
     });
 
-    // If we deleted a primary address, set another one as primary
+   
     if (deletedAddress.isPrimary) {
       const firstAddress = await Address.findOne({ userId: userId });
       if (firstAddress) {
@@ -482,37 +479,33 @@ const editUserAddress = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    // Use Promise.all for concurrent fetching
+ 
     const [userData, address] = await Promise.all([
       User.findById(userId),
       Address.findOne({
         _id: req.params.id,
-        userId: userId, // More explicit userId check
+        userId: userId,
       }),
     ]);
 
-    // More robust error handling
+    
     if (!userData) {
-      req.flash("error", "User not found");
       return res.redirect("/login");
     }
 
     if (!address) {
-      req.flash("error", "Address not found or you don't have permission");
       return res.redirect("/profile");
     }
 
-    // Render with additional context
+  
     res.render("editAddress", {
       address,
       user: userData,
       pageTitle: "Edit Address",
     });
   } catch (error) {
-    // More detailed error logging
+   
     console.error("Edit Address Error:", error);
-
-    req.flash("error", "An unexpected error occurred");
     res.redirect("/user/profile#address");
   }
 };
@@ -521,7 +514,7 @@ const updateUserAddress = async (req, res) => {
     const addressId = req.params.id;
     const userId = req.session.user;
 
-    // Destructure the request body
+ 
     const {
       addressType,
       name,
@@ -535,7 +528,7 @@ const updateUserAddress = async (req, res) => {
       state,
     } = req.body;
 
-    // Find and update the address
+   
     const updatedAddress = await Address.findOneAndUpdate(
       {
         _id: addressId,
@@ -556,12 +549,12 @@ const updateUserAddress = async (req, res) => {
         },
       },
       {
-        new: true, // Return the updated document
-        runValidators: true, // Run model validations
+        new: true,
+        runValidators: true, 
       }
     );
 
-    // Check if address was found and updated
+  
     if (!updatedAddress) {
       return res.status(404).json({
         success: false,
@@ -570,7 +563,7 @@ const updateUserAddress = async (req, res) => {
       });
     }
 
-    // Send success response
+   
     res.status(200).json({
       success: true,
       message: "Address updated successfully",
@@ -579,7 +572,7 @@ const updateUserAddress = async (req, res) => {
   } catch (error) {
     console.error("Update Address Error:", error);
 
-    // Handle specific validation errors
+   
     if (error.name === "ValidationError") {
       return res.status(400).json({
         success: false,
@@ -587,7 +580,7 @@ const updateUserAddress = async (req, res) => {
       });
     }
 
-    // Generic error response
+    
     res.status(500).json({
       success: false,
       message: "An error occurred while updating the address",
@@ -597,12 +590,12 @@ const updateUserAddress = async (req, res) => {
 
 const updateProfileDetails = async (req, res) => {
   const { name, phone, password, npassword } = req.body;
-  const userId = req.session.user; // Assume user is logged in
+  const userId = req.session.user;
 
   try {
     const user = await User.findById(userId);
 
-    // Validate current password if provided
+    
     if (password) {
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
@@ -613,7 +606,7 @@ const updateProfileDetails = async (req, res) => {
       }
     }
 
-    // Update fields if they have changed
+    
     if (name && name !== user.name) user.name = name;
     if (phone && phone !== user.phone) user.phone = phone;
     if (npassword) user.password = await bcrypt.hash(npassword, 10);
@@ -625,19 +618,19 @@ const updateProfileDetails = async (req, res) => {
   }
 };
 const validatCurrentPassword = async (req, res) => {
-  const { password } = req.body; // Assuming you send userId to identify the user
+  const { password } = req.body; 
   const userId = req.session.user;
 
   try {
-    // Retrieve the user from the database
-    const user = await User.findById(userId); // Replace with your method to get the user
+ 
+    const user = await User.findById(userId); 
 
     if (!user) {
       return res.status(404).json({ valid: false, message: "User  not found" });
     }
 
-    // Compare the entered password with the stored hashed password
-    const isValid = await bcrypt.compare(password, user.password); // Assuming user.password is the hashed password
+   
+    const isValid = await bcrypt.compare(password, user.password);
 
     res.json({ valid: isValid });
   } catch (error) {
@@ -649,15 +642,15 @@ const loadUserOrder = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    // Fetch user data
-    const userData = await User.findById(userId).populate("addresses"); // Assuming addresses are populated
+   
+    const userData = await User.findById(userId).populate("addresses"); 
     const userOrders = await Order.find({ userId })
       .populate("items.productId")
       .sort({
         orderedAt: -1,
       });
 
-    // If the user has addresses, they will be included in userData
+   
     res.render("Order", {
       user: userData,
       orders: userOrders,
@@ -671,15 +664,15 @@ const loadUserAddress = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    // Fetch user data
-    const userData = await User.findById(userId).populate("addresses"); // Assuming addresses are populated
+  
+    const userData = await User.findById(userId).populate("addresses"); 
     const userOrders = await Order.find({ userId })
       .populate("items.productId")
       .sort({
         orderedAt: -1,
       });
 
-    // If the user has addresses, they will be included in userData
+   
     res.render("Address", {
       user: userData,
       orders: userOrders,
@@ -694,15 +687,15 @@ const loadUserAccountDetails = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    // Fetch user data
-    const userData = await User.findById(userId).populate("addresses"); // Assuming addresses are populated
+  
+    const userData = await User.findById(userId).populate("addresses");
     const userOrders = await Order.find({ userId })
       .populate("items.productId")
       .sort({
         orderedAt: -1,
       });
 
-    // If the user has addresses, they will be included in userData
+   
     res.render("AccountDetails", {
       user: userData,
       orders: userOrders,
@@ -728,7 +721,6 @@ module.exports = {
   deleteUserAddress,
   editUserAddress,
   updateUserAddress,
-
   updateProfileDetails,
   validatCurrentPassword,
   loadUserOrder,

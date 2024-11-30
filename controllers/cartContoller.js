@@ -12,11 +12,11 @@ const loadCartPage = async (req, res) => {
     const shippingCharge = 40;
     let isCartEmpty = true;
 
-    // Check if the user is authenticated
+   
     if (req.session && req.session.user) {
       const userId = req.session.user;
 
-      // Fetch the cart for the authenticated user
+      
       const cart = await Cart.findOne({ userId }).populate({
         path: "items.productId",
         model: "Product",
@@ -37,7 +37,7 @@ const loadCartPage = async (req, res) => {
 
             if (!variant) {
               console.error("Variant not found for item:", item);
-              return null; // or handle this case as needed
+              return null; 
             }
 
             return {
@@ -46,7 +46,7 @@ const loadCartPage = async (req, res) => {
                 ? product.category.name
                 : "Unknown",
               productName: product.productName,
-              productBrand: product.brand, // Use brand as string
+              productBrand: product.brand, 
               productImage: product.productImage[0],
               quantity: item.quantity,
               color: item.variant.color,
@@ -95,7 +95,7 @@ const addToCart = async (req, res) => {
     const { productId, size, color, quantity } = req.body;
   
 
-    // Check if the user is authenticated
+   
     if (!req.session || !req.session.user) {
       return res.status(401).json({
         success: false,
@@ -104,14 +104,14 @@ const addToCart = async (req, res) => {
       });
     }
 
-    // Find or create the cart for the user
+   
     let cart = await Cart.findOne({ userId: req.session.user });
     if (!cart) {
      
       cart = new Cart({ userId: req.session.user, items: [] });
     }
 
-    // Find the product to add to the cart
+   
     const product = await Product.findById(productId);
     if (!product) {
       
@@ -120,7 +120,7 @@ const addToCart = async (req, res) => {
         .json({ success: false, message: "Product not found" });
     }
 
-    // Check for the product variant
+   
     const variant = product.variants.find(
       (v) => v.size === size && v.color === color
     );
@@ -132,10 +132,10 @@ const addToCart = async (req, res) => {
       });
     }
 
-    // Detailed logging of existing cart items
+  
    
 
-    // Check for duplicate variant specifically in the variant object
+   
     const isDuplicateVariant = cart.items.some(
       (item) =>
         item.productId.toString() === productId.toString() &&
@@ -143,7 +143,7 @@ const addToCart = async (req, res) => {
         item.variant.color === color
     );
 
-    // Prevent adding the same variant
+   
     if (isDuplicateVariant) {
      
       return res.status(400).json({
@@ -159,7 +159,7 @@ const addToCart = async (req, res) => {
 
     const totalPrice = (product.salePrice || product.regularPrice) * quantity;
 
-    // Add new item to cart
+   
     cart.items.push({
       productId,
       productBrand: product.productBrand,
@@ -177,10 +177,10 @@ const addToCart = async (req, res) => {
 
   
 
-    // Save the cart
+  
     await cart.save();
 
-    // Update the User document to reference the cart
+  
     await User.findByIdAndUpdate(
       req.session.user,
       { $addToSet: { cart: cart._id } },
@@ -244,10 +244,9 @@ const updateStockAfterAdd = async (productId, size, color, quantity) => {
 };
 const deleteFromCart = async (req, res) => {
   try {
-    const { productId, size, color } = req.body; // Get productId, size, and color from request body
-   // Debugging statement
-
-    // Check if the user is authenticated
+    const { productId, size, color } = req.body; 
+  
+    
     if (!req.session || !req.session.user) {
       return res.status(401).json({
         success: false,
@@ -263,10 +262,10 @@ const deleteFromCart = async (req, res) => {
       });
     }
 
-    // Find the index of the item to be removed
+  
     const itemIndex = cart.items.findIndex(
       (item) =>
-        item.productId.equals(productId) && // Ensure productId is compared correctly
+        item.productId.equals(productId) && 
         item.variant.size === size &&
         item.variant.color === color
     );
@@ -278,21 +277,21 @@ const deleteFromCart = async (req, res) => {
       });
     }
 
-    // Remove the item from the cart
+   
     cart.items.splice(itemIndex, 1);
 
-    // Calculate the new total after removal
+  
     const updatedCartTotal = cart.items.reduce((total, item) => {
-      return total + item.itemTotal; // Assuming itemTotal is the total price for each item
+      return total + item.itemTotal;
     }, 0);
 
-    // Save the updated cart
+  
     await cart.save();
 
     return res.status(200).json({
       success: true,
       message: "Item removed from cart successfully",
-      newTotal: updatedCartTotal, // Return the new total
+      newTotal: updatedCartTotal,
     });
   } catch (error) {
     console.error("Error removing item from cart:", error);
@@ -306,7 +305,7 @@ const updateCart = async (req, res) => {
   try {
     const { productId, size, color, quantity } = req.body;
 
-    // Check if user is authenticated
+ 
     if (!req.session || !req.session.user) {
       return res.status(401).json({
         success: false,
@@ -314,7 +313,7 @@ const updateCart = async (req, res) => {
       });
     }
 
-    // Find the user's cart
+  
     const cart = await Cart.findOne({ userId: req.session.user }).populate({
       path: "items.productId",
       model: "Product",
@@ -327,7 +326,7 @@ const updateCart = async (req, res) => {
       });
     }
 
-    // Find the specific item in cart
+  
     const cartItem = cart.items.find(
       (item) =>
         item.productId._id.toString() === productId &&
@@ -342,15 +341,15 @@ const updateCart = async (req, res) => {
       });
     }
 
-    // Update quantity
+   
     cartItem.quantity = parseInt(quantity);
 
-    // Calculate new item total
+   
     const itemTotal =
       cartItem.quantity *
       (cartItem.productId.salePrice || cartItem.productId.regularPrice);
 
-    // Calculate new cart totals
+    
     const subtotal = cart.items.reduce((total, item) => {
       return (
         total +
@@ -359,12 +358,12 @@ const updateCart = async (req, res) => {
       );
     }, 0);
 
-    const shippingCharge = 40; // Your fixed shipping charge
+    const shippingCharge = 40;
     const total = subtotal + shippingCharge;
  
     
 
-    // Save the updated cart
+ 
     await cart.save();
 
     return res.status(200).json({

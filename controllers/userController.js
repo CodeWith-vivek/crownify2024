@@ -156,7 +156,7 @@ const signup = async (req, res) => {
         });
       }
 
-      // If the user is registered with a regular account, return an error
+     
       return res.json({
         success: false,
         message: "User with this email already exists.",
@@ -168,7 +168,7 @@ const signup = async (req, res) => {
 
     const emailSent = await sendVerificationEmail(email, otp);
 
-    // If email was sent successfully
+  
     if (emailSent) {
       const hashedPassword = await securePassword(password);
       let avatarPath = req.file
@@ -354,12 +354,11 @@ const logout = async (req, res) => {
 
 const loadShopPage = async (req, res) => {
   try {
-    // Extract query parameters
+   
     let search = req.query.search || "";
     const page = parseInt(req.query.page) || 1;
     const limit = 12;
-    const isAjax = req.xhr; // Check if it's an AJAX request
-
+  
     // Handle sorting
     const sortOption = req.query.sort || "";
     let sortCriteria = {};
@@ -388,17 +387,17 @@ const loadShopPage = async (req, res) => {
         sortCriteria = {};
     }
 
-    // Fetch blocked brands and unlisted categories
+    
     const [blockedBrands, unlistedCategories] = await Promise.all([
-      Brand.find({ isBlocked: true }).select("brandName"), // Select brandName instead of _id
+      Brand.find({ isBlocked: true }).select("brandName"),
       Category.find({ isListed: false }).select("_id"),
     ]);
 
    
-    // Prepare products query
+  
     const productsQuery = {
       isBlocked: false,
-      brand: { $nin: blockedBrands.map((brand) => brand.brandName) }, // Use brand names for filtering
+      brand: { $nin: blockedBrands.map((brand) => brand.brandName) },
       category: { $nin: unlistedCategories.map((category) => category._id) },
       $or: [
         { productName: { $regex: search, $options: "i" } },
@@ -407,45 +406,32 @@ const loadShopPage = async (req, res) => {
       ],
     };
 
-    // Fetch products with pagination and sorting
+  
     const products = await Product.find(productsQuery)
       .sort(sortCriteria)
       .limit(limit)
       .skip((page - 1) * limit)
-      .populate("category", "name") // Populate category details
+      .populate("category", "name") 
       .exec();
 
    
-    // Count total products for pagination
+   
     const count = await Product.countDocuments(productsQuery);
 
-    // If it's an AJAX request (live search), return JSON
-    if (isAjax) {
-      return res.json({
-        success: true,
-        products,
-        currentPage: page,
-        totalPages: Math.ceil(count / limit),
-        totalProducts: count,
-      });
-    }
+ 
+ 
 
-    // Fetch additional data for full page load
+   
     const [categories, brands, userData] = await Promise.all([
-      Category.find({ isListed: true }), // Only listed categories
-      Brand.find({ isBlocked: false }), // Only unblocked brands
+      Category.find({ isListed: true }),
+      Brand.find({ isBlocked: false }),
       req.session.user ? User.findOne({ _id: req.session.user }) : null,
     ]);
 
-    // Extract unique sizes from the products
+   
     const uniqueSizes = [
       ...new Set(products.flatMap((product) => product.size || [])),
     ];
-
-   
-   
-
-    // Render the full page for non-AJAX requests
     return res.render("Shop", {
       user: userData,
       products,
@@ -460,24 +446,16 @@ const loadShopPage = async (req, res) => {
       totalProducts: count,
     });
   } catch (error) {
-    // Comprehensive error logging
+    
     console.error("Error loading shop page:", error);
 
-    // Handle different types of errors
+   
     if (error.name === "ValidationError") {
       return res.status(400).send("Validation Error: " + error.message);
     }
 
     if (error.name === "MongoError") {
       return res.status(500).send("Database Error: " + error.message);
-    }
-
-    // // Generic error response
-    if (req.xhr) {
-      return res.status(500).json({
-        success: false,
-        message: "Server error occurred while loading shop page",
-      });
     }
 
     res
@@ -491,7 +469,7 @@ const loadProductDetails = async (req, res) => {
   try {
     const productId = req.params.id;
 
-    // Fetch product with explicit selection of all fields we need
+  
     const product = await Product.findById(productId)
       .select({
         productName: 1,
@@ -504,7 +482,7 @@ const loadProductDetails = async (req, res) => {
         reviewsCount: 1,
         variants: 1,
       })
-      .lean() // Convert to plain JavaScript object
+      .lean()
       .exec();
      
 
@@ -512,7 +490,7 @@ const loadProductDetails = async (req, res) => {
       return res.status(404).send("Product not found");
     }
 
-    // Ensure variants array exists and is properly structured
+   
     if (!Array.isArray(product.variants)) {
       product.variants = [];
     }
@@ -521,10 +499,6 @@ const loadProductDetails = async (req, res) => {
        0
      );
 
-    // Log product data for debugging
-  
-
-    // Fetch related products
     const relatedProducts = await Product.find({
       brand: product.brand,
       _id: { $ne: productId },
@@ -533,14 +507,14 @@ const loadProductDetails = async (req, res) => {
       .lean()
       .exec();
 
-    // Prepare the data to be sent to the template
+   
     const templateData = {
       product: {
         ...product,
         variants: product.variants.map((variant) => ({
           size: variant.size,
           color: variant.color,
-          quantity: variant.quantity || 0, // Ensure quantity exists
+          quantity: variant.quantity || 0, 
         })),
         totalQuantity,
       },
@@ -548,14 +522,14 @@ const loadProductDetails = async (req, res) => {
     };
  
 
-    // Add user data if logged in
+ 
     const userId = req.session.user;
     if (userId) {
       const user = await User.findById(userId).lean();
       templateData.user = user;
     }
 
-    // Add script tag in the template to make product data available to frontend
+   
     const productScript = `
             <script>
                 const product = ${JSON.stringify(templateData.product)};
@@ -563,7 +537,7 @@ const loadProductDetails = async (req, res) => {
             </script>
         `;
 
-    // Render the template with all necessary data
+   
     return res.render("ProductDetails", {
       ...templateData,
       productScript,

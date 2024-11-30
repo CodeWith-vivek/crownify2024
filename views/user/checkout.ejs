@@ -151,9 +151,9 @@
 
   document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('checkoutForm').addEventListener('submit', async function (event) {
-            event.preventDefault(); // Prevent the default form submission
+            event.preventDefault(); 
 
-            // Check if any payment method is selected
+            
             const paymentChecked = document.querySelector('input[name="paymentMethod"]:checked');
             const primaryAddress = document.querySelector('.badge.bg-success');
 
@@ -164,7 +164,7 @@
                     icon: 'warning',
                     confirmButtonText: 'OK'
                 });
-                return; // Exit the function if no payment method is selected
+                return;
             }
 
             if (!primaryAddress) {
@@ -174,7 +174,7 @@
                     icon: 'warning',
                     confirmButtonText: 'OK'
                 });
-                return; // Exit the function if no primary address is selected
+                return; 
             }
 
             Swal.fire({
@@ -186,7 +186,7 @@
                 cancelButtonText: 'Cancel'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    // Prepare the form data
+                  
                     const formData = {
                         primaryAddressId: document.querySelector('input[name="primaryAddressId"]').value,
                         products: Array.from(document.querySelectorAll('input[name="products[]"]')).map(input => input.value),
@@ -217,7 +217,7 @@
                                 showConfirmButton: false,
                                 timer: 3000,
                             }).then(() => {
-                                window.location.href = '/shop'; // Redirect to order summary page
+                                window.location.href = '/shop'; 
                             });
                         } else {
                             Swal.fire({
@@ -242,7 +242,7 @@
     });
             function confirmPrimaryAddress(event, addressId) {
                 event.preventDefault();
-                console.log("Function called with addressId:", addressId); // Debug log
+               
 
                 Swal.fire({
                     title: 'Set as Primary Address?',
@@ -258,20 +258,20 @@
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            credentials: 'same-origin'  // Important for sessions
+                            credentials: 'same-origin' 
                         })
                             .then(async response => {
-                                console.log("Response status:", response.status); // Debug log
+                             
 
                                 if (!response.ok) {
                                     const text = await response.text();
-                                    console.log("Error response body:", text); // Debug log
+                                    console.log("Error response body:", text); 
                                     throw new Error(`HTTP error! status: ${response.status}`);
                                 }
                                 return response.json();
                             })
                             .then(data => {
-                                console.log("Success response:", data); // Debug log
+                             
                                 if (data.success) {
                                     Swal.fire({
                                         title: 'Success!',

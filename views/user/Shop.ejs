@@ -220,28 +220,17 @@
                         <% products.forEach(product=> { %>
                             <div class="col-lg-4 col-md-6 col-sm-6">
                                 <div class="product__item <%= product.isBlocked ? 'blocked' : '' %>">
-                                    <!-- Updated the click handler to use the correct route -->
+                                  
                                     <div class="product-click-wrapper"
                                         onclick="window.location.href='/product/<%= product._id %>'">
-                                        <!-- <div class="product__item__pic set-bg"
-                                            data-setbg="/uploads/product-image/<%= product.productImage[0] %>" style="    border-radius: 15px">
-                                            <% if (product.isOnSale) { %>
-                                                <span class="label">Sale</span>
-                                                <% } %>
-                                                    <ul class="product__hover">
-                                                        <li><a href="#"
-                                                                onclick="event.preventDefault(); event.stopPropagation(); handleWishlist('<%= product._id %>')">
-                                                                <img src="/assets/usershop/img/icon/heart.png" alt="">
-                                                            </a></li>
-                                                    </ul>
-                                        </div> -->
+                                
                                         <div class="product__item__pic" style="border-radius: 25px;">
                                             <div class="image-container">
-                                                <!-- Default image -->
+                                              
                                                 <img src="/uploads/product-image/<%= product.productImage[0] %>"
                                                     class="default-image" alt="Product Image" />
 
-                                                <!-- Hover image -->
+                                              
                                                 <% if (product.productImage[1]) { %>
                                                     <img src="/uploads/product-image/<%= product.productImage[1] %>"
                                                         class="hover-image" alt="Hover Image" />
@@ -252,20 +241,13 @@
                                                 <span class="label">Sale</span>
                                                 <% } %>
 
-                                                    <!-- <ul class="product__hover">
-                                                        <li>
-                                                            <a href="#"
-                                                                onclick="event.preventDefault(); event.stopPropagation(); handleWishlist('<%= product._id %>')">
-                                                                <img src="/assets/usershop/img/icon/heart.png" alt="">
-                                                            </a>
-                                                        </li>
-                                                    </ul> -->
+                                                   
                                         </div>
                                         <div class="product__item__text">
                                             <h6>
                                                 <%= product.productName %>
                                             </h6>
-                                            <!-- Modified add-cart to prevent navigation -->
+                                          
                                             <a href="#" class="add-cart"
                                                 onclick="event.preventDefault(); event.stopPropagation(); handleAddToCart('<%= product._id %>')">
 
@@ -421,13 +403,13 @@
                     link.addEventListener('click', (e) => {
                         console.log('Cart link clicked');
 
-                        // Prevent any existing event handlers
+                        
                         e.stopPropagation();
 
-                        // Ensure default navigation
+                      
                         window.location.href = '/cart';
 
-                        // Prevent default link behavior
+                       
                         e.preventDefault();
                     });
                 });

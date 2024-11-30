@@ -158,10 +158,10 @@
             inputPlaceholder: "%"
         });
 
-        // Check if the amount is valid
+      
         if (amount === null || amount === '' || isNaN(amount) || amount < 0 || amount > 100) {
             Swal.fire("Invalid Input", "Please enter a valid percentage between 0 and 100.", "error");
-            return; // Exit the function if the input is invalid
+            return;
         }
 
         $.ajax({
@@ -175,10 +175,10 @@
                 console.log("Response from server:", response);
                 if (response.status === true) {
                     Swal.fire("Offer added", "The offer has been added successfully", "success").then(() => {
-                        location.reload(); // Reload after the alert is closed
+                        location.reload(); 
                     });
                 } else {
-                    // Show the error message from the server
+                   
                     Swal.fire("Failed", response.message || "Unable to add offer", "error");
                 }
             },
@@ -245,11 +245,11 @@
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Perform the action
+                  
                     fetch(url, { method: 'GET' })
                         .then(response => {
                             if (response.ok) {
-                                // Dynamically update the button based on the current action
+                            
                                 const isBlocking = title.includes('Block');
                                 buttonElement.className = isBlocking ? 'btn btn-success' : 'btn btn-danger';
                                 buttonElement.querySelector('a').textContent = isBlocking ? 'Unblock' : 'Block';
@@ -276,11 +276,11 @@
     </script>
   
     <script>
-        // Handle logout action with fetch
+       
         document.getElementById('logoutLink').addEventListener('click', function (event) {
-            event.preventDefault(); // Prevent the default link behavior
+            event.preventDefault(); 
 
-            // Send fetch request to logout
+           
             fetch('/admin/logout', {
                 method: 'POST',
                 headers: {
@@ -291,29 +291,29 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Show success SweetAlert
+                       
                         Swal.fire({
                             icon: 'success',
                             title: 'Logged Out',
-                            text: data.message, // Message from the backend
-                            timer: 2000, // Wait for 2 seconds before redirect
-                            showConfirmButton: false // Hide the confirm button
+                            text: data.message, 
+                            timer: 2000,
+                            showConfirmButton: false 
                         }).then(() => {
-                            // Redirect after showing SweetAlert
+                           
                             window.location.replace('/admin/login');
                         });
                     } else {
-                        // If logout failed, show an error SweetAlert
+                     
                         Swal.fire({
                             icon: 'error',
                             title: 'Logout Failed',
-                            text: data.message, // Message from the backend
+                            text: data.message, 
                             confirmButtonText: 'Try Again'
                         });
                     }
                 })
                 .catch(error => {
-                    // Handle any network errors
+                   
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',

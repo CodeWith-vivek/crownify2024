@@ -195,14 +195,14 @@
                     const orderDate = orderItem.getAttribute('data-order-date');
                     const items = JSON.parse(orderItem.getAttribute('data-items'));
 
-                    // Populate modal header info
+                   
                     document.getElementById('modalOrderId').textContent = orderId;
                     document.getElementById('modalCustomer').textContent = customerName;
                     document.getElementById('modalDate').textContent = new Date(orderDate).toLocaleDateString();
 
-                    // Populate items with individual actions
+                 
                     const modalItems = document.getElementById('modalItems');
-                    modalItems.innerHTML = ''; // Clear previous items
+                    modalItems.innerHTML = '';
 
                     items.forEach((item, index) => {
                         const itemDiv = document.createElement('div');
@@ -211,7 +211,7 @@
                         const itemStatus = item.orderStatus || 'Return Pending';
                         const itemPrice = (item.productId?.salePrice || item.productId?.regularPrice || 0) * item.quantity;
 
-                        // Determine badge color based on status
+                    
                         const getBadgeClass = (status) => {
                             const badgeClasses = {
                                 'Delivered': 'bg-success',
@@ -226,7 +226,7 @@
                             return badgeClasses[status] || 'bg-secondary';
                         };
 
-                        // Determine which button to show based on status
+                       
                         const getActionButton = (status) => {
                             const commonAttributes = `
                     data-order-id="${orderId}" 
@@ -290,16 +290,16 @@
                         modalItems.appendChild(itemDiv);
                     });
 
-                    // Show the modal
+                   
                     document.getElementById('orderModal').style.display = 'block';
 
-                    // Add event listeners for new buttons
+                 
                     setupActionButtons();
                 });
             });
 
             function setupActionButtons() {
-                // Cancel Item Button Handler
+           
                 document.querySelectorAll('.cancel-item').forEach(button => {
                     button.addEventListener('click', function () {
                         const orderId = this.getAttribute('data-order-id');
@@ -310,7 +310,7 @@
                         const productSize = this.getAttribute('data-product-size');
                         const productPrice = this.getAttribute('data-product-price');
 
-                        // Populate cancel modal fields
+                      
                         document.getElementById('cancelOrderId').textContent = orderId;
                         document.getElementById('cancelProductName').textContent = productName;
                         document.getElementById('cancelProductImage').src = `/uploads/product-image/${productImage || 'placeholder.jpg'}`;
@@ -318,10 +318,10 @@
                         document.getElementById('cancelProductSize').textContent = productSize || 'N/A';
                         document.getElementById('cancelProductPrice').textContent = productPrice;
 
-                        // Show the cancel modal
+                      
                         document.getElementById('cancelModal').style.display = 'block';
 
-                        // Handle cancellation submission
+                       
                         const submitCancellationButton = document.getElementById('submitCancellation');
                         submitCancellationButton.onclick = function () {
                             handleItemCancellation(
@@ -336,7 +336,7 @@
                     });
                 });
 
-                // Return Item Button Handler
+              
                 document.querySelectorAll('.return-item').forEach(button => {
                     button.addEventListener('click', function () {
                         const orderId = this.getAttribute('data-order-id');
@@ -347,7 +347,7 @@
                         const productSize = this.getAttribute('data-product-size');
                         const productPrice = this.getAttribute('data-product-price');
 
-                        // Populate return modal fields
+                       
                         document.getElementById('returnOrderId').textContent = orderId;
                         document.getElementById('returnProductName').textContent = productName;
                         document.getElementById('returnProductImage').src = `/uploads/product-image/${productImage || 'placeholder.jpg'}`;
@@ -355,13 +355,13 @@
                         document.getElementById('returnProductSize').textContent = productSize || 'N/A';
                         document.getElementById('returnProductPrice').textContent = productPrice;
 
-                        // Clear previous comment
+                      
                         document.getElementById('returnComment').value = '';
 
-                        // Show the return modal
+                       
                         document.getElementById('returnModal').style.display = 'block';
 
-                        // Handle return submission
+                       
                         const submitReturnButton = document.getElementById('submitReturn');
                         submitReturnButton.onclick = function () {
                             handleReturnSubmission(
@@ -388,7 +388,7 @@
                     return;
                 }
 
-                // Show SweetAlert confirmation before sending the request
+              
                 Swal.fire({
                     title: 'Are you sure?',
                     text: 'Do you really want to submit this return request?',
@@ -400,7 +400,7 @@
                     cancelButtonText: 'No, keep it'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // User confirmed return submission, show loading
+                     
                         Swal.fire({
                             title: 'Processing...',
                             text: 'Please wait while we process your return request.',
@@ -411,7 +411,7 @@
                             }
                         });
 
-                        // Prepare the data to send
+                        
                         const data = {
                             orderId,
                             productName,
@@ -421,7 +421,7 @@
                             returnComment: comment,
                         };
 
-                        // Send the POST request using Fetch API
+                      
                         fetch('/return-item', {
                             method: 'POST',
                             headers: {
@@ -438,17 +438,17 @@
                                         text: 'Your return request has been submitted successfully.',
                                         confirmButtonText: 'OK'
                                     }).then(() => {
-                                        // Reload the page after successful cancellation
+                                      
                                         window.location.reload();
                                     }).then(() => {
-                                        // Update the UI to reflect the return status
+                                        
                                         const returnButton = document.querySelector(`.return-item[data-order-id="${orderId}"][data-item-index="${itemIndex}"]`);
                                         returnButton.innerText = 'Cancel Return';
                                         returnButton.classList.remove('btn-warning');
                                         returnButton.classList.add('btn-danger');
                                         returnButton.disabled = false;
 
-                                        // Update the status display
+                                      
                                         const statusBadge = returnButton.closest('.product-item').querySelector('.badge');
                                         if (statusBadge) {
                                             statusBadge.innerText = 'Return Requested';
@@ -456,7 +456,7 @@
                                             statusBadge.classList.add('bg-warning');
                                         }
 
-                                        // Close the modal
+                                       
                                         closeModal('returnModal');
                                     });
                                 } else {
@@ -484,7 +484,7 @@
             function handleItemCancellation(orderId, itemIndex, productName, productSize, productColor, productPrice) {
                 const cancelComment = document.getElementById('cancelComment').value.trim();
 
-                // Validate if cancelComment is empty
+               
                 if (!cancelComment) {
                     Swal.fire({
                         icon: 'warning',
@@ -495,7 +495,7 @@
                     return;
                 }
 
-                // Show SweetAlert confirmation before sending the request
+               
                 Swal.fire({
                     title: 'Are you sure?',
                     text: 'Do you really want to cancel this item?',
@@ -507,7 +507,7 @@
                     cancelButtonText: 'No, keep it'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // User confirmed cancellation, show loading
+                      
                         Swal.fire({
                             title: 'Processing...',
                             text: 'Please wait while we cancel your item.',
@@ -518,7 +518,7 @@
                             }
                         });
 
-                        // Prepare the data to send
+                        
                         const data = {
                             orderId,
                             productName,
@@ -528,7 +528,7 @@
                             cancelComment
                         };
 
-                        // Send the POST request using Fetch API
+                       
                         fetch('/cancel-item', {
                             method: 'POST',
                             headers: {
@@ -545,7 +545,7 @@
                                         text: 'The item has been successfully canceled.',
                                         confirmButtonText: 'OK'
                                     }).then(() => {
-                                        // Reload the page after successful cancellation
+                                      
                                         window.location.reload();
                                     });
                                 } else {
@@ -567,7 +567,7 @@
                                 });
                             });
                     } else {
-                        // User clicked "No, keep it" - show non-intrusive toast
+                       
                         Swal.fire({
                             icon: 'info',
                             title: 'Action Cancelled',
@@ -587,21 +587,21 @@
                     document.getElementById(modalId).style.display = 'none';
                 } else {
                     document.querySelectorAll('.modal').forEach(modal => {
-                        modal.style.display = 'none'; // Close all modals
+                        modal.style.display = 'none'; 
                     });
                 }
 
-                // Clear modal content for specific modals
+              
                 if (modalId === 'orderModal') {
-                    document.getElementById('modalItems').innerHTML = ''; // Clear order items
+                    document.getElementById('modalItems').innerHTML = ''; 
                 } else if (modalId === 'cancelModal') {
-                    document.getElementById('cancelComment').value = ''; // Clear cancel reason
+                    document.getElementById('cancelComment').value = ''; 
                 } else if (modalId === 'returnModal') {
-                    document.getElementById('returnComment').value = ''; // Clear return reason
+                    document.getElementById('returnComment').value = ''; 
                 }
             }
 
-            // Close modal when clicking outside
+          
             window.onclick = function (event) {
                 const modals = document.querySelectorAll('.modal');
                 modals.forEach(modal => {

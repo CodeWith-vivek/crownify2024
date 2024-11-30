@@ -5,11 +5,11 @@
     const resendButton = document.getElementById('resendOtp');
     const currentEmail = document.getElementById('user-email').value;
 
-    // Default countdown time
+  
     countdownTime = <%= countdownTime %>;
     let intervalId;
 
-    // Load countdown time from localStorage if available
+   
     function loadCountdownTime() {
         const savedTime = localStorage.getItem('countdownTime');
         if (savedTime) {
@@ -17,12 +17,12 @@
         }
     }
 
-    // Save countdown time to localStorage
+  
     function saveCountdownTime() {
         localStorage.setItem('countdownTime', countdownTime);
     }
 
-    // Clear countdown time from localStorage
+    
     function clearCountdownTime() {
         localStorage.removeItem('countdownTime');
     }
@@ -39,11 +39,11 @@
     }
 
     function startCountdown() {
-        updateTimerDisplay(); // Update the display immediately
+        updateTimerDisplay();
         intervalId = setInterval(() => {
             countdownTime--;
-            saveCountdownTime(); // Save the remaining time
-            updateTimerDisplay(); // Update the display on each tick
+            saveCountdownTime();
+            updateTimerDisplay();
 
             if (countdownTime <= 0) {
                 clearInterval(intervalId);
@@ -96,11 +96,11 @@
                             });
                         });
 
-    // Load the countdown time when the script loads
+  
     loadCountdownTime();
     startCountdown();
 
-    // Event listener for verifying OTP
+   
     verifyOtpButton.addEventListener('click', () => {
         let otpCode = '';
         otpInputs.forEach(input => otpCode += input.value);
@@ -114,7 +114,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Clear any stored countdown time
+                      
                         clearCountdownTime();
                         sessionStorage.setItem('signupComplete', 'true');
 
@@ -158,7 +158,7 @@
             }
         });
 
-        // Clear signup completion flag on logout
+    
         window.addEventListener('beforeunload', function () {
             if (window.location.pathname === '/logout') {
                 sessionStorage.removeItem('signupComplete');
@@ -166,15 +166,15 @@
         });
 
 
-    // Resend OTP // functionality
+  
     resendButton.onclick = () => {
-        if (countdownTime > 0) return; // Don't allow resend if timer is still active
-        countdownTime = 120; // Reset countdown to 120 seconds
+        if (countdownTime > 0) return;
+        countdownTime = 120;
         timerElement.style.color = 'gray';
         timerElement.style.fontSize = "14px";
          saveCountdownTime();
         resetOtpInputs();
-        startCountdown(); // Start the countdown again
+        startCountdown();
 
         fetch('/resend-otp', {
             method: 'POST',
@@ -210,7 +210,7 @@
             });
     };
 
-    // Additional event listeners and functions can be added here as needed
+   
 </script>
 
 <script>
@@ -224,12 +224,12 @@
         const closeModalBtn = document.getElementById("close-modal-btn");
         let cropper;
 
-        // Trigger file upload dialog
+       
         changePictureBtn.addEventListener("click", () => {
             avatarUpload.click();
         });
 
-        // Initialize Cropper.js on image select
+     
         avatarUpload.addEventListener("change", (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -243,12 +243,12 @@
                     cropImage.src = event.target.result;
                     cropModal.style.display = "block";
 
-                    // Destroy existing cropper instance if it exists
+                  
                     if (cropper) {
                         cropper.destroy();
                     }
 
-                    // Initialize new cropper
+                  
                     cropper = new Cropper(cropImage, {
                         aspectRatio: 1,
                         viewMode: 1,
@@ -267,7 +267,7 @@
             }
         });
 
-        // Save cropped image
+   
         cropSaveBtn.addEventListener("click", async () => {
             try {
                 if (!cropper) {
@@ -275,7 +275,7 @@
                 }
 
                 const canvas = cropper.getCroppedCanvas({
-                    width: 300,  // Set desired dimensions
+                    width: 300, 
                     height: 300,
                     imageSmoothingEnabled: true,
                     imageSmoothingQuality: 'high',
@@ -297,7 +297,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Update avatar preview
+                  
                     const avatar = document.querySelector('.avatar');
                     avatar.style.backgroundImage = `url(${data.avatarUrl}?${new Date().getTime()})`;
                     avatar.textContent = ''; // Clear any initial letter

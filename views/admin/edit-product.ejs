@@ -159,20 +159,7 @@
                                     <div id="category-error" class="error-message"></div>
                                 </div>
                             </div>
-                            <!-- <div class="row">
-                                <div class="col-sm-6 mb-3">
-                                    <label class="form-label">Category</label>
-                                    <select class="form-select border" name="category">
-                                        <% for (let i=0; i < cat.length; i++) { %>
-                                            <option value="<%= cat[i]._id %>" <%=cat[i]._id.toString()===product.category._id.toString()
-                                                ? 'selected' : '' %>>
-                                                <%= cat[i].name %>
-                                            </option>
-                                            <% } %>
-                                    </select>
-                                    <div id="category-error" class="error-message"></div>
-                                </div>
-                            </div> -->
+                         
 
                             <!-- Image Upload -->
                             <div class="card mb-2">
@@ -323,7 +310,7 @@
     function validateForm() {
         clearErrorMessages();
 
-        // Select elements using querySelector for more reliable selection
+    
         const name = document.querySelector('input[name="productName"]').value.trim();
         const description = document.querySelector('textarea[name="description"]').value.trim();
         const brand = document.querySelector('select[name="brand"]').value;
@@ -333,25 +320,25 @@
 
         let isValid = true;
 
-        // Product Name Validation
+      
         if (name === "") {
             displayErrorMessage('productName-error', 'Please enter a product name.');
             isValid = false;
         }
 
-        // Description Validation
+   
         if (description === "") {
             displayErrorMessage('description-error', 'Please enter a product description.');
             isValid = false;
         }
 
-        // Brand Validation
+      
         if (brand === "") {
             displayErrorMessage('brand-error', 'Please select a brand.');
             isValid = false;
         }
 
-        // Price Validations
+       
         if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
             displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
             isValid = false;
@@ -367,13 +354,13 @@
             isValid = false;
         }
 
-        // Category Validation
+     
         if (category === "") {
             displayErrorMessage('category-error', 'Please select a category.');
             isValid = false;
         }
 
-        // Size, Color, Quantity Validation
+     
         const sizeColorGroups = document.querySelectorAll('.size-color-group');
         sizeColorGroups.forEach((group, index) => {
             const size = group.querySelector('select[name="sizes[]"]').value;
@@ -407,7 +394,7 @@
                 }
             }
 
-            // Clear Error Messages Function
+          
             function clearErrorMessages() {
                 const errorElements = document.getElementsByClassName('error-message');
                 Array.from(errorElements).forEach(element => {
@@ -519,14 +506,14 @@
         </script>
         <script>
          document.getElementById('productForm').addEventListener('submit', function (e) {
-                e.preventDefault(); // Prevent default form submission
+                e.preventDefault(); 
 
-                // Run validation
+               
                 if (!validateForm()) {
-                    return; // Stop if validation fails
+                    return;
                 }
 
-                // If validation passes, submit form
+            
                 const form = e.target;
                 const formData = new FormData(form);
 
@@ -536,7 +523,7 @@
                 })
                     .then(response => {
                         if (!response.ok) {
-                            // Attempt to get the error message from the response
+                           
                             return response.json().then(err => {
                                 throw new Error(err.message || 'Network response was not ok');
                             });
@@ -564,7 +551,7 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        // Check if the error has a response with a message
+                      
                         if (error.response) {
                             console.error('Response data:', error.response.data);
                             Swal.fire({
@@ -574,7 +561,7 @@
                                 confirmButtonText: 'OK'
                             });
                         } else {
-                            // Fallback for general errors
+                           
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Submission Error',
@@ -588,11 +575,10 @@
         </script>
  
         <script>
-            // Handle logout action with fetch
+       
             document.getElementById('logoutLink').addEventListener('click', function (event) {
-                event.preventDefault(); // Prevent the default link behavior
-
-                // Send fetch request to logout
+                event.preventDefault();
+              
                 fetch('/admin/logout', {
                     method: 'POST',
                     headers: {
@@ -603,29 +589,29 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Show success SweetAlert
+                         
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Logged Out',
-                                text: data.message, // Message from the backend
-                                timer: 2000, // Wait for 2 seconds before redirect
-                                showConfirmButton: false // Hide the confirm button
+                                text: data.message,
+                                timer: 2000, 
+                                showConfirmButton: false 
                             }).then(() => {
-                                // Redirect after showing SweetAlert
+                              
                                 window.location.replace('/admin/login');
                             });
                         } else {
-                            // If logout failed, show an error SweetAlert
+                           
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Logout Failed',
-                                text: data.message, // Message from the backend
+                                text: data.message, 
                                 confirmButtonText: 'Try Again'
                             });
                         }
                     })
                     .catch(error => {
-                        // Handle any network errors
+                       
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',

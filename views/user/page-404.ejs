@@ -34,13 +34,12 @@
                     link.addEventListener('click', (e) => {
                         console.log('Cart link clicked');
 
-                        // Prevent any existing event handlers
+                     
                         e.stopPropagation();
 
-                        // Ensure default navigation
+                      
                         window.location.href = '/cart';
 
-                        // Prevent default link behavior
                         e.preventDefault();
                     });
                 });

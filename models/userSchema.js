@@ -102,7 +102,7 @@ const userSchema = new Schema(
    
     avatar: {
       type: String,
-      required: false, // avatar is now optional
+      required: false,
     },
   },
   {

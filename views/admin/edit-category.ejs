@@ -26,15 +26,15 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             function validateForm() {
-                // Clear previous error messages
+               
                 clearErrorMessage();
 
-                // Fetch field values
+              
                 const name = document.getElementById("categoryName").value.trim();
                 const description = document.getElementById("description").value.trim();
                 let isValid = true;
 
-                // Name validation
+               
                 if (name === "") {
                     displayErrorMessage("name-error", "Please enter a name");
                     isValid = false;
@@ -43,7 +43,7 @@
                     isValid = false;
                 }
 
-                // Description validation
+               
                 if (description === "") {
                     displayErrorMessage("description-error", "Please enter a description");
                     isValid = false;
@@ -66,7 +66,7 @@
                 });
             }
 
-            // Handle update category button
+        
             document.getElementById("updateCategoryButton").addEventListener("click", function () {
                 if (validateForm()) {
                     Swal.fire({
@@ -80,7 +80,7 @@
                         cancelButtonText: "Cancel"
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            // Submit the form if confirmed
+                           
                             document.getElementById("editCategoryForm").submit();
                         }
                     });
@@ -88,11 +88,11 @@
             });
         </script>
         <script>
-            // Handle logout action with fetch
+           
             document.getElementById('logoutLink').addEventListener('click', function (event) {
-                event.preventDefault(); // Prevent the default link behavior
+                event.preventDefault(); 
 
-                // Send fetch request to logout
+              
                 fetch('/admin/logout', {
                     method: 'POST',
                     headers: {
@@ -103,29 +103,29 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Show success SweetAlert
+                          
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Logged Out',
-                                text: data.message, // Message from the backend
-                                timer: 2000, // Wait for 2 seconds before redirect
-                                showConfirmButton: false // Hide the confirm button
+                                text: data.message,
+                                timer: 2000,
+                                showConfirmButton: false
                             }).then(() => {
-                                // Redirect after showing SweetAlert
+                               
                                 window.location.replace('/admin/login');
                             });
                         } else {
-                            // If logout failed, show an error SweetAlert
+                           
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Logout Failed',
-                                text: data.message, // Message from the backend
+                                text: data.message,
                                 confirmButtonText: 'Try Again'
                             });
                         }
                     })
                     .catch(error => {
-                        // Handle any network errors
+                      
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',

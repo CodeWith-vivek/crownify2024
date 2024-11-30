@@ -88,7 +88,7 @@
         }
     });
 
-    // Real-time validation for the phone number
+   
     document.getElementById('phone').addEventListener('input', function () {
         const phone = this.value.trim();
         const phoneError = document.getElementById('phoneError');
@@ -100,7 +100,7 @@
         }
     });
 
-    // Real-time validation for the current password
+   
     document.getElementById('password').addEventListener('input', async function () {
         const password = this.value;
         const passwordError = document.getElementById('passwordError');
@@ -109,26 +109,26 @@
 
         if (password.length < 8) {
             passwordError.textContent = 'Current password must be at least 8 characters long';
-            npasswordField.disabled = true; // Disable new password fields
+            npasswordField.disabled = true; 
             cpasswordField.disabled = true;
         } else {
             passwordError.textContent = '';
 
-            // Validate current password with the backend
+           
             try {
                 const response = await fetch('/validate-current-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password }) // Send the current password to validate
+                    body: JSON.stringify({ password }) 
                 });
                 const result = await response.json();
                 if (result.valid) {
-                    npasswordField.disabled = false; // Enable new password fields
+                    npasswordField.disabled = false;
                     cpasswordField.disabled = false;
                 } else {
-                    npasswordField.disabled = true; // Disable new password fields
+                    npasswordField.disabled = true; 
                     cpasswordField.disabled = true;
-                    passwordError.textContent = 'Incorrect current password'; // Show error if password is incorrect
+                    passwordError.textContent = 'Incorrect current password'; 
                 }
             } catch (error) {
                 console.error('Error validating password:', error);
@@ -137,7 +137,7 @@
         }
     });
 
-    // Real-time validation for the new password
+  
     document.getElementById('npassword').addEventListener('input', function () {
         const npassword = this.value;
         const cpassword = document.getElementById('cpassword').value;
@@ -152,7 +152,7 @@
         }
     });
 
-    // Real-time validation for the confirm password
+  
     document.getElementById('cpassword').addEventListener('input', function () {
         const cpassword = this.value;
         const npassword = document.getElementById('npassword').value;
@@ -165,11 +165,11 @@
         }
     });
 
-    // Form submission logic
+ 
     document.getElementById('updateForm').addEventListener('submit', async function (e) {
-        e.preventDefault(); // Prevent the default form submission
+        e.preventDefault();
 
-        // Check for validation errors
+     
         const errors = document.querySelectorAll('.error-message');
         let hasErrors = false;
 
@@ -185,10 +185,10 @@
                 title: 'Validation Error',
                 text: 'Please fix the errors before submitting.',
             });
-            return; // Stop form submission
+            return;
         }
 
-        // If no errors, proceed with form submission
+       
         const name = document.getElementById('name').value.trim();
         const phone = document.getElementById('phone').value.trim();
         const password = document.getElementById('password').value;

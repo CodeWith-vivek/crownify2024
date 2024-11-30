@@ -47,10 +47,7 @@
                                             <label for="addressType">Address Type:</label>
                                             <select name="addressType" id="addressType" required
                                                 style="border-radius: 36px;">
-                                                <!-- <option value="">Select Address Type</option>
-                                                <option value="Home">Home</option>
-                                                <option value="Office">Office</option>
-                                                <option value="Other">Other</option> -->
+                                             
                                                 <option value="Home" <%=address.addressType==='Home' ? 'selected' : ''
                                                     %>
                                                     >
@@ -241,14 +238,14 @@
                     return isValid;
                 };
 
-                // Attach validation listeners to all fields
+             
                 for (const field in fields) {
                     const element = document.getElementById(fields[field].id);
                     element.addEventListener("input", () => validateField(field));
                     element.addEventListener("blur", () => validateField(field, true));
                 }
 
-                // Validate all fields on form submission
+             
                 document.getElementById("signform").addEventListener("submit", async (event) => {
                     event.preventDefault();
                     let allValid = true;
@@ -317,13 +314,13 @@
                     link.addEventListener('click', (e) => {
                         console.log('Cart link clicked');
 
-                        // Prevent any existing event handlers
+                 
                         e.stopPropagation();
 
-                        // Ensure default navigation
+                     
                         window.location.href = '/cart';
 
-                        // Prevent default link behavior
+                    
                         e.preventDefault();
                     });
                 });

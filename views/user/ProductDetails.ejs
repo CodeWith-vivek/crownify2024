@@ -129,10 +129,9 @@
                                 <span>Default Quantity : </span>
                                 <div class="quantity">
                                     <div class="pro-qty">
-                                        <!-- <button class="qtybtn inc">▲</button> -->
+                                       
                                         <input type="number" value="1" min="1" max="6" id="quantityInput" readonly>
-                                        <!-- <button class="qtybtn dec" style="    top: 11px;
-    right: 15px;">▼</button> -->
+                          
                                     </div>
                                 </div>
                                 <a href="#" class="primary-btn" id="addToCartBtn" disabled>Add to Cart</a>
@@ -249,24 +248,24 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <script>
-            // Global variables to track selection state
+          
             let currentSize = null;
             let currentColor = null;
 
-            // Initialize the page
+            
             document.addEventListener('DOMContentLoaded', function () {
-                // Initially hide all color options
+              
                 document.querySelectorAll('.color-label').forEach(label => {
                     label.style.display = 'none';
                 });
 
-                // Set up initial state
+               
                 updateAddToCartButton();
                 setupStockCheck()
                 setupCartNavigation();
             });
 
-            // Size selection handling
+          
             document.querySelectorAll('input[name="size"]').forEach(sizeInput => {
 
                 sizeInput.addEventListener('change', function () {
@@ -277,42 +276,42 @@
                     currentSize = selectedSize;
                     console.log("Selected size:", selectedSize);
 
-                    // Reset color selection
+                  
                     resetColorSelection();
 
-                    // Show only relevant colors for selected size
+                   
                     showRelevantColors(selectedSize);
 
-                    // Reset stock display since size has changed
+                  
                     const stockDisplay = document.getElementById('stock-display');
                     stockDisplay.textContent = 'Please select both size and color to see stock';
                     stockDisplay.style.color = 'gray';
 
-                    // Reset quantity to 1 when size changes
+                 
                     const quantityInput = document.getElementById('quantityInput');
                     quantityInput.value = 1; // Reset quantity to 1
 
-                    // Update UI state
+                  
                     updateAddToCartButton();
 
-                    // Add a slight delay before updating the stock display
+                   
                     setTimeout(() => {
                         updateStockDisplay();
                     }, 10);
                 });
             });
-            // Color selection handling
+          
             document.querySelectorAll('input[name="color"]').forEach(colorInput => {
                 colorInput.addEventListener('change', function () {
                     if (!currentSize) {
                         this.checked = false;
                         Swal.fire({
-                            icon: 'info', // Type of alert (options: success, error, warning, info, question)
+                            icon: 'info', 
                             title: 'Incomplete Selection',
                             text: 'Please select a size first.',
-                            confirmButtonText: 'OK', // Text for the confirmation button
+                            confirmButtonText: 'OK',
                             customClass: {
-                                confirmButton: 'btn btn-warning', // Optional: Add custom classes to the button for styling
+                                confirmButton: 'btn btn-warning', 
                             },
                         });
                         return;
@@ -322,28 +321,28 @@
                     currentColor = selectedColor;
                     console.log("Selected color:", selectedColor);
 
-                    // Update color swatch highlighting
+                   
                     updateColorSwatchHighlight(this);
 
 
-                    // Fetch stock information for the selected size and color
-                    updateStockDisplay(); // This will now fetch stock regardless of quantity
+                   
+                    updateStockDisplay();
 
-                    // Update the Add to Cart button state
+                  
                     updateAddToCartButton();
 
                 });
             });
 
             function resetColorSelection() {
-                // Clear color selection state
+               
                 currentColor = null;
                 document.querySelectorAll('input[name="color"]').forEach(input => {
                     input.checked = false;
                 });
                 removeColorHighlight();
 
-                // Reset stock display
+              
                 const stockDisplay = document.getElementById('stock-display');
                 stockDisplay.textContent = 'Please select a color for the chosen size';
                 stockDisplay.style.color = 'gray';
@@ -353,14 +352,14 @@
                 const productId = '<%= product._id %>';
                 const stockDisplay = document.getElementById('stock-display');
 
-                // Show all color options for the selected size
+                
                 document.querySelectorAll('.color-label').forEach(label => {
                     const colorInput = label.querySelector('input[name="color"]');
                     if (label.dataset.size === selectedSize) {
-                        label.style.display = 'inline-block'; // Show the color option
+                        label.style.display = 'inline-block';
                         const color = colorInput.value;
 
-                        // Fetch stock for each color
+                       
                         fetch(`/product/${productId}/stock?size=${encodeURIComponent(selectedSize)}&color=${encodeURIComponent(color)}`)
                             .then(response => response.json())
 
@@ -368,25 +367,25 @@
                                 console.error('Error fetching stock for color:', error);
                             });
                     } else {
-                        label.style.display = 'none'; // Hide color options that don't match the selected size
+                        label.style.display = 'none';
                     }
                 });
 
-                // Reset stock display
+               
                 stockDisplay.textContent = "Please select a color to see stock";
                 stockDisplay.style.color = 'gray';
             }
             function updateColorSwatchHighlight(selectedInput) {
                 console.log('Updating color swatch highlight for:', selectedInput.value);
-                // Remove highlight from all swatches
+              
                 removeColorHighlight();
 
-                // Find the swatch for the selected input
+               
                 const swatch = selectedInput.parentElement.querySelector('.color-swatch');
 
                 if (swatch) {
                     console.log('Highlighting swatch:', swatch);
-                    swatch.classList.add('selected'); // Add highlight to the selected swatch
+                    swatch.classList.add('selected'); 
                 }
             }
             function removeColorHighlight() {
@@ -450,7 +449,7 @@
             function updateAddToCartButton() {
                 const addToCartBtn = document.getElementById('addToCartBtn');
                 if (currentSize && currentColor) {
-                    // Fetch stock to ensure button is only enabled when stock > 0
+                  
                     const productId = '<%= product._id %>';
                     fetch(`/product/${productId}/stock?size=${encodeURIComponent(currentSize)}&color=${encodeURIComponent(currentColor)}`)
                         .then(response => response.json())
@@ -475,22 +474,22 @@
             }
 
             function setupStockCheck() {
-                const quantity = 1; // Fixed quantity
+                const quantity = 1; 
                 const stockDisplay = document.getElementById('stock-display');
 
                 document.querySelectorAll('.qtybtn').forEach(button => {
                     button.addEventListener('click', async function () {
                         const productId = '<%= product._id %>';
-                        const size = currentSize; // Ensure this variable is set when a size is selected
-                        const color = currentColor; // Ensure this variable is set when a color is selected
+                        const size = currentSize;
+                        const color = currentColor; 
 
                         if (size && color) {
-                            // Fetch stock data for the selected size and color
+                          
                             const response = await fetch(`/product/${productId}/stock?size=${encodeURIComponent(size)}&color=${encodeURIComponent(color)}`);
                             const data = await response.json();
 
                             if (data.stock !== undefined) {
-                                // Check if stock is sufficient for the fixed quantity
+                               
                                 if (data.stock >= quantity) {
                                     stockDisplay.textContent = `In stock: ${data.stock}`;
                                     stockDisplay.style.color = 'green';
@@ -504,30 +503,30 @@
                             }
                         } else {
                             Swal.fire({
-                                icon: 'warning', // Type of alert (options: success, error, warning, info, question)
+                                icon: 'warning', 
                                 title: 'Incomplete Selection',
                                 text: 'Please select both size and color.',
-                                confirmButtonText: 'OK', // Text for the confirmation button
+                                confirmButtonText: 'OK', 
                                 customClass: {
-                                    confirmButton: 'btn btn-warning', // Optional: Add custom classes to the button for styling
+                                    confirmButton: 'btn btn-warning',
                                 },
                             });
                         }
                     });
                 });
             }
-            // Add to Cart functionality
+           
             document.getElementById('addToCartBtn').addEventListener('click', async function (event) {
                 event.preventDefault();
 
                 if (!currentSize || !currentColor) {
                     Swal.fire({
-                        icon: 'warning', // Type of alert (options: success, error, warning, info, question)
+                        icon: 'warning', 
                         title: 'Incomplete Selection',
                         text: 'Please select both size and color before adding to cart.',
-                        confirmButtonText: 'OK', // Text for the confirmation button
+                        confirmButtonText: 'OK',
                         customClass: {
-                            confirmButton: 'btn btn-warning', // Optional: Add custom classes to the button for styling
+                            confirmButton: 'btn btn-warning', 
                         },
                     });
                     return;
@@ -538,7 +537,6 @@
 
 
 
-                // Add to cart API call
                 try {
                     const response = await fetch('/cart/add', {
                         method: 'POST',
@@ -562,9 +560,9 @@
                             text: 'Item added to cart successfully!',
 
                         }).then((result) => {
-                            // if (result.isConfirmed) {
+                            
                             location.reload();
-                            // }
+                          
                         });
 
                     } else {
@@ -602,9 +600,9 @@
                 });
             }
 
-            // Related products "Add to Cart" handler
+           
             function handleAddToCart(productId) {
-                // Implement related products add to cart functionality
+                
                 fetch('/cart/add', {
                     method: 'POST',
                     headers: {
@@ -612,7 +610,7 @@
                     },
                     body: JSON.stringify({
                         productId: productId,
-                        quantity: 1  // Default quantity for related products
+                        quantity: 1 
                     })
                 })
                     .then(response => response.json())
@@ -622,10 +620,7 @@
                                 icon: 'success',
                                 title: 'Success!',
                                 text: 'Product added to cart successfully!',
-                                // confirmButtonText: 'OK',
-                                // customClass: {
-                                //     confirmButton: 'btn btn-success',
-                                // },
+                               
                             });
                         } else {
                             Swal.fire({
@@ -657,7 +652,7 @@
                     });
             }
 
-            // Initialize magnifier functionality if needed
+            
             function initMagnifier() {
                 const magnifierGlass = document.createElement('div');
                 magnifierGlass.setAttribute('class', 'img-magnifier-glass');
@@ -666,11 +661,11 @@
                     img.parentElement.style.position = 'relative';
                     img.parentElement.appendChild(magnifierGlass.cloneNode(true));
 
-                    // Add magnifier glass functionality here if needed
+                   
                 });
             }
 
-            // Call initialization functions when document is ready
+           
             document.addEventListener('DOMContentLoaded', function () {
                 initMagnifier();
             })
@@ -680,9 +675,9 @@
                 cartLinks.forEach(link => {
                     link.addEventListener('click', (e) => {
                         console.log('Cart link clicked');
-                        e.stopPropagation(); // Prevent bubbling to avoid duplicate handlers
+                        e.stopPropagation();
                         window.location.href = '/cart';
-                        e.preventDefault(); // Prevent default navigation
+                        e.preventDefault();
                     });
                 });
             });
@@ -693,15 +688,15 @@
                         const defaultBg = item.getAttribute('data-setbg');
                         const hoverBg = item.getAttribute('data-hoverbg');
 
-                        // Set initial background image
+                       
                         item.style.backgroundImage = `url(${defaultBg})`;
 
-                        // Change background image on hover
+                        
                         item.addEventListener('mouseover', () => {
                             item.style.backgroundImage = `url(${hoverBg})`;
                         });
 
-                        // Revert back to original image on mouse out
+                       
                         item.addEventListener('mouseout', () => {
                             item.style.backgroundImage = `url(${defaultBg})`;
                         });

@@ -14,23 +14,23 @@ const path = require("path");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/"); // Specify your uploads directory
+    cb(null, "uploads/"); 
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // Append the current timestamp to the file name
+    cb(null, Date.now() + path.extname(file.originalname)); 
   },
 });
 const upload = multer({ storage: storage });
+
+
 function restrictLoggedInUser(req, res, next) {
   if (req.isAuthenticated && req.isAuthenticated()) {
-    // Redirect to a specific page if the user is already logged in
     return res.redirect("/profile");
   }
-  next(); // Continue to the requested route if the user is not logged in
+  next();
 }
 const preventBackToAuth = async (req, res, next) => {
   if (req.session.user) {
-    // If user is logged in and trying to access auth pages
     if (
       req.path === "/verify-otp" ||
       req.path === "/signup" ||
@@ -39,7 +39,7 @@ const preventBackToAuth = async (req, res, next) => {
       return res.redirect("/");
     }
   } else {
-    // If user is not logged in and trying to access OTP page directly
+   
     if (req.path === "/verify-otp" && !req.session.userData) {
       return res.redirect("/signup");
     }
@@ -88,7 +88,6 @@ router.post("/login", preventCache,restrictLoggedInUser,userController.login);
 
 router.get("/logout",userController.logout)
 router.get("/shop", userController.loadShopPage);
-
 router.get("/product/:id", userController.loadProductDetails);
 
 

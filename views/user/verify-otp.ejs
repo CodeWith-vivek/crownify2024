@@ -154,11 +154,11 @@
             const resendButton = document.getElementById('resendOtp');
             const currentEmail = document.getElementById('user-email').value;
 
-            // Default countdown time
+            
             countdownTime = <%= countdownTime %>;
             let intervalId;
 
-            // Load countdown time from localStorage if available
+          
             function loadCountdownTime() {
                 const savedTime = localStorage.getItem('countdownTime');
                 if (savedTime) {
@@ -166,12 +166,12 @@
                 }
             }
 
-            // Save countdown time to localStorage
+           
             function saveCountdownTime() {
                 localStorage.setItem('countdownTime', countdownTime);
             }
 
-            // Clear countdown time from localStorage
+            
             function clearCountdownTime() {
                 localStorage.removeItem('countdownTime');
             }
@@ -248,14 +248,14 @@
                 });
             });
 
-            // Load the countdown time when the script loads
+           
             loadCountdownTime();
              if (countdownTime > 0) {
-        startCountdown(); // Start countdown only if time is left
+        startCountdown(); 
     } else {
-        displayTimerExpired(); // Show expired message immediately if time is zero
+        displayTimerExpired();
     }
-            // Event listener for verifying OTP
+           
             verifyOtpButton.addEventListener('click', () => {
                 let otpCode = '';
                 otpInputs.forEach(input => otpCode += input.value);
@@ -269,7 +269,7 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                // Clear any stored countdown time
+                                
                                 clearCountdownTime();
                                 sessionStorage.setItem('signupComplete', 'true');
 
@@ -313,7 +313,7 @@
                 }
             });
 
-            // Clear signup completion flag on logout
+            
             window.addEventListener('beforeunload', function () {
                 if (window.location.pathname === '/logout') {
                     sessionStorage.removeItem('signupComplete');
@@ -321,15 +321,15 @@
             });
 
 
-            // Resend OTP // functionality
+           
             resendButton.onclick = () => {
-                if (countdownTime > 0) return; // Don't allow resend if timer is still active
-                countdownTime = 120; // Reset countdown to 120 seconds
+                if (countdownTime > 0) return; 
+                countdownTime = 120; 
                 timerElement.style.color = 'gray';
                 timerElement.style.fontSize = "14px";
                 saveCountdownTime();
                 resetOtpInputs();
-                startCountdown(); // Start the countdown again
+                startCountdown(); 
 
                 fetch('/resend-otp', {
                     method: 'POST',
@@ -365,7 +365,7 @@
                     });
             };
 
-            // Additional event listeners and functions can be added here as needed
+            
         </script>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
@@ -377,13 +377,13 @@
                         link.addEventListener('click', (e) => {
                             console.log('Cart link clicked');
 
-                            // Prevent any existing event handlers
+                           
                             e.stopPropagation();
 
-                            // Ensure default navigation
+                          
                             window.location.href = '/cart';
 
-                            // Prevent default link behavior
+                           
                             e.preventDefault();
                         });
                     });

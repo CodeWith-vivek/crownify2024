@@ -157,7 +157,7 @@
             countdownTime = <%= countdownTime %>;
             let intervalId;
 
-            // Load saved countdown time from localStorage
+          
             function loadCountdownTime() {
                 const savedTime = localStorage.getItem('countdownTime');
                 if (savedTime) {
@@ -165,24 +165,24 @@
                 }
             }
 
-            // Save countdown time to localStorage
+           
             function saveCountdownTime() {
                 localStorage.setItem('countdownTime', countdownTime);
             }
 
-            // Clear countdown time from localStorage
+           
             function clearCountdownTime() {
                 localStorage.removeItem('countdownTime');
             }
 
-            // Function to format time
+         
             function formatTime(seconds) {
                 const minutes = Math.floor(seconds / 60);
                 const secs = seconds % 60;
                 return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
             }
 
-            // Start countdown
+         
             function startCountdown() {
                 updateTimerDisplay();
                  intervalId = setInterval(() => {
@@ -199,7 +199,7 @@
                 }, 1000);
             }
 
-            // Update timer display
+         
             function updateTimerDisplay() {
                     timerElement.innerHTML = formatTime(countdownTime) + ' Sec';
                     const resendButton = document.getElementById('resendOtp');
@@ -251,7 +251,7 @@
 
 
          
-            // Move to next input field
+          
             function moveToNext(current, nextFieldID) {
                 if (current.value.length === 1 && !isNaN(current.value)) {
                     document.getElementById(nextFieldID).focus();
@@ -260,23 +260,23 @@
                 }
             }
 
-            // Move to previous input field
+         
             function moveToPrev(current, prevFieldID, event) {
                 if (event.key === 'Backspace' && current.value.length === 0) {
                     document.getElementById(prevFieldID).focus();
                 }
             }
 
-            // OTP input should only allow numbers
+          
             otpInputs.forEach(input => {
                 input.addEventListener('input', (e) => {
                     if (!/^\d*$/.test(e.target.value)) {
-                        e.target.value = '';  // Only numbers allowed
+                        e.target.value = '';  
                     }
                 });
             });
 
-            // Verify OTP on button click
+         
             verifyOtpButton.addEventListener('click', () => {
                 let otpCode = '';
                 otpInputs.forEach(input => otpCode += input.value);
@@ -336,7 +336,7 @@
                 resetOtpInputs();
                 startCountdown(); 
 
-                // Send request to resend OTP
+             
                 fetch('/resend-otp-forgot', {
                     method: 'POST',
                     headers: {
@@ -382,13 +382,13 @@
                         link.addEventListener('click', (e) => {
                             console.log('Cart link clicked');
 
-                            // Prevent any existing event handlers
+                           
                             e.stopPropagation();
 
-                            // Ensure default navigation
+                           
                             window.location.href = '/cart';
 
-                            // Prevent default link behavior
+                         
                             e.preventDefault();
                         });
                     });

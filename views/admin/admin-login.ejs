@@ -70,7 +70,7 @@
     </section>
     <%- include("../../views/partials/admin/footer") %>
         <script>
-            // Form Elements
+        
             const emailid = document.getElementById("email");
             const passid = document.getElementById("password");
             const error1 = document.getElementById("error1");
@@ -78,7 +78,6 @@
             let emailValid = false;
             let passValid = false;
 
-            // Email validation function
             function emailValidateChecking() {
                 const emailValue = emailid.value.toLowerCase().trim();
                 const emailpattern = /^[a-zA-Z0-9._-]+@(gmail\.com|yahoo\.com|icloud\.com|outlook\.com)$/;
@@ -87,12 +86,12 @@
                     error1.innerHTML = "Not a valid email id";
                     emailValid = false;
                 } else {
-                    error1.style.display = "none";  // Hide error if valid
+                    error1.style.display = "none";  
                     emailValid = true;
                 }
             }
 
-            // Password validation function
+         
             function passValidationChecking() {
                 const passValue = passid.value.trim();
                 const passpattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -102,26 +101,26 @@
                     error2.innerHTML = "Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character";
                     passValid = false;
                 } else {
-                    error2.style.display = "none";  // Hide error if valid
+                    error2.style.display = "none"; 
                     passValid = true;
                 }
             }
 
-            // Add event listeners for live validation
+           
             passid.addEventListener('input', passValidationChecking);
             emailid.addEventListener('input', emailValidateChecking);
 
-            // Submit event for form validation and login
+           
             const loginForm = document.getElementById('loginForm');
 
                 loginForm.addEventListener('submit', async (e) => {
-                    e.preventDefault(); // Prevent the default form submission
+                    e.preventDefault(); 
 
-                    // Get input values
+                 
                     const email = document.getElementById('email').value;
                     const password = document.getElementById('password').value;
 
-                    // Fetch request to the backend login route
+                  
                     const response = await fetch('/admin/login', {
                         method: 'POST',
                         headers: {
@@ -132,22 +131,22 @@
 
                     const data = await response.json();
 
-                    // Check the response from the backend
+                 
                     if (data.success) {
-                        // Show success SweetAlert
+                   
                         Swal.fire({
                             icon: 'success',
                             title: 'Login Successful',
                             text: 'You have successfully logged in as an admin.',
-                             showConfirmButton: false,  // Hide the OK button
-                            timer: 1000,  // Set timer for 3 seconds
-                            // timerProgressBar: true, 
+                             showConfirmButton: false, 
+                            timer: 1000, 
+                            
                         }).then(() => {
-                            // Redirect to the admin dashboard after the alert
-                            window.location.replace(data.redirectUrl);  // Use the redirect URL from backend
+                           
+                            window.location.replace(data.redirectUrl);  
                         });
                     } else {
-                        // Show error SweetAlert
+                     
                         Swal.fire({
                             icon: 'error',
                             title: 'Login Failed',
@@ -163,7 +162,7 @@
                 const passwordInput = document.getElementById('password');
                 const eyeIcon = document.getElementById('eye-icon');
 
-                // Check if the password input and eye icon exist
+              
                 if (passwordInput && eyeIcon) {
                     if (passwordInput.type === 'password') {
                         passwordInput.type = 'text';

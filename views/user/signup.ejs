@@ -154,7 +154,7 @@
                     error1.innerHTML = "";
                     nameValid = true;
                 }
-                passValidationChecking(); // Recheck password validation as name changes
+                passValidationChecking();
             }
 
             function emailValidateChecking() {
@@ -217,18 +217,18 @@
                 }
             }
 
-            // Attach event listeners for real-time validation
+          
             nameid.addEventListener('input', nameValidatedChecking);
             emailid.addEventListener('input', emailValidateChecking);
             phoneid.addEventListener('input', phoneValidateChecking);
             passid.addEventListener('input', passValidationChecking);
             cpassid.addEventListener('input', passValidationChecking);
 
-            // Form submission handler
+          
             signform.addEventListener('submit', async function (event) {
                 event.preventDefault();
 
-                // Run all validations
+               
                 nameValidatedChecking();
                 emailValidateChecking();
                 phoneValidateChecking();
@@ -257,7 +257,7 @@
                                 icon: 'success',
                                 title: 'OTP Sent',
                                 text: data.message,
-                                showConfirmButton: false,  // Hide the OK button
+                                showConfirmButton: false, 
                                 timer: 3000,
                             }).then(() => {
                                 localStorage.setItem('countdownTime', '120');
@@ -268,7 +268,7 @@
                                 icon: 'error',
                                 title: 'Registration Failed',
                                 text: data.message,
-                                showConfirmButton: false,  // Hide the OK button
+                                showConfirmButton: false,
                                 timer: 5000,
                             });
                         }
@@ -316,7 +316,7 @@
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
         <script>
             function showLoginAlert(event) {
-                event.preventDefault(); // Prevent default link behavior
+                event.preventDefault();
                 swal({
                     title: "Logging In",
                     text: "Successfully logging  in using with Google.",
@@ -324,7 +324,7 @@
                     buttons: false,
                     timer: 1200,
                 }).then(() => {
-                    // Redirect to Google authentication after alert
+                   
                     window.location.href = "/auth/google";
                 });
             }
@@ -338,13 +338,12 @@
                         link.addEventListener('click', (e) => {
                             console.log('Cart link clicked');
 
-                            // Prevent any existing event handlers
                             e.stopPropagation();
 
-                            // Ensure default navigation
+                          
                             window.location.href = '/cart';
 
-                            // Prevent default link behavior
+                          
                             e.preventDefault();
                         });
                     });

@@ -214,12 +214,12 @@
             form.addEventListener("submit", async (event) => {
                 event.preventDefault();
 
-                const newStatus = event.submitter.value; // Use event.submitter to get the clicked button's value
+                const newStatus = event.submitter.value;
                 const orderId = form.querySelector('input[name="orderId"]').value;
                 const productSize = form.querySelector('input[name="productSize"]').value;
                 const productColor = form.querySelector('input[name="productColor"]').value;
 
-                // SweetAlert confirmation
+        
                 Swal.fire({
                     icon: 'question',
                     title: 'Are you sure?',
@@ -252,7 +252,7 @@
                                     title: 'Success!',
                                     text: 'Order status updated successfully!',
                                 });
-                                // Update UI
+                             
                                 const statusBadge = form.closest("tr").querySelector(".status-badge");
                                 if (statusBadge) {
                                     statusBadge.textContent = newStatus;

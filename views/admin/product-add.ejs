@@ -189,7 +189,7 @@
     </section>
     <%- include("../../views/partials/admin/footer2") %>
         <script>
-            let variantIndex = 1; // Start from 1 since 0 is already used
+            let variantIndex = 1;
 
             document.getElementById('addSizeColorBtn').addEventListener('click', function () {
                 const container = document.getElementById('sizeColorContainer');
@@ -345,7 +345,7 @@
                 const category = document.getElementsByName('category')[0].value;
                 let isValid = true;
 
-                // Existing Field Validations
+             
                 if (name.trim() === "") {
                     displayErrorMessage('productName-error', 'Please enter a product name.');
                     isValid = false;
@@ -381,7 +381,7 @@
                     isValid = false;
                 }
 
-                // Size, Color, Quantity Validation
+          
                 const sizeColorGroups = document.querySelectorAll('.size-color-group');
                 sizeColorGroups.forEach((group, index) => {
                     const size = group.querySelector('select[name="sizes[]"]').value;
@@ -402,7 +402,7 @@
                     }
                 });
 
-                // Image Validation
+                
                 const imageInputs = [
                     document.getElementById('input1'),
                     document.getElementById('input2'),
@@ -446,15 +446,15 @@
                 const errorElements = document.getElementsByClassName('error-message');
                 Array.from(errorElements).forEach(element => {
                     element.innerText = '';
-                    element.style.display = "none"; // Hide error messages
+                    element.style.display = "none"; 
                 });
             }
           document.getElementById('productForm').addEventListener('submit', async (e) => {
-                e.preventDefault(); // Prevent default form submission
+                e.preventDefault(); 
 
-                // First, run form validation
+               
                 if (!validateForm()) {
-                    return; // Stop if validation fails
+                    return;
                 }
 
                 const formData = new FormData(e.target);
@@ -465,27 +465,22 @@
                         body: formData
                     });
 
-                    // Log full response for debugging
-                    console.log('Full Response:', response);
-
-                    // Parse the JSON response
+            
                     const result = await response.json();
-                    console.log('Parsed Result:', result);
 
-                    // Check if response is successful
                     if (response.ok && result.success) {
-                        // SweetAlert Success
+               
                         Swal.fire({
                             icon: 'success',
                             title: 'Success!',
                             text: result.message || 'Product added successfully',
                             confirmButtonText: 'OK'
                         }).then(() => {
-                            // Redirect after confirmation
+                       
                             window.location.href = '/admin/products';
                         });
                     } else {
-                        // SweetAlert Error
+               
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
@@ -494,7 +489,7 @@
                         });
                     }
                 } catch (error) {
-                    // Comprehensive error handling
+            
                     console.error('Submission Error:', error);
 
                     Swal.fire({
@@ -505,11 +500,10 @@
                     });
                 }
             });
-            // Handle logout action with fetch
+  
             document.getElementById('logoutLink').addEventListener('click', function (event) {
-                event.preventDefault(); // Prevent the default link behavior
-
-                // Send fetch request to logout
+                event.preventDefault();
+       
                 fetch('/admin/logout', {
                     method: 'POST',
                     headers: {
@@ -520,29 +514,29 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Show success SweetAlert
+                     
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Logged Out',
-                                text: data.message, // Message from the backend
-                                timer: 2000, // Wait for 2 seconds before redirect
-                                showConfirmButton: false // Hide the confirm button
+                                text: data.message,
+                                timer: 2000, 
+                                showConfirmButton: false 
                             }).then(() => {
-                                // Redirect after showing SweetAlert
+                      
                                 window.location.replace('/admin/login');
                             });
                         } else {
-                            // If logout failed, show an error SweetAlert
+                         
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Logout Failed',
-                                text: data.message, // Message from the backend
+                                text: data.message,
                                 confirmButtonText: 'Try Again'
                             });
                         }
                     })
                     .catch(error => {
-                        // Handle any network errors
+                   
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',

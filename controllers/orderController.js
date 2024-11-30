@@ -14,7 +14,7 @@ const placeOrder = async (req, res) => {
       paymentMethod,
     } = req.body;
 
-    // Validate cart items by fetching the user's cart
+   
     const cart = await Cart.findOne({ userId });
 
     if (!cart || cart.items.length === 0) {
@@ -24,7 +24,7 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    // Prepare items for the order, validating against product availability
+  
     const orderProducts = [];
     for (let i = 0; i < cart.items.length; i++) {
       const cartItem = cart.items[i];
@@ -36,7 +36,7 @@ const placeOrder = async (req, res) => {
 
 
 
-      // Check if the variant exists in the product variants array
+    
       const variantIndex = product.variants.findIndex(
         (v) =>
           v.size === cartItem.variant.size && v.color === cartItem.variant.color
@@ -49,7 +49,7 @@ const placeOrder = async (req, res) => {
         });
       }
 
-      // Ensure there's enough stock
+   
       if (product.variants[variantIndex].quantity < cartItem.quantity) {
         return res.status(400).json({
           success: false,
@@ -57,7 +57,7 @@ const placeOrder = async (req, res) => {
         });
       }
 
-      // Reduce stock and save the product
+    
       product.variants[variantIndex].quantity -= cartItem.quantity;
       await product.save();
 
@@ -72,10 +72,10 @@ const placeOrder = async (req, res) => {
         regularPrice: product.regularPrice,
         salePrice: product.salePrice,
         totalPrice: product.salePrice * cartItem.quantity,
-        productImage: product.productImage[0], // Adjust if you want to select the right image
+        productImage: product.productImage[0],
       });
     }
-    // Validate the shipping address
+  
     const primaryAddress = await Address.findOne({
       _id: primaryAddressId,
       userId,
@@ -88,19 +88,21 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    // Create the order
+  
     const order = new Order({
       userId,
       primaryAddressId,
-      items: orderProducts, // Save the items array here
+      items: orderProducts,
       subtotal,
       shipping,
       total,
       grandTotal: total,
-      totalAmount: subtotal + shipping,
+      totalAmount: Number(subtotal) + Number(shipping),
       paymentMethod,
       shippingAddress: primaryAddressId,
     });
+  
+    
 
     await order.save();
 
@@ -134,7 +136,7 @@ const cancelOrder = async (req, res) => {
       cancelComment,
     } = req.body;
 
-    // Validate required fields
+
     if (!orderId || !productSize || !productColor) {
       return res.status(400).json({
         success: false,
@@ -145,7 +147,7 @@ const cancelOrder = async (req, res) => {
 
     const userId = req.session.user;
 
-    // Find the order
+
     const order = await Order.findOne({ _id: orderId, userId });
 
     if (!order) {
@@ -155,16 +157,16 @@ const cancelOrder = async (req, res) => {
       });
     }
 
-    // Find the specific item in the order using size and color
+   
     const orderItemIndex = order.items.findIndex((item) => {
-      // Add null checks
+
       if (!item.variant) return false;
 
-      // Convert sizes to uppercase for case-insensitive comparison
+   
       const itemSize = item.variant.size.toUpperCase();
       const requestSize = productSize.toUpperCase();
 
-      // Convert colors to uppercase for case-insensitive comparison
+    
       const itemColor = item.variant.color.toUpperCase();
       const requestColor = productColor.toUpperCase();
 
@@ -196,10 +198,10 @@ const cancelOrder = async (req, res) => {
       });
     }
 
-    // Get the productId from the orderItem
+    
     const productIdFromOrder = orderItem.productId;
 
-    // Find the product and update its stock
+   
     const product = await Product.findById(productIdFromOrder);
     if (product) {
       const variantIndex = product.variants.findIndex(
@@ -214,13 +216,13 @@ const cancelOrder = async (req, res) => {
       }
     }
 
-    // Update the order item status to canceled
+   
     order.items[orderItemIndex].orderStatus = "canceled";
     if (cancelComment) {
       order.items[orderItemIndex].cancelComment = cancelComment;
     }
 
-    // If all items are canceled, update the overall order status
+   
     const allItemsCanceled = order.items.every(
       (item) => item.orderStatus === "canceled"
     );
@@ -250,7 +252,7 @@ const returnItem = async (req, res) => {
 
     const { orderId, productSize, productColor, returnComment } = req.body;
 
-    // Validate required fields
+   
     if (!orderId || !productSize || !productColor) {
       return res.status(400).json({
         success: false,
@@ -261,7 +263,7 @@ const returnItem = async (req, res) => {
 
     const userId = req.session.user;
 
-    // Find the order
+    
     const order = await Order.findOne({ _id: orderId, userId });
 
     if (!order) {
@@ -271,7 +273,7 @@ const returnItem = async (req, res) => {
       });
     }
 
-    // Find the specific item in the order using size and color
+   
     const orderItemIndex = order.items.findIndex((item) => {
       if (!item.variant) return false;
 
@@ -311,7 +313,7 @@ const returnItem = async (req, res) => {
       });
     }
 
-    // Update the order item status to return_pending
+   
     order.items[orderItemIndex].orderStatus = "Return requested";
     if (returnComment) {
       order.items[orderItemIndex].returnComment = returnComment;
