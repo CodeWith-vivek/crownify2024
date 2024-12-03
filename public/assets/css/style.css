@@ -631,7 +631,7 @@ th {
   border: 1px solid transparent;
   border-radius: 0;
   padding: 8px 15px 8px;
-  background-color: black;
+  background-color:transparent;
   color: #fff;
   font-family: Poppins, Helvetica, Tahoma, Arial, sans-serif;
   font-weight: 400;
@@ -1275,9 +1275,12 @@ textarea:-ms-input-placeholder {
   padding-left: 0;
 }
 
-.mobile-nav-wrapper,
-.site-header__logo.mobileview {
-  display: none;
+@media (min-width: 992px) {
+
+  .mobile-nav-wrapper,
+  .site-header__logo.mobileview {
+    display: none;
+  }
 }
 
 @media (min-width:990px) {

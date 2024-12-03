@@ -23,7 +23,9 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
 
     <link rel="stylesheet" href="assets/css/style2.css">
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
@@ -32,7 +34,51 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
+<style>
+    .breadcrumb-option {
+    background: #291616;;
+    padding: 40px 0;
+}
+body{
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    text-align: left;
+    background-color: #fff;
+}
+.breadcrumb__text h4 {
+    color: #ffffff;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+.breadcrumb__links a {
+    font-size: 15px;
+    color: #ffffff;
+    margin-right: 18px;
+    display: inline-block;
+    position: relative;
+}
+.breadcrumb__links span {
+    font-size: 15px;
+    color: #b7b7b7;
+    display: inline-block;
+}
+p{
+    color: #fff;
+}
+body, html {
+            margin: 0;
+            padding: 0;
+            font-family: monospace;
+            background-color: #9b8178;
+            color: #000;
+            line-height: 1.6;
+        }
 
+</style>
 </head>
 
 <body class="template-index belle home12-category">
@@ -76,7 +122,7 @@
                             <span>/</span>
                             <li><a href="/signup">SIGN UP</a></li>
                                 <%}%>
-                            <li style="padding-right: 61px;"><a href="faq.html">FAQS</a></li>
+                            <li style="padding-right: 61px;"><a href="/faq">FAQS</a></li>
                         </ul>
                     </div>
                 </div>
@@ -110,31 +156,28 @@
                                             class="anm anm-angle-down-l"></i></a>
 
                                 </li>
+                                <li class="lvl1 parent megamenu"><a href="/brand">Brand <i class="anm anm-angle-down-l"></i></a>
+                                
+                                </li>
                                 <li class="lvl1 parent megamenu"><a href="/shop">Shop <i
                                             class="anm anm-angle-down-l"></i></a>
 
                                 </li>
-                                <!-- <li class="lvl1 parent megamenu"><a href="#">Brand<i
-                                            class="anm anm-angle-down-l"></i></a>
-
-                                </li>
+                              
+                
                                 <li class="lvl1 parent dropdown"><a href="#">Pages <i
                                             class="anm anm-angle-down-l"></i></a>
                                     <ul class="dropdown">
 
-                                        <li><a href="checkout.html" class="site-nav">Checkout</a></li>
-                                        <li><a href="about-us.html" class="site-nav">About Us <span
-                                                    class="lbl nm_label1">New</span> </a></li>
-                                        <li><a href="contact-us.html" class="site-nav">Contact Us</a></li>
-                                        <li><a href="faqs.html" class="site-nav">FAQs</a></li>
+                                        <li><a href="/About" class="site-nav">About Us  </a></li>
+                                        <li><a href="/contact" class="site-nav">Contact Us</a></li>
+                                        <li><a href="/faq" class="site-nav">FAQs</a></li>
 
-                                        <li><a href="404.html" class="site-nav">404</a></li>
-                                        <li><a href="coming-soon.html" class="site-nav">Coming soon <span
-                                                    class="lbl nm_label1">New</span> </a></li>
+                                       
                                     </ul>
                                 </li>
-                                <li class="lvl1 parent dropdown"><a href="#">Contact<i
-                                            class="anm anm-angle-down-l"></i></a></li> -->
+                                <li class="lvl1 parent dropdown"><a href="/contact">Contact<i
+                                            class="anm anm-angle-down-l"></i></a></li>
 
 
                             </ul>
@@ -153,14 +196,14 @@
                     <!--Mobile Logo-->
                     <div class="col-4 col-sm-3 col-md-3 col-lg-2 d-flex align-items-center justify-content-end">
                         <!-- Common Elements for all users -->
-                        <div class="site-header__search">
+                        <!-- <div class="site-header__search">
                             <button type="button" class="search-trigger"><i class="icon anm anm-search-l"></i></button>
                         </div>
                         <div class="site-header__wishlist">
                             <button type="button" class="wishlist-trigger">
                                 <i class="icon anm anm-heart-l"></i>
                             </button>
-                        </div>
+                        </div> -->
                         <div class="site-cart mr-3">
                             <a href="/cart" class="site-header__cart" title="Cart">
                                 <i class="icon anm anm-bag-l"></i>
@@ -203,13 +246,29 @@
                 <li class="lvl1 parent megamenu"><a href="/">Home <i class="anm anm-plus-l"></i></a>
 
                 </li>
+                <li class="lvl1 parent megamenu"><a href="/brand">Brand <i class="anm anm-plus-l"></i></a>
+                
+                </li>
                 <li class="lvl1 parent megamenu"><a href="/shop">Shop <i class="anm anm-plus-l"></i></a>
 
                 </li>
+                <li class="lvl1 parent megamenu"><a href="#">Pages <i class="anm anm-plus-l"></i></a>
+                    <ul>
+                
+                    
+                        <li><a href="/About" class="site-nav">About Us</a>
+                        </li>
+                        <li><a href="/contact" class="site-nav">Contact Us</a></li>
+                        <li><a href="/faq" class="site-nav">FAQs</a></li>
+                    </ul>
+                </li>
+                
              
             </ul>
         </div>
         <!--End Mobile Menu-->
+
+
         <div class="container-fluid crownify d-flex justify-content-center align-items-center">
             <img src="assets/images/logo/Crownify_logo_text.png" class="custom-logo">
 

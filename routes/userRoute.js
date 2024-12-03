@@ -9,6 +9,7 @@ const checkoutController=require("../controllers/checkoutController")
 const {userAuth}=require("../middlewares/auth")
 const preventCache=require("../middlewares/prevent")
 const orderController=require("../controllers/orderController")
+const contactController = require("../controllers/contactController");
 const multer = require("multer");
 const path = require("path");
 
@@ -52,6 +53,11 @@ router.get("/pageNotFound", userController.pageNotFound);
 //user signup managing
 
 router.get("/",userController.loadHomepage)
+router.get("/brand", userController.loadBrandpage);
+router.post("/contact", contactController.submitContactForm);
+router.get("/contact", userController.loadContactpage);
+router.get("/About", userController.loadAboutpage);
+router.get("/faq", userController.loadFaqpage);
 router.get("/signup",preventCache,preventBackToAuth,userController.loadSignup)
 router.post("/signup", userController.signup);
 router.get("/verify-otp",preventCache,preventBackToAuth,userController.loadOtpverify)

@@ -34,7 +34,7 @@ const userSchema = new Schema(
     },
     googleId: {
       type: String,
-      unique: true,
+      default: null, // Ensure null is explicitly allowed
     },
     password: {
       type: String,
@@ -99,11 +99,11 @@ const userSchema = new Schema(
     ],
     addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }],
 
-   
     avatar: {
       type: String,
       required: false,
     },
+    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
   },
   {
     collection: "users",

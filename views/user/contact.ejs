@@ -1,0 +1,210 @@
+<%- include("../../views/partials/user/headershop") %>
+<section class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb__text">
+                    <h4>Shop</h4>
+                    <div class="breadcrumb__links">
+                        <a href="/">Home</a>
+                        <span>Contact</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div class="container-fluid crownify d-flex justify-content-center align-items-center" style="margin-top: 0px;">
+    <img src="assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+
+</div>
+
+<div class="map">
+
+    
+    <iframe src="https://www.google.com/maps?q=9.938290,76.321862&z=15&output=embed" height="500" style="border:0;"
+        allowfullscreen="" aria-hidden="false" tabindex="0">
+    </iframe>
+</div>
+<!-- Map End -->
+
+<!-- Contact Section Begin -->
+<section class="contact spad" style="background-color: #fdeaea;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-md-6">
+                <div class="contact__text">
+                    <div class="section-title">
+                        <span>Information</span>
+                        <h2>Contact Us</h2>
+                        <p>As you might expect of a company that began as a high-end interiors contractor, we pay
+                            strict attention.</p>
+                    </div>
+                    <ul>
+                        <li>
+                            <h4>America</h4>
+                            <p>195 E Parker Square Dr, Parker, CO 801 <br />+43 982-314-0958</p>
+                        </li>
+                        <li>
+                            <h4>France</h4>
+                            <p>109 Avenue Léon, 63 Clermont-Ferrand <br />+12 345-423-9893</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6">
+                <div class="contact__form">
+                    <form action="/contact" method="POST" id="contactForm">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div id="errorName" class="error-message"></div>
+                                <input type="text" placeholder="Full Name" id="name" name="name">
+                               
+                            </div>
+                            <div class="col-lg-12">
+                                <div id="errorEmail" class="error-message"></div>
+                                <input type="text" placeholder="Email" id="email" name="email">
+                               
+                            </div>
+                            <div class="col-lg-12">
+                                <div id="errorPhone" class="error-message"></div>
+                                <input type="text" placeholder="Phone" id="phone" name="phone">
+                              
+                            </div>
+                            <div class="col-lg-12">
+                                <div id="errorMessage" class="error-message"></div>
+                                <textarea placeholder="Message" id="message" name="message"></textarea>
+                               
+                                <button type="submit" class="site-btn">Send Message</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+<%- include("../../views/partials/user/footershop") %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+   const nameid = document.getElementById("name");
+    const emailid = document.getElementById("email");
+    const messageid = document.getElementById("message");
+    const phoneid = document.getElementById("phone");
+
+    const errorName = document.getElementById("errorName");
+    const errorEmail = document.getElementById("errorEmail");
+    const errorPhone = document.getElementById("errorPhone");
+    const errorMessage = document.getElementById("errorMessage");
+
+    let nameValid = false;
+    let emailValid = false;
+    let messageValid = false;
+    let phoneValid = false;
+
+    // Name validation
+    nameid.addEventListener("input", () => {
+        const nameValue = nameid.value.trim();
+        const namePattern = /^[A-Za-z]+(?: [A-Za-z]+){1,2}$/;
+
+        if (nameValue === "") {
+            errorName.textContent = "Name cannot be empty.";
+            nameValid = false;
+        } else if (!namePattern.test(nameValue)) {
+            errorName.textContent = "Enter a valid full name.";
+            nameValid = false;
+        } else {
+            errorName.textContent = "";
+            nameValid = true;
+        }
+    });
+
+    // Email validation
+    emailid.addEventListener("input", () => {
+        const emailValue = emailid.value.trim(); 
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (emailValue === "") {
+            errorEmail.textContent = "Email cannot be empty.";
+            emailValid = false;
+        } else if (!emailPattern.test(emailValue)) {
+            errorEmail.textContent = "Enter a valid email address.";
+            emailValid = false;
+        } else {
+            errorEmail.textContent = "";
+            emailValid = true;
+        }
+    });
+
+    // Phone validation
+    phoneid.addEventListener("input", () => {
+        const phoneValue = phoneid.value.trim(); 
+        const phonePattern = /^\d{10}$/;
+
+        if (phoneValue === "") {
+            errorPhone.textContent = "Phone number cannot be empty.";
+            phoneValid = false;
+        } else if (!phonePattern.test(phoneValue)) {
+            errorPhone.textContent = "Phone number must be 10 digits.";
+            phoneValid = false;
+        } else {
+            errorPhone.textContent = "";
+            phoneValid = true;
+        }
+    });
+
+    // Message validation
+    messageid.addEventListener("input", () => {
+        const messageValue = messageid.value.trim();
+
+        if (messageValue === "") {
+            errorMessage.textContent = "Message cannot be empty.";
+            messageValid = false;
+        } else if (messageValue.length < 10) {
+            errorMessage.textContent = "Message must be at least 10 characters.";
+            messageValid = false;
+        } else {
+            errorMessage.textContent = "";
+            messageValid = true;
+        }
+    });
+
+    // Form submission
+   document.getElementById("contactForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        if (nameValid && emailValid && phoneValid && messageValid) {
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch("/contact", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    Swal.fire("Success", result.message, "success").then(() => {
+                        event.target.reset();
+                    });
+                } else {
+                    Swal.fire("Error", result.message, "error");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                Swal.fire("Error", "There was an error submitting your form.", "error");
+            }
+        } else {
+            Swal.fire("Validation Error", "Please correct the errors in the form.", "error");
+        }
+    });
+</script>

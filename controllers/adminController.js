@@ -103,8 +103,9 @@ const loadOrderlist = async (req, res) => {
 
     
     const orders = await Order.find(query)
-      .populate("userId", "name email") 
-      .populate("items.productId", "productName productImage") 
+      .populate("userId", "name email")
+      .populate("items.productId", "productName productImage")
+      .sort({ createdAt: -1 })
       .limit(limit)
       .skip((page - 1) * limit)
       .exec();
@@ -123,7 +124,7 @@ const loadOrderlist = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
- 
+
 //code to change status of order by admin
 
 const updateOrderStatusByAdmin = async (req, res) => {
@@ -154,7 +155,7 @@ const updateOrderStatusByAdmin = async (req, res) => {
       });
     }
 
-    // Find the order
+  
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({

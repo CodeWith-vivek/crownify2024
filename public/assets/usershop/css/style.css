@@ -2064,7 +2064,7 @@ ol {
 -----------------------*/
 
 .breadcrumb-option {
-	background: #5e2f2f;
+	background: #291616;;
 	padding: 40px 0;
 }
 
@@ -3306,9 +3306,10 @@ ol {
 }
 
 .contact__form input {
+	background: transparent;
 	height: 50px;
 	width: 100%;
-	border: 1px solid #e1e1e1;
+	border: 2px solid #e1e1e1;
 	padding-left: 20px;
 	font-size: 15px;
 	color: #b7b7b7;
@@ -3336,9 +3337,10 @@ ol {
 }
 
 .contact__form textarea {
+	background: transparent;
 	height: 150px;
 	width: 100%;
-	border: 1px solid #e1e1e1;
+	border: 2px solid #e1e1e1;
 	padding-left: 20px;
 	padding-top: 12px;
 	font-size: 15px;

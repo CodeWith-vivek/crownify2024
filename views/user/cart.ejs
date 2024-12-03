@@ -31,9 +31,9 @@
                                             to purchase item .</p>
                                         <% } %>
                                             <div class="empty-cart-actions">
-                                                <a href="/" class="btn btn-primary">Continue Shopping</a>
+                                                <a href="/" class="btn btn-primary" style="background-color: black;">Continue Shopping</a>
                                                 <% if (!isGuest) { %>
-                                                    <a href="/wishlist" class="btn btn-secondary">View Wishlist</a>
+                                                    <a href="/#" class="btn btn-secondary">View Wishlist</a>
                                                     <% } %>
                                             </div>
                             </div>
@@ -169,7 +169,7 @@
                                     <strong style="color: #f94242;">₹<%= total.toFixed(2) %></strong>
                                 </li>
                             </ul>
-                            <a href="/checkout" class="btn btn-primary w-100 " style="border-radius: 0px;">Proceed to
+                            <a href="/checkout" class="btn btn-primary w-100 " style="border-radius: 0px; background-color: black;">Proceed to
                                 Checkout</a>
                         </div>
                     </div>

@@ -37,6 +37,93 @@ const loadHomepage = async (req, res) => {
     res.status(500).send("server error");
   }
 };
+const loadContactpage = async (req, res) => {
+  try {
+    const user = req.session.user;
+
+    const products = await Product.find({ isBlocked: false });
+
+    if (user) {
+      const userData = await User.findOne({ _id: user });
+
+      return res.render("contact", { user: userData, products });
+    } else {
+      return res.render("contact", { products });
+    }
+  } catch (error) {
+    console.log("Contact page not found", error);
+    res.status(500).send("server error");
+  }
+};
+const loadAboutpage = async (req, res) => {
+  try {
+    const user = req.session.user;
+
+    const products = await Product.find({ isBlocked: false });
+
+    if (user) {
+      const userData = await User.findOne({ _id: user });
+
+      return res.render("About", { user: userData, products });
+    } else {
+      return res.render("About", { products });
+    }
+  } catch (error) {
+    console.log("About page not found", error);
+    res.status(500).send("server error");
+  }
+};
+
+const loadFaqpage =async(req,res)=>{
+   try {
+     const user = req.session.user;
+
+     const products = await Product.find({ isBlocked: false });
+
+     if (user) {
+       const userData = await User.findOne({ _id: user });
+
+       return res.render("FAQ", { user: userData, products });
+     } else {
+       return res.render("FAQ", { products });
+     }
+   } catch (error) {
+     console.log("FAQ page not found", error);
+     res.status(500).send("server error");
+   }
+
+}
+const loadBrandpage = async (req, res) => {
+  try {
+    const user = req.session.user;
+
+    const products = await Product.find({ isBlocked: false });
+    const brands = await Brand.find(); // Fetch all brands
+
+    // Create a Set of blocked brand names for quick lookup
+    const blockedBrands = new Set(
+      brands.filter((brand) => brand.isBlocked).map((brand) => brand.brandName)
+    );
+
+    // Filter products based on the blocked brands
+    const filteredProducts = products.filter(
+      (product) => !blockedBrands.has(product.brand) // Check if the brand is blocked
+    );
+
+    if (user) {
+      const userData = await User.findOne({ _id: user });
+      return res.render("Brand", {
+        user: userData,
+        products: filteredProducts,
+      });
+    } else {
+      return res.render("Brand", { products: filteredProducts });
+    }
+  } catch (error) {
+    console.log("Brand page not found", error);
+    res.status(500).send("server error");
+  }
+};
 
 //code for page not found
 
@@ -213,14 +300,60 @@ const signup = async (req, res) => {
 
 //code to verify otp
 
+// const verifyOtp = async (req, res) => {
+//   try {
+//     const { otp } = req.body;
+//     const sessionOtp = req.session.userOtp;
+
+//     if (otp === sessionOtp) {
+//       const user = req.session.userData;
+//       const avatarPath = user.avatar ? user.avatar : null; 
+//       const newUser = new User({
+//         name: user.name,
+//         email: user.email,
+//         phone: user.phone,
+//         password: user.password,
+//         avatar: avatarPath,
+//       });
+//       await newUser.save();
+//       req.session.user = newUser._id;
+
+//       req.session.userOtp = null;
+//       req.session.userData = null;
+//       req.session.previousEmail = null;
+//       req.session.countdownTime = null;
+
+//       return res.json({
+//         success: true,
+//         redirectUrl: "/",
+//         message: "Signup successful!",
+//       });
+//     } else {
+//       return res.json({ success: false, message: "Invalid OTP" });
+//     }
+//   } catch (error) {
+//     console.log("OTP verification error", error);
+//     return res.status(500).json({ success: false, message: "Server error" });
+//   }
+// };
 const verifyOtp = async (req, res) => {
   try {
     const { otp } = req.body;
     const sessionOtp = req.session.userOtp;
 
-    if (otp === sessionOtp) {
+    console.log("Stored OTP:", sessionOtp, "User-entered OTP:", otp);
+
+    if (!sessionOtp) {
+      return res.json({
+        success: false,
+        message: "Session expired. Please request a new OTP.",
+      });
+    }
+
+    if (otp.toString() === sessionOtp.toString()) {
       const user = req.session.userData;
-      const avatarPath = user.avatar ? user.avatar : null; 
+      const avatarPath = user.avatar ? user.avatar : null;
+
       const newUser = new User({
         name: user.name,
         email: user.email,
@@ -228,13 +361,11 @@ const verifyOtp = async (req, res) => {
         password: user.password,
         avatar: avatarPath,
       });
+
       await newUser.save();
       req.session.user = newUser._id;
-
       req.session.userOtp = null;
       req.session.userData = null;
-      req.session.previousEmail = null;
-      req.session.countdownTime = null;
 
       return res.json({
         success: true,
@@ -574,5 +705,8 @@ module.exports = {
   logout,
   loadShopPage,
   loadProductDetails,
- 
+  loadBrandpage,
+  loadContactpage,
+  loadAboutpage,
+  loadFaqpage
 };

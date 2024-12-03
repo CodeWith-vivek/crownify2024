@@ -1,0 +1,344 @@
+<%- include("../../views/partials/user/header") %>
+    <!--Body Content-->
+    <section class="breadcrumb-option">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="breadcrumb__text">
+                        <h4 style="font-size: 24px; font-family: 'Nunito Sans';">Shop</h4>
+                        <div class="breadcrumb__links">
+                            <a href="/">Home</a>
+                            <span>></span>
+                            <span>Brand</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="container-fluid crownify d-flex justify-content-center align-items-center" style="margin-top: 0px;">
+        <img src="assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+    
+    </div>
+
+ 
+    <div id="page-content">
+        <!--Home slider-->
+        <div class="slideshow slideshow-wrapper pb-section">
+            <div class="home-slideshow">
+                <div class="slide slideshow--medium">
+                    <div class="blur-up lazyload">
+                        <img class="blur-up lazyload" data-src="assets/images/brand.png" src="/assets/images/brand.png"
+                            alt="Outfit of Today" title="Outfit of Today" />
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!--End Home slider-->
+        <div class="container-fluid crownify2 d-flex justify-content-center align-items-center">
+
+        </div>
+        <div class="container-fluid crownify2 d-flex justify-content-around align-items-center">
+            <img src="/assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+            <img src="/assets/images/urbanWhite.png" class="custom-logo">
+            <img src="/assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+        </div>
+        <div class="container-fluid crownify2 d-flex justify-content-center align-items-center">
+
+        </div>
+
+
+
+        <!--Shop these looks-->
+        <div class="section" style="    background-color: white;">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3">
+
+                        <div class="productSlider grid-products grid-products-hover-gry">
+                            <% let brandName="URBAN MONKEY" ; // Replace with the desired brand name const
+                               let filteredProducts = products.filter(product => 
+    product.brand === brandName && // Check if the product belongs to the desired brand
+    !product.isBlocked && // Check if the product is not blocked
+    product.category && !product.category.isBlocked && // Check if the category is valid and not blocked
+    product.brand && !product.brand.isBlocked // Check if the brand is valid and not blocked
+);
+                                %>
+                                <% filteredProducts.forEach(product=> { %>
+                                    <div class="col-12 item">
+                                        <!-- start product image -->
+                                        <div class="product-image">
+                                            <a href="/product/<%= product._id %>" class="grid-view-item__link">
+                                                <!-- image -->
+                                                <img class="primary blur-up lazyload"
+                                                    data-src="/uploads/product-image/<%= product.productImage[0] %>"
+                                                    src="/uploads/product-image/<%= product.productImage[0] %>"
+                                                    alt="<%= product.productName %>" title="<%= product.productName %>"
+                                                    style="border-radius: 14px;">
+                                                <!-- End image -->
+                                                <!-- Hover image -->
+                                                <img class="hover blur-up lazyload"
+                                                    data-src="/uploads/product-image/<%= product.productImage[1] %>"
+                                                    src="/uploads/product-image/<%= product.productImage[1] %>"
+                                                    alt="<%= product.productName %>" title="<%= product.productName %>"
+                                                    style="border-radius: 14px;">
+                                                <!-- End hover image -->
+                                            </a>
+                                        </div>
+                                        <!-- end product image -->
+                                        <!-- start product details -->
+                                        <div class="product-details text-center">
+                                            <!-- product name -->
+                                            <div class="product-name">
+                                                <a href="/product/<%= product._id %>">
+                                                    <%= product.productName %>
+                                                </a>
+                                            </div>
+                                            <!-- End product name -->
+                                            <!-- product price -->
+                                            <div class="product-price">
+                                                <span class="price">₹<%= product.salePrice.toFixed(2) %></span>
+                                            </div>
+                                            <!-- End product price -->
+                                        </div>
+                                        <!-- End product details -->
+                                    </div>
+                                    <% }); %>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid crownify2 d-flex justify-content-center align-items-center">
+
+        </div>
+        <div class="container-fluid crownify2 d-flex justify-content-around align-items-center">
+            <img src="/assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+            <img src="/assets/images/addidasWhite.png" class="custom-logo">
+            <img src="/assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+        </div>
+        <div class="container-fluid crownify2 d-flex justify-content-center align-items-center">
+
+        </div>
+
+
+
+        <!--Shop these looks-->
+        <div class="section" style="    background-color: white;">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3">
+
+                        <div class="productSlider grid-products grid-products-hover-gry">
+                            <% let brandName2="Addidas" ; 
+                               let  filteredProducts1=products.filter(product=> product.brand === brandName2);
+                                %>
+                                <% filteredProducts1.forEach(product=> { %>
+                                    <div class="col-12 item">
+                                        <!-- start product image -->
+                                        <div class="product-image">
+                                            <a href="/product/<%= product._id %>" class="grid-view-item__link">
+                                                <!-- image -->
+                                                <img class="primary blur-up lazyload"
+                                                    data-src="/uploads/product-image/<%= product.productImage[0] %>"
+                                                    src="/uploads/product-image/<%= product.productImage[0] %>"
+                                                    alt="<%= product.productName %>" title="<%= product.productName %>"
+                                                    style="border-radius: 14px;">
+                                                <!-- End image -->
+                                                <!-- Hover image -->
+                                                <img class="hover blur-up lazyload"
+                                                    data-src="/uploads/product-image/<%= product.productImage[1] %>"
+                                                    src="/uploads/product-image/<%= product.productImage[1] %>"
+                                                    alt="<%= product.productName %>" title="<%= product.productName %>"
+                                                    style="border-radius: 14px;">
+                                                <!-- End hover image -->
+                                            </a>
+                                        </div>
+                                        <!-- end product image -->
+                                        <!-- start product details -->
+                                        <div class="product-details text-center">
+                                            <!-- product name -->
+                                            <div class="product-name">
+                                                <a href="/product/<%= product._id %>">
+                                                    <%= product.productName %>
+                                                </a>
+                                            </div>
+                                            <!-- End product name -->
+                                            <!-- product price -->
+                                            <div class="product-price">
+                                                <span class="price">₹<%= product.salePrice.toFixed(2) %></span>
+                                            </div>
+                                            <!-- End product price -->
+                                        </div>
+                                        <!-- End product details -->
+                                    </div>
+                                    <% }); %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid crownify2 d-flex justify-content-center align-items-center">
+
+        </div>
+        <div class="container-fluid crownify2 d-flex justify-content-around align-items-center">
+            <img src="/assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+            <img src="/assets/images/nikeWhite.png" class="custom-logo">
+            <img src="/assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+        </div>
+        <div class="container-fluid crownify2 d-flex justify-content-center align-items-center">
+
+        </div>
+
+
+
+        <!--Shop these looks-->
+        <div class="section" style="    background-color: white;">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3">
+
+                        <div class="productSlider grid-products grid-products-hover-gry">
+                            <% let brandName3="Nike" ;
+                              let  filteredProducts2=products.filter(product=> product.brand === brandName3);
+                                %>
+                                <% filteredProducts2.forEach(product=> { %>
+                                    <div class="col-12 item">
+                                        <!-- start product image -->
+                                        <div class="product-image">
+                                            <a href="/product/<%= product._id %>" class="grid-view-item__link">
+                                                <!-- image -->
+                                                <img class="primary blur-up lazyload"
+                                                    data-src="/uploads/product-image/<%= product.productImage[0] %>"
+                                                    src="/uploads/product-image/<%= product.productImage[0] %>"
+                                                    alt="<%= product.productName %>" title="<%= product.productName %>"
+                                                    style="border-radius: 14px;">
+                                                <!-- End image -->
+                                                <!-- Hover image -->
+                                                <img class="hover blur-up lazyload"
+                                                    data-src="/uploads/product-image/<%= product.productImage[1] %>"
+                                                    src="/uploads/product-image/<%= product.productImage[1] %>"
+                                                    alt="<%= product.productName %>" title="<%= product.productName %>"
+                                                    style="border-radius: 14px;">
+                                                <!-- End hover image -->
+                                            </a>
+                                        </div>
+                                        <!-- end product image -->
+                                        <!-- start product details -->
+                                        <div class="product-details text-center">
+                                            <!-- product name -->
+                                            <div class="product-name">
+                                                <a href="/product/<%= product._id %>">
+                                                    <%= product.productName %>
+                                                </a>
+                                            </div>
+                                            <!-- End product name -->
+                                            <!-- product price -->
+                                            <div class="product-price">
+                                                <span class="price">₹<%= product.salePrice.toFixed(2) %></span>
+                                            </div>
+                                            <!-- End product price -->
+                                        </div>
+                                        <!-- End product details -->
+                                    </div>
+                                    <% }); %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid crownify2 d-flex justify-content-center align-items-center">
+
+        </div>
+        <div class="container-fluid crownify2 d-flex justify-content-around align-items-center">
+            <img src="/assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+            <img src="/assets/images/pumaWhite.png" class="custom-logo">
+            <img src="/assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+        </div>
+        <div class="container-fluid crownify2 d-flex justify-content-center align-items-center">
+
+        </div>
+
+
+
+        <!--Shop these looks-->
+        <div class="section" style="    background-color: white;">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3">
+
+                        <div class="productSlider grid-products grid-products-hover-gry">
+                            <% let brandName4="Puma" ; 
+                                let filteredProducts3=products.filter(product=> product.brand === brandName4);
+                                %>
+                                <% filteredProducts3.forEach(product=> { %>
+                                    <div class="col-12 item">
+                                        <!-- start product image -->
+                                        <div class="product-image">
+                                            <a href="/product/<%= product._id %>" class="grid-view-item__link">
+                                                <!-- image -->
+                                                <img class="primary blur-up lazyload"
+                                                    data-src="/uploads/product-image/<%= product.productImage[0] %>"
+                                                    src="/uploads/product-image/<%= product.productImage[0] %>"
+                                                    alt="<%= product.productName %>" title="<%= product.productName %>"
+                                                    style="border-radius: 14px;">
+                                                <!-- End image -->
+                                                <!-- Hover image -->
+                                                <img class="hover blur-up lazyload"
+                                                    data-src="/uploads/product-image/<%= product.productImage[1] %>"
+                                                    src="/uploads/product-image/<%= product.productImage[1] %>"
+                                                    alt="<%= product.productName %>" title="<%= product.productName %>"
+                                                    style="border-radius: 14px;">
+                                                <!-- End hover image -->
+                                            </a>
+                                        </div>
+                                        <!-- end product image -->
+                                        <!-- start product details -->
+                                        <div class="product-details text-center">
+                                            <!-- product name -->
+                                            <div class="product-name">
+                                                <a href="/product/<%= product._id %>">
+                                                    <%= product.productName %>
+                                                </a>
+                                            </div>
+                                            <!-- End product name -->
+                                            <!-- product price -->
+                                            <div class="product-price">
+                                                <span class="price">₹<%= product.salePrice.toFixed(2) %></span>
+                                            </div>
+                                            <!-- End product price -->
+                                        </div>
+                                        <!-- End product details -->
+                                    </div>
+                                    <% }); %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--End Footer-->
+        <%- include("../../views/partials/user/footer") %>
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const cartLinks = document.querySelectorAll('.site-header__cart');
+
+                    cartLinks.forEach(link => {
+                        link.addEventListener('click', (e) => {
+                            console.log('Cart link clicked');
+
+
+                            e.stopPropagation();
+
+
+                            window.location.href = '/cart';
+
+
+                            e.preventDefault();
+                        });
+                    });
+                });
+            </script>

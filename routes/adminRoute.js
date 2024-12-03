@@ -6,6 +6,7 @@ const categoryController=require("../controllers/categoryController")
 const brandController=require("../controllers/brandController")
 const productController=require("../controllers/productController")
 const {adminAuth}=require("../middlewares/auth")
+const contactController = require("../controllers/contactController");
 
 const multer =require("multer")
 const storage=require("../helpers/multer")
@@ -55,4 +56,6 @@ router.post("/deleteImage",adminAuth,productController.deleteSingleImage)
 router.get("/orderlist",adminAuth,adminController.loadOrderlist)
 router.get("/orderDetails/:id",adminAuth,adminController.loadOrderDetails)
 router.post("/update-status",adminAuth,adminController.updateOrderStatusByAdmin);
+
+router.get("/contactMessages", adminAuth, contactController.customerMessages);
 module.exports=router
