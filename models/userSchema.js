@@ -103,7 +103,7 @@ const userSchema = new Schema(
       type: String,
       required: false,
     },
-    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
+    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Wishlist" }],
   },
   {
     collection: "users",

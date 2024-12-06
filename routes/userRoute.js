@@ -10,6 +10,7 @@ const {userAuth}=require("../middlewares/auth")
 const preventCache=require("../middlewares/prevent")
 const orderController=require("../controllers/orderController")
 const contactController = require("../controllers/contactController");
+const wishlistController=require("../controllers/wishlistController")
 const multer = require("multer");
 const path = require("path");
 
@@ -122,6 +123,14 @@ router.post("/return-item",userAuth,orderController.returnItem)
 router.get("/orders", userAuth, profileController.loadUserOrder);
 router.get("/Address",userAuth,profileController.loadUserAddress)
 router.get("/AccountDetails",userAuth,profileController.loadUserAccountDetails)
+
+//user wishlist
+router.get("/wishlist",wishlistController.loadWishlistpage)
+router.post("/wishlist/add", wishlistController.addToWishlist);
+router.get("/wishlist/colors", wishlistController.getColorsBySize);
+router.post("/wishlist/remove", wishlistController.removeFromWishlist);
+
+
 
 
 

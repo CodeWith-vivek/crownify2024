@@ -136,9 +136,9 @@
                                 </div>
                                 <a href="#" class="primary-btn" id="addToCartBtn" disabled>Add to Cart</a>
                             </div>
-                            <div class="product__details__btns__option">
-                                <a href="#"><i class="fa fa-heart"></i> Add to Wishlist</a>
-                            </div>
+                    <div class="product__details__btns__option">
+                        <a href="#" onclick="addToWishlist('<%= product._id %>')"><i class="fa fa-heart"></i> Add to Wishlist</a>
+                    </div>
                             <div class="product__details__last__option">
                                 <h5><span>Guaranteed Safe Checkout</span></h5>
                                 <img src="/assets/usershop/img/shop-details/details-payment.png" alt="">
@@ -704,3 +704,39 @@
                 });
 
         </script>
+      <script>
+        async function addToWishlist(productId) {
+            try {
+                const response = await fetch("/wishlist/add", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ productId }),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Added to Wishlist!",
+                        text: result.message,
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Failed to Add to Wishlist",
+                        text: result.message,
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: "error",
+                    title: "An Error Occurred",
+                    text: "Unable to add to wishlist. Please try again.",
+                });
+                console.error("Add to Wishlist Error:", error);
+            }
+        }
+    </script>

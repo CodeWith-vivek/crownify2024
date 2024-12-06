@@ -125,9 +125,16 @@
                             </ul>
                             <h4 class="order__title">Payment Method</h4>
                             <div class="checkout__input__checkbox">
-                                <label for="payment">
+                                <label for="cod-payment">
+                                    <input type="radio" id="cod-payment" name="paymentMethod" value="COD">
                                     Cash On Delivery
-                                    <input type="radio" id="payment" name="paymentMethod" value="COD">
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                            <div class="checkout__input__checkbox">
+                                <label for="razorpay-payment">
+                                    <input type="radio" id="razorpay-payment" name="paymentMethod" value="RazorPay">
+                                    Razor Pay
                                     <span class="checkmark"></span>
                                 </label>
                             </div>
@@ -148,19 +155,19 @@
      
 
 //   
-
-  document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('checkoutForm').addEventListener('submit', async function (event) {
-            event.preventDefault(); 
+            event.preventDefault();
 
-            
+            // More robust payment method and primary address validation
             const paymentChecked = document.querySelector('input[name="paymentMethod"]:checked');
-            const primaryAddress = document.querySelector('.badge.bg-success');
+            const primaryAddress = document.querySelector('input[name="primaryAddressId"]');
 
+            // Validation checks with more specific error messages
             if (!paymentChecked) {
                 Swal.fire({
                     title: 'Payment Method Required',
-                    text: 'Please select a payment option to proceed.',
+                    text: 'Please select a payment method (Cash on Delivery or Razor Pay).',
                     icon: 'warning',
                     confirmButtonText: 'OK'
                 });
@@ -170,36 +177,52 @@
             if (!primaryAddress) {
                 Swal.fire({
                     title: 'Primary Address Required',
-                    text: 'Please select a primary address before proceeding.',
+                    text: 'Please add and select a primary shipping address.',
                     icon: 'warning',
-                    confirmButtonText: 'OK'
+                    confirmButtonText: 'Add Address',
+                    showCancelButton: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/user/addAddress';
+                    }
                 });
-                return; 
+                return;
             }
 
+            // Confirm order with more detailed validation
             Swal.fire({
                 title: 'Confirm Order',
-                text: 'Are you sure you want to place this order?',
+                html: `
+                <p>Are you sure you want to place this order?</p>
+                <strong>Payment Method:</strong> ${paymentChecked.value}<br>
+                <strong>Total Amount:</strong> ₹${document.querySelector('input[name="total"]').value}
+            `,
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, place it!',
-                cancelButtonText: 'Cancel'
+                confirmButtonText: 'Yes, Place Order',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                  
-                    const formData = {
-                        primaryAddressId: document.querySelector('input[name="primaryAddressId"]').value,
-                        products: Array.from(document.querySelectorAll('input[name="products[]"]')).map(input => input.value),
-                        quantities: Array.from(document.querySelectorAll('input[name="quantities[]"]')).map(input => input.value),
-                        sizes: Array.from(document.querySelectorAll('input[name="sizes[]"]')).map(input => input.value),
-                        colors: Array.from(document.querySelectorAll('input[name="colors[]"]')).map(input => input.value),
-                        subtotal: document.querySelector('input[name="subtotal"]').value,
-                        shipping: document.querySelector('input[name="shipping"]').value,
-                        total: document.querySelector('input[name="total"]').value,
-                        paymentMethod: paymentChecked.value,
-                    };
+                    // Disable submit button to prevent multiple submissions
+                    const submitButton = event.target.querySelector('button[type="submit"]');
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = 'Processing...';
 
                     try {
+                        // Collect form data more dynamically
+                        const formData = {
+                            primaryAddressId: primaryAddress.value,
+                            products: Array.from(document.querySelectorAll('input[name="products[]"]')).map(input => input.value),
+                            quantities: Array.from(document.querySelectorAll('input[name="quantities[]"]')).map(input => input.value),
+                            sizes: Array.from(document.querySelectorAll('input[name="sizes[]"]')).map(input => input.value),
+                            colors: Array.from(document.querySelectorAll('input[name="colors[]"]')).map(input => input.value),
+                            subtotal: document.querySelector('input[name="subtotal"]').value,
+                            shipping: document.querySelector('input[name="shipping"]').value,
+                            total: document.querySelector('input[name="total"]').value,
+                            paymentMethod: paymentChecked.value,
+                        };
+
                         const response = await fetch('/checkout', {
                             method: 'POST',
                             headers: {
@@ -207,39 +230,54 @@
                             },
                             body: JSON.stringify(formData),
                         });
+
                         const data = await response.json();
 
                         if (data.success) {
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Order Placed!',
-                                text: data.message + ' Order ID: ' + data.orderId,
-                                showConfirmButton: false,
-                                timer: 3000,
-                            }).then(() => {
-                                window.location.href = '/shop'; 
+                                title: 'Order Placed Successfully!',
+                                html: `
+                                <p>Your order has been confirmed.</p>
+                                <strong>Order ID:</strong> ${data.orderId}
+                            `,
+                                showConfirmButton: true,
+                                confirmButtonText: 'View Orders',
+                                cancelButtonText: 'Continue Shopping',
+                                showCancelButton: true
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '/orders';
+                                } else {
+                                    window.location.href = '/shop';
+                                }
                             });
                         } else {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Order Failed',
-                                text: data.message,
-                                showConfirmButton: false,
-                                timer: 5000,
+                                text: data.message || 'Unable to place order. Please try again.',
+                                confirmButtonText: 'Retry'
                             });
                         }
                     } catch (error) {
+                        console.error('Checkout Error:', error);
                         Swal.fire({
                             icon: 'error',
-                            title: 'Server Error',
-                            text: 'Unable to connect to the server. Please try again later.',
-                            confirmButtonText: 'Okay'
+                            title: 'Network Error',
+                            text: 'Unable to connect to the server. Please check your internet connection.',
+                            confirmButtonText: 'Retry'
                         });
+                    } finally {
+                        // Re-enable submit button
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = 'Proceed to Checkout';
                     }
                 }
             });
         });
     });
+ 
             function confirmPrimaryAddress(event, addressId) {
                 event.preventDefault();
                

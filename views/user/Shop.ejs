@@ -220,66 +220,65 @@
                         <% products.forEach(product=> { %>
                             <div class="col-lg-4 col-md-6 col-sm-6">
                                 <div class="product__item <%= product.isBlocked ? 'blocked' : '' %>">
-                                  
                                     <div class="product-click-wrapper"
                                         onclick="window.location.href='/product/<%= product._id %>'">
-                                
                                         <div class="product__item__pic" style="border-radius: 25px;">
                                             <div class="image-container">
-                                              
                                                 <img src="/uploads/product-image/<%= product.productImage[0] %>"
                                                     class="default-image" alt="Product Image" />
-
-                                              
                                                 <% if (product.productImage[1]) { %>
                                                     <img src="/uploads/product-image/<%= product.productImage[1] %>"
                                                         class="hover-image" alt="Hover Image" />
                                                     <% } %>
                                             </div>
-
                                             <% if (product.isOnSale) { %>
                                                 <span class="label">Sale</span>
                                                 <% } %>
-
-                                                   
+                                                    <ul class="product__hover">
+                                                        <li>
+                                                            <div class="wishlist-wrapper">
+                                                                <a href="#" id="wishlist-<%= product._id %>"
+                                                                    onclick="event.preventDefault(); event.stopPropagation(); addToWishlist('<%= product._id %>')">
+                                                                    <img src="/assets/usershop/img/icon/heart.png"
+                                                                        alt="" style="background-color: transparent;">
+                                                                </a>
+                                                            </div>
+                                                        </li>
+                                                    </ul>
                                         </div>
                                         <div class="product__item__text">
                                             <h6>
                                                 <%= product.productName %>
                                             </h6>
-                                          
                                             <a href="#" class="add-cart"
-                                                onclick="event.preventDefault(); event.stopPropagation(); handleAddToCart('<%= product._id %>')">
-
-                                            </a>
-                                        <div class="rating-container">
-                                            <div class="rating">
-                                                <% for (let i=0; i < 5; i++) { %>
-                                                    <i class="fa <%= i < product.rating ? 'fa-star' : 'fa-star-o' %>"></i>
-                                                    <% } %>
+                                                onclick="event.preventDefault(); event.stopPropagation(); handleAddToCart('<%= product._id %>')"></a>
+                                            <div class="rating-container">
+                                                <div class="rating">
+                                                    <% for (let i=0; i < 5; i++) { %>
+                                                        <i
+                                                            class="fa <%= i < product.rating ? 'fa-star' : 'fa-star-o' %>"></i>
+                                                        <% } %>
+                                                </div>
+                                                <div class="stock-status">
+                                                    <% const totalQuantity=product.variants ?
+                                                        product.variants.reduce((sum, variant)=> sum +
+                                                        variant.quantity, 0) : 0; %>
+                                                        <% if (totalQuantity> 10) { %>
+                                                            <span style="color: green;">In stock</span>
+                                                            <% } else if (totalQuantity>= 1) { %>
+                                                                <span style="color: orange;">
+                                                                    <%= totalQuantity %> left
+                                                                </span>
+                                                                <% } else { %>
+                                                                    <span style="color: red;">Out of stock</span>
+                                                                    <% } %>
+                                                </div>
                                             </div>
-                                            <div class="stock-status">
-                                                <%  const totalQuantity=product.variants ?
-                                                    product.variants.reduce((sum, variant)=> sum + variant.quantity, 0) : 0;
-                                                    %>
-                                                    <% if (totalQuantity> 10) { %>
-                                                        <span style="color: green;">In stock</span>
-                                                        <% } else if (totalQuantity>= 1) { %>
-                                                            <span style="color: orange;">
-                                                                <%= totalQuantity %> left
-                                                            </span>
-                                                            <% } else { %>
-                                                                <span style="color: red;">Out of stock</span>
-                                                                <% } %>
-                                            </div>
-                                        </div>
-                                            <h5>
-
-                                                ₹<%= product.salePrice.toFixed(2) %><span
-                                                        style="padding-left: 10px;   text-decoration: line-through; color: rgb(179, 179, 179); font-size: 0.9em; margin-right: 8px;">₹
-                                                        <%= product.regularPrice.toFixed(2) %>
+                                            <h5>₹<%= product.salePrice.toFixed(2) %>
+                                                    <span
+                                                        style="padding-left: 10px; text-decoration: line-through; color: rgb(179, 179, 179); font-size: 0.9em; margin-right: 8px;">
+                                                        ₹<%= product.regularPrice.toFixed(2) %>
                                                     </span>
-
                                             </h5>
                                             <div class="product__color__select" onclick="event.stopPropagation();">
                                                 <% if (product.colors && product.colors.length> 0) { %>
@@ -392,6 +391,7 @@
     </section>
 
     <%- include("../../views/partials/user/footershop") %>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
         <script>
 
 
@@ -403,15 +403,60 @@
                     link.addEventListener('click', (e) => {
                         console.log('Cart link clicked');
 
-                        
+
                         e.stopPropagation();
 
-                      
+
                         window.location.href = '/cart';
 
-                       
+
                         e.preventDefault();
                     });
                 });
             });
+        </script>
+        <script>
+      
+            async function addToWishlist(productId) {
+                    try {
+                        const response = await fetch("/wishlist/add", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ productId }),
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Added to Wishlist!",
+                                text: result.message,
+                                timer: 1500, // Display for 1.5 seconds
+                                showConfirmButton: false,
+                            }).then(() => {
+                                // Reload the page after the SweetAlert message is dismissed
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Failed to Add to Wishlist",
+                                text: result.message,
+                            }).then(() => {
+                                // Reload the page after the SweetAlert message is dismissed
+                                window.location.reload();
+                            });
+                        }
+                    } catch (error) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "An Error Occurred",
+                            text: "Unable to add to wishlist. Please try again.",
+                        });
+                        console.error("Add to Wishlist Error:", error);
+                    }
+                }
         </script>

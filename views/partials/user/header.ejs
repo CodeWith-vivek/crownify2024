@@ -77,6 +77,47 @@ body, html {
             color: #000;
             line-height: 1.6;
         }
+ .form-select {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  color: #333; /* Text color */
+  background-color: #f80000; /* Light background */
+  border: 1px solid #ed0000; /* Subtle border */
+  border-radius: 8px; /* Rounded corners */
+  transition: all 0.3s ease; /* Smooth hover/focus transitions */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+}
+
+.form-select:hover {
+  background-color: #f1f1f1; /* Slightly darker background on hover */
+  border-color: #ccc; /* Darker border on hover */
+}
+
+.form-select:focus {
+  background-color: #fff; /* Brighter background when focused */
+  border-color: #007bff; /* Highlight border in a primary color */
+  outline: none; /* Remove default browser outline */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add glow effect */
+}
+
+.form-select option {
+  padding: 10px;
+  background-color: #fff; /* Option background */
+  color: #333; /* Option text color */
+}
+.stock-status {
+    font-weight: bold;
+}
+.stock-status-out {
+    color: red;
+}
+.stock-status-low {
+    color: orange;
+}
+.stock-status-available {
+    color: green;
+}
 
 </style>
 </head>
@@ -198,12 +239,14 @@ body, html {
                         <!-- Common Elements for all users -->
                         <!-- <div class="site-header__search">
                             <button type="button" class="search-trigger"><i class="icon anm anm-search-l"></i></button>
-                        </div>
-                        <div class="site-header__wishlist">
-                            <button type="button" class="wishlist-trigger">
-                                <i class="icon anm anm-heart-l"></i>
-                            </button>
                         </div> -->
+                        <div class="site-header__wishlist">
+                          
+                                <a href="/wishlist" class="wishlist-trigger" title="Cart">
+                                <i class="icon anm anm-heart-l"></i>
+                                </a>
+                      
+                        </div>
                         <div class="site-cart mr-3">
                             <a href="/cart" class="site-header__cart" title="Cart">
                                 <i class="icon anm anm-bag-l"></i>

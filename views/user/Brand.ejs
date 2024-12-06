@@ -133,10 +133,18 @@
                     <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3">
 
                         <div class="productSlider grid-products grid-products-hover-gry">
-                            <% let brandName2="Addidas" ; 
-                               let  filteredProducts1=products.filter(product=> product.brand === brandName2);
-                                %>
-                                <% filteredProducts1.forEach(product=> { %>
+                          
+
+                                        <% let brandName2="ADDIDAS" ;
+                                        let filteredProducts1=products.filter(product=>
+                                            product.brand === brandName2 &&
+                                            !product.isBlocked && // Check if the product is not blocked
+                                            product.category && !product.category.isBlocked && // Check if the category is valid and not blocked
+                                            product.brand && !product.brand.isBlocked // Check if the brand is valid and not blocked
+                                            );
+                                            %>
+                                            <% filteredProducts1.forEach(product=> { %>
+                                    
                                     <div class="col-12 item">
                                         <!-- start product image -->
                                         <div class="product-image">
@@ -202,10 +210,16 @@
                     <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3">
 
                         <div class="productSlider grid-products grid-products-hover-gry">
-                            <% let brandName3="Nike" ;
-                              let  filteredProducts2=products.filter(product=> product.brand === brandName3);
-                                %>
-                                <% filteredProducts2.forEach(product=> { %>
+                   
+                                <% let brandName3="NIKE" ; 
+                                let filteredProducts2=products.filter(product=>
+                                    product.brand === brandName3 &&
+                                    !product.isBlocked && // Check if the product is not blocked
+                                    product.category && !product.category.isBlocked && // Check if the category is valid and not blocked
+                                    product.brand && !product.brand.isBlocked // Check if the brand is valid and not blocked
+                                    );
+                                    %>
+                                    <% filteredProducts2.forEach(product=> { %>
                                     <div class="col-12 item">
                                         <!-- start product image -->
                                         <div class="product-image">
@@ -271,10 +285,16 @@
                     <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3">
 
                         <div class="productSlider grid-products grid-products-hover-gry">
-                            <% let brandName4="Puma" ; 
-                                let filteredProducts3=products.filter(product=> product.brand === brandName4);
-                                %>
-                                <% filteredProducts3.forEach(product=> { %>
+                  
+                                    <% let brandName4="PUMA" ; 
+                                    let filteredProducts3=products.filter(product=>
+                                        product.brand === brandName4 && 
+                                        !product.isBlocked && // Check if the product is not blocked
+                                        product.category && !product.category.isBlocked && // Check if the category is valid and not blocked
+                                        product.brand && !product.brand.isBlocked // Check if the brand is valid and not blocked
+                                        );
+                                        %>
+                                        <% filteredProducts3.forEach(product=> { %>
                                     <div class="col-12 item">
                                         <!-- start product image -->
                                         <div class="product-image">

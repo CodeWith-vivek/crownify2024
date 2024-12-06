@@ -343,6 +343,7 @@ const verifyOtp = async (req, res) => {
 
     console.log("Stored OTP:", sessionOtp, "User-entered OTP:", otp);
 
+    // Check if session OTP is missing
     if (!sessionOtp) {
       return res.json({
         success: false,
@@ -350,19 +351,40 @@ const verifyOtp = async (req, res) => {
       });
     }
 
+    // Check if the entered OTP matches the session OTP
     if (otp.toString() === sessionOtp.toString()) {
       const user = req.session.userData;
-      const avatarPath = user.avatar ? user.avatar : null;
 
+      // Ensure the user data is available
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message: "User data is missing. Please try again.",
+        });
+      }
+
+      const avatarPath = user.avatar || null; // Use null if no avatar
+
+      // Create a new user with an initialized wishlist
       const newUser = new User({
         name: user.name,
         email: user.email,
         phone: user.phone,
-        password: user.password,
+        password: user.password, // Ensure password is hashed before saving
         avatar: avatarPath,
+        wishlist: [], // Initialize as an empty array
       });
 
-      await newUser.save();
+      // Attempt to save the new user
+      await newUser.save().catch((saveError) => {
+        console.log("Error saving user:", saveError);
+        return res.status(400).json({
+          success: false,
+          message: "Error saving user. Please try again.",
+        });
+      });
+
+      // Set user ID in session and clear OTP and user data from session
       req.session.user = newUser._id;
       req.session.userOtp = null;
       req.session.userData = null;
@@ -376,11 +398,10 @@ const verifyOtp = async (req, res) => {
       return res.json({ success: false, message: "Invalid OTP" });
     }
   } catch (error) {
-    console.log("OTP verification error", error);
+    console.log("OTP verification error:", error);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
 //code to resend otp
 
 const resendOtp = async (req, res) => {
