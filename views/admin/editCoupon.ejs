@@ -1,0 +1,215 @@
+<%- include("../../views/partials/admin/header2") %>
+<section class="content-main">
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="container mt-4">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <h1 class="text-center mb-4">Edit Coupon</h1>
+                            <form id="edit-coupon-form" method="POST" action="/admin/edit-coupon/<%= coupon._id %>">
+                                <div class="mb-3">
+                                    <label for="coupon-code" class="form-label">Coupon Code</label>
+                                    <input type="text" class="form-control" id="coupon-code" name="coupon-code"
+                                        value="<%= coupon.code %>" required maxlength="20">
+                                    <span class="text-danger" id="coupon-code-error"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="discount-type" class="form-label">Discount Type</label>
+                                    <select class="form-select" id="discount-type" name="discount-type" required>
+                                        <option value="percentage" <%=coupon.discountType==='percentage' ? 'selected'
+                                            : '' %>>Percentage</option>
+                                        <option value="fixed" <%=coupon.discountType==='fixed' ? 'selected' : '' %>
+                                            >Fixed Amount</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="discount-amount" class="form-label">Discount Amount</label>
+                                    <input type="number" class="form-control" id="discount-amount"
+                                        name="discount-amount" value="<%= coupon.discountAmount %>" required min="0"
+                                        step="0.01">
+                                    <span class="text-danger" id="discount-amount-error"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="max-discount" class="form-label">Max Discount</label>
+                                    <input type="number" class="form-control" id="max-discount" name="maxDiscount"
+                                        value="<%= coupon.maxDiscount %>" min="0" step="0.01"
+                                        placeholder="Enter max discount">
+                                    <span class="text-danger" id="max-discount-error"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="min-purchase" class="form-label">Min Purchase</label>
+                                    <input type="number" class="form-control" id="min-purchase" name="minPurchase"
+                                        value="<%= coupon.minPurchase %>" required min="0" step="0.01"
+                                        placeholder="Enter minimum purchase amount">
+                                    <span class="text-danger" id="min-purchase-error"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="expiry-date" class="form-label">Expiry Date</label>
+                                    <input type="date" class="form-control" id="expiry-date" name="expiry-date"
+                                        value="<%= coupon.expiryDate.toISOString().split('T')[0] %>" required>
+                                    <span class="text-danger" id="expiry-date-error"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="usage-limit" class="form-label">Usage Limit</label>
+                                    <input type="number" class="form-control" id="usage-limit" name="usage-limit"
+                                        value="<%= coupon.usageLimit %>" required min="1">
+                                    <span class="text-danger" id="usage-limit-error"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="description" name="description" maxlength="500"
+                                        placeholder="Enter a brief description of the coupon"
+                                        required><%= coupon.description %></textarea>
+                                    <span class="text-danger" id="description-error"></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <button type="submit" class="btn btn-custom text-white"
+                                        style="background-color: rgb(31, 31, 196);" id="save-button" disabled>Save
+                                        Changes</button>
+                                    <button type="button" class="btn btn-secondary"
+                                        onclick="cancelEdit()">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+    <%- include("../../views/partials/admin/footer2") %>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    // Function to fetch coupon data and populate the form
+    function populateCouponForm(couponId) {
+        fetch(`/admin/edit-coupon/${couponId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch coupon data');
+                }
+                return response.json();
+            })
+            .then(coupon => {
+                document.getElementById('coupon-code').value = coupon.code;
+                document.getElementById('discount-type').value = coupon.discountType;
+                document.getElementById('discount-amount').value = coupon.discountAmount;
+                document.getElementById('max-discount').value = coupon.maxDiscount || '';
+                document.getElementById('min-purchase').value = coupon.minPurchase;
+                document.getElementById('expiry-date').value = new Date(coupon.expiryDate).toISOString().split('T')[0];
+                document.getElementById('usage-limit').value = coupon.usageLimit;
+            })
+            .catch(error => console.error('Error fetching coupon data:', error));
+    }
+
+    const couponId = '<%= coupon._id.toString() %>';
+    document.addEventListener('DOMContentLoaded', () => {
+        if (couponId) {
+            populateCouponForm(couponId);
+        } else {
+            console.error('Coupon ID not available');
+        }
+    });
+</script>
+
+<script>
+    const form = document.getElementById('edit-coupon-form');
+    const saveButton = document.getElementById('save-button');
+
+    function validateForm() {
+        let isValid = true;
+        document.querySelectorAll('.text-danger').forEach((span) => {
+            span.textContent = '';
+        });
+
+        const couponCode = document.getElementById('coupon-code').value.trim();
+        const discountAmount = parseFloat(document.getElementById('discount-amount').value);
+        const minPurchase = parseFloat(document.getElementById('min-purchase').value);
+        const usageLimit = parseInt(document.getElementById('usage-limit').value);
+        const description = document.getElementById('description').value.trim();
+
+        if (couponCode === '') {
+            document.getElementById('coupon-code-error').textContent = 'Coupon code is required.';
+            isValid = false;
+        }
+        if (isNaN(discountAmount) || discountAmount < 0) {
+            document.getElementById('discount-amount-error').textContent = 'Discount amount must be a positive number.';
+            isValid = false;
+        }
+        if (isNaN(minPurchase) || minPurchase < 0) {
+            document.getElementById('min-purchase-error').textContent = 'Minimum purchase amount must be a positive number.';
+            isValid = false;
+        }
+        if (isNaN(usageLimit) || usageLimit < 1) {
+            document.getElementById('usage-limit-error').textContent = 'Usage limit must be at least 1.';
+            isValid = false;
+        }
+        if (description === '') {
+            document.getElementById('description-error').textContent = 'Description is required.';
+            isValid = false;
+        }
+
+        saveButton.disabled = !isValid;
+        return isValid;
+    }
+
+    form.addEventListener('input', validateForm);
+    form.addEventListener('submit', function (event) {
+        if (!validateForm()) {
+            event.preventDefault();
+        }
+    });
+
+    validateForm();
+
+    function cancelEdit() {
+        window.location.href = '/admin/coupon-management';
+    }
+</script>
+
+<script>
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const actionUrl = form.action;
+
+        fetch(actionUrl, {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.message) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: data.message,
+                    }).then(() => {
+                        window.location.href = '/admin/coupon-management';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An unexpected error occurred.',
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to update coupon. Please try again later.',
+                });
+            });
+    });
+</script>

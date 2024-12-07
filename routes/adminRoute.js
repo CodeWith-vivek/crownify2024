@@ -7,6 +7,7 @@ const brandController=require("../controllers/brandController")
 const productController=require("../controllers/productController")
 const {adminAuth}=require("../middlewares/auth")
 const contactController = require("../controllers/contactController");
+const couponController=require("../controllers/couponController")
 
 const multer =require("multer")
 const storage=require("../helpers/multer")
@@ -58,4 +59,11 @@ router.get("/orderDetails/:id",adminAuth,adminController.loadOrderDetails)
 router.post("/update-status",adminAuth,adminController.updateOrderStatusByAdmin);
 
 router.get("/contactMessages", adminAuth, contactController.customerMessages);
+
+router.get("/coupon-management",adminAuth, couponController.loadCouponManagement);
+router.get("/get-coupons",adminAuth, couponController.getCoupons);
+router.post("/add-coupon",adminAuth, couponController.addCoupon);
+router.delete("/coupons/:id",adminAuth, couponController.deleteCoupon);
+router.get('/edit-coupon/:id',adminAuth,couponController.editCoupon)
+router.post('/edit-coupon/:id',adminAuth,couponController.updateCoupon)
 module.exports=router

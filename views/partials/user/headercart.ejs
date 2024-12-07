@@ -40,6 +40,10 @@
     <link rel="stylesheet" href="/assets/usershop/css/style.css" type="text/css">
     <link rel="stylesheet" href="assets/css/style10.css">
     <link rel="stylesheet" href="/assets/css/style.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- jQuery and Bootstrap JS -->
+
     <style>
         .pagination .page-item .page-link {
             display: flex;
@@ -101,7 +105,9 @@
             gap: 10px;
             /* Add space between buttons */
         }
-        body, html {
+
+        body,
+        html {
             margin: 0;
             padding: 0;
             font-family: monospace;
@@ -109,6 +115,104 @@
             color: #000;
             line-height: 1.6;
         }
+
+        .form-stacked {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            /* Adds spacing between elements */
+        }
+
+        .form-stacked input {
+            width: 100%;
+            margin-bottom: 10px;
+            /* Adds space below the input */
+        }
+
+        .form-stacked button {
+            width: 100%;
+            /* Ensures buttons are the same width as the input field */
+            padding: 10px;
+            /* Adds padding for better appearance */
+            text-align: center;
+            /* Centers text within the buttons */
+        }
+
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1;
+            /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgba(84, 79, 79, 0.147);
+            /* Fallback color */
+            background-color: rgba(165, 154, 154, 0.172);
+            /* Black w/ opacity */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+           
+            padding: 20px;
+            border: 1px solid #888;
+            width: 124%;
+        
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            margin: 0;
+        }
+
+        .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal {
+            z-index: 1050;
+          
+        }
+
+        .modal-backdrop {
+            z-index: 1040;
+          
+        }
+
+        .img-fluid {
+            max-width: 44%;
+            height: 44px;
+        }
+        @media (min-width: 992px) {
+    .col-lg-9 {
+        -ms-flex: 0 0 75%;
+        flex: 0 0 75%;
+        max-width: 86%;
+    }
+}
+@media (min-width: 992px) {
+    .col-lg-2 {
+        -ms-flex: 0 0 16.666667%;
+        flex: 3 0 16.666667%;
+        max-width: 78.666667%;
+    }
+}
     </style>
 
 

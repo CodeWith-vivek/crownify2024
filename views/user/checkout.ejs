@@ -159,11 +159,10 @@
         document.getElementById('checkoutForm').addEventListener('submit', async function (event) {
             event.preventDefault();
 
-            // More robust payment method and primary address validation
+            // Payment method and primary address validation
             const paymentChecked = document.querySelector('input[name="paymentMethod"]:checked');
             const primaryAddress = document.querySelector('input[name="primaryAddressId"]');
 
-            // Validation checks with more specific error messages
             if (!paymentChecked) {
                 Swal.fire({
                     title: 'Payment Method Required',
@@ -189,7 +188,7 @@
                 return;
             }
 
-            // Confirm order with more detailed validation
+            // Confirm order
             Swal.fire({
                 title: 'Confirm Order',
                 html: `
@@ -204,13 +203,13 @@
                 reverseButtons: true
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    // Disable submit button to prevent multiple submissions
+                    // Disable submit button
                     const submitButton = event.target.querySelector('button[type="submit"]');
                     submitButton.disabled = true;
                     submitButton.innerHTML = 'Processing...';
 
                     try {
-                        // Collect form data more dynamically
+                        // Collect form data
                         const formData = {
                             primaryAddressId: primaryAddress.value,
                             products: Array.from(document.querySelectorAll('input[name="products[]"]')).map(input => input.value),
@@ -223,49 +222,18 @@
                             paymentMethod: paymentChecked.value,
                         };
 
-                        const response = await fetch('/checkout', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(formData),
-                        });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Order Placed Successfully!',
-                                html: `
-                                <p>Your order has been confirmed.</p>
-                                <strong>Order ID:</strong> ${data.orderId}
-                            `,
-                                showConfirmButton: true,
-                                confirmButtonText: 'View Orders',
-                                cancelButtonText: 'Continue Shopping',
-                                showCancelButton: true
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    window.location.href = '/orders';
-                                } else {
-                                    window.location.href = '/shop';
-                                }
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Order Failed',
-                                text: data.message || 'Unable to place order. Please try again.',
-                                confirmButtonText: 'Retry'
-                            });
+                        // Handle different payment methods
+                        if (paymentChecked.value === 'RazorPay') {
+                            handleRazorpayPayment(formData);
+                        } else if (paymentChecked.value === 'COD') {
+                            await handleCODPayment(formData);
                         }
                     } catch (error) {
                         console.error('Checkout Error:', error);
                         Swal.fire({
                             icon: 'error',
-                            title: 'Network Error',
-                            text: 'Unable to connect to the server. Please check your internet connection.',
+                            title: 'Checkout Failed',
+                            text: error.message || 'Unable to process your order. Please try again.',
                             confirmButtonText: 'Retry'
                         });
                     } finally {
@@ -277,67 +245,189 @@
             });
         });
     });
- 
-            function confirmPrimaryAddress(event, addressId) {
-                event.preventDefault();
-               
 
+    // Handle Razorpay Payment
+    function handleRazorpayPayment(formData) {
+        fetch('/checkout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.razorpayOrderId) {
+                    const options = {
+                        key: data.key,
+                        amount: data.amount,
+                        currency: 'INR',
+                        name: 'Your Store Name',
+                        description: 'Order Payment',
+                        order_id: data.razorpayOrderId,
+                        handler: function (response) {
+                            // Verify payment on server
+                            return fetch('/verify-payment', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    ...response,
+                                    orderId: data.orderId
+                                }),
+                            })
+                                .then(verifyResponse => verifyResponse.json())
+                                .then(verifyData => {
+                                    if (verifyData.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Payment Successful!',
+                                            text: 'Your order has been confirmed.',
+                                            showConfirmButton: true,
+                                            confirmButtonText: 'View Order',
+                                            cancelButtonText: 'Continue Shopping',
+                                            showCancelButton: true
+                                        }).then((result) => {
+                                            if (result.isConfirmed) {
+                                                window.location.href = `/orders`;
+                                            } else {
+                                                window.location.href = '/shop';
+                                            }
+                                        });
+                                    } else {
+                                        throw new Error(verifyData.message || 'Payment verification failed');
+                                    }
+                                });
+                        },
+                        prefill: {
+                            name: 'Customer Name',
+                            email: 'customer@example.com',
+                            contact: 'Customer Phone Number'
+                        },
+                        theme: {
+                            color: '#3399cc'
+                        }
+                    };
+
+                    const razorpayInstance = new Razorpay(options);
+                    razorpayInstance.open();
+                } else {
+                    throw new Error(data.message || 'Failed to create Razorpay order');
+                }
+            })
+            .catch(error => {
+                console.error('Razorpay Error:', error);
                 Swal.fire({
-                    title: 'Set as Primary Address?',
-                    text: 'Do you want to set this as your primary address?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, set it!',
-                    cancelButtonText: 'Cancel'
+                    icon: 'error',
+                    title: 'Payment Failed',
+                    text: error.message || 'Unable to process payment. Please try again.',
+                    confirmButtonText: 'Retry'
+                });
+            });
+    }
+
+    // Handle COD Payment
+    async function handleCODPayment(formData) {
+        try {
+            const response = await fetch('/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Order Placed Successfully!',
+                    html: `
+                    <p>Your order has been confirmed.</p>
+                    <strong>Order ID:</strong> ${data.orderId}
+                `,
+                    showConfirmButton: true,
+                    confirmButtonText: 'View Orders',
+                    cancelButtonText: 'Continue Shopping',
+                    showCancelButton: true
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        fetch(`/set-primary-address/${addressId}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            credentials: 'same-origin' 
-                        })
-                            .then(async response => {
-                             
-
-                                if (!response.ok) {
-                                    const text = await response.text();
-                                    console.log("Error response body:", text); 
-                                    throw new Error(`HTTP error! status: ${response.status}`);
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                             
-                                if (data.success) {
-                                    Swal.fire({
-                                        title: 'Success!',
-                                        text: 'Primary address updated successfully.',
-                                        icon: 'success',
-                                        confirmButtonText: 'OK'
-                                    }).then(() => {
-                                        window.location.reload();
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        title: 'Failed!',
-                                        text: data.message || 'Failed to update primary address.',
-                                        icon: 'error',
-                                        confirmButtonText: 'OK'
-                                    });
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                Swal.fire({
-                                    title: 'Error!',
-                                    text: 'An error occurred while updating primary address. Please try again.',
-                                    icon: 'error',
-                                    confirmButtonText: 'OK'
-                                });
-                            });
+                        window.location.href = '/orders';
+                    } else {
+                        window.location.href = '/shop';
                     }
                 });
+            } else {
+                throw new Error(data.message || 'Unable to place order');
             }
+        } catch (error) {
+            console.error('COD Checkout Error:', error); Swal.fire({
+                icon: 'error',
+                title: 'Order Failed',
+                text: error.message || 'Unable to process your order. Please try again.',
+                confirmButtonText: 'Retry'
+            });
+        }
+    }
+
+    function confirmPrimaryAddress(event, addressId) {
+        event.preventDefault();
+
+        Swal.fire({
+            title: 'Set as Primary Address?',
+            text: 'Do you want to set this as your primary address?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, set it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/set-primary-address/${addressId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                })
+                    .then(async response => {
+                        if (!response.ok) {
+                            const text = await response.text();
+                            console.log("Error response body:", text);
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'Primary address updated successfully.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Failed!',
+                                text: data.message || 'Failed to update primary address.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'An error occurred while updating primary address. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    });
+            }
+        });
+    }
     </script>

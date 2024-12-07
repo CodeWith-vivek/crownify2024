@@ -5,6 +5,7 @@ const Brand = require("../models/brandSchema");
 const env = require("dotenv").config();
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
+const Coupon = require("../models/couponSchema");
 
 // code for secure password
 
@@ -23,14 +24,20 @@ const loadHomepage = async (req, res) => {
   try {
     const user = req.session.user;
 
+    // Fetch products
     const products = await Product.find({ isBlocked: false });
+
+    // Fetch coupons (adjust this based on your database schema)
+    const coupons = await Coupon.find({}); // Replace with actual query
 
     if (user) {
       const userData = await User.findOne({ _id: user });
 
-      return res.render("Home", { user: userData, products });
+      // Pass coupons to the view
+      return res.render("Home", { user: userData, products, coupons });
     } else {
-      return res.render("Home", { products });
+      // Pass coupons to the view
+      return res.render("Home", { products, coupons });
     }
   } catch (error) {
     console.log("Home page not found", error);
@@ -59,21 +66,26 @@ const loadAboutpage = async (req, res) => {
   try {
     const user = req.session.user;
 
+    // Fetch products
     const products = await Product.find({ isBlocked: false });
+
+    // Fetch coupons
+    const coupons = await Coupon.find({}); // Replace with your actual query if needed
 
     if (user) {
       const userData = await User.findOne({ _id: user });
 
-      return res.render("About", { user: userData, products });
+      // Pass coupons to the view
+      return res.render("About", { user: userData, products, coupons });
     } else {
-      return res.render("About", { products });
+      // Pass coupons to the view
+      return res.render("About", { products, coupons });
     }
   } catch (error) {
     console.log("About page not found", error);
     res.status(500).send("server error");
   }
 };
-
 const loadFaqpage =async(req,res)=>{
    try {
      const user = req.session.user;
@@ -298,44 +310,7 @@ const signup = async (req, res) => {
   }
 };
 
-//code to verify otp
 
-// const verifyOtp = async (req, res) => {
-//   try {
-//     const { otp } = req.body;
-//     const sessionOtp = req.session.userOtp;
-
-//     if (otp === sessionOtp) {
-//       const user = req.session.userData;
-//       const avatarPath = user.avatar ? user.avatar : null; 
-//       const newUser = new User({
-//         name: user.name,
-//         email: user.email,
-//         phone: user.phone,
-//         password: user.password,
-//         avatar: avatarPath,
-//       });
-//       await newUser.save();
-//       req.session.user = newUser._id;
-
-//       req.session.userOtp = null;
-//       req.session.userData = null;
-//       req.session.previousEmail = null;
-//       req.session.countdownTime = null;
-
-//       return res.json({
-//         success: true,
-//         redirectUrl: "/",
-//         message: "Signup successful!",
-//       });
-//     } else {
-//       return res.json({ success: false, message: "Invalid OTP" });
-//     }
-//   } catch (error) {
-//     console.log("OTP verification error", error);
-//     return res.status(500).json({ success: false, message: "Server error" });
-//   }
-// };
 const verifyOtp = async (req, res) => {
   try {
     const { otp } = req.body;

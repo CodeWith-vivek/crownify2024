@@ -16,13 +16,26 @@
     <!-- Template CSS -->
     <link href="/assets/admin2/css/main.css" rel="stylesheet" type="text/css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+   
     <!-- SweetAlert JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    
     <style> 
         .error-message{
             color: red;
         }
+body.dark table td {
+  color: white;
+}
+body.dark .justify-content-center{
+    background-color: #2a2a29;
+}
+body.dark h1{
+    color: white;
+}
     </style>
 
 </head>
@@ -35,7 +48,7 @@
                 <img src="/assets/admin2/imgs/theme/logoCrownify.png" class="logo" alt="Crownify">
             </a>
             <div>
-                <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i>
+                <button class="btn btn-icon btn-aside-minimize"><i class="material-icons">menu_open</i>
                 </button>
             </div>
         </div>
@@ -43,49 +56,55 @@
         <ul class="menu-aside">
             <li class="menu-item active">
                 <a class="menu-link" href="/admin/dashboard">
-                    <i class="icon material-icons md-home"></i>
+                <i class="material-icons">home</i>
                     <span class="text">Dashboard</span>
                 </a>
             </li>
             <li class="menu-item">
                 <a class="menu-link" href="/admin/addProducts">
-                    <i class="icon material-icons md-add_business"></i>
+                    <i class="material-icons">add_business</i>
                     <span class="text">Add Products</span>
                 </a>
             </li>
             <li class="menu-item">
                 <a class="menu-link" href="/admin/orderlist">
-                    <i class="icon material-icons md-shopping_cart"></i>
+                <i class="material-icons">shopping_cart</i>
                     <span class="text">Orders</span>
                 </a>
             </li>
             <li class="menu-item">
                 <a class="menu-link" href="/admin/products">
-                    <i class="icon material-icons md-shopping_bag"></i>
+                <i class="material-icons">shopping_bag</i>
                     <span class="text">Products</span>
                 </a>
             </li>
             <li class="menu-item">
                 <a class="menu-link" href="/admin/users">
-                    <i class="icon material-icons md-people"></i>
+            <i class="material-icons">people</i>
                     <span class="text">Customers</span>
                 </a>
             </li>
             <li class="menu-item">
                 <a class="menu-link" href="/admin/category">
-                    <i class="icon material-icons md-category"></i>
+                <i class="material-icons">category</i>
                     <span class="text">Category</span>
                 </a>
             </li>
             <li class="menu-item">
                 <a class="menu-link" href="/admin/brands">
-                    <i class="icon material-icons md-stars"></i>
+            <i class="material-icons">star</i>
                     <span class="text">Brands</span>
                 </a>
             </li>
             <li class="menu-item">
+                <a class="menu-link" href="/admin/coupon-management">
+                <i class="material-icons">local_offer</i>
+                    <span class="text">Coupon Management</span>
+                </a>
+            </li>
+            <li class="menu-item">
                 <a class="menu-link" href="/admin/contactMessages">
-                    <i class="icon material-icons md-people"></i>
+                <i class="material-icons">question_answer</i>
                     <span class="text">Enqiry contact</span>
                 </a>
             </li>
@@ -103,12 +122,11 @@
                 <ul class="nav">
 
                     <li class="nav-item">
-                        <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons md-nights_stay"></i>
+                        <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons">dark_mode</i>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="requestfullscreen nav-link btn-icon"><i
-                                class="material-icons md-cast"></i></a>
+                        <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons">cast_connected</i>
                     </li>
 
                     <li class="dropdown nav-item">

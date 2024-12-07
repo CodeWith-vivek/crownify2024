@@ -234,6 +234,42 @@
         .logo-section {
             background: transparent;
         }
+         .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+           
+            padding: 20px;
+            border: 1px solid #888;
+            width: 124%;
+        
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            margin: 0;
+        }
+
+        .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal {
+            z-index: 1050;
+          
+        }
+
+        .modal-backdrop {
+            z-index: 1040;
+          
+        }
+
     </style>
 
 
@@ -414,8 +450,11 @@
                                     </li>
                                     <li><a class="dropdown-item" href="/orders"><i class="fa-solid fa-box"></i> Orders</a>
                                     </li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-ticket-alt"></i>
-                                            Coupons</a></li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" id="couponsLink">
+                                            <i class="fa-solid fa-ticket-alt"></i> Coupons
+                                        </a>
+                                    </li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-cog"></i> Settings</a>
                                     </li>
                                     <li><a class="dropdown-item" href="/logout"><i class="fa-solid fa-sign-out-alt"></i>

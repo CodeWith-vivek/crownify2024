@@ -3,21 +3,105 @@
 const Cart = require("../models/cartSchema");
 const Product = require("../models/productSchema");
 const User = require("../models/userSchema");
+const Coupon = require("../models/couponSchema");
 
 // code to lad cart page 
 
+// const loadCartPage = async (req, res) => {
+//   try {
+//     let cartItems = [];
+//     let subtotal = 0;
+//     const shippingCharge = 40;
+//     let isCartEmpty = true;
+
+   
+//     if (req.session && req.session.user) {
+//       const userId = req.session.user;
+
+      
+//       const cart = await Cart.findOne({ userId }).populate({
+//         path: "items.productId",
+//         model: "Product",
+//         populate: {
+//           path: "category",
+//           model: "Category",
+//         },
+//       });
+
+//       if (cart && cart.items.length > 0) {
+//         cartItems = cart.items
+//           .map((item) => {
+//             const product = item.productId;
+//             const variant = product.variants.find(
+//               (v) =>
+//                 v.size === item.variant.size && v.color === item.variant.color
+//             );
+
+//             if (!variant) {
+//               console.error("Variant not found for item:", item);
+//               return null; 
+//             }
+
+//             return {
+//               product,
+//               productCategory: product.category
+//                 ? product.category.name
+//                 : "Unknown",
+//               productName: product.productName,
+//               productBrand: product.brand, 
+//               productImage: product.productImage[0],
+//               quantity: item.quantity,
+//               color: item.variant.color,
+//               size: item.variant.size,
+//               selectedVariantStockLevel: variant.quantity,
+//               itemTotal:
+//                 item.quantity * (product.salePrice || product.regularPrice),
+//             };
+//           })
+//           .filter((item) => item !== null);
+
+//         isCartEmpty = false;
+//       }
+
+//       subtotal = cartItems.reduce((total, item) => total + item.itemTotal, 0);
+//     } else {
+//       isCartEmpty = true;
+//     }
+
+//     const total = subtotal + shippingCharge;
+
+//     const userId = req.session.user;
+//     const user = await User.findOne({ _id: userId });
+
+//     res.render("cart", {
+//       user,
+//       cartItems,
+//       subtotal,
+//       shippingCharge,
+//       total,
+//       isCartEmpty,
+//       isGuest: !req.session.user,
+//     });
+//   } catch (error) {
+//     console.error("Cart page error:", error.stack || error);
+//     res.status(500).render("error", {
+//       message: "Error loading cart",
+//       error: error.toString(),
+//     });
+//   }
+// };
 const loadCartPage = async (req, res) => {
   try {
     let cartItems = [];
     let subtotal = 0;
     const shippingCharge = 40;
     let isCartEmpty = true;
+    let discountAmount = 0; // To hold the discount amount if a coupon is applied
+    let couponCode = ""; // To store the applied coupon code
 
-   
     if (req.session && req.session.user) {
       const userId = req.session.user;
 
-      
       const cart = await Cart.findOne({ userId }).populate({
         path: "items.productId",
         model: "Product",
@@ -38,7 +122,7 @@ const loadCartPage = async (req, res) => {
 
             if (!variant) {
               console.error("Variant not found for item:", item);
-              return null; 
+              return null;
             }
 
             return {
@@ -47,7 +131,7 @@ const loadCartPage = async (req, res) => {
                 ? product.category.name
                 : "Unknown",
               productName: product.productName,
-              productBrand: product.brand, 
+              productBrand: product.brand,
               productImage: product.productImage[0],
               quantity: item.quantity,
               color: item.variant.color,
@@ -63,23 +147,40 @@ const loadCartPage = async (req, res) => {
       }
 
       subtotal = cartItems.reduce((total, item) => total + item.itemTotal, 0);
+
+      // Check for coupon code in session (if any)
+      couponCode = req.session.couponCode || "";
+
+      // Apply discount if a coupon is present
+      if (couponCode) {
+        const coupon = await Coupon.findOne({ code: couponCode });
+        if (coupon && coupon.isActive && coupon.expiryDate > new Date()) {
+          discountAmount = calculateDiscount(coupon, subtotal);
+        }
+      }
     } else {
       isCartEmpty = true;
     }
 
-    const total = subtotal + shippingCharge;
+    const total = subtotal + shippingCharge - discountAmount; // Update total
 
     const userId = req.session.user;
     const user = await User.findOne({ _id: userId });
 
-    res.render("cart", {
+    // Fetch available coupons
+    const coupons = await Coupon.find({ isActive: true }); // Adjust the query as needed
+
+    res.render("cart", { // Ensure you specify the correct path
       user,
       cartItems,
       subtotal,
       shippingCharge,
       total,
+      discountAmount, // Pass discount amount to the view
+      couponCode, // Pass the coupon code to the view
       isCartEmpty,
       isGuest: !req.session.user,
+      coupons, // Pass coupons to the view
     });
   } catch (error) {
     console.error("Cart page error:", error.stack || error);
@@ -88,6 +189,17 @@ const loadCartPage = async (req, res) => {
       error: error.toString(),
     });
   }
+};
+
+
+// Function to calculate discount based on coupon type
+const calculateDiscount = (coupon, subtotal) => {
+  if (coupon.discountType === "percentage") {
+    return (subtotal * coupon.discountAmount) / 100;
+  } else if (coupon.discountType === "fixed") {
+    return coupon.discountAmount;
+  }
+  return 0; // No discount
 };
 
 // code to add items to cart

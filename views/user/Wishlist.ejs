@@ -371,3 +371,23 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cartLinks = document.querySelectorAll('.site-header__cart');
+
+            cartLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    console.log('Cart link clicked');
+
+
+                    e.stopPropagation();
+
+
+                    window.location.href = '/cart';
+
+
+                    e.preventDefault();
+                });
+            });
+        });
+    </script>

@@ -265,6 +265,47 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="couponsModal" tabindex="-1" role="dialog" aria-labelledby="couponsModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="couponsModalLabel">Available Coupons</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group">
+                        <% if (coupons && coupons.length> 0) { %>
+                            <% coupons.forEach(coupon=> { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <strong>
+                                        <%= coupon.code %>
+    
+                                    </strong>
+                                    <span style="color: green;"> <b>
+                                            <%=coupon.description %>
+                                        </b></span>
+                                    <span> Expiry Date:</span> <span style="color: #f94242;">
+                                        <%= new Date(coupon.expiryDate).toLocaleDateString() %>
+                                    </span>
+    
+                                   
+                                </li>
+                                <% }); %>
+                                    <% } else { %>
+                                        <li class="list-group-item">No coupons available</li>
+                                        <% } %>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="background-color: #ed143d;" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!--End Footer-->
 <%- include("../../views/partials/user/footer") %>
@@ -286,5 +327,12 @@
                     e.preventDefault();
                 });
             });
+        });
+</script>
+<script>
+    document.getElementById('couponsLink').addEventListener('click', function (e) {
+            e.preventDefault(); // Prevent default link behavior
+            const couponsModal = new bootstrap.Modal(document.getElementById('couponsModal'));
+            couponsModal.show();
         });
 </script>

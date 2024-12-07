@@ -258,6 +258,31 @@
                     element.style.display = "none"
                 })
             }
+            async function removeOffer(categoryId) {
+                    try {
+                        const response = await fetch('/admin/removeCategoryOffer', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ categoryId }),
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && data.status) {
+                            Swal.fire('Offer Removed', 'The offer has been removed successfully.', 'success')
+                                .then(() => {
+                                    location.reload(); // Reload the page to reflect the changes
+                                });
+                        } else {
+                            Swal.fire('Failed', data.message || 'Removing offer failed.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error removing offer:', error);
+                        Swal.fire('Error', 'An error occurred while removing the offer.', 'error');
+                    }
+                }
 
            async function addOffer(categoryId) {
                 const { value: amount } = await Swal.fire({

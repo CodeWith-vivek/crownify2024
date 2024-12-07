@@ -2259,6 +2259,9 @@ a.itemside:hover .title {
 body.dark .card-body{
   background-color: #2a2a29;;
 }
+body.dark .tr td {
+  color: white;
+}
 
 .card-user .card-body {
   text-align: center;

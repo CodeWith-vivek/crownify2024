@@ -104,6 +104,23 @@ const userSchema = new Schema(
       required: false,
     },
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Wishlist" }],
+    couponsApplied: [
+      {
+        coupon: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Coupon", // Reference to the Coupon model
+        },
+        usedCount: {
+          type: Number,
+          default: 0,
+          min: [0, "Used count cannot be negative"],
+        },
+        appliedOn: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   {
     collection: "users",

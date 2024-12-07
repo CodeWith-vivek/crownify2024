@@ -149,6 +149,7 @@ router.post('/checkout/validate',userAuth,checkoutController.validateQuantity)
 //order
 
 router.post("/checkout",userAuth,orderController.placeOrder)
+router.post("/verify-payment", userAuth, orderController.verifyRazorpayPayment);
 
 
 
