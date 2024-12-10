@@ -54,12 +54,10 @@ const userSchema = new Schema(
         ref: "Cart",
       },
     ],
-    wallet: [
-      {
-        type: Number,
-        default: 0,
-      },
-    ],
+    wallet: {
+      type: Number,
+      default: 0.0,
+    },
     orderHistory: [
       {
         type: Schema.Types.ObjectId,

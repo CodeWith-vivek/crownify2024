@@ -141,37 +141,44 @@
                                                         </div>
                                                         <div class="col-6 col-md-2 mb-2 mb-md-0">
                                                             <div class="d-md-none text-muted fs-6 mb-1">STATUS</div>
-                                                            <span
-                                                                class="<%= order.orderStatus === 'Delivered' ? 'text-success' : 'text-warning' %>">
+                                                            <span class="<%= item.badgeClass %>">
                                                                 <%= item.orderStatus || 'Pending' %>
                                                             </span>
                                                         </div>
+                                                        
+                                                        <% }); %>
                                                         <div class="col-6 col-md-2">
-                                                            <button
-                                                                class="btn btn-dark btn-outline-secondary btn w-100 w-md-auto mb-1 view-order"
-                                                                style="font-size : smaller;">
+                                                        
+                                                            <button class="btn btn-dark btn-outline-secondary btn w-100 w-md-auto mb-1 view-order" style="font-size : smaller;">
                                                                 View <i class="bi bi-chevron-down ms-1"></i>
                                                             </button>
-                                                            <% if (order.orderStatus==='Placed' ||
-                                                                order.orderStatus==='Confirmed' ) { %>
-                                                                <button
-                                                                    class="btn btn-danger btn-outline-secondary btn w-100 w-md-auto mb-1"
-                                                                    style="font-size: smaller;">
-                                                                    Cancel Order <i class="bi bi-chevron-down ms-1"></i>
-                                                                </button>
-                                                                <% } %>
-                                                                    <% if (order.orderStatus==='Delivered' ) { %>
-                                                                        <button
-                                                                            class="btn btn-warning btn-outline-secondary btn w-100 w-md-auto mb-1"
-                                                                            style="font-size: smaller;">
-                                                                            Return <i
-                                                                                class="bi bi-chevron-down ms-1"></i>
-                                                                        </button>
-                                                                        <% } %>
+                                                        
                                                         </div>
-                                                        <% }); %>
                                                 </div>
+                                                <div class="row">
+                                                    <div class="col-10 text-end" >Sub Total:</div>
+                                                    <div class="col-2 text-danger" >₹<%= order.subtotal || 0 %>
+                                                    </div> <!-- Assuming order has a discount property -->
+                                                </div>
+                                                
+                                                <div class="row">
+                                                    <div class="col-10 text-end">Savings:</div>
+                                                    <div class="col-2 text-success" >₹<%= order.discount || 0 %>
+                                                    </div> <!-- Assuming order has a discount property -->
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-10 text-end">Shipping:</div>
+                                                    <div class="col-2">₹<%= order.shipping || 0 %>
+                                                    </div> <!-- Assuming order has a discount property -->
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-10 text-end">Grand Total:</div>
+                                                    <div class="col-2  text-danger">₹<%= order.grandTotal || 0 %>
+                                                    </div> <!-- Assuming order has a discount property -->
+                                                </div>
+                                               
                                             </div>
+                                         
                                             <% }); %>
                                                 <% } %>
                             </div>
@@ -215,13 +222,14 @@
                         const getBadgeClass = (status) => {
                             const badgeClasses = {
                                 'Delivered': 'bg-success',
+                                'Shipped': 'bg-purple',
                                 'Return Pending': 'bg-warning',
-                                'Return Requested': 'bg-warning',
-                                'Return Approved': 'bg-info',
+                                'Return requested': 'bg-orange',
+                                'Returned': 'bg-info',
                                 'Return Rejected': 'bg-danger',
                                 'Placed': 'bg-warning',
                                 'Confirmed': 'bg-warning',
-                                'Cancelled': 'bg-danger'
+                                'canceled': 'bg-danger'
                             };
                             return badgeClasses[status] || 'bg-secondary';
                         };
@@ -244,7 +252,7 @@
                         <button class="btn btn-warning btn-sm w-100 return-item" ${commonAttributes}>
                             Return Item
                         </button>`;
-                                case 'Return Requested':
+                                case 'Return requested':
                                     return `
                         <button class="btn btn-danger btn-sm w-100 cancel-return" ${commonAttributes}>
                             Cancel Return Request
@@ -299,6 +307,19 @@
             });
 
             function setupActionButtons() {
+                document.querySelectorAll('.cancel-return').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const orderId = this.getAttribute('data-order-id');
+                        const itemIndex = this.getAttribute('data-item-index');
+                        const productName = this.getAttribute('data-product-name');
+                        const productImage = this.getAttribute('data-product-image');
+                        const productColor = this.getAttribute('data-product-color');
+                        const productSize = this.getAttribute('data-product-size');
+                        const productPrice = this.getAttribute('data-product-price');
+
+                        handleCancelReturnRequest(orderId, itemIndex, productName, productSize, productColor, productPrice);
+                    });
+                });
            
                 document.querySelectorAll('.cancel-item').forEach(button => {
                     button.addEventListener('click', function () {
@@ -375,35 +396,22 @@
                     });
                 });
             }
-
-            function handleReturnSubmission(orderId, itemIndex, productName, productSize, productColor, productPrice) {
-                const comment = document.getElementById('returnComment').value.trim();
-                if (!comment) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Comment Required',
-                        text: 'Please provide a reason for return before proceeding.',
-                        confirmButtonText: 'OK'
-                    });
-                    return;
-                }
-
-              
+      
+         function handleCancelReturnRequest(orderId, itemIndex, productName, productSize, productColor, productPrice) {
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: 'Do you really want to submit this return request?',
+                    text: 'Do you really want to cancel this return request?',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, submit it!',
+                    confirmButtonText: 'Yes, cancel it!',
                     cancelButtonText: 'No, keep it'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                     
                         Swal.fire({
                             title: 'Processing...',
-                            text: 'Please wait while we process your return request.',
+                            text: 'Please wait while we cancel your return request.',
                             allowOutsideClick: false,
                             showConfirmButton: false,
                             didOpen: () => {
@@ -411,18 +419,17 @@
                             }
                         });
 
-                        
+                        // Send a request to your server to cancel the return request
                         const data = {
                             orderId,
+                            itemIndex,
                             productName,
                             productSize,
                             productColor,
-                            productPrice,
-                            returnComment: comment,
+                            productPrice
                         };
 
-                      
-                        fetch('/return-item', {
+                        fetch('/cancel-return-request', { // Update this URL to your actual endpoint
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -434,36 +441,18 @@
                                 if (data.success) {
                                     Swal.fire({
                                         icon: 'success',
-                                        title: 'Return Submitted',
-                                        text: 'Your return request has been submitted successfully.',
+                                        title: 'Return Request Canceled',
+                                        text: 'The return request has been successfully canceled.',
                                         confirmButtonText: 'OK'
                                     }).then(() => {
-                                      
-                                        window.location.reload();
-                                    }).then(() => {
-                                        
-                                        const returnButton = document.querySelector(`.return-item[data-order-id="${orderId}"][data-item-index="${itemIndex}"]`);
-                                        returnButton.innerText = 'Cancel Return';
-                                        returnButton.classList.remove('btn-warning');
-                                        returnButton.classList.add('btn-danger');
-                                        returnButton.disabled = false;
-
-                                      
-                                        const statusBadge = returnButton.closest('.product-item').querySelector('.badge');
-                                        if (statusBadge) {
-                                            statusBadge.innerText = 'Return Requested';
-                                            statusBadge.classList.remove('bg-success');
-                                            statusBadge.classList.add('bg-warning');
-                                        }
-
-                                       
-                                        closeModal('returnModal');
+                                        // Reload the page to reflect the changes
+                                        location.reload();
                                     });
                                 } else {
                                     Swal.fire({
                                         icon: 'error',
-                                        title: 'Submission Failed',
-                                        text: data.message || 'Failed to submit the return request. Please try again later.',
+                                        title: 'Cancellation Failed',
+                                        text: data.message || 'Failed to cancel the return request. Please try again later.',
                                         confirmButtonText: 'OK'
                                     });
                                 }
@@ -473,13 +462,117 @@
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Error',
-                                    text: 'An error occurred while submitting the return request. Please try again later.',
+                                    text: 'An error occurred while canceling the return request. Please try again later.',
                                     confirmButtonText: 'OK'
                                 });
                             });
                     }
                 });
             }
+             function handleReturnSubmission(orderId, itemIndex, productName, productSize, productColor, productPrice) {
+                    const comment = document.getElementById('returnComment').value.trim();
+                    if (!comment) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Comment Required',
+                            text: 'Please provide a reason for return before proceeding.',
+                            confirmButtonText: 'OK'
+                        });
+                        return;
+                    }
+
+
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: 'Do you really want to submit this return request?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, submit it!',
+                        cancelButtonText: 'No, keep it'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+
+                            Swal.fire({
+                                title: 'Processing...',
+                                text: 'Please wait while we process your return request.',
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+
+
+                            const data = {
+                                orderId,
+                                productName,
+                                productSize,
+                                productColor,
+                                productPrice,
+                                returnComment: comment,
+                            };
+
+
+                            fetch('/return-item', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(data),
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Return Submitted',
+                                            text: 'Your return request has been submitted successfully.',
+                                            confirmButtonText: 'OK'
+                                        }).then(() => {
+
+                                            window.location.reload();
+                                        }).then(() => {
+
+                                            const returnButton = document.querySelector(`.return-item[data-order-id="${orderId}"][data-item-index="${itemIndex}"]`);
+                                            returnButton.innerText = 'Cancel Return';
+                                            returnButton.classList.remove('btn-warning');
+                                            returnButton.classList.add('btn-danger');
+                                            returnButton.disabled = false;
+
+
+                                            const statusBadge = returnButton.closest('.product-item').querySelector('.badge');
+                                            if (statusBadge) {
+                                                statusBadge.innerText = 'Return Requested';
+                                                statusBadge.classList.remove('bg-success');
+                                                statusBadge.classList.add('bg-warning');
+                                            }
+
+
+                                            closeModal('returnModal');
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Submission Failed',
+                                            text: data.message || 'Failed to submit the return request. Please try again later.',
+                                            confirmButtonText: 'OK'
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'An error occurred while submitting the return request. Please try again later.',
+                                        confirmButtonText: 'OK'
+                                    });
+                                });
+                        }
+                    });
+                }
 
             function handleItemCancellation(orderId, itemIndex, productName, productSize, productColor, productPrice) {
                 const cancelComment = document.getElementById('cancelComment').value.trim();

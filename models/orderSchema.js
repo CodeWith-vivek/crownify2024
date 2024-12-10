@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const cartItemSchema=require("../models/cartItemSchema")
+const cartItemSchema = require("../models/cartItemSchema");
 const orderSchema = new Schema(
   {
     userId: {
@@ -9,15 +9,15 @@ const orderSchema = new Schema(
       ref: "User",
       required: true,
     },
-    items: [cartItemSchema], 
+    items: [cartItemSchema],
     shippingAddress: {
       type: Schema.Types.ObjectId,
       ref: "Address",
-      required: true, 
+      required: true,
     },
     paymentMethod: {
       type: String,
-      enum: ["COD", "Card", "UPI", "Wallet", "Net Banking","RazorPay"],
+      enum: ["COD", "Card", "UPI", "Wallet", "Net Banking", "RazorPay"],
       required: true,
     },
     paymentStatus: {
@@ -25,22 +25,27 @@ const orderSchema = new Schema(
       enum: ["Pending", "Completed", "Failed", "Refunded"],
       default: "Pending",
     },
-   
-    totalAmount: {
-      type: Number,
-      required: true,
-    },
+    coupon: { type: mongoose.Schema.Types.ObjectId, ref: "Coupon" },
+    couponCode: { type: String, default: null },
     discount: {
       type: Number,
       default: 0,
     },
-    shippingCharge: {
+    subtotal: {
+      type: Number,
+      required: true, // Add this to ensure subtotal is always saved
+    },
+    total: {
+      type: Number,
+      required: true, // Total before discount
+    },
+    shipping: {
       type: Number,
       default: 40.0,
     },
     grandTotal: {
       type: Number,
-      required: true, 
+      required: true, // Total after discount + shipping
     },
     orderedAt: {
       type: Date,
@@ -50,7 +55,7 @@ const orderSchema = new Schema(
       type: Date,
     },
     trackingId: {
-      type: String, 
+      type: String,
     },
   },
   { timestamps: true }

@@ -689,11 +689,33 @@ const validatCurrentPassword = async (req, res) => {
 
 //code to load user order list page
 
+// const loadUserOrder = async (req, res) => {
+//   try {
+//     const userId = req.session.user;
+
+   
+//     const userData = await User.findById(userId).populate("addresses"); 
+//     const userOrders = await Order.find({ userId })
+//       .populate("items.productId")
+//       .sort({
+//         orderedAt: -1,
+//       });
+
+   
+//     res.render("Order", {
+//       user: userData,
+//       orders: userOrders,
+//     });
+//   } catch (error) {
+//     console.error("Error retrieving data:", error);
+//     res.redirect("/pageNotFound");
+//   }
+// };
+
 const loadUserOrder = async (req, res) => {
   try {
     const userId = req.session.user;
 
-   
     const userData = await User.findById(userId).populate("addresses"); 
     const userOrders = await Order.find({ userId })
       .populate("items.productId")
@@ -701,10 +723,34 @@ const loadUserOrder = async (req, res) => {
         orderedAt: -1,
       });
 
-   
+    // Function to get badge class based on order status
+    const getBadgeClass = (status) => {
+      const badgeClasses = {
+        'Delivered': 'text-success',
+        'Shipped': 'text-purple',
+        'Return requested': 'text-orange',
+        'Returned':'text-info',
+        'Return Approved': 'text-info',
+        'Return Rejected': 'text-danger',
+        'Placed': 'text-warning',
+        'Confirmed': 'text-warning',
+        'canceled': 'text-danger'
+      };
+      return badgeClasses[status] || 'bg-secondary';
+    };
+
+    // Map over orders and their items to add badgeClass
+    const ordersWithBadgeClasses = userOrders.map(order => {
+      order.items = order.items.map(item => {
+        item.badgeClass = getBadgeClass(item.orderStatus); // Add badge class
+        return item;
+      });
+      return order;
+    });
+
     res.render("Order", {
       user: userData,
-      orders: userOrders,
+      orders: ordersWithBadgeClasses, // Use the modified orders
     });
   } catch (error) {
     console.error("Error retrieving data:", error);

@@ -59,7 +59,7 @@
                         <div class="mb-3">
                             <label for="usage-limit" class="form-label">Usage Limit</label>
                             <input type="number" class="form-control" id="usage-limit" name="usageLimit" required
-                                min="1" placeholder="Enter usage limit">
+                                min="0" placeholder="Enter usage limit">
                             <span class="text-danger" id="usage-error"></span>
                         </div>
                         <div class="mb-3">
@@ -268,11 +268,14 @@
                 }
 
                 // Validate Max Discount (optional)
-                const maxDiscount = parseFloat(document.getElementById('max-discount').value);
-                if (maxDiscount < 0) {
-                    document.getElementById('max-error').textContent = 'Max discount must be a positive number or zero.';
-                    isValid = false;
-                }
+              const maxDiscountInput = document.getElementById('max-discount').value.trim();
+               if (maxDiscountInput !== '') { // Only validate if not empty
+                   const maxDiscount = parseFloat(maxDiscountInput);
+                   if (isNaN(maxDiscount) || maxDiscount < 0) {
+                       document.getElementById('max-error').textContent = 'Max discount must be a positive number or zero.';
+                       isValid = false;
+                   }
+               }
 
                 // Validate Min Purchase
                 const minPurchase = parseFloat(document.getElementById('min-purchase').value);
@@ -289,11 +292,11 @@
                 }
 
                 // Validate Usage Limit
-                const usageLimit = parseInt(document.getElementById('usage-limit').value, 10);
-                if (isNaN(usageLimit) || usageLimit < 1) {
-                    document.getElementById('usage-error').textContent = 'Usage limit must be at least 1.';
-                    isValid = false;
-                }
+               const usageLimit = parseInt(document.getElementById('usage-limit').value, 10);
+               if (isNaN(usageLimit) || (usageLimit !== 0 && usageLimit < 1)) {
+                   document.getElementById('usage-error').textContent = 'Usage limit must be at least 1 or 0 for unlimited usage.';
+                   isValid = false;
+               }
 
                 // Validate Description
               const description = document.getElementById('description').value.trim();

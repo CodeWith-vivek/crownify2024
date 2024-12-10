@@ -7,70 +7,62 @@
                     <div class="row justify-content-center">
                         <div class="col-md-6">
                             <h1 class="text-center mb-4">Edit Coupon</h1>
-                            <form id="edit-coupon-form" method="POST" action="/admin/edit-coupon/<%= coupon._id %>">
-                                <div class="mb-3">
-                                    <label for="coupon-code" class="form-label">Coupon Code</label>
-                                    <input type="text" class="form-control" id="coupon-code" name="coupon-code"
-                                        value="<%= coupon.code %>" required maxlength="20">
-                                    <span class="text-danger" id="coupon-code-error"></span>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="discount-type" class="form-label">Discount Type</label>
-                                    <select class="form-select" id="discount-type" name="discount-type" required>
-                                        <option value="percentage" <%=coupon.discountType==='percentage' ? 'selected'
-                                            : '' %>>Percentage</option>
-                                        <option value="fixed" <%=coupon.discountType==='fixed' ? 'selected' : '' %>
-                                            >Fixed Amount</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="discount-amount" class="form-label">Discount Amount</label>
-                                    <input type="number" class="form-control" id="discount-amount"
-                                        name="discount-amount" value="<%= coupon.discountAmount %>" required min="0"
-                                        step="0.01">
-                                    <span class="text-danger" id="discount-amount-error"></span>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="max-discount" class="form-label">Max Discount</label>
-                                    <input type="number" class="form-control" id="max-discount" name="maxDiscount"
-                                        value="<%= coupon.maxDiscount %>" min="0" step="0.01"
-                                        placeholder="Enter max discount">
-                                    <span class="text-danger" id="max-discount-error"></span>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="min-purchase" class="form-label">Min Purchase</label>
-                                    <input type="number" class="form-control" id="min-purchase" name="minPurchase"
-                                        value="<%= coupon.minPurchase %>" required min="0" step="0.01"
-                                        placeholder="Enter minimum purchase amount">
-                                    <span class="text-danger" id="min-purchase-error"></span>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="expiry-date" class="form-label">Expiry Date</label>
-                                    <input type="date" class="form-control" id="expiry-date" name="expiry-date"
-                                        value="<%= coupon.expiryDate.toISOString().split('T')[0] %>" required>
-                                    <span class="text-danger" id="expiry-date-error"></span>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="usage-limit" class="form-label">Usage Limit</label>
-                                    <input type="number" class="form-control" id="usage-limit" name="usage-limit"
-                                        value="<%= coupon.usageLimit %>" required min="1">
-                                    <span class="text-danger" id="usage-limit-error"></span>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="description" class="form-label">Description</label>
-                                    <textarea class="form-control" id="description" name="description" maxlength="500"
-                                        placeholder="Enter a brief description of the coupon"
-                                        required><%= coupon.description %></textarea>
-                                    <span class="text-danger" id="description-error"></span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <button type="submit" class="btn btn-custom text-white"
-                                        style="background-color: rgb(31, 31, 196);" id="save-button" disabled>Save
-                                        Changes</button>
-                                    <button type="button" class="btn btn-secondary"
-                                        onclick="cancelEdit()">Cancel</button>
-                                </div>
-                            </form>
+                        <form id="edit-coupon-form" method="POST" action="/admin/edit-coupon/<%= coupon._id %>">
+                            <div class="mb-3">
+                                <label for="coupon-code" class="form-label">Coupon Code</label>
+                                <input type="text" class="form-control" id="coupon-code" name="couponCode" value="<%= coupon.code %>" required
+                                    maxlength="20">
+                                <span class="text-danger" id="coupon-code-error"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label for="discount-type" class="form-label">Discount Type</label>
+                                <select class="form-select" id="discount-type" name="discountType" required> <!-- Changed here -->
+                                    <option value="percentage" <%=coupon.discountType==='percentage' ? 'selected' : '' %>>Percentage</option>
+                                    <option value="fixed" <%=coupon.discountType==='fixed' ? 'selected' : '' %>>Fixed Amount</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="discount-amount" class="form-label">Discount Amount</label>
+                                <input type="number" class="form-control" id="discount-amount" name="discountAmount"
+                                    value="<%= coupon.discountAmount %>" required min="0" step="0.01"> <!-- Changed here -->
+                                <span class="text-danger" id="discount-amount-error"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label for="max-discount" class="form-label">Max Discount</label>
+                                <input type="number" class="form-control" id="max-discount" name="maxDiscount" value="<%= coupon.maxDiscount %>"
+                                    min="0" step="0.01" placeholder="Enter max discount">
+                                <span class="text-danger" id="max-discount-error"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label for="min-purchase" class="form-label">Min Purchase</label>
+                                <input type="number" class="form-control" id="min-purchase" name="minPurchase" value="<%= coupon.minPurchase %>"
+                                    required min="0" step="0.01" placeholder="Enter minimum purchase amount">
+                                <span class="text-danger" id="min-purchase-error"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label for="expiry-date" class="form-label">Expiry Date</label>
+                                <input type="date" class="form-control" id="expiry-date" name="expiryDate"
+                                    value="<%= coupon.expiryDate.toISOString().split('T')[0] %>" required> <!-- Changed here -->
+                                <span class="text-danger" id="expiry-date-error"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label for="usage-limit" class="form-label">Usage Limit</label>
+                                <input type="number" class="form-control" id="usage-limit" name="usageLimit" value="<%= coupon.usageLimit %>"
+                                    required min="1">
+                                <span class="text-danger" id="usage-limit-error"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" maxlength="500"
+                                    placeholder="Enter a brief description of the coupon" required><%= coupon.description %></textarea>
+                                <span class="text-danger" id="description-error"></span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-custom text-white" style="background-color: rgb(31, 31, 196);"
+                                    id="save-button">Save Changes</button>
+                                <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
+                            </div>
+                        </form>
                         </div>
                     </div>
                 </div>
@@ -173,12 +165,25 @@
     form.addEventListener('submit', function (event) {
         event.preventDefault();
 
-        const formData = new FormData(form);
+           const formData = {
+            couponCode: document.getElementById('coupon-code').value.trim(),
+            discountType: document.getElementById('discount-type').value, // Assuming you have a discount type dropdown
+            discountAmount: parseFloat(document.getElementById('discount-amount').value),
+            minPurchase: parseFloat(document.getElementById('min-purchase').value),
+            usageLimit: parseInt(document.getElementById('usage-limit').value),
+            description: document.getElementById('description').value.trim(),
+            expiryDate: document.getElementById('expiry-date').value, // Assuming you have an expiry date input
+            maxDiscount: parseFloat(document.getElementById('max-discount')?.value || 0) // Optional max discount
+        };
+
         const actionUrl = form.action;
 
         fetch(actionUrl, {
-            method: 'POST',
-            body: formData
+            method: 'POST', // or change to PUT/PATCH if your backend expects that
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
         })
             .then(response => {
                 if (!response.ok) {

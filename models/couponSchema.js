@@ -7,7 +7,7 @@ const couponSchema = new mongoose.Schema(
       required: [true, "Coupon code is required"],
       unique: true,
       trim: true,
-      maxlength: [20, "Coupon code cannot exceed 20 characters"],
+      
     },
     discountType: {
       type: String,
@@ -17,17 +17,17 @@ const couponSchema = new mongoose.Schema(
     discountAmount: {
       type: Number,
       required: [true, "Discount amount is required"],
-      min: [0, "Discount amount cannot be negative"],
+    
     },
     maxDiscount: {
       type: Number,
-      min: [0, "Max discount cannot be negative"],
+   
       default: null, // Optional field
     },
     minPurchase: {
       type: Number,
       required: [true, "Minimum purchase amount is required"],
-      min: [0, "Minimum purchase amount cannot be negative"],
+     
     },
     expiryDate: {
       type: Date,
@@ -36,13 +36,9 @@ const couponSchema = new mongoose.Schema(
     usageLimit: {
       type: Number,
       required: [true, "Usage limit is required"],
-      min: [1, "Usage limit must be at least 1"],
+      min: [0],
     },
-    usedCount: {
-      type: Number,
-      default: 0,
-      min: [0, "Used count cannot be negative"],
-    },
+   
     users_applied: [
       {
         user: {
@@ -59,7 +55,7 @@ const couponSchema = new mongoose.Schema(
     description: {
       type: String,
       trim: true,
-      maxlength: [500, "Description cannot exceed 500 characters"], // Adjust the maxlength as needed
+      
     },
     isActive: {
       type: Boolean,

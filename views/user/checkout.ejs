@@ -115,6 +115,7 @@
                                 <li>Subtotal <span>₹<%= subtotal.toFixed(2) %></span>
                                     <input type="hidden" name="subtotal" value="<%= subtotal %>">
                                 </li>
+                                <li>Discount <span style="color: green; font-size: 14px;">₹<%= discountAmount.toFixed(2) %></span></li>
                                 <li>Shipping <span style="color: gray; font-size: 14px;">₹<%= shipping.toFixed(2) %>
                                             </span>
                                     <input type="hidden" name="shipping" value="<%= shipping %>">
@@ -430,4 +431,42 @@
             }
         });
     }
+    </script>
+    <script>
+        // Function to remove the coupon from the session
+        function removeCouponFromSession() {
+            fetch('/remove-coupon', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cartTotal: 0 }), // Adjust as needed
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Coupon removed from session.');
+                    } else {
+                        console.error('Failed to remove coupon:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                });
+        }
+
+        // Event listener for visibility change to check if user is leaving the checkout page
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                // Check if the current page is the checkout page
+                if (window.location.pathname === '/checkout') {
+                    removeCouponFromSession();
+                }
+            }
+        });
+
+        // Alternatively, using beforeunload to check if the user is leaving the checkout page
+        window.addEventListener('beforeunload', (event) => {
+            if (window.location.pathname === '/checkout') {
+                removeCouponFromSession();
+            }
+        });
     </script>
