@@ -687,30 +687,7 @@ const validatCurrentPassword = async (req, res) => {
   }
 };
 
-//code to load user order list page
 
-// const loadUserOrder = async (req, res) => {
-//   try {
-//     const userId = req.session.user;
-
-   
-//     const userData = await User.findById(userId).populate("addresses"); 
-//     const userOrders = await Order.find({ userId })
-//       .populate("items.productId")
-//       .sort({
-//         orderedAt: -1,
-//       });
-
-   
-//     res.render("Order", {
-//       user: userData,
-//       orders: userOrders,
-//     });
-//   } catch (error) {
-//     console.error("Error retrieving data:", error);
-//     res.redirect("/pageNotFound");
-//   }
-// };
 
 const loadUserOrder = async (req, res) => {
   try {

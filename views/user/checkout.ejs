@@ -1,472 +1,526 @@
 <%- include("../../views/partials/user/headershop") %>
 
-<section class="breadcrumb-option">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="breadcrumb__text">
-                    <h4>Check Out</h4>
-                    <div class="breadcrumb__links">
-                        <a href="/">Home</a>
-                        <a href="/shop">Shop</a>
-                        <span>Check Out</span>
+    <section class="breadcrumb-option">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="breadcrumb__text">
+                        <h4>Check Out</h4>
+                        <div class="breadcrumb__links">
+                            <a href="/">Home</a>
+                            <a href="/shop">Shop</a>
+                            <span>Check Out</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="checkout spad">
-    <div class="container">
-        <div class="checkout__form">
-            <form id="checkoutForm" action="/checkout" method="POST">
-                <div class="row">
-                    <div class="col-lg-7 col-md-5">
-                        <% if (addresses.length===0) { %>
-                            <h2>No address added yet.</h2>
-                            <% } else { %>
-                                <% addresses.forEach(address=> { %>
-                                    <div class="card mb-3 mb-lg-3">
-                                        <div class="card-header d-flex justify-content-between align-items-center"
-                                            style="background-color: #cf8484;">
-                                            <h5 class="mb-0">Address</h5>
-                                            <% if (address.isPrimary) { %>
-                                                <span class="badge bg-success"
-                                                    style="margin-right: 23px; color:white; background-color: #703535 !important;">Primary</span>
-                                                <% } %>
-                                        </div>
-                                        <div class="card-body">
-                                            <address>
-                                                <%= address.fullName %><br>
-                                                    <%= address.flatHouseCompany %>, <%= address.areaStreet %><br>
-                                                            <%= address.city %>, <%= address.state %> - <%=
-                                                                        address.postalCode %><br>
-                                                                        <%= address.mobileNumber %><br>
-                                            </address>
-                                            <div class="d-flex justify-content-between">
-                                                <% if (!address.isPrimary) { %>
-                                                    <a href="#" class="btn-small btn-link"
-                                                        onclick="confirmPrimaryAddress(event, '<%= address._id %>')">
-                                                        Set as Primary
-                                                    </a>
+    <section class="checkout spad">
+        <div class="container">
+            <div class="checkout__form">
+                <form id="checkoutForm" action="/checkout" method="POST">
+                    <div class="row">
+                        <div class="col-lg-7 col-md-5">
+                            <% if (addresses.length===0) { %>
+                                <h2>No address added yet.</h2>
+                                <% } else { %>
+                                    <% addresses.forEach(address=> { %>
+                                        <div class="card mb-3 mb-lg-3">
+                                            <div class="card-header d-flex justify-content-between align-items-center"
+                                                style="background-color: #cf8484;">
+                                                <h5 class="mb-0">Address</h5>
+                                                <% if (address.isPrimary) { %>
+                                                    <span class="badge bg-success"
+                                                        style="margin-right: 23px; color:white; background-color: #703535 !important;">Primary</span>
                                                     <% } %>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <% }); %>
-                                        <% } %>
-                                            <!-- Common Add Address Button -->
-                                            <a class="btn btn-primary"
-                                                style="width: 150px; background-color: #703535; margin-left: 20px; color: rgb(251, 251, 251);"
-                                                href="/user/addAddress">Add Address</a>
-                    </div>
-                    <div class="col-lg-5 col-md-7">
-                        <div class="checkout__order">
-                            <h4 class="order__title">Your order</h4>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Quantity</th>
-                                        <th>Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% products.forEach(product=> { %>
-                                        <tr>
-                                            <td>
-                                                <div class="product-info">
-                                                    <div class="product-image">
-                                                        <img src="/uploads/product-image/<%= product.productImage %>"
-                                                            style="width: 50px; height: 50px; margin-right: 10px;">
-                                                    </div>
-                                                    <div class="product-details product-details-small">
-                                                        <p><b>
-                                                                <%= product.productName %>
-                                                            </b></p>
-                                                        <p>
-                                                            <%= product.productBrand %>
-                                                        </p>
-                                                        <p>
-                                                            <%= product.size %>
-                                                        </p>
-                                                        <p>
-                                                            <%= product.color %>
-                                                        </p>
-                                                    </div>
+                                            <div class="card-body">
+                                                <address>
+                                                    <%= address.fullName %><br>
+                                                        <%= address.flatHouseCompany %>, <%= address.areaStreet %><br>
+                                                                <%= address.city %>, <%= address.state %> - <%=
+                                                                            address.postalCode %><br>
+                                                                            <%= address.mobileNumber %><br>
+                                                </address>
+                                                <div class="d-flex justify-content-between">
+                                                    <% if (!address.isPrimary) { %>
+                                                        <a href="#" class="btn-small btn-link"
+                                                            onclick="confirmPrimaryAddress(event, '<%= address._id %>')">
+                                                            Set as Primary
+                                                        </a>
+                                                        <% } %>
                                                 </div>
-                                            </td>
-                                            <td>
-                                                <input type="text" name="quantities[]" value="<%= product.quantity %>"
-                                                    readonly
-                                                    style="width: 50px; border: none; background: transparent;">
-                                                <input type="hidden" name="products[]" value="<%= product.productId %>">
-                                                <input type="hidden" name="sizes[]" value="<%= product.size %>">
-                                                <input type="hidden" name="colors[]" value="<%= product.color %>">
-                                            </td>
-                                            <td>₹<%= product.itemTotal %>
-                                            </td>
-                                        </tr>
+                                            </div>
+                                        </div>
                                         <% }); %>
-                                </tbody>
-                            </table>
-                            <ul class="checkout__total__all">
-                                <li>Subtotal <span>₹<%= subtotal.toFixed(2) %></span>
-                                    <input type="hidden" name="subtotal" value="<%= subtotal %>">
-                                </li>
-                                <li>Discount <span style="color: green; font-size: 14px;">₹<%= discountAmount.toFixed(2) %></span></li>
-                                <li>Shipping <span style="color: gray; font-size: 14px;">₹<%= shipping.toFixed(2) %>
-                                            </span>
-                                    <input type="hidden" name="shipping" value="<%= shipping %>">
-                                </li>
-                                <li>Total <span>₹<%= total.toFixed(2) %></span>
-                                    <input type="hidden" name="total" value="<%= total %>">
-                                </li>
-                            </ul>
-                            <h4 class="order__title">Payment Method</h4>
-                            <div class="checkout__input__checkbox">
-                                <label for="cod-payment">
-                                    <input type="radio" id="cod-payment" name="paymentMethod" value="COD">
-                                    Cash On Delivery
-                                    <span class="checkmark"></span>
-                                </label>
+                                            <% } %>
+                                                <!-- Common Add Address Button -->
+                                                <a class="btn btn-primary"
+                                                    style="width: 150px; background-color: #703535; margin-left: 20px; color: rgb(251, 251, 251);"
+                                                    href="/user/addAddress">Add Address</a>
+                        </div>
+                        <div class="col-lg-5 col-md-7">
+                            <div class="checkout__order">
+                                <h4 class="order__title">Your order</h4>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% products.forEach(product=> { %>
+                                            <tr>
+                                                <td>
+                                                    <div class="product-info">
+                                                        <div class="product-image">
+                                                            <img src="/uploads/product-image/<%= product.productImage %>"
+                                                                style="width: 50px; height: 50px; margin-right: 10px;">
+                                                        </div>
+                                                        <div class="product-details product-details-small">
+                                                            <p><b>
+                                                                    <%= product.productName %>
+                                                                </b></p>
+                                                            <p>
+                                                                <%= product.productBrand %>
+                                                            </p>
+                                                            <p>
+                                                                <%= product.size %>
+                                                            </p>
+                                                            <p>
+                                                                <%= product.color %>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="quantities[]"
+                                                        value="<%= product.quantity %>" readonly
+                                                        style="width: 50px; border: none; background: transparent;">
+                                                    <input type="hidden" name="products[]"
+                                                        value="<%= product.productId %>">
+                                                    <input type="hidden" name="sizes[]" value="<%= product.size %>">
+                                                    <input type="hidden" name="colors[]" value="<%= product.color %>">
+                                                </td>
+                                                <td>₹<%= product.itemTotal %>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                    </tbody>
+                                </table>
+                                <ul class="checkout__total__all">
+                                    <li>Subtotal <span>₹<%= subtotal.toFixed(2) %></span>
+                                        <input type="hidden" name="subtotal" value="<%= subtotal %>">
+                                    </li>
+                                    <li>Discount <span style="color: green; font-size: 14px;">₹<%=
+                                                discountAmount.toFixed(2) %></span></li>
+                                    <li>Shipping <span style="color: gray; font-size: 14px;">₹<%= shipping.toFixed(2) %>
+                                        </span>
+                                        <input type="hidden" name="shipping" value="<%= shipping %>">
+                                    </li>
+                                    <li>Total <span>₹<%= total.toFixed(2) %></span>
+                                        <input type="hidden" name="total" value="<%= total %>">
+                                    </li>
+                                </ul>
+                                <h4 class="order__title">Payment Method</h4>
+                                <div class="checkout__input__checkbox">
+                                    <label for="cod-payment">
+                                        <input type="radio" id="cod-payment" name="paymentMethod" value="COD">
+                                        Cash On Delivery
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                                <div class="checkout__input__checkbox">
+                                    <label for="razorpay-payment">
+                                        <input type="radio" id="razorpay-payment" name="paymentMethod" value="RazorPay">
+                                        Razor Pay
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                                <div class="checkout__input__checkbox">
+                                    <label for="wallet-payment">
+                                        <input type="radio" id="wallet-payment" name="paymentMethod" value="Wallet">
+                                        Wallet
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                                <% if (addresses.length> 0) { %>
+                                    <input type="hidden" name="primaryAddressId"
+                                        value="<%= addresses.find(address => address.isPrimary)._id %>">
+                                    <% } %>
+                                        <button type="submit" class="site-btn">Proceed to Checkout</button>
                             </div>
-                            <div class="checkout__input__checkbox">
-                                <label for="razorpay-payment">
-                                    <input type="radio" id="razorpay-payment" name="paymentMethod" value="RazorPay">
-                                    Razor Pay
-                                    <span class="checkmark"></span>
-                                </label>
-                            </div>
-                            <% if (addresses.length> 0) { %>
-                                <input type="hidden" name="primaryAddressId"
-                                    value="<%= addresses.find(address => address.isPrimary)._id %>">
-                                <% } %>
-                                    <button type="submit" class="site-btn">Proceed to Checkout</button>
                         </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
     <%- include("../../views/partials/user/footershop") %>
-    <script>
-     
+        <script>
 
-//   
-    document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('checkoutForm').addEventListener('submit', async function (event) {
-            event.preventDefault();
 
-            // Payment method and primary address validation
-            const paymentChecked = document.querySelector('input[name="paymentMethod"]:checked');
-            const primaryAddress = document.querySelector('input[name="primaryAddressId"]');
+            document.addEventListener('DOMContentLoaded', function () {
+                document.getElementById('checkoutForm').addEventListener('submit', async function (event) {
+                    event.preventDefault();
 
-            if (!paymentChecked) {
-                Swal.fire({
-                    title: 'Payment Method Required',
-                    text: 'Please select a payment method (Cash on Delivery or Razor Pay).',
-                    icon: 'warning',
-                    confirmButtonText: 'OK'
-                });
-                return;
-            }
+                    // Validate payment method and primary address
+                    const paymentChecked = document.querySelector('input[name="paymentMethod"]:checked');
+                    const primaryAddress = document.querySelector('input[name="primaryAddressId"]');
 
-            if (!primaryAddress) {
-                Swal.fire({
-                    title: 'Primary Address Required',
-                    text: 'Please add and select a primary shipping address.',
-                    icon: 'warning',
-                    confirmButtonText: 'Add Address',
-                    showCancelButton: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/user/addAddress';
+                    if (!paymentChecked) {
+                        Swal.fire({
+                            title: 'Payment Method Required',
+                            text: 'Please select a payment method (Wallet, Cash on Delivery, or Razor Pay).',
+                            icon: 'warning',
+                            confirmButtonText: 'OK'
+                        });
+                        return;
                     }
-                });
-                return;
-            }
 
-            // Confirm order
-            Swal.fire({
-                title: 'Confirm Order',
-                html: `
+                    if (!primaryAddress) {
+                        Swal.fire({
+                            title: 'Primary Address Required',
+                            text: 'Please add and select a primary shipping address.',
+                            icon: 'warning',
+                            confirmButtonText: 'Add Address',
+                            showCancelButton: true
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/user/addAddress';
+                            }
+                        });
+                        return;
+                    }
+
+                    // Confirm order
+                    Swal.fire({
+                        title: 'Confirm Order',
+                        html: `
                 <p>Are you sure you want to place this order?</p>
                 <strong>Payment Method:</strong> ${paymentChecked.value}<br>
                 <strong>Total Amount:</strong> ₹${document.querySelector('input[name="total"]').value}
             `,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, Place Order',
-                cancelButtonText: 'Cancel',
-                reverseButtons: true
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    // Disable submit button
-                    const submitButton = event.target.querySelector('button[type="submit"]');
-                    submitButton.disabled = true;
-                    submitButton.innerHTML = 'Processing...';
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, Place Order',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            // Disable submit button
+                            const submitButton = event.target.querySelector('button[type="submit"]');
+                            submitButton.disabled = true;
+                            submitButton.innerHTML = 'Processing...';
 
-                    try {
-                        // Collect form data
-                        const formData = {
-                            primaryAddressId: primaryAddress.value,
-                            products: Array.from(document.querySelectorAll('input[name="products[]"]')).map(input => input.value),
-                            quantities: Array.from(document.querySelectorAll('input[name="quantities[]"]')).map(input => input.value),
-                            sizes: Array.from(document.querySelectorAll('input[name="sizes[]"]')).map(input => input.value),
-                            colors: Array.from(document.querySelectorAll('input[name="colors[]"]')).map(input => input.value),
-                            subtotal: document.querySelector('input[name="subtotal"]').value,
-                            shipping: document.querySelector('input[name="shipping"]').value,
-                            total: document.querySelector('input[name="total"]').value,
-                            paymentMethod: paymentChecked.value,
-                        };
+                            try {
+                                // Collect form data
+                                const formData = {
+                                    primaryAddressId: primaryAddress.value,
+                                    products: Array.from(document.querySelectorAll('input[name="products[]"]')).map(input => input.value),
+                                    quantities: Array.from(document.querySelectorAll('input[name="quantities[]"]')).map(input => input.value),
+                                    sizes: Array.from(document.querySelectorAll('input[name="sizes[]"]')).map(input => input.value),
+                                    colors: Array.from(document.querySelectorAll('input[name="colors[]"]')).map(input => input.value),
+                                    subtotal: document.querySelector('input[name="subtotal"]').value,
+                                    shipping: document.querySelector('input[name="shipping"]').value,
+                                    total: document.querySelector('input[name="total"]').value,
+                                    paymentMethod: paymentChecked.value,
+                                };
 
-                        // Handle different payment methods
-                        if (paymentChecked.value === 'RazorPay') {
-                            handleRazorpayPayment(formData);
-                        } else if (paymentChecked.value === 'COD') {
-                            await handleCODPayment(formData);
-                        }
-                    } catch (error) {
-                        console.error('Checkout Error:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Checkout Failed',
-                            text: error.message || 'Unable to process your order. Please try again.',
-                            confirmButtonText: 'Retry'
-                        });
-                    } finally {
-                        // Re-enable submit button
-                        submitButton.disabled = false;
-                        submitButton.innerHTML = 'Proceed to Checkout';
-                    }
-                }
-            });
-        });
-    });
-
-    // Handle Razorpay Payment
-    function handleRazorpayPayment(formData) {
-        fetch('/checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData),
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.razorpayOrderId) {
-                    const options = {
-                        key: data.key,
-                        amount: data.amount,
-                        currency: 'INR',
-                        name: 'Your Store Name',
-                        description: 'Order Payment',
-                        order_id: data.razorpayOrderId,
-                        handler: function (response) {
-                            // Verify payment on server
-                            return fetch('/verify-payment', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    ...response,
-                                    orderId: data.orderId
-                                }),
-                            })
-                                .then(verifyResponse => verifyResponse.json())
-                                .then(verifyData => {
-                                    if (verifyData.success) {
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: 'Payment Successful!',
-                                            text: 'Your order has been confirmed.',
-                                            showConfirmButton: true,
-                                            confirmButtonText: 'View Order',
-                                            cancelButtonText: 'Continue Shopping',
-                                            showCancelButton: true
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                window.location.href = `/orders`;
-                                            } else {
-                                                window.location.href = '/shop';
-                                            }
-                                        });
-                                    } else {
-                                        throw new Error(verifyData.message || 'Payment verification failed');
-                                    }
+                                // Handle payment methods
+                                if (paymentChecked.value === 'Wallet') {
+                                    await handleWalletPayment(formData);
+                                } else if (paymentChecked.value === 'RazorPay') {
+                                    handleRazorpayPayment(formData);
+                                } else if (paymentChecked.value === 'COD') {
+                                    await handleCODPayment(formData);
+                                }
+                            } catch (error) {
+                                console.error('Checkout Error:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Checkout Failed',
+                                    text: error.message || 'Unable to process your order. Please try again.',
+                                    confirmButtonText: 'Retry'
                                 });
-                        },
-                        prefill: {
-                            name: 'Customer Name',
-                            email: 'customer@example.com',
-                            contact: 'Customer Phone Number'
-                        },
-                        theme: {
-                            color: '#3399cc'
+                            } finally {
+                                // Re-enable submit button
+                                submitButton.disabled = false;
+                                submitButton.innerHTML = 'Proceed to Checkout';
+                            }
                         }
-                    };
-
-                    const razorpayInstance = new Razorpay(options);
-                    razorpayInstance.open();
-                } else {
-                    throw new Error(data.message || 'Failed to create Razorpay order');
-                }
-            })
-            .catch(error => {
-                console.error('Razorpay Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Payment Failed',
-                    text: error.message || 'Unable to process payment. Please try again.',
-                    confirmButtonText: 'Retry'
+                    });
                 });
             });
-    }
-
-    // Handle COD Payment
-    async function handleCODPayment(formData) {
-        try {
-            const response = await fetch('/checkout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Order Placed Successfully!',
-                    html: `
-                    <p>Your order has been confirmed.</p>
-                    <strong>Order ID:</strong> ${data.orderId}
-                `,
-                    showConfirmButton: true,
-                    confirmButtonText: 'View Orders',
-                    cancelButtonText: 'Continue Shopping',
-                    showCancelButton: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/orders';
-                    } else {
-                        window.location.href = '/shop';
-                    }
-                });
-            } else {
-                throw new Error(data.message || 'Unable to place order');
-            }
-        } catch (error) {
-            console.error('COD Checkout Error:', error); Swal.fire({
-                icon: 'error',
-                title: 'Order Failed',
-                text: error.message || 'Unable to process your order. Please try again.',
-                confirmButtonText: 'Retry'
-            });
-        }
-    }
-
-    function confirmPrimaryAddress(event, addressId) {
-        event.preventDefault();
-
-        Swal.fire({
-            title: 'Set as Primary Address?',
-            text: 'Do you want to set this as your primary address?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, set it!',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch(`/set-primary-address/${addressId}`, {
+            // Handle Razorpay Payment
+            function handleRazorpayPayment(formData) {
+                fetch('/checkout', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    credentials: 'same-origin'
+                    body: JSON.stringify(formData),
                 })
-                    .then(async response => {
-                        if (!response.ok) {
-                            const text = await response.text();
-                            console.log("Error response body:", text);
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
+                    .then(response => response.json())
                     .then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                title: 'Success!',
-                                text: 'Primary address updated successfully.',
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location.reload();
-                            });
+                        if (data.success && data.razorpayOrderId) {
+                            const options = {
+                                key: data.key,
+                                amount: data.amount,
+                                currency: 'INR',
+                                name: 'Your Store Name',
+                                description: 'Order Payment',
+                                order_id: data.razorpayOrderId,
+                                handler: function (response) {
+                                    // Verify payment on server
+                                    return fetch('/verify-payment', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                            ...response,
+                                            orderId: data.orderId
+                                        }),
+                                    })
+                                        .then(verifyResponse => verifyResponse.json())
+                                        .then(verifyData => {
+                                            if (verifyData.success) {
+                                                Swal.fire({
+                                                    icon: 'success',
+                                                    title: 'Payment Successful!',
+                                                    text: 'Your order has been confirmed.',
+                                                    showConfirmButton: true,
+                                                    confirmButtonText: 'View Order',
+                                                    cancelButtonText: 'Continue Shopping',
+                                                    showCancelButton: true
+                                                }).then((result) => {
+                                                    if (result.isConfirmed) {
+                                                        window.location.href = `/orders`;
+                                                    } else {
+                                                        window.location.href = '/shop';
+                                                    }
+                                                });
+                                            } else {
+                                                throw new Error(verifyData.message || 'Payment verification failed');
+                                            }
+                                        });
+                                },
+                                prefill: {
+                                    name: 'Customer Name',
+                                    email: 'customer@example.com',
+                                    contact: 'Customer Phone Number'
+                                },
+                                theme: {
+                                    color: '#3399cc'
+                                }
+                            };
+
+                            const razorpayInstance = new Razorpay(options);
+                            razorpayInstance.open();
                         } else {
-                            Swal.fire({
-                                title: 'Failed!',
-                                text: data.message || 'Failed to update primary address.',
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
+                            throw new Error(data.message || 'Failed to create Razorpay order');
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
+                        console.error('Razorpay Error:', error);
                         Swal.fire({
-                            title: 'Error!',
-                            text: 'An error occurred while updating primary address. Please try again.',
                             icon: 'error',
-                            confirmButtonText: 'OK'
+                            title: 'Payment Failed',
+                            text: error.message || 'Unable to process payment. Please try again.',
+                            confirmButtonText: 'Retry'
                         });
                     });
             }
-        });
-    }
-    </script>
-    <script>
-        // Function to remove the coupon from the session
-        function removeCouponFromSession() {
-            fetch('/remove-coupon', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ cartTotal: 0 }), // Adjust as needed
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        console.log('Coupon removed from session.');
-                    } else {
-                        console.error('Failed to remove coupon:', data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch Error:', error);
-                });
-        }
+            async function handleWalletPayment(formData) {
+                    try {
+                        const response = await fetch('/checkout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(formData),
+                        });
 
-        // Event listener for visibility change to check if user is leaving the checkout page
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden') {
-                // Check if the current page is the checkout page
+                        const data = await response.json();
+
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Order Placed Successfully!',
+                                html: `
+                <p>Your order has been confirmed and the amount has been deducted from your wallet.</p>
+                <strong>Order ID:</strong> ${data.orderId}<br>
+            
+            `,
+                                showConfirmButton: true,
+                                confirmButtonText: 'View Orders',
+                                cancelButtonText: 'Continue Shopping',
+                                showCancelButton: true
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '/orders';
+                                } else {
+                                    window.location.href = '/shop';
+                                }
+                            });
+                        } else {
+                            throw new Error(data.message || 'Unable to process wallet payment');
+                        }
+                    } catch (error) {
+                        console.error('Wallet Checkout Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Payment Failed',
+                            text: error.message || 'Unable to process wallet payment. Please try again.',
+                            confirmButtonText: 'Retry'
+                        });
+                    }
+                }
+
+            // Handle COD Payment
+            async function handleCODPayment(formData) {
+                try {
+                    const response = await fetch('/checkout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData),
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Order Placed Successfully!',
+                            html: `
+                    <p>Your order has been confirmed.</p>
+                    <strong>Order ID:</strong> ${data.orderId}
+                `,
+                            showConfirmButton: true,
+                            confirmButtonText: 'View Orders',
+                            cancelButtonText: 'Continue Shopping',
+                            showCancelButton: true
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/orders';
+                            } else {
+                                window.location.href = '/shop';
+                            }
+                        });
+                    } else {
+                        throw new Error(data.message || 'Unable to place order');
+                    }
+                } catch (error) {
+                    console.error('COD Checkout Error:', error); Swal.fire({
+                        icon: 'error',
+                        title: 'Order Failed',
+                        text: error.message || 'Unable to process your order. Please try again.',
+                        confirmButtonText: 'Retry'
+                    });
+                }
+            }
+
+            function confirmPrimaryAddress(event, addressId) {
+                event.preventDefault();
+
+                Swal.fire({
+                    title: 'Set as Primary Address?',
+                    text: 'Do you want to set this as your primary address?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, set it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/set-primary-address/${addressId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            credentials: 'same-origin'
+                        })
+                            .then(async response => {
+                                if (!response.ok) {
+                                    const text = await response.text();
+                                    console.log("Error response body:", text);
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: 'Success!',
+                                        text: 'Primary address updated successfully.',
+                                        icon: 'success',
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Failed!',
+                                        text: data.message || 'Failed to update primary address.',
+                                        icon: 'error',
+                                        confirmButtonText: 'OK'
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'An error occurred while updating primary address. Please try again.',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                            });
+                    }
+                });
+            }
+        </script>
+        <script>
+            // Function to remove the coupon from the session
+            function removeCouponFromSession() {
+                fetch('/remove-coupon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cartTotal: 0 }), // Adjust as needed
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Coupon removed from session.');
+                        } else {
+                            console.error('Failed to remove coupon:', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch Error:', error);
+                    });
+            }
+
+            // Event listener for visibility change to check if user is leaving the checkout page
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    // Check if the current page is the checkout page
+                    if (window.location.pathname === '/checkout') {
+                        removeCouponFromSession();
+                    }
+                }
+            });
+
+            // Alternatively, using beforeunload to check if the user is leaving the checkout page
+            window.addEventListener('beforeunload', (event) => {
                 if (window.location.pathname === '/checkout') {
                     removeCouponFromSession();
                 }
-            }
-        });
-
-        // Alternatively, using beforeunload to check if the user is leaving the checkout page
-        window.addEventListener('beforeunload', (event) => {
-            if (window.location.pathname === '/checkout') {
-                removeCouponFromSession();
-            }
-        });
-    </script>
+            });
+        </script>

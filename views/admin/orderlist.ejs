@@ -6,8 +6,8 @@
         </div>
         <div>
             <!-- <form method="GET" action="/admin/orderlist"> -->
-                <input type="text" name="search" placeholder="Search order ID" class="form-control bg-white"
-                    value="<%= search || '' %>" style="color: black;">
+                <!-- <input type="text" name="search" placeholder="Search order ID" class="form-control bg-white"
+                    value="<%= search || '' %>" style="color: black;"> -->
             <!-- </form> -->
         </div>
     </div>
@@ -28,7 +28,7 @@
                         <option>Show 40</option>
                     </select> -->
                 </div>
-                <div class="col-lg-2 col-6 col-md-3">
+                <!-- <div class="col-lg-2 col-6 col-md-3">
                     <select class="form-select">
                         <option>Status</option>
                         <option>Returned </option>
@@ -38,7 +38,7 @@
                         <option>Shipped</option>
                         <option>Return request</option>
                     </select>
-                </div>
+                </div> -->
             </div>
         </header>
         <div class="card-body">
@@ -107,27 +107,33 @@
                                             <a href="/admin/orderDetails/<%= order._id %>?itemId=<%= item._id %>" class="btn btn-md rounded font-sm"> Details</a>
                                             <!-- <a href="/admin/orderDetails" class="btn btn-md rounded font-sm">Details</a> -->
                                         
-                                        <td>
-                                            <div class="dropdown">
-                                                <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                                    Update Status
-                                                </a>
-                                                <div class="dropdown-menu">
-                                                    <form id="statusForm" action="/admin/update-status" method="POST">
-                                                        <input type="hidden" name="orderId" value="<%= order._id %>" />
-                                                        <input type="hidden" name="productSize" value="<%= item.variant.size %>" />
-                                                        <input type="hidden" name="productColor" value="<%= item.variant.color %>" />
-                                                    
-                                                        <button type="submit" name="newStatus" value="Placed" class="dropdown-item">Placed</button>
+                                    <td>
+                                        <div class="dropdown">
+                                            <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                                Update Status
+                                            </a>
+                                            <div class="dropdown-menu">
+                                                <form id="statusForm" action="/admin/update-status" method="POST">
+                                                    <input type="hidden" name="orderId" value="<%= order._id %>" />
+                                                    <input type="hidden" name="productSize" value="<%= item.variant.size %>" />
+                                                    <input type="hidden" name="productColor" value="<%= item.variant.color %>" />
+                                    
+                                                    <% if (item.orderStatus==="Placed" ) { %>
                                                         <button type="submit" name="newStatus" value="Shipped" class="dropdown-item">Shipped</button>
-                                                        <button type="submit" name="newStatus" value="Delivered" class="dropdown-item">Delivered</button>
-                                                        <button type="submit" name="newStatus" value="Returned" class="dropdown-item">Returned</button>
-                                                        <button type="submit" name="newStatus" value="canceled" class="dropdown-item">canceled</button>
-                                                    </form>
-                                                </div>
+                                                        <% } else if (item.orderStatus==="Return requested" ) { %>
+                                                            <button type="submit" name="newStatus" value="Returned"
+                                                                class="dropdown-item">Delivered</button>
+                                                            <% }else if (item.orderStatus==="Shipped" ) { %>
+                                                            <button type="submit" name="newStatus" value="Delivered"
+                                                                class="dropdown-item">Delivered</button>
+                                                        
+                                                                <% } %>
+                                                                    <!-- No buttons for Delivered or Canceled -->
+                                                </form>
                                             </div>
-                                        </td>
+                                        </div>
+                                    </td>
                                     </td>
                                 </tr>
                                 <% }); %>
@@ -251,6 +257,8 @@
                                     icon: 'success',
                                     title: 'Success!',
                                     text: 'Order status updated successfully!',
+                                }).then(() => {
+                                    window.location.reload();
                                 });
                              
                                 const statusBadge = form.closest("tr").querySelector(".status-badge");

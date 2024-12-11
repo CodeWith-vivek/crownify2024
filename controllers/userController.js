@@ -496,17 +496,24 @@ const logout = async (req, res) => {
 
 //code to load shop page
 
+
+
 const loadShopPage = async (req, res) => {
   try {
-   
+    console.log("==== Incoming Shop Page Request ====");
+    console.log("Query parameters:", req.query);
+
     let search = req.query.search || "";
     const page = parseInt(req.query.page) || 1;
     const limit = 12;
-  
- 
+
+    console.log("Search term:", search);
+    console.log("Page:", page, "Limit:", limit);
+
     const sortOption = req.query.sort || "";
     let sortCriteria = {};
 
+  
     switch (sortOption) {
       case "priceLowHigh":
         sortCriteria = { salePrice: 1 };
@@ -527,79 +534,140 @@ const loadShopPage = async (req, res) => {
         sortCriteria = { popularity: -1 };
         break;
       default:
-        sortCriteria = {};
+        sortCriteria = { createdAt: -1 };
     }
 
-    
-    const [blockedBrands, unlistedCategories] = await Promise.all([
-      Brand.find({ isBlocked: true }).select("brandName"),
-      Category.find({ isListed: false }).select("_id"),
-    ]);
+    console.log("Sort option:", sortOption);
+    console.log("Sort criteria:", sortCriteria);
 
-   
   
     const productsQuery = {
       isBlocked: false,
-      brand: { $nin: blockedBrands.map((brand) => brand.brandName) },
-      category: { $nin: unlistedCategories.map((category) => category._id) },
-      $or: [
-        { productName: { $regex: search, $options: "i" } },
-        { size: { $regex: search, $options: "i" } },
-        { color: { $regex: search, $options: "i" } },
-      ],
     };
+
+    // Text search
+    if (search) {
+      productsQuery.$or = [
+        { productName: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    console.log("Search query:", productsQuery.$or);
+
+  
+    const selectedColor = req.query.color;
+    if (selectedColor) {
+      productsQuery.variants = { $elemMatch: { color: selectedColor } };
+    }
+    console.log("Selected color:", selectedColor);
+
+ 
+    const priceRange = req.query.priceRange;
+    if (priceRange) {
+      const [minPrice, maxPrice] = priceRange.split("-").map(Number);
+      productsQuery.salePrice = {
+        $gte: minPrice,
+        $lte: maxPrice,
+      };
+    }
+    console.log("Price range filter:", productsQuery.salePrice);
+
+   
+    const selectedCategories = req.query.categories
+      ? Array.isArray(req.query.categories)
+        ? req.query.categories
+        : [req.query.categories]
+      : [];
+    if (selectedCategories.length > 0) {
+      productsQuery.category = { $in: selectedCategories };
+    }
+    console.log("Selected categories:", selectedCategories);
+
+  
+    const selectedBrands = req.query.brands
+      ? Array.isArray(req.query.brands)
+        ? req.query.brands
+        : [req.query.brands]
+      : [];
+    if (selectedBrands.length > 0) {
+      productsQuery.brand = { $in: selectedBrands };
+    }
+    console.log("Selected brands:", selectedBrands);
+
+ 
+    const selectedSizes = req.query.sizes
+      ? Array.isArray(req.query.sizes)
+        ? req.query.sizes
+        : [req.query.sizes]
+      : [];
+    if (selectedSizes.length > 0) {
+      productsQuery.size = { $in: selectedSizes };
+    }
+    console.log("Selected sizes:", selectedSizes);
+
+    console.log("Final query object:", productsQuery);
 
   
     const products = await Product.find(productsQuery)
       .sort(sortCriteria)
-      .limit(limit)
       .skip((page - 1) * limit)
-      .populate("category", "name") 
-      .exec();
+      .limit(limit)
+      .populate("category");
 
-    const count = await Product.countDocuments(productsQuery);
+    console.log("Fetched products:", products.length);
 
-    const [categories, brands, userData] = await Promise.all([
+   
+    const totalProducts = await Product.countDocuments(productsQuery);
+    console.log("Total products matching query:", totalProducts);
+const productsWithDiscount = products.map((product) => {
+  const discount =
+    product.regularPrice > 0
+      ? ((product.regularPrice - product.salePrice) / product.regularPrice) *
+        100
+      : 0;
+  return {
+    ...product._doc, 
+    discountPercentage: Math.round(discount),
+  };
+});
+   
+    const uniqueColors = await Product.distinct("color");
+    console.log("Unique colors available:", uniqueColors);
+
+   
+    const [categories, brands] = await Promise.all([
       Category.find({ isListed: true }),
       Brand.find({ isBlocked: false }),
-      req.session.user ? User.findOne({ _id: req.session.user }) : null,
     ]);
 
+    console.log("Fetched categories:", categories.length);
+    console.log("Fetched brands:", brands.length);
+
    
-    const uniqueSizes = [
-      ...new Set(products.flatMap((product) => product.size || [])),
-    ];
     return res.render("Shop", {
-      user: userData,
-      products,
+      products: productsWithDiscount,
       categories,
       brands,
-      uniqueSizes,
+      uniqueColors,
       search,
       sort: sortOption,
+      selectedColor, 
       currentPage: page,
-      totalPages: Math.ceil(count / limit),
+      totalPages: Math.ceil(totalProducts / limit),
       productsPerPage: limit,
-      totalProducts: count,
+      totalProducts,
     });
   } catch (error) {
-    
-    console.error("Error loading shop page:", error);
-
-   
-    if (error.name === "ValidationError") {
-      return res.status(400).send("Validation Error: " + error.message);
-    }
-
-    if (error.name === "MongoError") {
-      return res.status(500).send("Database Error: " + error.message);
-    }
-
-    res
-      .status(500)
-      .send("An unexpected error occurred while loading the shop page");
+    console.error("Error in loadShopPage:", error);
+    return res.status(500).render("error", {
+      message: "An error occurred while loading the shop page",
+      error: process.env.NODE_ENV === "development" ? error : null,
+    });
   }
 };
+
+
 
 //code to load product details page
 

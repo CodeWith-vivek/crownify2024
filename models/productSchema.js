@@ -49,16 +49,16 @@ const productSchema = new Schema(
       type: Number,
       default: 0,
     },
+    previousProductOffer: { type: Number, default: null },
     productImage: {
       type: [String],
-      required: true, 
+      required: true,
     },
-    variants: [productVariantSchema], 
+    variants: [productVariantSchema],
     isBlocked: {
       type: Boolean,
       default: false,
     },
-  
   },
   { timestamps: true }
 );

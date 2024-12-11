@@ -42,135 +42,157 @@
                             </form>
                         </div>
                         <div class="shop__sidebar__accordion">
-                            <div class="accordion" id="accordionExample">
-                                <div class="card" style="background: transparent;">
-                                    <div class="card-heading">
-                                        <a data-toggle="collapse" data-target="#collapseOne">Categories</a>
-                                    </div>
-                                    <div id="collapseOne" class="collapse show" data-parent="#accordionExample">
-                                        <div class="card-body">
-                                            <div class="shop__sidebar__categories">
-                                                <ul class="nice-scroll">
-                                                    <% categories.forEach(category=> { %>
-                                                        <li><a href="#">
-                                                                <%= category.name %> (<%= category.productCount || 0 %>)
-                                                            </a></li>
-                                                        <% }); %>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card" style="background: transparent;">
-                                    <div class="card-heading">
-                                        <a data-toggle="collapse" data-target="#collapseTwo">Branding</a>
-                                    </div>
-                                    <div id="collapseTwo" class="collapse show" data-parent="#accordionExample">
-                                        <div class="card-body">
-                                            <div class="shop__sidebar__brand">
-                                                <ul>
-                                                    <% if (brands.length===0) { %>
-                                                        <li>No brands available</li>
-                                                        <% } else { %>
-                                                            <% brands.forEach(brand=> { %>
-                                                                <li>
-                                                                    <a href="#">
+                            <form action="/shop" method="GET" id="filterForm">
+                                <input type="hidden" name="sort" value="<%= sort || '' %>">
+                                <input type="hidden" name="page" value="<%= currentPage || 1 %>">
+                                <input type="hidden" name="search" value="<%= search || '' %>">
 
-                                                                        <!-- Display the first image -->
-                                                                        <%= brand.brandName %>
-                                                                    </a>
-                                                                </li>
-                                                                <% }); %>
-                                                                    <% } %>
-                                                </ul>
+                                <div class="accordion" id="accordionExample">
+                                    <div class="card" style="background: transparent;">
+                                        <div class="card-heading">
+                                            <a data-toggle="collapse" data-target="#collapseOne">Categories</a>
+                                        </div>
+                                        <div id="collapseOne" class="collapse show" data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                <div class="shop__sidebar__categories">
+                                                    <ul class="nice-scroll">
+                                                        <% categories.forEach(category=> { %>
+                                                            <li>
+                                                                <label>
+                                                                    <input type="checkbox" name="categories"
+                                                                        value="<%= category._id %>"
+                                                                        onchange="document.getElementById('filterForm').submit();">
+                                                                    <%= category.name %> (<%= category.productCount || 0
+                                                                            %>)
+                                                                </label>
+                                                            </li>
+                                                            <% }); %>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="card" style="background: transparent;">
+                                        <div class="card-heading">
+                                            <a data-toggle="collapse" data-target="#collapseTwo">Branding</a>
+                                        </div>
+                                        <div id="collapseTwo" class="collapse show" data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                <div class="shop__sidebar__brand">
+                                                    <ul>
+                                                        <% if (brands.length===0) { %>
+                                                            <li>No brands available</li>
+                                                            <% } else { %>
+                                                                <% brands.forEach(brand=> { %>
+                                                                    <li>
+                                                                        <label>
+                                                                            <input type="checkbox" name="brands"
+                                                                                value="<%= brand._id %>"
+                                                                                onchange="document.getElementById('filterForm').submit();">
+                                                                            <%= brand.brandName %>
+                                                                        </label>
+                                                                    </li>
+                                                                    <% }); %>
+                                                                        <% } %>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div> -->
+                                    <div class="card" style="background: transparent;">
+                                        <div class="card-heading">
+                                            <a data-toggle="collapse" data-target="#collapseThree">Filter Price</a>
+                                        </div>
+                                        <div id="collapseThree" class="collapse show" data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                <div class="shop__sidebar__price">
+                                                    <ul>
+                                                        <li><a href="#" onclick="filterByPrice(0, 1000)">₹0.00 -
+                                                                ₹1000.00</a></li>
+                                                        <li><a href="#" onclick="filterByPrice(1000, 2000)">₹1000.00 -
+                                                                ₹2000.00</a></li>
+                                                        <li><a href="#" onclick="filterByPrice(2000, 5000)">₹2000.00 -
+                                                                ₹5000.00</a></li>
+                                                        <li><a href="#" onclick="filterByPrice(5000, 10000)">₹5000.00 -
+                                                                ₹10000.00</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="card" style="background: transparent;">
+                                        <div class="card-heading">
+                                            <a data-toggle="collapse" data-target="#collapseFour">Size</a>
+                                        </div>
+                                        <div id="collapseFour" class="collapse show" data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                <div class="shop__sidebar__size">
+                                                    <label for="ONESIZE">
+                                                        <input type="checkbox" name="sizes" value="ONESIZE"
+                                                            onchange="document.getElementById('filterForm').submit();">
+                                                        ONESIZE
+                                                    </label>
+                                                    <label for="S/M">
+                                                        <input type="checkbox" name="sizes" value="S/M"
+                                                            onchange="document.getElementById('filterForm').submit();">
+                                                        S / M
+                                                    </label>
+                                                    <label for="M/L">
+                                                        <input type="checkbox" name="sizes" value="M/L"
+                                                            onchange="document.getElementById('filterForm').submit();">
+                                                        M / L
+                                                    </label>
+                                                    <label for="L/XL">
+                                                        <input type="checkbox" name="sizes" value="L/XL"
+                                                            onchange="document.getElementById('filterForm').submit();">
+                                                        L / XL
+                                                    </label>
+                                                    <label for="YOUTH">
+                                                        <input type="checkbox" name="sizes" value="YOUTH"
+                                                            onchange="document.getElementById('filterForm').submit();">
+                                                        YOUTH
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div> -->
+                                    <div class="card" style="background: transparent;">
+                                        <div class="card-heading">
+                                            <a data-toggle="collapse" data-target="#collapseFive">Colors</a>
+                                        </div>
+                                        <div id="collapseFive" class="collapse show" data-parent="#accordionExample">
+                                            <div class="card-body">
+                                                <div class="shop__sidebar__color">
+                                                    <label class="c-1" for="sp-1">
+                                                        <input type="radio" id="sp-1" name="color" value="Black"
+                                                            onchange="document.getElementById('filterForm').submit();">
+                                                    </label>
+                                                    <label class="c-2" for="sp-2">
+                                                        <input type="radio" id="sp-2" name="color" value="Navy"
+                                                            onchange="document.getElementById('filterForm').submit();">
+                                                    </label>
+                                                    <label class="c-3" for="sp-3">
+                                                        <input type="radio" id="sp-3" name="color" value="Yellow"
+                                                            onchange="document.getElementById('filterForm').submit();">
+                                                    </label>
+                                                    <label class="c-4" for="sp-4">
+                                                        <input type="radio" id="sp-4" name="color" value="Grey"
+                                                            onchange="document.getElementById('filterForm').submit();">
+                                                    </label>
+                                                    <label class="c-8" for="sp-8">
+                                                        <input type="radio" id="sp-8" name="color" value="Red"
+                                                            onchange="document.getElementById('filterForm').submit();">
+                                                    </label>
+                                                    <label class="c-9" for="sp-9">
+                                                        <input type="radio" id="sp-9" name="color" value="White"
+                                                            onchange="document.getElementById('filterForm').submit();">
+                                                    </label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card" style="background: transparent;">
-                                    <div class="card-heading">
-                                        <a data-toggle="collapse" data-target="#collapseThree">Filter Price</a>
-                                    </div>
-                                    <div id="collapseThree" class="collapse show" data-parent="#accordionExample">
-                                        <div class="card-body">
-                                            <div class="shop__sidebar__price">
-                                                <ul>
-                                                    <li><a href="#">₹0.00 - ₹1000.00</a></li>
-                                                    <li><a href="#">₹1000.00 - ₹2000.00</a></li>
-                                                    <li><a href="#">₹2000.00 - ₹5000.00</a></li>
-                                                    <li><a href="#">₹5000.00 - ₹10000.00</a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="card">
-                                    <div class="card-heading">
-                                        <a data-toggle="collapse" data-target="#collapseFour">Size</a>
-                                    </div>
-                                    <div id="collapseFour" class="collapse show" data-parent="#accordionExample">
-                                        <div class="card-body">
-                                            <div class="shop__sidebar__size">
-                                                <label for="ONESIZE">ONESIZE
-                                                    <input type="radio" id="ONESIZE">
-                                                </label>
-                                                <label for="S/M">S / M
-                                                    <input type="radio" id="s/m">
-                                                </label>
-                                                <label for="M/L">M / L
-                                                    <input type="radio" id="m/l">
-                                                </label>
-                                                <label for="L/XL">L / XL
-                                                    <input type="radio" id="l/xl">
-                                                </label>
-                                                <label for="YOUTH">YOUTH
-                                                    <input type="radio" id="YOUTH">
-                                                </label>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card" style="background: transparent;">
-                                    <div class="card-heading">
-                                        <a data-toggle="collapse" data-target="#collapseFive">Colors</a>
-                                    </div>
-                                    <div id="collapseFive" class="collapse show" data-parent="#accordionExample">
-                                        <div class="card-body">
-                                            <div class="shop__sidebar__color">
-                                                <label class="c-1" for="sp-1">
-                                                    <input type="radio" id="sp-1">
-                                                </label>
-                                                <label class="c-2" for="sp-2">
-                                                    <input type="radio" id="sp-2">
-                                                </label>
-                                                <label class="c-3" for="sp-3">
-                                                    <input type="radio" id="sp-3">
-                                                </label>
-                                                <label class="c-4" for="sp-4">
-                                                    <input type="radio" id="sp-4">
-                                                </label>
-                                                <label class="c-5" for="sp-5">
-                                                    <input type="radio" id="sp-5">
-                                                </label>
-                                                <label class="c-6" for="sp-6">
-                                                    <input type="radio" id="sp-6">
-                                                </label>
-                                                <label class="c-7" for="sp-7">
-                                                    <input type="radio" id="sp-7">
-                                                </label>
-                                                <label class="c-8" for="sp-8">
-                                                    <input type="radio" id="sp-8">
-                                                </label>
-                                                <label class="c-9" for="sp-9">
-                                                    <input type="radio" id="sp-9">
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -259,20 +281,28 @@
                                                             class="fa <%= i < product.rating ? 'fa-star' : 'fa-star-o' %>"></i>
                                                         <% } %>
                                                 </div>
-                                                <div class="stock-status">
-                                                    <% const totalQuantity=product.variants ?
-                                                        product.variants.reduce((sum, variant)=> sum +
-                                                        variant.quantity, 0) : 0; %>
-                                                        <% if (totalQuantity> 10) { %>
-                                                            <span style="color: green;">In stock</span>
-                                                            <% } else if (totalQuantity>= 1) { %>
-                                                                <span style="color: orange;">
-                                                                    <%= totalQuantity %> left
-                                                                </span>
-                                                                <% } else { %>
-                                                                    <span style="color: red;">Out of stock</span>
-                                                                    <% } %>
-                                                </div>
+                                                <% if (product.discountPercentage> 0) { %>
+                                                    <h6 style="color: red;">
+                                                        <%= product.discountPercentage %> % off
+                                                    </h6>
+                                                    <% } else { %>
+                                                        <h6>No Discount</h6>
+                                                        <% } %>
+                                                            <div class="stock-status">
+                                                                <% const totalQuantity=product.variants ?
+                                                                    product.variants.reduce((sum, variant)=> sum +
+                                                                    variant.quantity, 0) : 0; %>
+                                                                    <% if (totalQuantity> 10) { %>
+                                                                        <span style="color: green;">In stock</span>
+                                                                        <% } else if (totalQuantity>= 1) { %>
+                                                                            <span style="color: orange;">
+                                                                                <%= totalQuantity %> left
+                                                                            </span>
+                                                                            <% } else { %>
+                                                                                <span style="color: red;">Out of
+                                                                                    stock</span>
+                                                                                <% } %>
+                                                            </div>
                                             </div>
                                             <h5>₹<%= product.salePrice.toFixed(2) %>
                                                     <span
@@ -392,7 +422,20 @@
 
     <%- include("../../views/partials/user/footershop") %>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
         <script>
+            function filterByPrice(min, max) {
+                const filterForm = document.getElementById('filterForm');
+                const priceInput = document.createElement('input');
+                priceInput.type = 'hidden';
+                priceInput.name = 'priceRange';
+                priceInput.value = `${min}-${max}`;
+                filterForm.appendChild(priceInput);
+                filterForm.submit();
+            }
+        </script>
+        <script>
+
 
 
 
@@ -416,47 +459,47 @@
             });
         </script>
         <script>
-      
+
             async function addToWishlist(productId) {
-                    try {
-                        const response = await fetch("/wishlist/add", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({ productId }),
+                try {
+                    const response = await fetch("/wishlist/add", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ productId }),
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Added to Wishlist!",
+                            text: result.message,
+                            timer: 1500, // Display for 1.5 seconds
+                            showConfirmButton: false,
+                        }).then(() => {
+                            // Reload the page after the SweetAlert message is dismissed
+                            window.location.reload();
                         });
-
-                        const result = await response.json();
-
-                        if (result.success) {
-                            Swal.fire({
-                                icon: "success",
-                                title: "Added to Wishlist!",
-                                text: result.message,
-                                timer: 1500, // Display for 1.5 seconds
-                                showConfirmButton: false,
-                            }).then(() => {
-                                // Reload the page after the SweetAlert message is dismissed
-                                window.location.reload();
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Failed to Add to Wishlist",
-                                text: result.message,
-                            }).then(() => {
-                                // Reload the page after the SweetAlert message is dismissed
-                                window.location.reload();
-                            });
-                        }
-                    } catch (error) {
+                    } else {
                         Swal.fire({
                             icon: "error",
-                            title: "An Error Occurred",
-                            text: "Unable to add to wishlist. Please try again.",
+                            title: "Failed to Add to Wishlist",
+                            text: result.message,
+                        }).then(() => {
+                            // Reload the page after the SweetAlert message is dismissed
+                            window.location.reload();
                         });
-                        console.error("Add to Wishlist Error:", error);
                     }
+                } catch (error) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "An Error Occurred",
+                        text: "Unable to add to wishlist. Please try again.",
+                    });
+                    console.error("Add to Wishlist Error:", error);
                 }
+            }
         </script>

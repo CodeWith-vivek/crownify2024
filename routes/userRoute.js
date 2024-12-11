@@ -199,6 +199,7 @@ router.post("/wishlist/remove", wishlistController.removeFromWishlist);
 router.get("/wallet", userAuth, walletController.loadwalletpage);
 router.post("/wallet/add-money", userAuth, walletController.addMoneyToWallet);
 router.get("/wallet/balance", userAuth, walletController.getWalletBalance);
+router.post("/confirm-payment",userAuth,walletController.confirmPayment);
 
 // Get wallet balance
 
@@ -214,7 +215,7 @@ router.get(
   "/checkout",
   userAuth,
   (req, res, next) => {
-    // Set a session flag to indicate the user is on the checkout page
+  
     req.session.isCheckoutPage = true;
     next();
   },
@@ -236,3 +237,4 @@ router.post("/apply-coupon", userAuth, couponController.couponApply);
 router.post("/remove-coupon", userAuth, couponController.removeCoupon); // Add this line
 
 module.exports = router;
+

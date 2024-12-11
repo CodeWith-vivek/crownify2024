@@ -1,13 +1,11 @@
 const User = require("../models/userSchema");
+const Razorpay = require("razorpay");
+const crypto = require("crypto");
 
 const loadwalletpage = async (req, res) => {
   try {
     const userId = req.session.user;
-
-    // Since the route is protected, we can assume user is defined
     const userData = await User.findById(userId);
-
-    // Render the wallet page with user data
     return res.render("wallet", { user: userData });
   } catch (error) {
     console.log("Error loading wallet page", error);
@@ -15,12 +13,17 @@ const loadwalletpage = async (req, res) => {
   }
 };
 
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
 const addMoneyToWallet = async (req, res) => {
   try {
-    const userId = req.session.user; // Logged-in user's ID
+    const userId = req.session.user;
     const { amount } = req.body;
 
-    console.log("Adding amount:", amount, "for user ID:", userId); // Debug log
+    console.log("Adding amount:", amount, "for user ID:", userId);
 
     if (!amount || amount <= 0) {
       return res
@@ -35,16 +38,22 @@ const addMoneyToWallet = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    // Add the amount to the wallet
-    user.wallet += parseFloat(amount);
-    await user.save();
+ 
+    const options = {
+      amount: amount * 100,
+      currency: "INR",
+      receipt: `receipt_${new Date().getTime()}`,
+    };
 
-    console.log("New wallet balance:", user.wallet); // Debug log
+    const order = await razorpay.orders.create(options);
+    console.log("Razorpay order created:", order); // Debug log
 
+    
     return res.status(200).json({
       success: true,
-      message: `${amount} added to your wallet successfully.`,
-      balance: user.wallet,
+      message: "Order created successfully.",
+      orderId: order.id, 
+      amount: amount,
     });
   } catch (error) {
     console.error("Error adding money to wallet:", error);
@@ -73,8 +82,74 @@ const getWalletBalance = async (req, res) => {
   }
 };
 
+
+const confirmPayment = async (req, res) => {
+  try {
+    const userId = req.session.user; 
+    const { orderId, paymentId, signature, amount } = req.body;
+
+    console.log("Confirming payment with data:", {
+      orderId,
+      paymentId,
+      signature,
+      amount,
+    }); 
+
+    if (!orderId || !paymentId || !signature || !amount) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required payment details" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+   
+    const body = orderId + "|" + paymentId; 
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body.toString())
+      .digest("hex");
+
+    console.log("Expected Signature:", expectedSignature); // Debug log
+
+    if (signature !== expectedSignature) {
+      console.error("Invalid payment signature"); // Debug log
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid payment signature" });
+    }
+
+   
+    user.wallet = (user.wallet || 0) + parseFloat(amount); 
+
+    console.log("User wallet before update:", user.wallet - parseFloat(amount)); // Debug log
+    console.log("User wallet after adding amount:", user.wallet); // Debug log
+
+    await user.save();
+
+    // Step 3: Respond with updated balance
+    return res.status(200).json({
+      success: true,
+      message: "Payment confirmed and wallet updated.",
+      balance: user.wallet,
+    });
+  } catch (error) {
+    console.error("Error confirming payment:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error. Please try again later.",
+    });
+  }
+};
+
 module.exports = {
   loadwalletpage,
   addMoneyToWallet,
   getWalletBalance,
+  confirmPayment,
 };

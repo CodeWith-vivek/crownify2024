@@ -28,7 +28,7 @@ const loadWishlistpage = async (req, res) => {
     const wishlistItems = wishlist.items.map((item) => {
       const product = item.productId;
 
-      // Group variants by size
+    
       const variantsBySize = product.variants.reduce((acc, variant) => {
         if (!acc[variant.size]) {
           acc[variant.size] = {
@@ -37,7 +37,7 @@ const loadWishlistpage = async (req, res) => {
           };
         }
 
-        // Add unique colors and accumulate quantity
+      
         if (!acc[variant.size].colors.includes(variant.color)) {
           acc[variant.size].colors.push(variant.color);
         }
@@ -84,7 +84,7 @@ const getColorsBySize = async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // Filter variants by size and get unique colors with their quantities
+  
     const colorVariants = product.variants
       .filter((variant) => variant.size === size)
       .map((variant) => ({
@@ -92,7 +92,7 @@ const getColorsBySize = async (req, res) => {
         quantity: variant.quantity,
       }));
 
-    // Remove duplicate colors and keep track of total quantity
+   
     const uniqueColors = colorVariants.reduce((acc, variant) => {
       const existingColor = acc.find((item) => item.color === variant.color);
 
@@ -148,7 +148,7 @@ const addToWishlist = async (req, res) => {
     }
 
     const salePrice = product.salePrice;
-    const productImage = product.productImage[0] || ""; // Use the first image
+    const productImage = product.productImage[0] || "";
     const category = product.category;
 
     let wishlist = await Wishlist.findOne({ userId });
@@ -243,15 +243,15 @@ const removeFromWishlist = async (req, res) => {
       });
     }
 
-    // Remove the item from the wishlist
+  
     wishlist.items.splice(itemIndex, 1);
     await wishlist.save();
 
-    // Send updated wishlist items back to the client
+  
     return res.status(200).json({
       success: true,
       message: "Product removed from wishlist successfully.",
-      wishlistItems: wishlist.items, // Updated wishlist items
+      wishlistItems: wishlist.items,
     });
   } catch (error) {
     console.error("Remove from wishlist error:", error);

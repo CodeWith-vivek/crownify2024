@@ -58,11 +58,13 @@ const addCategory = async (req, res) => {
 
 //code to add category offer
 
+
 const addCategoryOffer = async (req, res) => {
   try {
     const percentage = parseInt(req.body.percentage);
     const categoryId = req.body.categoryId;
 
+    // Find the category
     const category = await Category.findById(categoryId);
     if (!category) {
       return res
@@ -70,11 +72,21 @@ const addCategoryOffer = async (req, res) => {
         .json({ status: false, message: "Category not found" });
     }
 
+    // Find all products in the category
     const products = await Product.find({ category: category._id });
-    const hasProductOffer = products.some(
+
+    // Check if any product has a higher product offer
+    const hasHigherProductOffer = products.some(
       (product) => product.productOffer > percentage
     );
-    if (hasProductOffer) {
+
+    // Apply offer only to products with `productOffer === 0`
+    const productsToUpdate = products.filter(
+      (product) => product.productOffer <= percentage
+    );
+
+    // If no products are eligible for the category offer, reject the request
+    if (productsToUpdate.length === 0 && hasHigherProductOffer) {
       return res.json({
         status: false,
         message:
@@ -82,19 +94,31 @@ const addCategoryOffer = async (req, res) => {
       });
     }
 
+    // Update the category offer
     await Category.updateOne(
       { _id: categoryId },
       { $set: { categoryOffer: percentage } }
     );
 
-    for (const product of products) {
+    for (const product of productsToUpdate) {
+      if (product.productOffer > 0) {
+        // Save the existing product offer in a temporary field
+        product.previousProductOffer = product.productOffer;
+        product.productOffer = 0; // Reset the product offer
+      }
+
+      // Apply the category offer to sale price
       product.salePrice =
         product.regularPrice - (product.regularPrice * percentage) / 100;
-      product.productOffer = 0; 
+
       await product.save();
     }
 
-    res.json({ status: true, message: "Category offer added successfully!" });
+    res.json({
+      status: true,
+      message:
+        "Category offer applied successfully to products with no existing or lower offers!",
+    });
   } catch (error) {
     console.error("Error adding category offer:", error);
     res.status(500).json({ status: false, message: "Internal server error" });
@@ -106,6 +130,8 @@ const addCategoryOffer = async (req, res) => {
 const removeCategoryOffer = async (req, res) => {
   try {
     const categoryId = req.body.categoryId;
+
+    // Find the category
     const category = await Category.findById(categoryId);
     if (!category) {
       return res
@@ -113,15 +139,31 @@ const removeCategoryOffer = async (req, res) => {
         .json({ status: false, message: "Category not found" });
     }
 
+    // Find all products in the category
     const products = await Product.find({ category: category._id });
+
     for (const product of products) {
-      product.salePrice = product.regularPrice;
-      product.productOffer = 0;
+      if (product.previousProductOffer) {
+        // Restore the previous product offer
+        product.productOffer = product.previousProductOffer;
+        product.salePrice =
+          product.regularPrice -
+          (product.regularPrice * product.previousProductOffer) / 100;
+
+        // Clear the temporary field
+        product.previousProductOffer = undefined;
+      } else {
+        // If no previous offer exists, reset sale price to regular price
+        product.salePrice = product.regularPrice;
+      }
+
       await product.save();
     }
 
+    // Remove the category offer
     category.categoryOffer = 0;
     await category.save();
+
     res.json({ status: true, message: "Category offer removed successfully!" });
   } catch (error) {
     console.error("Error removing category offer:", error);
