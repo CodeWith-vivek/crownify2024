@@ -177,13 +177,481 @@
     border-radius: 5px;
     padding: 5px 10px;
 }
-body, html {
+
+         :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #f8f9fa;
+            --text-color: #333;
+            --muted-color: #6c757d;
+            --border-color: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            font-family: monospace;
-            background-color: #9b8178;
-            color: #000;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 20px;
+        }
+
+        .card-header h5 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .order-list-header {
+            display: none;
+            font-weight: 600;
+            color: var(--muted-color);
+            padding: 0 20px 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .order-item {
+            background-color: #fff;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 20px;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .order-item:hover {
+            box-shadow: 0 6px 12px var(--shadow-color);
+        }
+
+        .order-content {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .product-info {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            align-items: center;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+
+        .product-details h3 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .product-details p {
+            font-size: 0.9rem;
+            color: var(--muted-color);
+            margin: 2px 0;
+        }
+
+        .order-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .order-detail {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .order-detail h4 {
+            font-size: 0.9rem;
+            color: var(--muted-color);
+            margin-bottom: 5px;
+        }
+
+        .order-detail p {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .badge-pending {
+            background-color: #ffeeba;
+            color: #856404;
+        }
+
+        .badge-shipped {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+          
+            color: #fff;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color:transparent;
+        }
+
+        .order-summary {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .summary-row:last-child {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+
+        @media (min-width: 768px) {
+            .order-list-header {
+                display: flex;
+            }
+
+            .order-list-header > div {
+                flex: 1;
+            }
+
+            .order-content {
+                flex-wrap: nowrap;
+            }
+
+            .product-info {
+                flex: 2;
+            }
+
+            .order-details {
+                flex: 3;
+                justify-content: space-between;
+            }
+
+            .order-detail {
+                text-align: center;
+            }
+        }
+      .order-list {
+    display: flex;
+    flex-direction: column; /* Stack orders vertically */
+}
+
+.order-item {
+    margin-bottom: 20px; /* Space between orders */
+    border: 1px solid #ccc; /* Optional: Add a border around each order */
+    padding: 10px; /* Optional: Add padding */
+}
+
+.order-content {
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+}
+
+.product-info {
+    display: flex; /* Keep product info in a row */
+    margin-bottom: 10px; /* Space between product info and order details */
+}
+
+.product-image {
+    width: 80px; /* Set a fixed width for images */
+    height: auto; /* Maintain aspect ratio */
+}
+
+.order-details {
+    display: flex; /* Display order details in a row */
+    justify-content: space-between; /* Space out the details */
+    margin-top: 10px; /* Space above order details */
+}
+
+.order-detail {
+    flex: 1; /* Allow each detail to take equal space */
+    margin-right: 10px; /* Space between details */
+}
+
+.order-detail:last-child {
+    margin-right: 0; /* Remove margin from the last detail */
+}
+a:hover {
+    color: inherit;
+}
+
+a, button {
+    color: #af1919;
+    text-decoration: none;
+    cursor: pointer;
+}
+.product-info {
+    margin-bottom: 15px; /* Space between product items */
+}
+
+.order-summary {
+    margin-top: 10px; /* Space above the summary */
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+@media (max-width: 576px) {
+    .order-item {
+        padding: 15px; /* Increase padding on small screens */
+    }
+    
+    .product-details h3 {
+        font-size: 1rem; /* Adjust product name size */
+    }
+    
+    .order-detail h4 {
+        font-size: 0.9rem; /* Smaller headings for order details */
+    }
+}
+.order-id {
+    font-size: 2.5rem; /* Default size for very large screens (desktops) */
+    margin-bottom: 10px; /* Space below the heading */
+}
+
+/* Large screens (≥ 992px, e.g., large desktops) */
+@media (min-width: 992px) {
+    .order-id {
+        font-size: 2rem; /* Size for large screens */
+    }
+}
+
+/* Medium screens (≥ 768px and < 992px, e.g., tablets) */
+@media (min-width: 768px) and (max-width: 991px) {
+    .order-id {
+        font-size: 1.75rem; /* Size for medium screens */
+    }
+}
+
+/* Small screens (≥ 576px and < 768px, e.g., small tablets and large phones) */
+@media (min-width: 576px) and (max-width: 767px) {
+    .order-id {
+        font-size: 1.5rem; /* Size for small screens */
+        text-align: center; /* Center text for better alignment */
+    }
+}
+
+/* Extra small screens (< 576px, e.g., phones) */
+@media (max-width: 575px) {
+    .order-id {
+        font-size: 1.25rem; /* Size for extra small screens */
+        text-align: center; /* Center text for better alignment */
+    }
+}
+
+/* Very small screens (< 400px, e.g., very small phones) */
+@media (max-width: 400px) {
+    .order-id {
+        font-size: 1rem; /* Size for very small screens */
+    }
+}
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.7); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+    background-color: #fefefe; /* White background */
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888; /* Gray border */
+    width: 90%; /* Full width for small screens */
+    max-width: 800px; /* Limit width for larger screens */
+    border-radius: 8px; /* Rounded corners */
+}
+
+/* Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+/* Close button hover effect */
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Table Styles */
+.table {
+    width: 100%; /* Full width */
+    border-collapse: collapse; /* Merge borders */
+}
+
+.table th,
+.table td {
+    padding: 8px; /* Padding inside cells */
+    text-align: left; /* Align text to the left */
+}
+
+.table img {
+    max-width: 100%; /* Ensure image is responsive */
+    height: auto; /* Maintain aspect ratio */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 10% auto; /* Adjust margin for smaller screens */
+        padding: 15px; /* Less padding for smaller screens */
+    }
+
+    .order-info p {
+        font-size: 0.9rem; /* Smaller font size for order info */
+    }
+
+    .table th,
+    .table td {
+        font-size: 0.85rem; /* Smaller font size for table */
+    }
+
+    .order-id {
+        font-size: 1.5rem; /* Reduce size for small screens */
+        text-align: center; /* Center text for better alignment */
+    }
+}
+
+@media (max-width: 576px) {
+    .modal-content {
+        padding: 10px; /* Further reduce padding */
+    }
+
+    .order-info p {
+        font-size: 0.8rem; /* Smaller font size for order info */
+    }
+
+    .table th,
+    .table td {
+        font-size: 0.75rem; /* Smaller font size for table */
+    }
+
+    .order-id {
+        font-size: small; /* Reduce size for extra small screens */
+    }
+}
+    .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+        }
+        .order-info {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .table {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .table th {
+            background-color: #f1f3f5;
+        }
+        #orderSummary {
+            background-color: #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .product-image {
+            object-fit: cover;
+            border-radius: 8px;
         }
     </style>
 
@@ -353,7 +821,7 @@ body, html {
 
                         <!-- Conditional Elements -->
                         <% if (locals.user) { %>
-                            <div class="dropdown" style="display: inline-block;">
+                            <div class="dropdown" style="display: inline-block; ">
                                 <button class="btn dropdown-toggle" type="button" id="userDropdown"
                                     data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="fa-solid fa-user" style="color: #e14141;"></i>

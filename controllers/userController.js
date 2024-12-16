@@ -500,6 +500,8 @@ const logout = async (req, res) => {
 
 const loadShopPage = async (req, res) => {
   try {
+
+    const user=req.session.user
     console.log("==== Incoming Shop Page Request ====");
     console.log("Query parameters:", req.query);
 
@@ -643,21 +645,36 @@ const productsWithDiscount = products.map((product) => {
 
     console.log("Fetched categories:", categories.length);
     console.log("Fetched brands:", brands.length);
-
+if(user){
+  const userData= await User.findOne({_id:user})
+  return res.render("Shop", {
+    user:userData,
+  products: productsWithDiscount,
+  categories,
+  brands,
+  uniqueColors,
+  search,
+  sort: sortOption,
+  selectedColor,
+  currentPage: page,
+  totalPages: Math.ceil(totalProducts / limit),
+  productsPerPage: limit,
+  totalProducts,
+});}else{return res.render("Shop", {
+  products: productsWithDiscount,
+  categories,
+  brands,
+  uniqueColors,
+  search,
+  sort: sortOption,
+  selectedColor,
+  currentPage: page,
+  totalPages: Math.ceil(totalProducts / limit),
+  productsPerPage: limit,
+  totalProducts,
+})}
    
-    return res.render("Shop", {
-      products: productsWithDiscount,
-      categories,
-      brands,
-      uniqueColors,
-      search,
-      sort: sortOption,
-      selectedColor, 
-      currentPage: page,
-      totalPages: Math.ceil(totalProducts / limit),
-      productsPerPage: limit,
-      totalProducts,
-    });
+ 
   } catch (error) {
     console.error("Error in loadShopPage:", error);
     return res.status(500).render("error", {

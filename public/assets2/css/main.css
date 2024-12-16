@@ -2133,8 +2133,8 @@ label {
 .card .card-header {
   padding: 1rem;
   margin-bottom: 11px;
-  background-color: #cf8484;
-  border-bottom: 1px solid #cf8484;
+  background-color: #db1717;
+  border-bottom: 1px solid #db1717;
 }
 
 .border-radius {
@@ -2227,7 +2227,7 @@ label {
 
 .dashboard-menu ul li a.active {
   color: #fff;
-  background-color: #cf8484;
+  background-color:#db1717;
 }
 
 .dashboard-menu ul li a.active i {

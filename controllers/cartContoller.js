@@ -14,11 +14,10 @@ const loadCartPage = async (req, res) => {
     const shippingCharge = 40;
     let isCartEmpty = true;
 
-   
     if (req.session && req.session.user) {
       const userId = req.session.user;
 
-      
+      // Fetch the user's cart with product and category details
       const cart = await Cart.findOne({ userId }).populate({
         path: "items.productId",
         model: "Product",
@@ -39,7 +38,7 @@ const loadCartPage = async (req, res) => {
 
             if (!variant) {
               console.error("Variant not found for item:", item);
-              return null; 
+              return null; // Skip the item if the variant is not found
             }
 
             return {
@@ -48,14 +47,15 @@ const loadCartPage = async (req, res) => {
                 ? product.category.name
                 : "Unknown",
               productName: product.productName,
-              productBrand: product.brand, 
+              productBrand: product.brand,
               productImage: product.productImage[0],
               quantity: item.quantity,
               color: item.variant.color,
               size: item.variant.size,
               selectedVariantStockLevel: variant.quantity,
-              itemTotal:
-                item.quantity * (product.salePrice || product.regularPrice),
+              itemTotal: Math.floor(
+                item.quantity * (product.salePrice || product.regularPrice)
+              ), // Floor the item total
             };
           })
           .filter((item) => item !== null);
@@ -63,17 +63,22 @@ const loadCartPage = async (req, res) => {
         isCartEmpty = false;
       }
 
-      subtotal = cartItems.reduce((total, item) => total + item.itemTotal, 0);
+      // Calculate subtotal with floored values
+      subtotal = Math.floor(
+        cartItems.reduce((total, item) => total + item.itemTotal, 0)
+      );
     } else {
       isCartEmpty = true;
     }
 
-    const total = subtotal + shippingCharge;
+    // Calculate total with floored values
+    const total = Math.floor(subtotal + shippingCharge);
 
     const userId = req.session.user;
     const user = await User.findOne({ _id: userId });
-      const coupons = await Coupon.find({ isActive: true });
+    const coupons = await Coupon.find({ isActive: true });
 
+    // Render the cart page with floored values
     res.render("cart", {
       user,
       cartItems,
@@ -82,7 +87,7 @@ const loadCartPage = async (req, res) => {
       total,
       isCartEmpty,
       isGuest: !req.session.user,
-      coupons
+      coupons,
     });
   } catch (error) {
     console.error("Cart page error:", error.stack || error);
@@ -256,9 +261,9 @@ const updateStockAfterAdd = async (productId, size, color, quantity) => {
 
 const deleteFromCart = async (req, res) => {
   try {
-    const { productId, size, color } = req.body; 
-  
-    
+    const { productId, size, color } = req.body;
+
+    // Check if user is logged in
     if (!req.session || !req.session.user) {
       return res.status(401).json({
         success: false,
@@ -266,6 +271,7 @@ const deleteFromCart = async (req, res) => {
       });
     }
 
+    // Find the user's cart
     const cart = await Cart.findOne({ userId: req.session.user });
     if (!cart) {
       return res.status(404).json({
@@ -274,10 +280,10 @@ const deleteFromCart = async (req, res) => {
       });
     }
 
-  
+    // Find the item index in the cart
     const itemIndex = cart.items.findIndex(
       (item) =>
-        item.productId.equals(productId) && 
+        item.productId.equals(productId) &&
         item.variant.size === size &&
         item.variant.color === color
     );
@@ -289,15 +295,17 @@ const deleteFromCart = async (req, res) => {
       });
     }
 
-   
+    // Remove the item from the cart
     cart.items.splice(itemIndex, 1);
 
-  
-    const updatedCartTotal = cart.items.reduce((total, item) => {
-      return total + item.itemTotal;
-    }, 0);
+    // Recalculate the cart total and floor it
+    const updatedCartTotal = Math.floor(
+      cart.items.reduce((total, item) => {
+        return total + item.itemTotal;
+      }, 0)
+    );
 
-  
+    // Save the updated cart
     await cart.save();
 
     return res.status(200).json({
@@ -313,14 +321,12 @@ const deleteFromCart = async (req, res) => {
     });
   }
 };
-
 // code to update cart
 
 const updateCart = async (req, res) => {
   try {
     const { productId, size, color, quantity } = req.body;
 
- 
     if (!req.session || !req.session.user) {
       return res.status(401).json({
         success: false,
@@ -328,7 +334,6 @@ const updateCart = async (req, res) => {
       });
     }
 
-  
     const cart = await Cart.findOne({ userId: req.session.user }).populate({
       path: "items.productId",
       model: "Product",
@@ -341,7 +346,6 @@ const updateCart = async (req, res) => {
       });
     }
 
-  
     const cartItem = cart.items.find(
       (item) =>
         item.productId._id.toString() === productId &&
@@ -356,38 +360,39 @@ const updateCart = async (req, res) => {
       });
     }
 
-   
+    // Update the item quantity
     cartItem.quantity = parseInt(quantity);
 
-   
-    const itemTotal =
+    // Calculate the item total and floor it
+    const itemTotal = Math.floor(
       cartItem.quantity *
-      (cartItem.productId.salePrice || cartItem.productId.regularPrice);
+        (cartItem.productId.salePrice || cartItem.productId.regularPrice)
+    );
 
-    
-    const subtotal = cart.items.reduce((total, item) => {
-      return (
-        total +
-        item.quantity *
-          (item.productId.salePrice || item.productId.regularPrice)
-      );
-    }, 0);
+    // Calculate the subtotal and floor it
+    const subtotal = Math.floor(
+      cart.items.reduce((total, item) => {
+        return (
+          total +
+          item.quantity *
+            (item.productId.salePrice || item.productId.regularPrice)
+        );
+      }, 0)
+    );
 
-    const shippingCharge = 40;
-    const total = subtotal + shippingCharge;
- 
-    
+    const shippingCharge = 40; // Flat shipping charge
+    const total = Math.floor(subtotal + shippingCharge);
 
- 
+    // Save the updated cart
     await cart.save();
 
     return res.status(200).json({
       success: true,
-      itemTotal: itemTotal.toFixed(2),
+      itemTotal: itemTotal,
       cartSummary: {
-        subtotal: subtotal.toFixed(2),
-        shippingCharge: shippingCharge.toFixed(2),
-        total: total.toFixed(2),
+        subtotal: subtotal,
+        shippingCharge: shippingCharge,
+        total: total,
       },
     });
   } catch (error) {

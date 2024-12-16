@@ -10,7 +10,7 @@
                             <h5 class="mb-0">Address</h5>
                             <% if (addr.isPrimary) { %>
                                 <span class="badge bg-success" style="margin-right: 23px;
-    background-color: #703535 !important;">Primary</span>
+    background-color: black !important;">Primary</span>
                                 <% } %>
                         </div>
                         <div class="card-body">
@@ -54,20 +54,21 @@
                                 address!</h3>
                         </div>
                         <% } %>
-
+<% if (addressCount < 4) { %>
 
                             <div class="col-lg-6 mt-4">
                                 <div class="card address-card">
                                     <div class="card-body text-center">
-                                        <h5 class="add-address-title" style="color: brown;">Add Address</h5>
+                                        <h5 class="add-address-title" style="color: red;">Add Address</h5>
                                         <div class="plus-button">
                                             <a href="/user/addAddress" class="btn">
-                                                <span style="font-size: 1.5rem; font-weight: bold;">+</span>
+                                                <span style="font-size: 1.5rem; font-weight: bold; color: red;">+</span>
                                             </a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            <% } %>
     </div>
 </div>
 </div>

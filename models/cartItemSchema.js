@@ -34,7 +34,7 @@ const cartItemSchema = new Schema({
   },
   orderStatus: {
     type: String,
-    enum: ["Placed", "Shipped", "Delivered", "canceled","Return requested","Returned"],
+    enum: ["Placed", "Shipped", "Delivered", "canceled","Return requested","Returned","Failed"],
     default: "Placed",
   },
   regularPrice: {

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>CROWNIFY</title>
+    <meta name="description" content="description">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/assets/admin/images/logoCrownify.png" />
+    <!-- Plugins CSS -->
+    <link rel="stylesheet" href="/assets/admin/css/plugins.css">
+    <!-- Bootstap CSS -->
+    <link rel="stylesheet" href="/assets/admin/css/bootstrap.min.css">
+    <!-- Main Style CSS -->
+    <link rel="stylesheet" href="/assets/admin/css/style.css">
+    <link rel="stylesheet" href="/assets/admin/css/responsive.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    
+    <link rel="stylesheet" href="/assets/admin/css/style2.css">
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.10/dist/sweetalert2.min.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #3b82f6;
+            --success-color: #22c55e;
+            --background-color: #f3f4f6;
+            --card-background: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+        }
+      
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+       
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            background-color: var(--card-background);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 2rem;
+            width: 100%;
+            max-width: 25rem;
+            text-align: center;
+        }
+        .wrapper {
+    display: flex; /* Make the wrapper a flex container */
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+    min-height: 100vh; /* Ensure the wrapper fills the viewport height */
+}
+
+        .icon-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .icon {
+            width: 4rem;
+            height: 4rem;
+            color: var(--success-color);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .order-number {
+            background-color: var(--background-color);
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .order-number p {
+            margin: 0;
+        }
+
+        .order-number .label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .order-number .value {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            margin-bottom: 0.75rem;
+        }
+
+        .button:hover {
+            background-color: #2563eb;
+        }
+
+        .button-secondary {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .button-secondary:hover {
+            background-color: #eff6ff;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 640px) {
+            .buttons {
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            .button {
+                margin-right: 0.75rem;
+            }
+        }
+        .order-details {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.order-details .left-side,
+.order-details .right-side {
+    flex: 1;
+}
+
+.order-details .label {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.order-details .value {
+    color: #555;
+}
+.left-side {
+    text-align: left; /* Ensures text is aligned to the left */
+}
+.label {
+    font-weight: bold; /* Optional: Make the label stand out */
+}
+.right-side {
+    text-align: right; /* Aligns the text inside the div to the right */
+}
+.value {
+    display: inline-block; /* Optional: Ensures inline elements maintain structure */
+}
+.button:hover{
+    background-color: white;
+    color: black;
+    border: 2px solid black;
+}
+.button{
+    background-color: black;
+}
+    </style>
+</head>

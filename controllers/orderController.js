@@ -15,6 +15,8 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+
+
 const placeOrder = async (req, res) => {
   try {
     console.log("===== Place Order Start =====");
@@ -25,8 +27,8 @@ const placeOrder = async (req, res) => {
       req.body;
     console.log("Request Body:", req.body);
 
-    const subtotalValue = Number(subtotal); // Ensure subtotal is a number
-    const totalBeforeDiscount = subtotalValue + Number(shipping); // Total before applying the discount
+    const subtotalValue = Math.floor(Number(subtotal)); // Floor subtotal
+    const totalBeforeDiscount = Math.floor(subtotalValue + Number(shipping)); // Floor total before discount
     console.log(
       "Subtotal:",
       subtotalValue,
@@ -85,9 +87,9 @@ const placeOrder = async (req, res) => {
           size: cartItem.variant.size,
         },
         quantity: cartItem.quantity,
-        regularPrice: product.regularPrice,
-        salePrice: product.salePrice,
-        totalPrice: product.salePrice * cartItem.quantity,
+        regularPrice: Math.floor(product.regularPrice), // Floor regular price
+        salePrice: Math.floor(product.salePrice), // Floor sale price
+        totalPrice: Math.floor(product.salePrice * cartItem.quantity), // Floor total price
         productImage: product.productImage[0],
       });
     }
@@ -110,43 +112,37 @@ const placeOrder = async (req, res) => {
     // Handle coupon usage and calculate discount
     let discount = 0;
     let appliedCoupon = null;
+    let couponToApply = null;
     if (req.session.coupon && req.session.coupon.temporary) {
-      console.log("Applying Coupon:", req.session.coupon);
+      console.log("Preparing Coupon:", req.session.coupon);
 
       const coupon = await Coupon.findOne({ code: req.session.coupon.code });
       if (coupon) {
+        couponToApply = coupon;
         appliedCoupon = coupon.code;
 
         if (coupon.discountType === "percentage") {
-          discount = Math.min(
-            (totalBeforeDiscount * coupon.discountAmount) / 100,
-            coupon.maxDiscount || Infinity
-          );
-          console.log("Percentage Discount Applied:", discount);
+          discount = Math.floor(
+            Math.min(
+              (totalBeforeDiscount * coupon.discountAmount) / 100,
+              coupon.maxDiscount || Infinity
+            )
+          ); // Floor percentage discount
+          console.log("Percentage Discount Calculated:", discount);
         } else if (coupon.discountType === "fixed") {
-          discount = Math.min(coupon.discountAmount, totalBeforeDiscount);
-          console.log("Fixed Discount Applied:", discount);
+          discount = Math.floor(
+            Math.min(coupon.discountAmount, totalBeforeDiscount)
+          ); // Floor fixed discount
+          console.log("Fixed Discount Calculated:", discount);
         }
-
-        // Save user usage history in the coupon
-        const userEntry = coupon.users_applied.find(
-          (entry) => entry.user && entry.user.toString() === userId.toString()
-        );
-        if (!userEntry) {
-          coupon.users_applied.push({ user: userId, used_count: 1 });
-        } else {
-          userEntry.used_count += 1;
-        }
-        await coupon.save();
-        req.session.coupon = null;
-        console.log("Coupon Saved and Session Cleared.");
       }
     }
     console.log("Discount:", discount);
 
     // Adjust grand total
-    const grandTotal = totalBeforeDiscount - discount;
+    const grandTotal = Math.floor(totalBeforeDiscount - discount); // Floor grand total
     console.log("Grand Total:", grandTotal);
+
     if (paymentMethod === "Wallet") {
       console.log("Processing Wallet Payment...");
       const user = await User.findById(userId);
@@ -172,6 +168,23 @@ const placeOrder = async (req, res) => {
       await user.save();
       console.log("Wallet balance updated for user:", userId);
 
+      const generateOrderNumber = () => {
+        return `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`; // e.g., ORD-1692287123456-1234
+      };
+
+      // Save coupon usage
+      if (couponToApply) {
+        const userEntry = couponToApply.users_applied.find(
+          (entry) => entry.user && entry.user.toString() === userId.toString()
+        );
+        if (!userEntry) {
+          couponToApply.users_applied.push({ user: userId, used_count: 1 });
+        } else {
+          userEntry.used_count += 1;
+        }
+        await couponToApply.save();
+      }
+
       const order = new Order({
         userId,
         primaryAddressId,
@@ -184,12 +197,14 @@ const placeOrder = async (req, res) => {
         couponCode: appliedCoupon,
         paymentMethod,
         shippingAddress: primaryAddressId,
-        status: "Confirmed",
+        paymentStatus: "Completed",
+        orderNumber: generateOrderNumber(),
       });
 
       await order.save();
       console.log("Wallet Order Saved:", order);
 
+      // Update product quantities
       for (let i = 0; i < cart.items.length; i++) {
         const cartItem = cart.items[i];
         const product = await Product.findById(cartItem.productId);
@@ -204,6 +219,8 @@ const placeOrder = async (req, res) => {
         await product.save();
       }
 
+      // Clear session coupon and cart
+      req.session.coupon = null;
       await Cart.deleteOne({ userId });
       console.log("Cart Cleared for User:", userId);
 
@@ -235,6 +252,9 @@ const placeOrder = async (req, res) => {
           error: err.message || err,
         });
       }
+      const generateOrderNumber = () => {
+        return `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`; // e.g., ORD-1692287123456-1234
+      };
 
       const preliminaryOrder = new Order({
         userId,
@@ -249,7 +269,8 @@ const placeOrder = async (req, res) => {
         paymentMethod,
         shippingAddress: primaryAddressId,
         razorpayOrderId: razorpayOrder.id,
-        status: "Pending Payment",
+        paymentStatus: "Pending",
+        orderNumber: generateOrderNumber(),
       });
 
       await preliminaryOrder.save();
@@ -264,7 +285,24 @@ const placeOrder = async (req, res) => {
         orderId: preliminaryOrder._id,
       });
     } else if (paymentMethod === "COD") {
+      const generateOrderNumber = () => {
+        return `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`; // e.g., ORD-1692287123456-1234
+      };
       console.log("Processing Cash on Delivery...");
+
+      // Save coupon usage
+      if (couponToApply) {
+        const userEntry = couponToApply.users_applied.find(
+          (entry) => entry.user && entry.user.toString() === userId.toString()
+        );
+        if (!userEntry) {
+          couponToApply.users_applied.push({ user: userId, used_count: 1 });
+        } else {
+          userEntry.used_count += 1;
+        }
+        await couponToApply.save();
+      }
+
       const order = new Order({
         userId,
         primaryAddressId,
@@ -277,12 +315,14 @@ const placeOrder = async (req, res) => {
         couponCode: appliedCoupon,
         paymentMethod,
         shippingAddress: primaryAddressId,
-        status: "Confirmed",
+        paymentStatus: "Pending",
+        orderNumber: generateOrderNumber(),
       });
 
       await order.save();
       console.log("COD Order Saved:", order);
 
+      // Update product quantities
       for (let i = 0; i < cart.items.length; i++) {
         const cartItem = cart.items[i];
         const product = await Product.findById(cartItem.productId);
@@ -297,39 +337,36 @@ const placeOrder = async (req, res) => {
         await product.save();
       }
 
+      // Clear session coupon and cart
+      req.session.coupon = null;
       await Cart.deleteOne({ userId });
       console.log("Cart Cleared for User:", userId);
 
       return res.json({
         success: true,
-        message: "Order placed successfully",
+        message: "Order placed successfully with Cash on Delivery",
         orderId: order._id,
         orderedItems: orderProducts,
       });
-    } else {
-      console.log("Invalid Payment Method:", paymentMethod);
-      return res.status(400).json({
-        success: false,
-        message: "Invalid payment method",
-      });
     }
   } catch (error) {
-    console.error("Order Placement Error:", error);
-    res.status(500).json({
+    console.error("Error placing order:", error);
+    return res.status(500).json({
       success: false,
-      message: error.message || "Error placing order",
+      message: "Error placing order",
+      error: error.message || error,
     });
   }
 };
 
 // code to cancel order
 
-
 const cancelOrder = async (req, res) => {
   try {
-    const { orderId, productSize, productColor, cancelComment } = req.body;
+    const { orderNumber, productSize, productColor, cancelComment } = req.body;
+    console.log(req.body)
 
-    if (!orderId || !productSize || !productColor) {
+    if (!orderNumber || !productSize || !productColor) {
       return res.status(400).json({
         success: false,
         message: "Missing required fields",
@@ -339,7 +376,10 @@ const cancelOrder = async (req, res) => {
 
     const userId = req.session.user;
 
-    const order = await Order.findOne({ _id: orderId, userId });
+    console.log("Received orderNumber:", orderNumber); // Log orderNumber for debugging
+
+    // Use orderNumber to find the order
+    const order = await Order.findOne({ orderNumber, userId });
 
     if (!order) {
       return res.status(404).json({
@@ -393,19 +433,18 @@ const cancelOrder = async (req, res) => {
         await product.save();
       }
     }
-   const totalOrderPrice = order.items.reduce(
-     (sum, item) => sum + item.totalPrice,
-     0
-   );
 
- 
-   const itemShare = orderItem.totalPrice / totalOrderPrice;
+    const totalOrderPrice = order.items.reduce(
+      (sum, item) => sum + item.totalPrice,
+      0
+    );
 
+    const itemShare = orderItem.totalPrice / totalOrderPrice;
 
-   const discountForItem = order.discount * itemShare;
+    const discountForItem = order.discount * itemShare;
 
-
-    const refundAmount = orderItem.totalPrice - discountForItem; 
+    // Floor the refund amount
+    const refundAmount = Math.floor(orderItem.totalPrice - discountForItem);
     let refundShipping = 0;
 
     if (
@@ -416,18 +455,15 @@ const cancelOrder = async (req, res) => {
       if (!user) {
         return res.status(404).json({
           success: false,
-          message: "User not found for wallet refund",
+          message: "User  not found for wallet refund",
         });
       }
 
-     
       user.wallet = (user.wallet || 0) + refundAmount;
 
-   
-      const totalShippingCharge = order.shipping || 0; 
+      const totalShippingCharge = order.shipping || 0;
       const itemsCount = order.items.length;
 
-    
       const shippingPerItem =
         itemsCount > 0 ? totalShippingCharge / itemsCount : 0;
 
@@ -437,52 +473,34 @@ const cancelOrder = async (req, res) => {
       );
 
       if (remainingItems.length === 0) {
-      
+        // Refund full shipping charge if no items are left
         refundShipping = totalShippingCharge;
-        order.shipping = 0; 
+        order.shipping = 0;
       } else {
-      
-        refundShipping = shippingPerItem;
-        order.shipping -= shippingPerItem; 
+        // Refund the shipping per item for the canceled item
+        refundShipping = Math.floor(shippingPerItem); // Floor shipping refund
+        order.shipping -= refundShipping;
       }
 
-   
       user.wallet += refundShipping;
 
-    
       await user.save();
     }
 
- 
-  
-
     console.log("Updated Shipping Charge:", order.shipping);
 
-    // Update order item status to canceled
+    // Update the order item status to canceled
     order.items[orderItemIndex].orderStatus = "canceled";
-    if (cancelComment) {
-      order.items[orderItemIndex].cancelComment = cancelComment;
-    }
-
-    const allItemsCanceled = order.items.every(
-      (item) => item.orderStatus === "canceled"
-    );
-    if (allItemsCanceled) {
-      order.orderStatus = "canceled";
-    }
-
+     if (cancelComment) {
+       order.items[orderItemIndex].cancelComment = cancelComment;
+     }
     await order.save();
 
-    res.json({
+    res.status(200).json({
       success: true,
-      message: "Product canceled successfully from order",
+      message: "Order item canceled successfully",
       refundAmount,
       refundShipping,
-      // Do not include updatedOrder.discount
-      updatedOrder: {
-        ...order._doc, // Include all order details except the discount
-        discount: undefined, // Explicitly set discount to undefined
-      },
     });
   } catch (error) {
     console.error("Cancel product error:", error);
@@ -497,9 +515,9 @@ const cancelOrder = async (req, res) => {
 
 const returnItem = async (req, res) => {
   try {
-    const { orderId, productSize, productColor, returnComment } = req.body;
+    const { orderNumber, productSize, productColor, returnComment } = req.body;
 
-    if (!orderId || !productSize || !productColor) {
+    if (!orderNumber || !productSize || !productColor) {
       return res.status(400).json({
         success: false,
         message: "Missing required fields",
@@ -509,7 +527,7 @@ const returnItem = async (req, res) => {
 
     const userId = req.session.user;
 
-    const order = await Order.findOne({ _id: orderId, userId });
+    const order = await Order.findOne({ orderNumber, userId });
 
     if (!order) {
       return res.status(404).json({
@@ -577,11 +595,11 @@ const returnItem = async (req, res) => {
   }
 };
 const cancelReturn = async (req, res) => {
-  const { orderId, itemIndex } = req.body;
+  const { orderNumber, itemIndex } = req.body;
 
   try {
     // Find the order by ID
-    const order = await Order.findById(orderId);
+    const order = await Order.findByOne(orderNumber);
     if (!order) {
       return res
         .status(404)
@@ -595,16 +613,32 @@ const cancelReturn = async (req, res) => {
         .json({ success: false, message: "Invalid item index" });
     }
 
+    // Get the item to be canceled
+    const orderItem = order.items[itemIndex];
+
+    // Check if the order item is already canceled or in a state that cannot be changed
+    if (orderItem.orderStatus === "Canceled") {
+      return res.status(400).json({
+        success: false,
+        message: "This item return request is already canceled",
+      });
+    }
+
+    // Calculate potential refund amount (if applicable)
+    const refundAmount = Math.floor(orderItem.totalPrice); // Assuming totalPrice exists
+    // You can include any logic to update user's wallet or similar actions here
+
     // Update the item's status to "Placed" or whatever is appropriate
-    order.items[itemIndex].orderStatus = "Placed"; // Change this to your desired status
+    orderItem.orderStatus = "Placed"; // Change this to your desired status
 
     // Save the updated order
     await order.save();
 
-    // Respond with success
+    // Respond with success and the refund amount (if applicable)
     return res.json({
       success: true,
       message: "Return request canceled successfully",
+      refundAmount, // Include refund amount if necessary
     });
   } catch (error) {
     console.error("Error canceling return request:", error);
@@ -647,6 +681,22 @@ const verifyRazorpayPayment = async (req, res) => {
       });
     }
 
+      if (order.couponCode) {
+        const coupon = await Coupon.findOne({ code: order.couponCode });
+        if (coupon) {
+          const userEntry = coupon.users_applied.find(
+            (entry) =>
+              entry.user && entry.user.toString() === order.userId.toString()
+          );
+          if (!userEntry) {
+            coupon.users_applied.push({ user: order.userId, used_count: 1 });
+          } else {
+            userEntry.used_count += 1;
+          }
+          await coupon.save();
+        }
+      }
+
     // Reduce stock for each product
     for (let item of order.items) {
       const product = await Product.findById(item.productId);
@@ -660,7 +710,7 @@ const verifyRazorpayPayment = async (req, res) => {
     }
 
     // Update order status
-    order.status = "Confirmed";
+    order.paymentStatus = "Completed";
     order.paymentDetails = {
       razorpayOrderId: razorpay_order_id,
       razorpayPaymentId: razorpay_payment_id,

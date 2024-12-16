@@ -79,12 +79,72 @@
                                         <% }); %>
                                             <% } %>
                                                 <!-- Common Add Address Button -->
-                                                <a class="btn btn-primary"
-                                                    style="width: 150px; background-color: #703535; margin-left: 20px; color: rgb(251, 251, 251);"
-                                                    data-bs-toggle="modal" data-bs-target="#addressModal">Add
-                                                    Address</a>
+                                                <% if (addressCount < 4) { %>
+                                                    <a class="btn btn-primary"
+                                                        style="width: 150px; background-color: #703535; margin-left: 20px; color: rgb(251, 251, 251);"
+                                                        data-bs-toggle="modal" data-bs-target="#addressModal">Add
+                                                        Address</a>
+                                                    <% } %>
                         </div>
+
+
                         <div class="col-lg-5 col-md-7">
+                            <div style="    margin-left: 20px;
+                                                          
+                                                            padding-top: 28px;
+                                                            padding-bottom: 28px;">
+                                <div class="cart__discount" style="margin-bottom: 20px;">
+                                    <h6>Discount codes</h6>
+                                    <form id="couponForm" class="form-stacked">
+                                        <input type="text" placeholder="Coupon code" id="couponCodeInput">
+                                        <button type="submit" style="font-size: 14px;margin-top: 15px;
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: #111111;
+    padding: 0 30px;
+    width: 100%;
+    border: none;
+  height: 50px;
+    right: 0;
+    top: 0;
+    
+  ">Apply</button>
+                                        <button type="button" id="removeCouponButton" style="font-size: 14px; margin-top: 15px;
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: #111111;
+    padding: 0 30px;
+    border: none;
+  height: 50px;
+    right: 0;
+    top: 0;
+    width: 100%;
+  ">Remove</button>
+                                    </form>
+                                </div>
+
+                                <button class="btn btn-secondary" id="viewCouponsButton" data-toggle="modal"
+                                    data-target="#couponsModal" style="margin-top: 20px; font-size: 14px;
+                                                                    color: #ffffff;
+                                                                    font-weight: 700;
+                                                                    letter-spacing: 2px;
+                                                                    text-transform: uppercase;
+                                                                    background: #d51010;
+                                                                    padding: 0 30px;
+                                                                    border: none;
+                                                                 
+                                                                    border-radius: 30px;
+                                                                  
+                                                                    right: 0;
+                                                                    top: 0;
+                                                                    height: 60px;
+                                                                    width: 100%;">View
+                                    Coupons</button>
+                            </div>
                             <div class="checkout__order">
                                 <h4 class="order__title">Your order</h4>
                                 <table class="table">
@@ -177,12 +237,86 @@
                                     <% } %>
                                         <button type="submit" class="site-btn">Proceed to Checkout</button>
                             </div>
+
+
+
+
+
+
+
+
                         </div>
+
+
                     </div>
                 </form>
             </div>
         </div>
     </section>
+    <div class="modal fade" id="couponsModal" tabindex="-1" role="dialog" aria-labelledby="couponsModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="couponsModalLabel"><i class="fas fa-tags"></i> Available Coupons</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4">
+                    <% if (coupons && coupons.length> 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="text-center" style="width: 20%;">Coupon Code</th>
+                                        <th>Description</th>
+                                        <th class="text-center" style="width: 20%;">Expiry Date</th>
+                                        <th class="text-center" style="width: 20%;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% coupons.forEach(coupon=> { %>
+                                        <tr>
+                                            <td class="text-center">
+                                                <span class="badge badge-success" style="font-size: 1rem;">
+                                                    <%= coupon.code %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="text-success font-weight-bold">
+                                                    <%= coupon.description %>
+                                                </span>
+                                            </td>
+                                            <td class="text-center text-danger font-weight-bold">
+                                                <%= new Date(coupon.expiryDate).toLocaleDateString("en-US", {
+                                                    year: "numeric" , month: "long" , day: "numeric" }) %>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-primary btn-sm px-4"
+                                                    onclick="copyToClipboard('<%= coupon.code %>')">
+                                                    Copy Code
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                        <% } else { %>
+                            <div class="alert alert-info text-center">
+                                <i class="fas fa-info-circle"></i> No coupons available at the moment.
+                            </div>
+                            <% } %>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i>
+                        Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content"
@@ -268,7 +402,8 @@
     <div class="modal fade" id="editAddressModal" tabindex="-1" aria-labelledby="editAddressModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content"  style="background-image: url('assets/images/editAddress2.png'); background-size: cover; background-position: center; background-repeat: no-repeat; backdrop-filter: blur(10px); border-radius: 15px;">
+            <div class="modal-content"
+                style="background-image: url('assets/images/editAddress2.png'); background-size: cover; background-position: center; background-repeat: no-repeat; backdrop-filter: blur(10px); border-radius: 15px;">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editAddressModalLabel">Edit Address</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -363,6 +498,8 @@
         </div>
     </div>
     <%- include("../../views/partials/user/footershop") %>
+        <!-- 
+  for edit address modal -->
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const editAddressModal = document.getElementById('editAddressModal');
@@ -549,6 +686,8 @@
                 });
             });
         </script>
+
+        <!-- add address -->
 
 
         <script>
@@ -782,109 +921,108 @@
 
 
             document.addEventListener('DOMContentLoaded', function () {
-                    document.getElementById('checkoutForm').addEventListener('submit', async function (event) {
-                        event.preventDefault();
+                document.getElementById('checkoutForm').addEventListener('submit', async function (event) {
+                    event.preventDefault();
 
-                        // Validate payment method and primary address
-                        const paymentChecked = document.querySelector('input[name="paymentMethod"]:checked');
-                        const primaryAddress = document.querySelector('input[name="primaryAddressId"]');
-                        const totalAmount = parseFloat(document.querySelector('input[name="total"]').value);
+                    // Validate payment method and primary address
+                    const paymentChecked = document.querySelector('input[name="paymentMethod"]:checked');
+                    const primaryAddress = document.querySelector('input[name="primaryAddressId"]');
+                    const totalAmount = parseFloat(document.querySelector('input[name="total"]').value);
 
-                        if (!paymentChecked) {
-                            Swal.fire({
-                                title: 'Payment Method Required',
-                                text: 'Please select a payment method (Wallet, Cash on Delivery, or Razor Pay).',
-                                icon: 'warning',
-                                confirmButtonText: 'OK'
-                            });
-                            return;
-                        }
 
-                        if (!primaryAddress) {
-                            Swal.fire({
-                                title: 'Primary Address Required',
-                                text: 'Please add and select a primary shipping address.',
-                                icon: 'warning',
-                                confirmButtonText: 'ok',
-                                showCancelButton: true
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    window.location.href = '/checkout';
-                                }
-                            });
-                            return;
-                        }
-
-                        // Restrict COD for orders above ₹1000
-                        if (paymentChecked.value === 'COD' && totalAmount > 1000) {
-                            Swal.fire({
-                                title: 'COD Not Allowed',
-                                text: 'Cash on Delivery is not available for orders above ₹1000. Please choose another payment method.',
-                                icon: 'warning',
-                                confirmButtonText: 'OK'
-                            });
-                            return;
-                        }
-
-                        // Confirm order
+                    if (!paymentChecked) {
                         Swal.fire({
-                            title: 'Confirm Order',
-                            html: `
-                <p>Are you sure you want to place this order?</p>
-                <strong>Payment Method:</strong> ${paymentChecked.value}<br>
-                <strong>Total Amount:</strong> ₹${totalAmount}
-            `,
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonText: 'Yes, Place Order',
-                            cancelButtonText: 'Cancel',
-                            reverseButtons: true
-                        }).then(async (result) => {
+                            title: 'Payment Method Required',
+                            text: 'Please select a payment method (Wallet, Cash on Delivery, or Razor Pay).',
+                            icon: 'warning',
+                            confirmButtonText: 'OK'
+                        });
+                        return;
+                    }
+
+                    if (!primaryAddress) {
+                        Swal.fire({
+                            title: 'Primary Address Required',
+                            text: 'Please add and select a primary shipping address.',
+                            icon: 'warning',
+                            confirmButtonText: 'ok',
+                            showCancelButton: true
+                        }).then((result) => {
                             if (result.isConfirmed) {
-                                // Disable submit button
-                                const submitButton = event.target.querySelector('button[type="submit"]');
-                                submitButton.disabled = true;
-                                submitButton.innerHTML = 'Processing...';
-
-                                try {
-                                    // Collect form data
-                                    const formData = {
-                                        primaryAddressId: primaryAddress.value,
-                                        products: Array.from(document.querySelectorAll('input[name="products[]"]')).map(input => input.value),
-                                        quantities: Array.from(document.querySelectorAll('input[name="quantities[]"]')).map(input => input.value),
-                                        sizes: Array.from(document.querySelectorAll('input[name="sizes[]"]')).map(input => input.value),
-                                        colors: Array.from(document.querySelectorAll('input[name="colors[]"]')).map(input => input.value),
-                                        subtotal: document.querySelector('input[name="subtotal"]').value,
-                                        shipping: document.querySelector('input[name="shipping"]').value,
-                                        total: totalAmount,
-                                        paymentMethod: paymentChecked.value,
-                                    };
-
-                                    // Handle payment methods
-                                    if (paymentChecked.value === 'Wallet') {
-                                        await handleWalletPayment(formData);
-                                    } else if (paymentChecked.value === 'RazorPay') {
-                                        handleRazorpayPayment(formData);
-                                    } else if (paymentChecked.value === 'COD') {
-                                        await handleCODPayment(formData);
-                                    }
-                                } catch (error) {
-                                    console.error('Checkout Error:', error);
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Checkout Failed',
-                                        text: error.message || 'Unable to process your order. Please try again.',
-                                        confirmButtonText: 'Retry'
-                                    });
-                                } finally {
-                                    // Re-enable submit button
-                                    submitButton.disabled = false;
-                                    submitButton.innerHTML = 'Proceed to Checkout';
-                                }
+                                window.location.href = '/checkout';
                             }
                         });
+                        return;
+                    }
+                    if (paymentChecked.value === 'COD' && totalAmount > 1000) {
+                        Swal.fire({
+                            title: 'COD Not Allowed',
+                            text: 'Cash on Delivery is not available for orders above ₹1000. Please choose another payment method.',
+                            icon: 'warning',
+                            confirmButtonText: 'OK'
+                        });
+                        return;
+                    }
+
+                    // Confirm order
+                    Swal.fire({
+                        title: 'Confirm Order',
+                        html: `
+                <p>Are you sure you want to place this order?</p>
+                <strong>Payment Method:</strong> ${paymentChecked.value}<br>
+                <strong>Total Amount:</strong> ₹${document.querySelector('input[name="total"]').value}
+            `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, Place Order',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            // Disable submit button
+                            const submitButton = event.target.querySelector('button[type="submit"]');
+                            submitButton.disabled = true;
+                            submitButton.innerHTML = 'Processing...';
+
+                            try {
+                                // Collect form data
+                                const formData = {
+                                    primaryAddressId: primaryAddress.value,
+                                    products: Array.from(document.querySelectorAll('input[name="products[]"]')).map(input => input.value),
+                                    quantities: Array.from(document.querySelectorAll('input[name="quantities[]"]')).map(input => input.value),
+                                    sizes: Array.from(document.querySelectorAll('input[name="sizes[]"]')).map(input => input.value),
+                                    colors: Array.from(document.querySelectorAll('input[name="colors[]"]')).map(input => input.value),
+                                    subtotal: document.querySelector('input[name="subtotal"]').value,
+                                    shipping: document.querySelector('input[name="shipping"]').value,
+                                    total: document.querySelector('input[name="total"]').value,
+                                    paymentMethod: paymentChecked.value,
+                                };
+
+                                // Handle payment methods
+                                if (paymentChecked.value === 'Wallet') {
+                                    await handleWalletPayment(formData);
+                                } else if (paymentChecked.value === 'RazorPay') {
+                                    handleRazorpayPayment(formData);
+                                } else if (paymentChecked.value === 'COD') {
+                                    await handleCODPayment(formData);
+                                }
+                            } catch (error) {
+                                console.error('Checkout Error:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Checkout Failed',
+                                    text: error.message || 'Unable to process your order. Please try again.',
+                                    confirmButtonText: 'Retry'
+                                });
+                            } finally {
+                                // Re-enable submit button
+                                submitButton.disabled = false;
+                                submitButton.innerHTML = 'Proceed to Checkout';
+                            }
+                        }
                     });
                 });
+            });
             // Handle Razorpay Payment
             function handleRazorpayPayment(formData) {
                 fetch('/checkout', {
@@ -1115,67 +1253,255 @@
                 });
             }
         </script>
-        <script>
-            // Function to remove the coupon from the session
-            function removeCouponFromSession() {
-                fetch('/remove-coupon', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cartTotal: 0 }), // Adjust as needed
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            console.log('Coupon removed from session.');
-                        } else {
-                            console.error('Failed to remove coupon:', data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Fetch Error:', error);
-                    });
-            }
 
-            // Event listener for visibility change to check if user is leaving the checkout page
-            document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'hidden') {
-                    // Check if the current page is the checkout page
-                    if (window.location.pathname === '/checkout') {
-                        removeCouponFromSession();
+
+
+        <script>
+            function confirmDeleteAddress(event, addressId) {
+                event.preventDefault();
+
+                Swal.fire({
+                    title: 'Delete Address?',
+                    text: 'Are you sure you want to delete this address?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/delete-address/${addressId}`, {
+                            method: 'POST',
+                            headers: {
+                                // Add CSRF token if you're using it
+                                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content,
+                            }
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: 'Deleted!',
+                                        text: 'Address deleted successfully.',
+                                        icon: 'success',
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Failed!',
+                                        text: data.message || 'Failed to delete address.',
+                                        icon: 'error',
+                                        confirmButtonText: 'OK'
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'An error occurred while deleting the address. Please try again.',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                            });
+                    }
+                });
+            }
+        </script>
+
+        <script>
+            function copyToClipboard(code) {
+                navigator.clipboard.writeText(code).then(() => {
+                    // Use SweetAlert for feedback
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Copied!',
+                        text: 'Coupon code copied to clipboard: ' + code,
+                        timer: 2000, // Auto-close after 2 seconds
+                        showConfirmButton: false
+                    });
+                }).catch((err) => {
+                    // Handle error with SweetAlert
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Could not copy text. Please try again!',
+                    });
+                    console.error('Could not copy text: ', err);
+                });
+            }
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                // Apply Coupon Form Submission
+                const couponForm = document.getElementById('couponForm');
+
+                if (couponForm) {
+                    const couponCodeInput = document.getElementById('couponCodeInput');
+                    const discountAmountElement = document.querySelector('span[style*="color: #1acf20;"]');
+                    const totalElement = document.querySelector('strong[style*="color: #f94242;"]');
+
+                    couponForm.addEventListener('submit', (event) => {
+                        event.preventDefault();
+
+                        const couponCode = couponCodeInput.value.trim();
+                        if (!couponCode) {
+                            Swal.fire('Error', 'Please enter a coupon code.', 'error');
+                            return;
+                        }
+
+                        const subtotalElement = document.querySelector('span[style*="color: #f94242;"]');
+                        if (!subtotalElement) {
+                            console.error("Cart subtotal element not found");
+                            return;
+                        }
+
+                        const subtotal = parseFloat(subtotalElement.textContent.replace('₹', ''));
+                        const shippingLabel = Array.from(document.querySelectorAll('span'))
+                            .find(span => span.textContent.includes('Shipping'));
+                        if (!shippingLabel || !shippingLabel.nextElementSibling) {
+                            console.error("Shipping element not found");
+                            return;
+                        }
+
+                        const shipping = parseFloat(shippingLabel.nextElementSibling.textContent.replace('₹', ''));
+                        const cartTotal = subtotal + shipping;
+
+                        // Remove coupon from session storage if it's there
+                        sessionStorage.removeItem('appliedCoupon');
+
+                        fetch('/apply-coupon', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ couponCode, cartTotal }),
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log("Server Response:", data);
+                                if (data.success) {
+                                    const discount = parseFloat(data.discount.applied);
+                                    discountAmountElement.innerHTML = '₹' + discount.toFixed(2);
+                                    const total = parseFloat(data.finalTotal);
+                                    totalElement.innerHTML = '₹' + total.toFixed(2);
+                                } else {
+                                    Swal.fire('Error', data.message || 'Failed to apply coupon.', 'error');
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Fetch Error:", error);
+                                Swal.fire('Error', 'An error occurred. Try again.', 'error');
+                            });
+                    });
+
+                    // Function to clear coupon
+                    function clearCoupon() {
+                        fetch('/remove-coupon', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    console.log('Coupon cleared successfully.');
+                                } else {
+                                    console.error('Failed to clear coupon:', data.message);
+                                }
+                            })
+                            .catch(error => console.error('Error clearing coupon:', error));
+                    }
+
+                    // On page load, check for an applied coupon in session storage
+                    const storedCouponCode = sessionStorage.getItem('appliedCoupon');
+                    if (storedCouponCode) {
+                        couponCodeInput.value = storedCouponCode; // Set the coupon input value
+                        couponForm.dispatchEvent(new Event('submit')); // Trigger submit to apply the coupon
+                    }
+
+                    // Detect when the user is leaving or refreshing the cart or checkout page
+                    window.addEventListener('beforeunload', () => {
+                        if (window.location.pathname !== '/cart' && window.location.pathname !== '/checkout') {
+                            clearCoupon();
+                        }
+                    });
+
+                    // Remove Coupon
+                    const removeCouponButton = document.getElementById('removeCouponButton');
+                    if (removeCouponButton) {
+                        removeCouponButton.addEventListener('click', () => {
+                            fetch('/remove-coupon', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        discountAmountElement.innerHTML = '₹0';
+                                        totalElement.innerHTML = '₹' + data.finalTotal.toFixed(2);
+                                        sessionStorage.removeItem('appliedCoupon'); // Clear from session storage
+                                        Swal.fire('Success', 'Coupon removed successfully.', 'success');
+                                    } else {
+                                        Swal.fire('Error', data.message || 'Failed to remove coupon.', 'error');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error("Fetch Error:", error);
+                                    Swal.fire('Error', 'An error occurred. Try again.', 'error');
+                                });
+                        });
                     }
                 }
-            });
 
-            // Alternatively, using beforeunload to check if the user is leaving the checkout page
-            window.addEventListener('beforeunload', (event) => {
-                if (window.location.pathname === '/checkout') {
-                    removeCouponFromSession();
+                // Remove Cart Item
+                const removeButtons = document.querySelectorAll('.cart__close');
+                removeButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const productId = button.getAttribute('data-product-id');
+                        const row = button.closest('tr.cart-item');
+                        const size = row.querySelector('td:nth-child(3) p').innerText;
+                        const color = row.querySelector('.product-color:nth-child(4) p').innerText;
+
+                        Swal.fire({
+                            title: 'Are you sure?',
+                            text: "You won't be able to revert this!",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Yes, remove it!'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                fetch(`/cart/remove`, {
+                                    method: 'DELETE',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ productId, size, color }),
+                                })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            row.remove();
+                                            Swal.fire('Removed!', 'Your item has been removed from the cart.', 'success')
+                                                .then(() => location.reload()); // Reload the page to reflect changes
+                                        } else {
+                                            Swal.fire('Error', data.message || 'Failed to remove item.', 'error');
+                                        }
+                                    })
+                                    .catch(error => Swal.fire('Error', 'An error occurred. Try again.', 'error'));
+                            }
+                        });
+                    });
+                });
+
+                // Copy Coupon Code
+                function copyToClipboard(code) {
+                    navigator.clipboard.writeText(code).then(() => {
+                        alert('Coupon code copied to clipboard: ' + code);
+                    }).catch(err => console.error('Could not copy text:', err));
                 }
             });
         </script>
-
-        <!-- <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                var myModal = new bootstrap.Modal(document.getElementById('addressModal'), {
-                    keyboard: false
-                });
-
-                // Open modal
-                document.querySelector('[data-bs-toggle="modal"]').addEventListener('click', function () {
-                    myModal.show();
-                });
-
-                // Close modal
-                document.querySelector('[data-bs-dismiss="modal"]').addEventListener('click', function () {
-                    myModal.hide();
-                });
-
-                // Handle form submission
-                document.getElementById('signform').addEventListener('submit', function (event) {
-                    event.preventDefault();
-                    // Add your form submission logic here
-                    console.log('Form submitted');
-                    // myModal.close();
-                });
-            });
-        </script> -->

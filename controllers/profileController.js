@@ -570,6 +570,7 @@ const updateUserAddress = async (req, res) => {
       town,
       state,
     } = req.body;
+    console.log("adadadadadadadadadad",req.body)
 
    
     const updatedAddress = await Address.findOneAndUpdate(
@@ -593,7 +594,7 @@ const updateUserAddress = async (req, res) => {
       },
       {
         new: true,
-        runValidators: true, 
+        runValidators: true,
       }
     );
 
@@ -742,7 +743,9 @@ const loadUserAddress = async (req, res) => {
     const userId = req.session.user;
 
   
-    const userData = await User.findById(userId).populate("addresses"); 
+    const userData = await User.findById(userId).populate("addresses");
+       const addressCount = userData.addresses ? userData.addresses.length : 0;
+   
     const userOrders = await Order.find({ userId })
       .populate("items.productId")
       .sort({
@@ -753,6 +756,7 @@ const loadUserAddress = async (req, res) => {
     res.render("Address", {
       user: userData,
       orders: userOrders,
+      addressCount, // Added addressCount
     });
   } catch (error) {
     console.error("Error retrieving data:", error);

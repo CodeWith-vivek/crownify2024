@@ -24,21 +24,20 @@ const addProducts = async (req, res) => {
   try {
     const products = req.body;
 
-  const productExists = await Product.findOne({
-    productName: new RegExp(`^${products.productName}$`, "i"), 
-  });
-
-  if (productExists) {
-    return res.status(400).json({
-      success: false,
-      message: "Product already exists, please try with another name",
+    const productExists = await Product.findOne({
+      productName: new RegExp(`^${products.productName}$`, "i"),
     });
-  }
+
+    if (productExists) {
+      return res.status(400).json({
+        success: false,
+        message: "Product already exists, please try with another name",
+      });
+    }
 
     const images = [];
     const uploadDir = path.join(__dirname, "../public/uploads/product-image");
 
-   
     if (req.files && req.files.length > 0) {
       for (let i = 0; i < req.files.length; i++) {
         const originalImagePath = req.files[i].path;
@@ -53,7 +52,6 @@ const addProducts = async (req, res) => {
       }
     }
 
-   
     const category = await Category.findOne({ name: products.category });
     if (!category) {
       return res
@@ -61,9 +59,16 @@ const addProducts = async (req, res) => {
         .json({ success: false, message: "Invalid category name" });
     }
 
+    let salePrice = Number(products.salePrice);
+    const regularPrice = Number(products.regularPrice);
+
+    if (category.categoryOffer > 0) {
+      const discount = (regularPrice * category.categoryOffer) / 100;
+      salePrice = Math.max(regularPrice - discount, 0); // Ensure sale price does not drop below 0
+    }
+
     const variants = [];
 
-   
     if (
       Array.isArray(products.colors) &&
       Array.isArray(products.sizes) &&
@@ -73,15 +78,14 @@ const addProducts = async (req, res) => {
         variants.push({
           color: color,
           size: products.sizes[index] || null,
-          quantity: Number(products.quantities[index]) || 1, 
+          quantity: Number(products.quantities[index]) || 1,
         });
       });
     } else {
-    
       variants.push({
         color: products.colors || "Default",
         size: products.sizes || "ONESIZE",
-        quantity: Number(products.quantities) || 1, 
+        quantity: Number(products.quantities) || 1,
       });
     }
 
@@ -90,8 +94,8 @@ const addProducts = async (req, res) => {
       description: products.description,
       brand: products.brand,
       category: category._id,
-      regularPrice: Number(products.regularPrice), 
-      salePrice: Number(products.salePrice),
+      regularPrice: regularPrice,
+      salePrice: salePrice,
       productImage: images,
       createdOn: new Date(),
       status: "Available",
@@ -102,12 +106,10 @@ const addProducts = async (req, res) => {
     return res.json({ success: true, message: "Product added successfully" });
   } catch (error) {
     console.error("Error saving product:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "An error occurred while saving the product",
-      });
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while saving the product",
+    });
   }
 };
 
@@ -174,6 +176,14 @@ const addProductOffer = async (req, res) => {
   try {
     const { productId, percentage } = req.body;
 
+    // Validate maximum offer percentage
+    if (percentage > 80) {
+      return res.json({
+        status: false,
+        message: "The maximum product offer cannot exceed 80%",
+      });
+    }
+
     // Find the product and its category
     const findProduct = await Product.findOne({ _id: productId });
     const findCategory = await Category.findOne({ _id: findProduct.category });
@@ -199,19 +209,17 @@ const addProductOffer = async (req, res) => {
       });
     }
 
-  
+    // Calculate discount amount and apply the new offer
     const discountAmount = Math.floor(
       findProduct.regularPrice * (percentage / 100)
     );
     findProduct.salePrice = findProduct.regularPrice - discountAmount;
     findProduct.productOffer = parseInt(percentage);
 
- 
     await findProduct.save();
 
-  
+    // Reset category offer if no products are affected
     if (findCategory.categoryOffer > 0) {
-     
       const categoryAffectedProducts = await Product.find({
         category: findCategory._id,
         productOffer: 0,
@@ -225,9 +233,9 @@ const addProductOffer = async (req, res) => {
 
     res.json({ status: true, message: "Product offer applied successfully" });
   } catch (error) {
-    console.error(error); 
+    console.error(error);
     res.status(500).json({ status: false, message: "Internal server error" });
-    res.redirect("/admin/pageerror"); 
+    res.redirect("/admin/pageerror");
   }
 };
 
@@ -322,82 +330,132 @@ const getEditProduct = async (req, res) => {
 
 const editProduct = async (req, res) => {
   try {
+    console.log(
+      "[INFO] Received request to edit product with ID:",
+      req.params.id
+    );
+
     const productId = req.params.id;
     const updates = req.body;
 
-   
+    // Validate product name
     if (!updates.productName) {
+      console.log("[ERROR] Product name is missing in the request.");
       return res
         .status(400)
         .json({ success: false, message: "Product name is required." });
     }
 
     const regularPrice = Number(updates.regularPrice);
+    console.log("[DEBUG] Regular Price received:", regularPrice);
+
     if (isNaN(regularPrice) || regularPrice < 0) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Regular price must be a valid positive number.",
-        });
+      console.log(
+        "[ERROR] Invalid regular price provided:",
+        updates.regularPrice
+      );
+      return res.status(400).json({
+        success: false,
+        message: "Regular price must be a valid positive number.",
+      });
     }
 
     const salePrice = Number(updates.salePrice);
+    console.log("[DEBUG] Sale Price received:", salePrice);
+
     if (isNaN(salePrice) || salePrice < 0) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Sale price must be a valid positive number.",
-        });
+      console.log("[ERROR] Invalid sale price provided:", updates.salePrice);
+      return res.status(400).json({
+        success: false,
+        message: "Sale price must be a valid positive number.",
+      });
     }
 
-   
+    // Find the product
     const product = await Product.findById(productId);
     if (!product) {
+      console.log("[ERROR] Product not found for ID:", productId);
       return res
         .status(404)
         .json({ success: false, message: "Product not found" });
     }
 
+    console.log("[INFO] Found product:", product);
 
+    // Update product fields
     product.productName = updates.productName || product.productName;
     product.description = updates.description || product.description;
     product.brand = updates.brand || product.brand;
 
- 
+    // Handle category change
     if (updates.category) {
+      console.log(
+        "[DEBUG] Category update detected. New category:",
+        updates.category
+      );
       const category = await Category.findOne({ name: updates.category });
       if (!category) {
+        console.log(
+          "[ERROR] Invalid category name provided:",
+          updates.category
+        );
         return res
           .status(400)
           .json({ success: false, message: "Invalid category name" });
       }
-      product.category = category._id;
+
+      console.log("[INFO] Category found:", category);
+      product.category = category._id; // Update the product's category
+
+      // Recalculate salePrice based on the new category's offer
+      if (category.categoryOffer >= 0) {
+        const discount = (regularPrice * category.categoryOffer) / 100;
+        product.salePrice = Math.max(regularPrice - discount, 0); // Ensure salePrice doesn't go below 0
+        console.log(
+          `[DEBUG] Sale price recalculated with category offer (${category.categoryOffer}%):`,
+          product.salePrice
+        );
+      } else {
+        product.salePrice = salePrice; // Retain the provided sale price if no offer exists
+        console.log(
+          "[DEBUG] No category offer applied. Sale price retained:",
+          salePrice
+        );
+      }
     }
 
+    // Update prices
     product.regularPrice = regularPrice;
-    product.salePrice = salePrice;
+    if (!updates.category || !product.salePrice) {
+      product.salePrice = salePrice;
+      console.log("[DEBUG] Sale price updated to:", salePrice);
+    }
 
-  
+    // Handle image upload
     const images = product.productImage || [];
+    console.log("[DEBUG] Existing images:", images);
     const uploadDir = path.join(__dirname, "../public/uploads/product-image");
 
-   
     if (req.files && req.files.length > 0) {
+      console.log(`[INFO] Received ${req.files.length} new images to upload.`);
       const totalImages = images.length + req.files.length;
       if (totalImages > 4) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "You cannot upload more than 4 images. you need to delete previous one to add image.",
-          });
+        console.log(
+          "[ERROR] Too many images provided. Total images:",
+          totalImages
+        );
+        return res.status(400).json({
+          success: false,
+          message:
+            "You cannot upload more than 4 images. You need to delete previous images to add more.",
+        });
       }
 
       for (let i = 0; i < req.files.length; i++) {
         const originalImagePath = req.files[i].path;
         const resizedImagePath = path.join(uploadDir, req.files[i].filename);
+
+        console.log("[INFO] Resizing image:", originalImagePath);
 
         await sharp(originalImagePath)
           .resize({ width: 440, height: 440, fit: "cover" })
@@ -406,11 +464,13 @@ const editProduct = async (req, res) => {
         images.push(req.files[i].filename);
         fs.unlinkSync(originalImagePath);
       }
-      product.productImage = images; 
+      product.productImage = images;
     }
 
-   
+    // Update variants
     const variants = [];
+
+    console.log("[DEBUG] Variants update data:", updates);
 
     if (
       Array.isArray(updates.colors) &&
@@ -421,12 +481,13 @@ const editProduct = async (req, res) => {
         updates.colors.length !== updates.sizes.length ||
         updates.colors.length !== updates.quantities.length
       ) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "Colors, sizes, and quantities must have the same length.",
-          });
+        console.log(
+          "[ERROR] Mismatched lengths for colors, sizes, and quantities arrays."
+        );
+        return res.status(400).json({
+          success: false,
+          message: "Colors, sizes, and quantities must have the same length.",
+        });
       }
 
       updates.colors.forEach((color, index) => {
@@ -444,18 +505,19 @@ const editProduct = async (req, res) => {
       });
     }
 
+    console.log("[DEBUG] Final variants array:", variants);
     product.variants = variants;
 
+    // Save product
     await product.save();
+    console.log("[INFO] Product updated successfully:", product);
     return res.json({ success: true, message: "Product updated successfully" });
   } catch (error) {
-    console.error("Error updating product:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "An error occurred while updating the product",
-      });
+    console.error("[ERROR] Error updating product:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while updating the product",
+    });
   }
 };
 

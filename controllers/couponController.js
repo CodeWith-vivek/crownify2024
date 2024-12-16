@@ -240,16 +240,17 @@ const couponApply = async (req, res) => {
       });
     }
 
-    // Calculate discount
+    // Calculate discount and apply floor
     let discount = 0;
     if (coupon.discountType === "percentage") {
-      discount = (cartTotal * coupon.discountAmount) / 100;
+      discount = Math.floor((cartTotal * coupon.discountAmount) / 100);
       discount = Math.min(discount, coupon.maxDiscount || discount);
     } else if (coupon.discountType === "fixed") {
-      discount = coupon.discountAmount;
+      discount = Math.floor(coupon.discountAmount);
     }
 
-    const finalTotal = Math.max(0, cartTotal - discount);
+    // Ensure final total is floored
+    const finalTotal = Math.floor(Math.max(0, cartTotal - discount));
 
     // Save coupon details in session
     req.session.coupon = {
@@ -281,7 +282,9 @@ const couponApply = async (req, res) => {
 };
 
 const removeCoupon = async (req, res) => {
-  const { cartTotal } = req.body;
+  const { cartTotal } = req.body; // Expecting the original cart total
+  console.log("cart Totality",req.body);
+  
 
   try {
     // Validate request data
@@ -300,7 +303,7 @@ const removeCoupon = async (req, res) => {
       success: true,
       message: "Coupon removed successfully.",
       discount: 0,
-      finalTotal: cartTotal,
+      finalTotal: cartTotal, // This should be the original total
     });
   } catch (err) {
     console.error("Error removing coupon:", err);

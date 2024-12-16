@@ -64,6 +64,14 @@ const addCategoryOffer = async (req, res) => {
     const percentage = parseInt(req.body.percentage);
     const categoryId = req.body.categoryId;
 
+    // Validate maximum category offer percentage
+    if (percentage > 80) {
+      return res.json({
+        status: false,
+        message: "The maximum category offer cannot exceed 80%",
+      });
+    }
+
     // Find the category
     const category = await Category.findById(categoryId);
     if (!category) {
@@ -108,8 +116,9 @@ const addCategoryOffer = async (req, res) => {
       }
 
       // Apply the category offer to sale price
-      product.salePrice =
-        product.regularPrice - (product.regularPrice * percentage) / 100;
+     product.salePrice = Math.floor(
+       product.regularPrice - (product.regularPrice * percentage) / 100
+     );
 
       await product.save();
     }
@@ -129,7 +138,14 @@ const addCategoryOffer = async (req, res) => {
 
 const removeCategoryOffer = async (req, res) => {
   try {
-    const categoryId = req.body.categoryId;
+    const { categoryId } = req.body;
+
+    // Validate categoryId
+    if (!categoryId) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Category ID is required" });
+    }
 
     // Find the category
     const category = await Category.findById(categoryId);
@@ -142,7 +158,8 @@ const removeCategoryOffer = async (req, res) => {
     // Find all products in the category
     const products = await Product.find({ category: category._id });
 
-    for (const product of products) {
+    // Update each product in the category
+    const productUpdates = products.map((product) => {
       if (product.previousProductOffer) {
         // Restore the previous product offer
         product.productOffer = product.previousProductOffer;
@@ -153,12 +170,15 @@ const removeCategoryOffer = async (req, res) => {
         // Clear the temporary field
         product.previousProductOffer = undefined;
       } else {
-        // If no previous offer exists, reset sale price to regular price
+        // Reset sale price to regular price if no previous offer exists
         product.salePrice = product.regularPrice;
       }
 
-      await product.save();
-    }
+      return product.save();
+    });
+
+    // Await all product updates concurrently
+    await Promise.all(productUpdates);
 
     // Remove the category offer
     category.categoryOffer = 0;

@@ -14,6 +14,7 @@ const wishlistController = require("../controllers/wishlistController");
 const couponController = require("../controllers/couponController");
 const rollbackCoupon = require("../middlewares/rollbackCoupon");
 const walletController = require("../controllers/walletController");
+const paymentController=require("../controllers/paymentController")
 const multer = require("multer");
 const path = require("path");
 
@@ -235,6 +236,9 @@ router.post("/verify-payment", userAuth, orderController.verifyRazorpayPayment);
 
 router.post("/apply-coupon", userAuth, couponController.couponApply);
 router.post("/remove-coupon", userAuth, couponController.removeCoupon); // Add this line
+
+router.get("/payment-Success",userAuth,paymentController.loadPayment);
+router.get("/payment-Failure", userAuth, paymentController.loadFailure);
 
 module.exports = router;
 

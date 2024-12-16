@@ -146,8 +146,8 @@ const updateOrderStatusByAdmin = async (req, res) => {
       "Shipped",
       "Delivered",
       "Returned",
-      "canceled",
-      "Return requested"
+      "Canceled",
+      "Return Requested",
     ];
     if (!validStatuses.includes(newStatus)) {
       return res.status(400).json({
@@ -156,6 +156,7 @@ const updateOrderStatusByAdmin = async (req, res) => {
       });
     }
 
+    // Fetch the order
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({
@@ -164,6 +165,7 @@ const updateOrderStatusByAdmin = async (req, res) => {
       });
     }
 
+    // Find the order item based on size and color
     const orderItemIndex = order.items.findIndex((item) => {
       if (!item.variant) return false;
 
@@ -191,6 +193,7 @@ const updateOrderStatusByAdmin = async (req, res) => {
 
     const orderItem = order.items[orderItemIndex];
 
+    // Check if the status is already updated
     if (orderItem.orderStatus === newStatus) {
       return res.status(400).json({
         success: false,
@@ -201,6 +204,7 @@ const updateOrderStatusByAdmin = async (req, res) => {
     const productIdFromOrder = orderItem.productId;
 
     if (newStatus === "Returned") {
+      // Handle inventory update for returned items
       const product = await Product.findById(productIdFromOrder);
       if (product) {
         const variantIndex = product.variants.findIndex(
@@ -221,33 +225,34 @@ const updateOrderStatusByAdmin = async (req, res) => {
         0
       );
 
-      // Step 2: Calculate the item's share (ratio) of the total price
+      // Calculate the item's share (ratio) of the total price
       const itemShare = orderItem.totalPrice / totalOrderPrice;
 
-      // Step 3: Calculate the proportional discount for this item
-      const discountForItem = order.discount * itemShare;
+      // Calculate the proportional discount for this item
+      const discountForItem = Math.floor(order.discount * itemShare);
 
       // Refund amount calculation
-      const refundAmount = orderItem.totalPrice - discountForItem; // Refund the item's total price
-      const userId = order.userId; // Assuming userId is stored in the order
+      const refundAmount = Math.floor(orderItem.totalPrice - discountForItem);
+      const userId = order.userId;
 
+      // Adjust the user's wallet
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({
           success: false,
-          message: "User  not found for refund",
+          message: "User not found for refund",
         });
       }
 
-      // Adjust the user's wallet for the item's total price
-      user.wallet = (user.wallet || 0) + refundAmount;
+      user.wallet = Math.floor((user.wallet || 0) + refundAmount);
 
-      // Save the user after updating wallet amounts
       await user.save();
     }
 
+    // Update the order item status
     order.items[orderItemIndex].orderStatus = newStatus;
 
+    // Check if all items have the same status
     const allItemsSameStatus = order.items.every(
       (item) => item.orderStatus === newStatus
     );

@@ -9,6 +9,11 @@ const orderSchema = new Schema(
       ref: "User",
       required: true,
     },
+    orderNumber: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     items: [cartItemSchema],
     shippingAddress: {
       type: Schema.Types.ObjectId,
@@ -22,7 +27,7 @@ const orderSchema = new Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["Pending", "Completed", "Failed", "Refunded"],
+      enum: ["Pending", "Completed", "Failed", "Refunded","Partially Paid"],
       default: "Pending",
     },
     coupon: { type: mongoose.Schema.Types.ObjectId, ref: "Coupon" },
