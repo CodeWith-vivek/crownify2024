@@ -1,12 +1,16 @@
 const User = require("../models/userSchema");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
+const Transaction=require("../models/transactionSchema")
 
 const loadwalletpage = async (req, res) => {
   try {
     const userId = req.session.user;
     const userData = await User.findById(userId);
-    return res.render("wallet", { user: userData });
+       const transactions = await Transaction.find({ userId }).sort({
+         date: -1,
+       }); 
+    return res.render("wallet", { user: userData, transactions });
   } catch (error) {
     console.log("Error loading wallet page", error);
     res.status(500).send("Server error");
@@ -35,12 +39,11 @@ const addMoneyToWallet = async (req, res) => {
     if (!user) {
       return res
         .status(404)
-        .json({ success: false, message: "User not found" });
+        .json({ success: false, message: "User  not found" });
     }
 
- 
     const options = {
-      amount: amount * 100,
+      amount: amount * 100, // Amount in paise
       currency: "INR",
       receipt: `receipt_${new Date().getTime()}`,
     };
@@ -48,11 +51,19 @@ const addMoneyToWallet = async (req, res) => {
     const order = await razorpay.orders.create(options);
     console.log("Razorpay order created:", order); // Debug log
 
-    
+    // Log the transaction for adding money to the wallet
+    const transaction = new Transaction({
+      userId,
+      amount,
+      type: "credit", // Since we are adding money to the wallet
+      description: `Added money to wallet: `,
+    });
+    await transaction.save();
+
     return res.status(200).json({
       success: true,
       message: "Order created successfully.",
-      orderId: order.id, 
+      orderId: order.id,
       amount: amount,
     });
   } catch (error) {
@@ -60,7 +71,6 @@ const addMoneyToWallet = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
 const getWalletBalance = async (req, res) => {
   try {
     const userId = req.session.user;

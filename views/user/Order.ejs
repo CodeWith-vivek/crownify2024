@@ -13,28 +13,28 @@
                     </div>
                     <h3 class="mb-3">Items</h3>
                     <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Product</th>
-                                <th>Quantity</th>
-                                <th>Price</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="modalItems">
-                            <!-- Dynamic rows will be inserted here -->
-                        </tbody>
-                    </table>
-                    
-                    <div id="orderSummary" class="mt-4">
-                        <p><strong>Subtotal:</strong> ₹<span id="modalSubtotal"></span></p>
-                        <p><strong>Discount:</strong> ₹<span id="modalDiscount"></span></p>
-                        <p><strong>Shipping:</strong> ₹<span id="modalShipping"></span></p>
-                        <p class="h5"><strong>Grand Total:</strong> ₹<span id="modalGrandTotal"></span></p>
-                    </div>
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalItems">
+                                <!-- Dynamic rows will be inserted here -->
+                            </tbody>
+                        </table>
+
+                        <div id="orderSummary" class="mt-4">
+                            <p><strong>Subtotal:</strong> ₹<span id="modalSubtotal"></span></p>
+                            <p><strong>Discount:</strong> ₹<span id="modalDiscount"></span></p>
+                            <p><strong>Shipping:</strong> ₹<span id="modalShipping"></span></p>
+                            <p class="h5"><strong>Grand Total:</strong> ₹<span id="modalGrandTotal"></span></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -94,222 +94,137 @@
 
 
 
-        <div class="container">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Your Orders</h5>
-                </div>
-                <div class="card-body">
-                    <div class="order-list">
-                        <% if (orders && orders.length> 0) { %>
-                            <% orders.forEach(order=> { %>
-                                <div class="order-item" data-order-id="<%= order.orderNumber %>"
-                                    data-customer-name="<%= user.name %>" data-order-date="<%= order.createdAt %>"
-                                    data-address="<%= order.shippingAddress || 'N/A' %>"
-                                    data-items='<%= JSON.stringify(order.items) %>'
-                                    data-timeline='<%= JSON.stringify(order.timeline || []) %>'
-                                    data-subtotal="<%= order.subtotal || 0 %>"
-                                    data-discount="<%= order.discount || 0 %>"
-                                    data-shipping="<%= order.shipping || 0 %>"
-                                    data-grandtotal="<%= order.grandTotal || 0 %>"
-                                    data-paymentStatus="<%= order.paymentStatus|| 'N/A' %>">
-                                    <div class="order-content">
-                                        <h6 class="order-id">Order ID: <%= order.orderNumber|| 'N/A' %>
-                                        </h6>
-                                        </h2>
-                                        <% order.items.forEach(item=> { %>
-                                            <div class="product-info row">
-                                                <div class="col-3 col-md-2">
-                                                    <img src="/uploads/product-image/<%= item.productImage || 'https://via.placeholder.com/80' %>"
-                                                        alt="<%= item.productId?.productName || 'Product Image' %>"
-                                                        class="product-image img-fluid">
-                                                </div>
-                                                <div class="col-9 col-md-10">
-                                                    <div class="product-details">
-                                                        <h3>
-                                                            <%= item.productId?.productName || 'Product Name' %>
-                                                        </h3>
-                                                        <p>Color: <%= item.variant.color || 'N/A' %>
-                                                        </p>
-                                                        <p>Size: <%= item.variant.size || 'N/A' %>
-                                                        </p>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h5>Your Orders</h5>
+        </div>
+        <div class="card-body">
+            <div class="order-list">
+                <% if (orders && orders.length> 0) { %>
+                    <% orders.forEach(order=> { %>
+                        <div class="order-item" data-order-id="<%= order.orderNumber %>"
+                            data-customer-name="<%= user.name %>" data-order-date="<%= order.createdAt %>"
+                            data-address="<%= order.shippingAddress || 'N/A' %>"
+                            data-items='<%= JSON.stringify(order.items) %>'
+                            data-timeline='<%= JSON.stringify(order.timeline || []) %>'
+                            data-subtotal="<%= order.subtotal || 0 %>" data-discount="<%= order.discount || 0 %>"
+                            data-shipping="<%= order.shipping || 0 %>" data-grandtotal="<%= order.grandTotal || 0 %>"
+                            data-paymentStatus="<%= order.paymentStatus || 'N/A' %>">
+                            <div class="order-content">
+                                <h6 class="order-id">Order ID: <%= order.orderNumber || 'N/A' %>
+                                </h6>
+                                <% order.items.forEach(item=> { %>
+                                    <div class="product-info row">
+                                        <div class="col-3 col-md-2">
+                                            <img src="/uploads/product-image/<%= item.productImage || 'https://via.placeholder.com/80' %>"
+                                                alt="<%= item.productId?.productName || 'Product Image' %>"
+                                                class="product-image img-fluid">
+                                        </div>
+                                        <div class="col-9 col-md-10">
+                                            <div class="product-details">
+                                                <h3>
+                                                    <%= item.productId?.productName || 'Product Name' %>
+                                                </h3>
+                                                <p>Color: <%= item.variant.color || 'N/A' %>
+                                                </p>
+                                                <p>Size: <%= item.variant.size || 'N/A' %>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="order-details row">
+                                        <div class="order-detail col-6 col-md-4">
+                                            <h4>Quantity</h4>
+                                            <p>
+                                                <%= item.quantity %>
+                                            </p>
+                                        </div>
+                                        <div class="order-detail col-6 col-md-4">
+                                            <h4>Price</h4>
+                                            <p>₹<%= (item.productId?.salePrice || item.productId?.regularPrice || 0) *
+                                                    item.quantity %>
+                                            </p>
+                                        </div>
+                                        <div class="order-detail col-12 col-md-4">
+                                            <h4>Status</h4>
+                                            <span class="badge <%= item.badgeClass %>">
+                                                <%= item.orderStatus || 'Pending' %>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <hr> <!-- Optional: Add a horizontal line between items -->
+                                    <% }); %>
+                            </div>
+                            <button class="btn btn-dark btn-outline-secondary btn w-100 mb-1 view-order"
+                                style="font-size: smaller;">
+                                View <i class="bi bi-chevron-down ms-1"></i>
+                            </button>
+
+                            <% const allDelivered=order.items.every(item=> item.orderStatus === 'Delivered');
+                                const anyFailed = order.paymentStatus === 'Failed' || order.items.some(item =>
+                                item.orderStatus === 'Failed');
+                                const paymentCompleted = order.paymentStatus === 'Completed';
+                                %>
+
+                                <% if (anyFailed) { %>
+                                    <button class="btn btn-primary btn w-100 mb-2 pay-now-btn"
+                                        data-order-id="<%= order.orderNumber %>">
+                                        Pay Now
+                                    </button>
+                                    <% } %>
+
+                                        <% if (allDelivered || paymentCompleted) { %>
+                                            <button class="btn btn-success btn w-100 mb-2 invoice-btn"
+                                                data-order-id="<%= order.orderNumber %>">
+                                                Download Invoice
+                                            </button>
+                                            <% } %>
+
+                                                <div class="order-summary">
+                                                    <div class="summary-row">
+                                                        <span>Subtotal:</span>
+                                                        <span>₹<%= order.subtotal || 0 %></span>
+                                                    </div>
+                                                    <div class="summary-row">
+                                                        <span>Discount :</span>
+                                                        <span>-₹<%= order.discount || 0 %></span>
+                                                    </div>
+                                                    <div class="summary-row">
+                                                        <span>Shipping:</span>
+                                                        <span>₹40</span>
+                                                    </div>
+                                                    <div class="summary-row">
+                                                        <span>Total:</span>
+                                                        <span>₹<%= order.grandTotal || 0 %></span>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="order-details row">
-                                                <div class="order-detail col-6 col-md-4">
-                                                    <h4>Quantity</h4>
-                                                    <p>
-                                                        <%= item.quantity %>
-                                                    </p>
-                                                </div>
-                                                <div class="order-detail col-6 col-md-4">
-                                                    <h4>Price</h4>
-                                                    <p>₹<%= (item.productId?.salePrice || item.productId?.regularPrice
-                                                            || 0) * item.quantity %>
-                                                    </p>
-                                                </div>
-                                                <div class="order-detail col-12 col-md-4">
-                                                    <h4>Status</h4>
-                                                    <span class="badge <%= item.badgeClass %>">
-                                                        <%= item.orderStatus || 'Pending' %>
-                                                    </span>
-                                                </div>
-
-                                            </div>
-                                            <hr> <!-- Optional: Add a horizontal line between items -->
-                                            <% }); %>
-                                    </div>
-                                    <button class="btn btn-dark btn-outline-secondary btn w-100 mb-1 view-order"
-                                        style="font-size: smaller;">
-                                        View <i class="bi bi-chevron-down ms-1"></i>
-                                    </button>
-                                    <div class="order-summary">
-                                        <div class="summary-row">
-                                            <span>Subtotal:</span>
-                                            <span>₹<%= order.subtotal || 0 %></span>
-                                        </div>
-                                        <div class="summary-row">
-                                            <span>Discount:</span>
-                                            <span>-₹<%= order.discount || 0 %></span>
-                                        </div>
-                                        <div class="summary-row">
-                                            <span>Shipping:</span>
-                                            <span>₹<%= order.shipping || 0 %></span>
-                                        </div>
-                                        <div class="summary-row">
-                                            <span>Total:</span>
-                                            <span>₹<%= order.grandTotal || 0 %></span>
-                                        </div>
-                                    </div>
+                        </div>
+                        <% }); %>
+                            <% } else { %>
+                                <div class="alert alert-warning" role="alert">
+                                    You have not ordered anything yet.
                                 </div>
-                                <% }); %>
-                                    <% } else { %>
-                                        <div class="alert alert-warning" role="alert">
-                                            You have not ordered anything yet.
-                                        </div>
-                                        <% } %>
-                    </div>
-                </div>
+                                <% } %>
+            </div>
+            <div class="pagination-controls">
+                <% if (currentPage> 1) { %>
+                    <a href="?page=<%= currentPage - 1 %>&limit=<%= limit %>" class="btn btn-secondary">Previous</a>
+                    <% } %>
+                        <span>Page <%= currentPage %> of <%= totalPages %></span>
+                        <% if (currentPage < totalPages) { %>
+                            <a href="?page=<%= currentPage + 1 %>&limit=<%= limit %>" class="btn btn-secondary">Next</a>
+                            <% } %>
             </div>
         </div>
+    </div>
+</div>
         <%- include("../../views/partials/user/footerprofile") %>
             <script>
 
 
 
 
-                // document.querySelectorAll('.view-order').forEach(button => {
-                //     button.addEventListener('click', function () {
-                //         const orderItem = this.closest('.order-item');
-                //         const orderId = orderItem.getAttribute('data-order-id');
-                //         const customerName = orderItem.getAttribute('data-customer-name');
-                //         const orderDate = orderItem.getAttribute('data-order-date');
-                //         const items = JSON.parse(orderItem.getAttribute('data-items'));
-
-
-                //         document.getElementById('modalOrderId').textContent = orderId;
-                //         document.getElementById('modalCustomer').textContent = customerName;
-                //         document.getElementById('modalDate').textContent = new Date(orderDate).toLocaleDateString();
-
-
-                //         const modalItems = document.getElementById('modalItems');
-                //         modalItems.innerHTML = '';
-
-                //         items.forEach((item, index) => {
-                //             const itemDiv = document.createElement('div');
-                //             itemDiv.className = 'product-item p-3 mb-3 border rounded';
-
-                //             const itemStatus = item.orderStatus || 'Return Pending';
-                //             const itemPrice = (item.productId?.salePrice || item.productId?.regularPrice || 0) * item.quantity;
-
-
-                //             const getBadgeClass = (status) => {
-                //                 const badgeClasses = {
-                //                     'Delivered': 'bg-success',
-                //                     'Shipped': 'bg-purple',
-                //                     'Return Pending': 'bg-warning',
-                //                     'Return requested': 'bg-orange',
-                //                     'Returned': 'bg-info',
-                //                     'Return Rejected': 'bg-danger',
-                //                     'Placed': 'bg-warning',
-                //                     'Confirmed': 'bg-warning',
-                //                     'canceled': 'bg-danger'
-                //                 };
-                //                 return badgeClasses[status] || 'bg-secondary';
-                //             };
-
-
-                //             const getActionButton = (status) => {
-                //                 const commonAttributes = `
-                //         data-order-id="${orderId}" 
-                //         data-item-index="${index}" 
-                //         data-product-name="${item.productId?.productName}" 
-                //         data-product-image="${item.productImage || 'placeholder.jpg'}"
-                //         data-product-color="${item.variant.color || 'N/A'}"
-                //         data-product-size="${item.variant.size || 'N/A'}"
-                //         data-product-price="${itemPrice}"
-                //     `;
-
-                //                 switch (status) {
-                //                     case 'Delivered':
-                //                         return `
-                //             <button class="btn btn-warning btn-sm w-100 return-item" ${commonAttributes}>
-                //                 Return Item
-                //             </button>`;
-                //                     case 'Return requested':
-                //                         return `
-                //             <button class="btn btn-danger btn-sm w-100 cancel-return" ${commonAttributes}>
-                //                 Cancel Return Request
-                //             </button>`;
-                //                     case 'Placed':
-                //                     case 'Confirmed':
-                //                         return `
-                //             <button class="btn btn-danger btn-sm w-100 cancel-item" ${commonAttributes}>
-                //                 Cancel Item
-                //             </button>`;
-                //                     default:
-                //                         return '';
-                //                 }
-                //             };
-
-                //             itemDiv.innerHTML = `
-                //     <div class="row align-items-center">
-                //         <div class="col-md-6">
-                //             <div class="d-flex align-items-center">
-                //                 <img src="/uploads/product-image/${item.productImage || 'placeholder.jpg'}" 
-                //                      alt="${item.productId?.productName}" 
-                //                      class="me-3 rounded" 
-                //                      width="60" height="60">
-                //                 <div>
-                //                     <div class="fw-medium">${item.productId?.productName}</div>
-                //                     <div class="text-muted">Size: ${item.variant.size}</div>
-                //                     <div class="text-muted">Color: ${item.variant.color || 'N/A'}</div>
-                //                     <div class="text-muted">Quantity: ${item.quantity}</div>
-                //                     <div class="text-muted">Price: ₹${itemPrice}</div>
-                //                 </div>
-                //             </div>
-                //         </div>
-                //         <div class="col-md-3">
-                //             <span class="badge ${getBadgeClass(itemStatus)}">
-                //                 ${itemStatus}
-                //             </span>
-                //         </div>
-                //         <div class="col-md-3">
-                //             ${getActionButton(itemStatus)}
-                //         </div>
-                //     </div>
-                // `;
-                //             modalItems.appendChild(itemDiv);
-                //         });
-
-
-                //         document.getElementById('orderModal').style.display = 'block';
-
-
-                //         setupActionButtons();
-                //     });
-                // });
 
                 document.querySelectorAll('.view-order').forEach(button => {
                     button.addEventListener('click', function () {
@@ -323,7 +238,7 @@
                         const discount = orderItem.getAttribute('data-discount');
                         const shipping = 40;
                         const grandTotal = orderItem.getAttribute('data-grandtotal');
-                        const paymentStatus=orderItem.getAttribute('data-paymentStatus')
+                        const paymentStatus = orderItem.getAttribute('data-paymentStatus')
 
                         // Set modal details
                         document.getElementById('modalOrderId').textContent = orderNumber;
@@ -333,7 +248,7 @@
                         document.getElementById('modalDiscount').textContent = discount;
                         document.getElementById('modalShipping').textContent = shipping;
                         document.getElementById('modalGrandTotal').textContent = grandTotal;
-                        document.getElementById('modalPaymentStatus').textContent=paymentStatus
+                        document.getElementById('modalPaymentStatus').textContent = paymentStatus
 
                         // Clear and populate modal items
                         const modalItems = document.getElementById('modalItems');
@@ -350,6 +265,7 @@
                             // Badge class helper
                             const getBadgeClass = (status) => {
                                 const badgeClasses = {
+                                    'Failed': 'bg-danger',
                                     'Delivered': 'bg-success',
                                     'Shipped': 'bg-purple',
                                     'Return Pending': 'bg-warning',
@@ -359,7 +275,7 @@
                                     'Placed': 'bg-warning',
                                     'Confirmed': 'bg-warning',
                                     'Canceled': 'bg-danger',
-                                    'Failed': 'bg-danger'
+
                                 };
                                 return badgeClasses[status] || 'bg-secondary';
                             };
@@ -834,3 +750,177 @@
                     });
                 };
             </script>
+            <script>
+                document.querySelectorAll('.pay-now-btn').forEach(button => {
+                    button.addEventListener('click', function () {
+                        // Retrieve the order ID from the button's data attribute
+                        const orderId = this.getAttribute('data-order-id');
+                        console.log("DEBUG: Pay Now Button Clicked for Order ID:", orderId);
+
+                        // Make an API call to fetch order details for retry payment
+                        fetch('/retry-payment', { // Ensure this route exists on your backend
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ orderId }), // Pass the order ID to the server
+                        })
+                            .then(response => {
+                                console.log("DEBUG: Retry Payment API Response Status:", response.status);
+                                if (!response.ok) {
+                                    throw new Error(`Retry Payment API failed: ${response.statusText}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log("DEBUG: Retry Payment API Response Data:", data);
+
+                                // Check if the API returned success and a valid order ID
+                                if (data.success && data.orderId) {
+                                    const options = {
+                                        key: data.key, // Razorpay API key
+                                        amount: data.amount, // Payment amount
+                                        currency: 'INR',
+                                        name: 'CROWNIFY',
+                                        description: 'Retry Payment',
+                                        order_id: data.orderId, // Razorpay order ID
+                                        handler: function (response) {
+                                            console.log("DEBUG: Payment Successful - Razorpay Response:", response);
+
+
+                                        },
+                                        prefill: {
+                                            name: 'Customer Name', // Optional
+                                            email: 'customer@example.com', // Optional
+                                            contact: 'Customer Phone Number', // Optional
+                                        },
+                                        theme: {
+                                            color: '#3399cc',
+                                        },
+                                        modal: {
+                                            ondismiss: function () {
+                                                console.warn("DEBUG: Payment modal dismissed by user.");
+                                            },
+                                        },
+                                    };
+
+                                    console.log("DEBUG: Initializing Razorpay with options:", options);
+                                    const razorpayInstance = new Razorpay(options);
+
+                                    // Open Razorpay modal for payment
+                                    razorpayInstance.open();
+
+                                    // Handle payment failure
+                                    razorpayInstance.on('payment.failed', function (response) {
+                                        console.error("DEBUG: Payment Failed - Razorpay Response:", response.error);
+
+                                        // Save failed payment details to the server
+                                        fetch('/payment-failure', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                            },
+                                            body: JSON.stringify({
+                                                orderId: data.orderId,
+                                                paymentId: response.error.metadata.payment_id || null,
+                                                razorpayOrderId: response.error.metadata.order_id || null,
+                                                reason: response.error.reason || 'Unknown reason',
+                                                description: response.error.description || 'No description available',
+                                            }),
+                                        })
+                                            .then(failureResponse => {
+                                                console.log("DEBUG: Payment Failure API Response Status:", failureResponse.status);
+                                                if (!failureResponse.ok) {
+                                                    throw new Error(`Failed to save payment failure: ${failureResponse.statusText}`);
+                                                }
+                                                return failureResponse.json();
+                                            })
+                                            .then(failureData => {
+                                                console.log("DEBUG: Payment Failure Data Saved:", failureData);
+
+                                                // Redirect to payment failure page
+                                                window.location.href = `/payment-failure?orderId=${data.orderId}`;
+                                            })
+                                            .catch(error => {
+                                                console.error("DEBUG: Error saving payment failure:", error);
+                                                Swal.fire({
+                                                    icon: 'error',
+                                                    title: 'Error',
+                                                    text: 'Could not save payment failure details. Please contact support.',
+                                                });
+                                            });
+                                    });
+                                } else {
+                                    throw new Error(data.message || 'Failed to create Razorpay order');
+                                }
+                            })
+                            .catch(error => {
+                                console.error("DEBUG: Error initiating retry payment:", error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Payment Failed',
+                                    text: 'An error occurred while initiating payment. Please try again.',
+                                });
+                            });
+                    });
+                });
+            </script>
+            <script>
+                async function checkUserBlockStatus() {
+                    try {
+                        const response = await fetch("/check-block-status", {
+                            method: "GET",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                        });
+                        const data = await response.json();
+
+                        if (data.blocked) {
+
+                            window.location.href = "/login"; // Redirect to the login page or home page
+                        }
+                    } catch (error) {
+                        console.error("Error checking block status:", error);
+                    }
+                }
+
+                // Check every 30 seconds
+                setInterval(checkUserBlockStatus, 2000);
+            </script>
+            <script>
+                document.addEventListener("DOMContentLoaded", () => {
+                    const invoiceButtons = document.querySelectorAll(".invoice-btn");
+
+                    invoiceButtons.forEach((button) => {
+                        button.addEventListener("click", () => {
+                            const orderId = button.getAttribute("data-order-id");
+                            if (orderId) {
+                                // Redirect to the backend route to download the invoice
+                                window.location.href = `/invoice/${orderId}`;
+                            } else {
+                                alert("Order ID is missing!");
+                            }
+                        });
+                    });
+                });
+            </script>
+            <!-- <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const orderItems = document.querySelectorAll(".order-item");
+
+                    orderItems.forEach(orderItem => {
+                        const allItemsNotCanceled = orderItem.getAttribute("data-all-items-not-canceled") === "true";
+
+                        if (allItemsNotCanceled) {
+                            const downloadButton = document.createElement("button");
+                            downloadButton.classList.add("btn", "btn-success", "w-100", "mb-2", "download-invoice-btn");
+                            downloadButton.textContent = "Download Invoice";
+                            downloadButton.setAttribute("data-order-id", orderItem.getAttribute("data-order-id"));
+
+                            // Append the button to the order-item
+                            orderItem.appendChild(downloadButton);
+                        }
+                    });
+                });
+            </script> -->

@@ -15,6 +15,8 @@ const couponController = require("../controllers/couponController");
 const rollbackCoupon = require("../middlewares/rollbackCoupon");
 const walletController = require("../controllers/walletController");
 const paymentController=require("../controllers/paymentController")
+const userCheckController=require("../controllers/userAccess")
+const reportController = require("../controllers/reportController");
 const multer = require("multer");
 const path = require("path");
 
@@ -54,7 +56,7 @@ const preventBackToAuth = async (req, res, next) => {
 router.get("/pageNotFound", userController.pageNotFound);
 
 //user signup managing
-
+router.get("/check-block-status",userCheckController.userCheck);
 router.get("/", userController.loadHomepage);
 router.get("/brand", userController.loadBrandpage);
 router.post("/contact", contactController.submitContactForm);
@@ -191,10 +193,10 @@ router.get(
 );
 
 //user wishlist
-router.get("/wishlist", wishlistController.loadWishlistpage);
-router.post("/wishlist/add", wishlistController.addToWishlist);
-router.get("/wishlist/colors", wishlistController.getColorsBySize);
-router.post("/wishlist/remove", wishlistController.removeFromWishlist);
+router.get("/wishlist", userAuth,wishlistController.loadWishlistpage);
+router.post("/wishlist/add",userAuth, wishlistController.addToWishlist);
+router.get("/wishlist/colors", userAuth,wishlistController.getColorsBySize);
+router.post("/wishlist/remove", userAuth,wishlistController.removeFromWishlist);
 
 //user wallet
 router.get("/wallet", userAuth, walletController.loadwalletpage);
@@ -206,7 +208,7 @@ router.post("/confirm-payment",userAuth,walletController.confirmPayment);
 
 //user cartManagement
 
-router.get("/cart", cartController.loadCartPage);
+router.get("/cart", userAuth,cartController.loadCartPage);
 router.get("/product/:id/stock", cartController.getVarientQuantity);
 
 router.post("/cart/add", cartController.addToCart);
@@ -239,6 +241,11 @@ router.post("/remove-coupon", userAuth, couponController.removeCoupon); // Add t
 
 router.get("/payment-Success",userAuth,paymentController.loadPayment);
 router.get("/payment-Failure", userAuth, paymentController.loadFailure);
+router.post("/payment-failure",userAuth,paymentController.paymentFailure)
+router.post("/retry-payment",userAuth,paymentController.retryPayment)
+
+router.post("/delete-preliminary-order",userAuth,orderController.deletepremilinaryOrder);
+router.get("/invoice/:orderId",userAuth,reportController.generateInvoicePDF);
 
 module.exports = router;
 

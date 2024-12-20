@@ -5,79 +5,70 @@
                 <h2 class="content-title card-title">Dashboard </h2>
                 <p>Whole data about your business here</p>
             </div>
-            <!-- <div>
-                <a href="#" class="btn btn-primary"><i class="text-muted material-icons md-post_add"></i>Create
-                    report</a>
-            </div> -->
+         
         </div>
-        <!-- <div class="row">
+        <div class="row">
             <div class="col-lg-3">
-                <div class="card card-body mb-4">
+           
+                <div class="card card-body mb-4 clo-lg-4">
                     <article class="icontext">
-                        <span class="icon icon-sm rounded-circle bg-primary-light"><i
-                                class="text-primary material-icons md-monetization_on"></i></span>
+                        <span class="icon icon-sm rounded-circle bg-primary-light">
+                            <i class="text-primary material-icons md-monetization_on"></i>
+                        </span>
                         <div class="text">
                             <h6 class="mb-1 card-title">Revenue</h6>
-                            <span>$13,456.5</span>
-                            <span class="text-sm">
-                                Shipping fees are not included
-                            </span>
+                            <span id="total-revenue">Loading...</span>
+
                         </div>
                     </article>
                 </div>
             </div>
-            <div class="col-lg-3">
+            <div class="col-lg-4">
                 <div class="card card-body mb-4">
                     <article class="icontext">
-                        <span class="icon icon-sm rounded-circle bg-success-light"><i
-                                class="text-success material-icons md-local_shipping"></i></span>
+                        <span class="icon icon-sm rounded-circle bg-success-light">
+                            <i class="text-success material-icons md-local_shipping"></i>
+                        </span>
                         <div class="text">
-                            <h6 class="mb-1 card-title">Orders</h6> <span>53.668</span>
-                            <span class="text-sm">
-                                Excluding orders in transit
-                            </span>
+                            <h6 class="mb-1 card-title">Orders</h6>
+                            <span id="total-orders">Loading...</span>
+
                         </div>
                     </article>
                 </div>
             </div>
-            <div class="col-lg-3">
+            <div class="col-lg-4">
                 <div class="card card-body mb-4">
                     <article class="icontext">
-                        <span class="icon icon-sm rounded-circle bg-warning-light"><i
-                                class="text-warning material-icons md-qr_code"></i></span>
+                        <span class="icon icon-sm rounded-circle bg-warning-light">
+                            <i class="text-warning material-icons md-qr_code"></i>
+                        </span>
                         <div class="text">
-                            <h6 class="mb-1 card-title">Products</h6> <span>9.856</span>
+                            <h6 class="mb-1 card-title">Products</h6>
+                            <span id="total-products">Loading...</span>
                             <span class="text-sm">
-                                In 19 Categories
+                                In <span id="total-categories">Loading...</span> Categories
                             </span>
                         </div>
                     </article>
                 </div>
             </div>
-            <div class="col-lg-3">
-                <div class="card card-body mb-4">
-                    <article class="icontext">
-                        <span class="icon icon-sm rounded-circle bg-info-light"><i
-                                class="text-info material-icons md-shopping_basket"></i></span>
-                        <div class="text">
-                            <h6 class="mb-1 card-title">Monthly Earning</h6> <span>$6,982</span>
-                            <span class="text-sm">
-                                Based in your local time.
-                            </span>
-                        </div>
-                    </article>
-                </div>
-            </div>
-        </div> -->
+            
+        </div>
         <div class="row">
-            <!-- <div class="col-xl-8 col-lg-12">
+            <div class="col-xl-12 col-lg-12">
                 <div class="card mb-4">
                     <article class="card-body">
-                        <h5 class="card-title">Sale statistics</h5>
+                        <h5 class="card-title">Sale Statistics</h5>
+                        <div>
+                            <button id="weeklyBtn" class="btn btn-primary">Weekly</button>
+                            <button id="monthlyBtn" class="btn btn-primary">Monthly</button>
+                            <button id="yearlyBtn" class="btn btn-primary">Yearly</button>
+                        </div>
                         <canvas id="myChart" height="120px"></canvas>
                     </article>
                 </div>
-            </div> -->
+            </div>
             <div class="col-lg-12">
                 <div class="card mb-4">
                     <div class="card-header">
@@ -150,176 +141,506 @@
                         </button>
                     </div>
                 </div>
+                <div class="card-body">
+                    <h4 class="mb-3"><i class="fas fa-box-open me-2"></i>Top 10 Best-Selling Products</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Product Name</th>
+                                    <th>Sales Count</th>
+                                   
+                                </tr>
+                            </thead>
+                            <tbody id="bestSellingProducts">
+                                <tr>
+                                    <td colspan="4">No data available</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Top 10 Best-Selling Categories -->
+                <div class="card-body">
+                    <h4 class="mb-3"><i class="fas fa-th-large me-2"></i>Top 10 Best-Selling Categories</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Category Name</th>
+                                    <th>Sales Count</th>
+                                   
+                                </tr>
+                            </thead>
+                            <tbody id="bestSellingCategories">
+                                <tr>
+                                    <td colspan="4">No data available</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Top 10 Best-Selling Brands -->
+                <div class="card-body">
+                    <h4 class="mb-3"><i class="fas fa-tag me-2"></i>Top 10 Best-Selling Brands</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Brand Name</th>
+                                    <th>Sales Count</th>
+                                
+                                </tr>
+                            </thead>
+                            <tbody id="bestSellingBrands">
+                                <tr>
+                                    <td colspan="4">No data available</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
 
 
-    </section> <!-- content-main end// -->
-    <!-- <div class="container mt-5"> -->
+    </section>
 
-    <!-- </div> -->
+    <%- include("../../views/partials/admin/footer2") %>
+        <!-- Bootstrap JS and dependencies (Popper.js) -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.getElementById('reportForm').addEventListener('submit', async (event) => {
+                event.preventDefault(); // Prevent the default form submission
 
-    <!-- Bootstrap JS and dependencies (Popper.js) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.getElementById('reportForm').addEventListener('submit', async (event) => {
-            event.preventDefault(); // Prevent the default form submission
+                const formData = new FormData(event.target);
+                const data = Object.fromEntries(formData.entries());
 
-            const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData.entries());
-
-            try {
-                const response = await fetch('/admin/sales-report', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                });
-
-                // Log the response for debugging
-                console.log('Response:', response);
-
-                const result = await response.json();
-
-                // Log the result for debugging
-                console.log('Result:', result);
-
-                if (result.status) {
-                    // Update the report results in the table
-                    document.getElementById('totalSalesCount').innerText = result.report.totalSalesCount;
-                    document.getElementById('totalOrderAmount').innerText = `₹${result.report.totalOrderAmount.toFixed(2)}`;
-                    document.getElementById('totalDiscount').innerText = `₹${result.report.totalDiscount.toFixed(2)}`;
-                    document.getElementById('couponDeductions').innerText = `₹${result.report.couponDeduction.toFixed(2)}`;
-
-                    // Show the results section
-                    document.getElementById('reportResults').style.display = 'block';
-
-                    // Show success alert
-                    Swal.fire({
-                        title: 'Success!',
-                        text: 'Report generated successfully.',
-                        icon: 'success',
-                        confirmButtonText: 'Okay'
+                try {
+                    const response = await fetch('/admin/sales-report', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
                     });
-                } else {
-                    // Show error alert
+
+                    // Log the response for debugging
+                    console.log('Response:', response);
+
+                    const result = await response.json();
+
+                    // Log the result for debugging
+                    console.log('Result:', result);
+
+                    if (result.status) {
+                        // Update the report results in the table
+                        document.getElementById('totalSalesCount').innerText = result.report.totalSalesCount;
+                        document.getElementById('totalOrderAmount').innerText = `₹${result.report.totalOrderAmount.toFixed(2)}`;
+                        document.getElementById('totalDiscount').innerText = `₹${result.report.totalDiscount.toFixed(2)}`;
+                        document.getElementById('couponDeductions').innerText = `₹${result.report.couponDeduction.toFixed(2)}`;
+
+                        // Show the results section
+                        document.getElementById('reportResults').style.display = 'block';
+
+                        // Show success alert
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Report generated successfully.',
+                            icon: 'success',
+                            confirmButtonText: 'Okay'
+                        });
+                    } else {
+                        // Show error alert
+                        Swal.fire({
+                            title: 'Error!',
+                            text: result.message || 'An error occurred while generating the report.',
+                            icon: 'error',
+                            confirmButtonText: 'Okay'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    // Show error alert for network or other issues
                     Swal.fire({
                         title: 'Error!',
-                        text: result.message || 'An error occurred while generating the report.',
+                        text: 'An internal error occurred. Please try again later.',
                         icon: 'error',
                         confirmButtonText: 'Okay'
                     });
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                // Show error alert for network or other issues
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'An internal error occurred. Please try again later.',
-                    icon: 'error',
-                    confirmButtonText: 'Okay'
-                });
-            }
-        });
+            });
 
-        // Show custom date range fields based on selection
-        document.getElementById('type').addEventListener('change', function () {
-            const customDateRange = document.getElementById('customDateRange');
-            if (this.value === 'custom') {
-                customDateRange.style.display = 'flex';
-            } else {
-                customDateRange.style.display = 'none';
-            }
-        });
-        document.getElementById('downloadReport').addEventListener('click', async () => {
-            const reportType = document.getElementById('type').value;
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
+            // Show custom date range fields based on selection
+            document.getElementById('type').addEventListener('change', function () {
+                const customDateRange = document.getElementById('customDateRange');
+                if (this.value === 'custom') {
+                    customDateRange.style.display = 'flex';
+                } else {
+                    customDateRange.style.display = 'none';
+                }
+            });
+            document.getElementById('downloadReport').addEventListener('click', async () => {
+                const reportType = document.getElementById('type').value;
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
 
-            // Prepare the data to send to the server
-            const data = {
-                type: reportType,
-                startDate: startDate,
-                endDate: endDate
-            };
+                // Prepare the data to send to the server
+                const data = {
+                    type: reportType,
+                    startDate: startDate,
+                    endDate: endDate
+                };
 
-            try {
-                const response = await fetch('/admin/sales-report/pdf', {
+                try {
+                    const response = await fetch('/admin/sales-report/pdf', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    });
+
+                    if (response.ok) {
+                        // Create a blob from the response
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = `Sales_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        a.remove();
+                    } else {
+                        // Handle error response without alert
+                        const result = await response.json();
+                        console.error('Error generating PDF:', result.message || 'An error occurred while generating the PDF.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            });
+        </script>
+        <script>
+            // Handle logout action with fetch
+            document.getElementById('logoutLink').addEventListener('click', function (event) {
+                event.preventDefault(); // Prevent the default link behavior
+
+                // Send fetch request to logout
+                fetch('/admin/logout', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(data),
-                });
+                    body: JSON.stringify({ action: 'logout' })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
 
-                if (response.ok) {
-                    // Create a blob from the response
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = url;
-                    a.download = `Sales_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    a.remove();
-                } else {
-                    // Handle error response without alert
-                    const result = await response.json();
-                    console.error('Error generating PDF:', result.message || 'An error occurred while generating the PDF.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        });
-    </script>
-    <script>
-        // Handle logout action with fetch
-        document.getElementById('logoutLink').addEventListener('click', function (event) {
-            event.preventDefault(); // Prevent the default link behavior
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Logged Out',
+                                text: data.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
 
-            // Send fetch request to logout
-            fetch('/admin/logout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ action: 'logout' })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
+                                window.location.replace('/admin/login');
+                            });
+                        } else {
 
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Logged Out',
-                            text: data.message,
-                            timer: 2000,
-                            showConfirmButton: false
-                        }).then(() => {
-
-                            window.location.replace('/admin/login');
-                        });
-                    } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Logout Failed',
+                                text: data.message,
+                                confirmButtonText: 'Try Again'
+                            });
+                        }
+                    })
+                    .catch(error => {
 
                         Swal.fire({
                             icon: 'error',
-                            title: 'Logout Failed',
-                            text: data.message,
-                            confirmButtonText: 'Try Again'
+                            title: 'Error',
+                            text: 'An error occurred. Please try again later.',
+                            confirmButtonText: 'Okay'
                         });
-                    }
-                })
-                .catch(error => {
-
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'An error occurred. Please try again later.',
-                        confirmButtonText: 'Okay'
                     });
+            });
+        </script>
+
+        <script>
+            // Sample data
+            const ctx = document.getElementById('myChart').getContext('2d');
+            let myChart;
+
+            // Function to fetch sales report data from the backend
+            async function fetchSalesReport(timeframe) {
+                try {
+                    const response = await fetch('/admin/sales-chart', { // Adjust the URL to your backend endpoint
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ type: timeframe }) // Send the selected timeframe
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    return data[timeframe]; // Return the data for the selected timeframe
+                } catch (error) {
+                    console.error('Error fetching sales report:', error);
+                    return null; // Return null in case of error
+                }
+            }
+
+            // Function to render the chart
+            async function renderChart(timeframe) {
+                const data = await fetchSalesReport(timeframe); // Fetch data from the backend
+
+                if (!data) {
+                    console.error('No data available');
+                    return; // Exit if no data is available
+                }
+
+                if (myChart) {
+                    myChart.destroy(); // Destroy the previous chart instance
+                }
+
+                myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [
+                            {
+                                label: 'Total Revenue',
+                                data: data.revenue,
+                                yAxisID: 'y',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Total Orders',
+                                data: data.orders,
+                                yAxisID: 'y1',
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Revenue (₹)'
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: 'Number of Orders'
+                                },
+                                grid: {
+                                    drawOnChartArea: false // only want the grid lines for one axis to show up
+                                }
+                            }
+                        }
+                    }
                 });
+            }
+
+            // Event listeners for buttons
+            document.getElementById('weeklyBtn').addEventListener('click', () => renderChart('weekly'));
+            document.getElementById('monthlyBtn').addEventListener('click', () => renderChart('monthly'));
+            document.getElementById('yearlyBtn').addEventListener('click', () => renderChart('yearly'));
+
+            // Initial render
+            renderChart('weekly');
+        </script>
+        <script>
+            document.addEventListener("DOMContentLoaded", async () => {
+                const revenueElement = document.getElementById("total-revenue");
+
+                try {
+                    console.log("Fetching overall revenue from the backend...");
+                    // Fetch the overall revenue from the backend
+                    const response = await fetch("/admin/overall-revenue"); // Replace with your API endpoint
+
+                    // Log the response status
+                    console.log("Response status:", response.status);
+
+                    // Check if the response is OK (status in the range 200-299)
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    console.log("Data received from the server:", data);
+
+                    if (data.status) {
+                        // Update the revenue details in the UI
+                        revenueElement.textContent = `₹${data.revenue.totalRevenue.toFixed(2)}`;
+                        console.log("Revenue updated in the UI:", revenueElement.textContent);
+                    } else {
+                        // Handle no revenue data
+                        revenueElement.textContent = "No revenue data available";
+                        console.warn("No revenue data available");
+                    }
+                } catch (error) {
+                    console.error("Error fetching overall revenue:", error);
+                    revenueElement.textContent = "Error loading revenue";
+                }
+            });
+            document.addEventListener("DOMContentLoaded", async () => {
+                const ordersElement = document.getElementById("total-orders");
+
+                try {
+                    // Fetch total orders from the backend
+                    const response = await fetch("/admin/total-orders"); // Replace with your API endpoint
+                    const data = await response.json();
+
+                    if (data.status) {
+                        // Update the orders count in the UI
+                        ordersElement.textContent = data.totalOrders.toLocaleString();
+                    } else {
+                        // Handle no data case
+                        ordersElement.textContent = "No orders received";
+                    }
+                } catch (error) {
+                    console.error("Error fetching total orders:", error);
+                    ordersElement.textContent = "Error loading orders";
+                }
+            });
+            document.addEventListener("DOMContentLoaded", async () => {
+                const productsElement = document.getElementById("total-products");
+                const categoriesElement = document.getElementById("total-categories");
+
+                try {
+                    console.log("Fetching total products from the backend...");
+
+                    // Fetch total products from the backend
+                    const response = await fetch("/admin/total-products"); // Replace with your API endpoint
+                    console.log("Response received:", response);
+
+                    // Check if the response is OK (status in the range 200-299)
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    console.log("Data received from total products API:", data);
+
+                    if (data.status) {
+                        // Update the product count in the UI
+                        productsElement.textContent = data.totalProducts.toLocaleString();
+                        console.log("Total products updated in UI:", data.totalProducts);
+                    } else {
+                        productsElement.textContent = "No products available";
+                        console.log("No products available.");
+                    }
+                    const categoryResponse = await fetch("/admin/total-categories"); // Replace with your API endpoint
+                    const categoryData = await categoryResponse.json();
+
+                    if (categoryData.status) {
+                        categoriesElement.textContent = categoryData.totalCategories.toLocaleString();
+                    } else {
+                        categoriesElement.textContent = "0";
+                    }
+
+                } catch (error) {
+                    console.error("Error fetching total products:", error);
+                    productsElement.textContent = "Error loading products";
+                    categoriesElement.textContent = "Error loading categories";
+                }
+            });
+        </script>
+       <script>
+       document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                console.log("Fetching top-selling stats...");
+                const response = await fetch("/admin/top-selling-stats");
+
+                if (!response.ok) {
+                    console.error("HTTP Error:", response.status, response.statusText);
+                    return;
+                }
+
+                const result = await response.json();
+                console.log("API Response:", result);
+
+                if (result.success) {
+                    console.log("Successfully fetched data. Rendering tables...");
+
+                    // Populate Best-Selling Products
+                    const productTable = document.getElementById("bestSellingProducts");
+                    console.log("Top Products:", result.data.topProducts);
+                    productTable.innerHTML = result.data.topProducts
+                        .map(
+                            (product, index) => `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${product.productName}</td>
+                        <td>${product.salesCount}</td>
+                    </tr>
+                `
+                        )
+                        .join("");
+
+                    // Populate Best-Selling Categories
+                    const categoryTable = document.getElementById("bestSellingCategories");
+                    console.log("Top Categories:", result.data.topCategories);
+                    categoryTable.innerHTML = result.data.topCategories
+                        .map(
+                            (category, index) => `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${category.categoryName}</td>
+                        <td>${category.salesCount}</td>
+                    </tr>
+                `
+                        )
+                        .join("");
+
+                    // Populate Best-Selling Brands
+                    const brandTable = document.getElementById("bestSellingBrands");
+                    console.log("Top Brands:", result.data.topBrands);
+                    brandTable.innerHTML = result.data.topBrands
+                        .map(
+                            (brand, index) => `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${brand.brandName}</td>
+                        <td>${brand.salesCount}</td>
+                    </tr>
+                `
+                        )
+                        .join("");
+
+                    console.log("Tables rendered successfully.");
+                } else {
+                    console.error("API Error:", result.message);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
         });
     </script>

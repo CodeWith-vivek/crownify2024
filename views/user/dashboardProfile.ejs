@@ -19,3 +19,26 @@
     </div>
 </div>
     <%- include("../../views/partials/user/footerprofile") %>
+    <script>
+        async function checkUserBlockStatus() {
+            try {
+                const response = await fetch("/check-block-status", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                const data = await response.json();
+
+                if (data.blocked) {
+
+                    window.location.href = "/login"; // Redirect to the login page or home page
+                }
+            } catch (error) {
+                console.error("Error checking block status:", error);
+            }
+        }
+
+        // Check every 30 seconds
+        setInterval(checkUserBlockStatus, 2000);
+    </script>

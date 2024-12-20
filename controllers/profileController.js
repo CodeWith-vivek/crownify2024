@@ -693,13 +693,18 @@ const validatCurrentPassword = async (req, res) => {
 const loadUserOrder = async (req, res) => {
   try {
     const userId = req.session.user;
+    const page = parseInt(req.query.page) || 1; // Current page
+    const limit = parseInt(req.query.limit) || 10; // Items per page
+    const skip = (page - 1) * limit; // Calculate how many orders to skip
 
     const userData = await User.findById(userId).populate("addresses"); 
     const userOrders = await Order.find({ userId })
       .populate("items.productId")
-      .sort({
-        orderedAt: -1,
-      });
+      .sort({ orderedAt: -1 })
+      .skip(skip) // Skip the previous pages
+      .limit(limit); // Limit the number of orders returned
+
+    const totalOrders = await Order.countDocuments({ userId }); // Get total number of orders
 
     // Function to get badge class based on order status
     const getBadgeClass = (status) => {
@@ -726,9 +731,16 @@ const loadUserOrder = async (req, res) => {
       return order;
     });
 
+    // Calculate total pages
+    const totalPages = Math.ceil(totalOrders / limit);
+
+    // Pass limit to the view
     res.render("Order", {
       user: userData,
       orders: ordersWithBadgeClasses, // Use the modified orders
+      currentPage: page,
+      totalPages: totalPages,
+      limit: limit // Pass the limit to the view
     });
   } catch (error) {
     console.error("Error retrieving data:", error);

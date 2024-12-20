@@ -19,11 +19,8 @@
                     <!-- Empty Wishlist Section -->
                     <div class="empty-cart-section text-center">
                         <div class="empty-cart-content">
-                            <img src="/assets/images/empty-wishlist.png" alt="Empty Wishlist"
-                                class="empty-cart-image mb-4">
-                  
-                           
-                            <div class="empty-cart-actions"style="margin-bottom:40px">
+                            <img src="/assets/images/empty-wishlist.png" alt="Empty Wishlist" class="empty-cart-image mb-4">
+                            <div class="empty-cart-actions" style="margin-bottom: 40px">
                                 <a href="/" class="btn btn-primary" style="background-color: black;">Continue
                                     Shopping</a>
                             </div>
@@ -38,8 +35,8 @@
                                         <th class="product-name text-center alt-font">Remove</th>
                                         <th class="product-price text-center alt-font">Images</th>
                                         <th class="product-name alt-font">Product</th>
-                                        <th class="product-size alt-font">Size</th>
-                                        <th class="product-name alt-font">Color</th>
+                                        <th class="product-size alt-font" style="width: 100px;">Size</th>
+                                        <th class="product-name alt-font" style="width: 100px;">Color</th>
                                         <th class="product-price text-center alt-font">Unit Price</th>
                                         <th class="stock-status text-center alt-font">Stock Status</th>
                                         <th class="product-subtotal text-center alt-font">Add to Cart</th>
@@ -103,8 +100,7 @@
                                             </td>
                                             <!-- Add to Cart -->
                                             <td class="product-subtotal text-center">
-                                                <button type="button"
-                                                    class="btn btn-small btn-add-to-cart add-to-cart-btn"
+                                                <button type="button" class="btn btn-small btn-add-to-cart add-to-cart-btn"
                                                     style="background-color: black;" disabled>
                                                     Add To Cart
                                                 </button>
@@ -390,4 +386,27 @@
                 });
             });
         });
+    </script>
+    <script>
+        async function checkUserBlockStatus() {
+            try {
+                const response = await fetch("/check-block-status", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                const data = await response.json();
+
+                if (data.blocked) {
+
+                    window.location.href = "/login"; // Redirect to the login page or home page
+                }
+            } catch (error) {
+                console.error("Error checking block status:", error);
+            }
+        }
+
+        // Check every 30 seconds
+        setInterval(checkUserBlockStatus, 2000);
     </script>

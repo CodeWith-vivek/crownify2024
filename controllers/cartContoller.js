@@ -9,6 +9,7 @@ const Coupon = require("../models/couponSchema");
 
 const loadCartPage = async (req, res) => {
   try {
+  
     let cartItems = [];
     let subtotal = 0;
     const shippingCharge = 40;
@@ -16,6 +17,8 @@ const loadCartPage = async (req, res) => {
 
     if (req.session && req.session.user) {
       const userId = req.session.user;
+      
+
 
       // Fetch the user's cart with product and category details
       const cart = await Cart.findOne({ userId }).populate({
@@ -103,9 +106,7 @@ const loadCartPage = async (req, res) => {
 const addToCart = async (req, res) => {
   try {
     const { productId, size, color, quantity } = req.body;
-  
 
-   
     if (!req.session || !req.session.user) {
       return res.status(401).json({
         success: false,
@@ -114,38 +115,46 @@ const addToCart = async (req, res) => {
       });
     }
 
-   
     let cart = await Cart.findOne({ userId: req.session.user });
     if (!cart) {
-     
       cart = new Cart({ userId: req.session.user, items: [] });
     }
 
-   
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).populate("category"); // Assuming category is a reference
     if (!product) {
-      
       return res
         .status(404)
         .json({ success: false, message: "Product not found" });
     }
 
-   
+    // Check if the product is blocked
+    if (product.isBlocked) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "This product is currently blocked and cannot be added to the cart",
+      });
+    }
+
+    // Check if the category is blocked
+   if (!product.category || !product.category.isListed) {
+     return res.status(400).json({
+       success: false,
+       message:
+         "This product's category is currently not listed and cannot be added to the cart",
+     });
+   }
+
     const variant = product.variants.find(
       (v) => v.size === size && v.color === color
     );
     if (!variant || variant.quantity < quantity) {
-      
       return res.status(400).json({
         success: false,
         message: "Selected variant is out of stock or insufficient quantity",
       });
     }
 
-  
-   
-
-   
     const isDuplicateVariant = cart.items.some(
       (item) =>
         item.productId.toString() === productId.toString() &&
@@ -153,9 +162,7 @@ const addToCart = async (req, res) => {
         item.variant.color === color
     );
 
-   
     if (isDuplicateVariant) {
-     
       return res.status(400).json({
         success: false,
         message: "This exact product variant is already in your cart",
@@ -169,7 +176,6 @@ const addToCart = async (req, res) => {
 
     const totalPrice = (product.salePrice || product.regularPrice) * quantity;
 
-   
     cart.items.push({
       productId,
       productBrand: product.productBrand,
@@ -181,16 +187,12 @@ const addToCart = async (req, res) => {
       totalPrice,
       salePrice: product.salePrice || product.regularPrice,
       regularPrice: product.regularPrice,
-      variant: { size, color }, // Ensure variant is saved
+      variant: { size, color },
       selectedVariantStockLevel: variant.quantity,
     });
 
-  
-
-  
     await cart.save();
 
-  
     await User.findByIdAndUpdate(
       req.session.user,
       { $addToSet: { cart: cart._id } },
@@ -203,7 +205,6 @@ const addToCart = async (req, res) => {
       cart,
     });
   } catch (error) {
-  
     return res.status(500).json({
       success: false,
       message: "An error occurred while adding to cart",

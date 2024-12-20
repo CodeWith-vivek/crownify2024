@@ -251,6 +251,7 @@ const updateOrderStatusByAdmin = async (req, res) => {
 
     // Update the order item status
     order.items[orderItemIndex].orderStatus = newStatus;
+     order.paymentStatus = "Completed";
 
     // Check if all items have the same status
     const allItemsSameStatus = order.items.every(

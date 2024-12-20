@@ -6,6 +6,7 @@
                     <div class="wallet-header">
                         <h2><i class="fas fa-wallet me-2" style="color:white;"></i>My Wallet</h2>
                     </div>
+
                     <div class="wallet-body">
                         <div class="text-center mb-4">
                             <p class="mb-1">Current Balance</p>
@@ -34,9 +35,45 @@
                             </div>
                         </div>
                     </div>
+                    <div class="transaction-history"
+                        style="max-height: 200px; overflow-y: hidden; border: 1px solid #ddd;">
+                        <h3 class="mb-4"
+                            style="font-size: 1.25rem; position: sticky; top: 0; background: white; z-index: 1; padding: 8px;">
+                            Recent Transactions
+                        </h3>
+                        <div class="transaction-list" style="max-height: calc(200px - 48px); overflow-y: auto;">
+                            <% transactions.forEach(transaction=> { %>
+                                <div class="transaction-item p-3 mb-3 d-flex align-items-center">
+                                    <div class="icon-container me-3 d-flex align-items-center justify-content-center"
+                                        style="width: 40px; height: 40px; border-radius: 50%; background-color: <%= transaction.type === 'credit' ? '#e6f4ea' : '#fdecea' %>; margin-right: 8px;">
+                                        <i class="bi <%= transaction.type === 'credit' ? 'bi-wallet-fill text-success' : 'bi-cash-stack text-danger' %>"
+                                            style="font-size: 1.5rem;"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h4 class="fs-1 mb-0 ms-1" style="font-size: 0.875rem;">
+                                            <%= transaction.description %>
+                                        </h4>
+                                    </div>
+                                    <div class="text-end">
+                                        <span
+                                            class="fs-5 fw-bold <%= transaction.type === 'credit' ? 'text-success' : 'text-danger' %>"
+                                            style="font-size: 0.75rem;">
+                                            <%= transaction.type==='credit' ? '+' : '-' %>₹<%=
+                                                    transaction.amount.toFixed(2) %>
+                                        </span>
+                                        <p class="text-muted mb-0" style="font-size: 0.75rem;">
+                                            <%= transaction.date.toISOString().split('T')[0] %>
+                                        </p>
+                                    </div>
+                                </div>
+                                <% }) %>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+    </div>
     </div>
     <%- include("../../views/partials/user/footershop") %>
 
@@ -186,4 +223,27 @@
                     });
                 });
             });
+        </script>
+        <script>
+            async function checkUserBlockStatus() {
+                try {
+                    const response = await fetch("/check-block-status", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    });
+                    const data = await response.json();
+
+                    if (data.blocked) {
+
+                        window.location.href = "/login"; // Redirect to the login page or home page
+                    }
+                } catch (error) {
+                    console.error("Error checking block status:", error);
+                }
+            }
+
+            // Check every 30 seconds
+            setInterval(checkUserBlockStatus, 2000);
         </script>

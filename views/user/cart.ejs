@@ -54,7 +54,7 @@
 
                                             <th>Quantity</th>
                                             <th>Status</th>
-                                            <th>Total</th>
+                                            <th>Subtotal</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -70,7 +70,7 @@
                                                         <h6>
                                                             <%= item.product.productName %>
                                                         </h6>
-                                                        <p>Price: <b>
+                                                        <p>Sale Price: <b>
                                                                 <%= item.product.salePrice %>
                                                             </b>
                                                         </p>
@@ -160,13 +160,13 @@
 
                             <ul class="list-unstyled col-12">
                                 <li class="summary-row d-flex justify-content-between">
-                                    <span>Subtotal</span>
-                                    <span style="color: #f94242;"><b>₹<%= subtotal.toFixed(2) %></b></span>
+                                    <span style="width: 100px;">Sale Price Subtotal</span>
+                                    <span style="color: #f94242; margin-top: 15px;"><b>₹<%= subtotal.toFixed(2) %></b></span>
                                 </li>
-                                <li class="summary1-row d-flex justify-content-between">
+                                <!-- <li class="summary1-row d-flex justify-content-between">
                                     <span>Discount</span>
                                     <span style="color: #1acf20;"><b>₹0</b></span>
-                                </li>
+                                </li> -->
                                 <li class="summary-row d-flex justify-content-between">
                                     <span>Shipping</span>
                                     <span>₹<%= shippingCharge.toFixed(2) %></span>
@@ -671,4 +671,27 @@
                     }).catch(err => console.error('Could not copy text:', err));
                 }
             });
+        </script>
+        <script>
+            async function checkUserBlockStatus() {
+                try {
+                    const response = await fetch("/check-block-status", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    });
+                    const data = await response.json();
+
+                    if (data.blocked) {
+
+                        window.location.href = "/login"; // Redirect to the login page or home page
+                    }
+                } catch (error) {
+                    console.error("Error checking block status:", error);
+                }
+            }
+
+            // Check every 30 seconds
+            setInterval(checkUserBlockStatus, 2000);
         </script>

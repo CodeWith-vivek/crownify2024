@@ -169,16 +169,16 @@
                                     </tbody>
                                 </table>
                                 <ul class="checkout__total__all">
-                                    <li>Subtotal <span>₹<%= subtotal.toFixed(2) %></span>
+                                    <li> Sale  Price Subtotal <span>₹<%= subtotal.toFixed(2) %></span>
                                         <input type="hidden" name="subtotal" value="<%= subtotal %>">
                                     </li>
-                                    <li>Discount <span style="color: green; font-size: 14px;">₹<%=
+                                    <li>Coupon Discount <span style="color: green; font-size: 14px;">₹<%=
                                                 discountAmount.toFixed(2) %></span></li>
                                     <li>Shipping <span style="color: gray; font-size: 14px;">₹<%= shipping.toFixed(2) %>
                                         </span>
                                         <input type="hidden" name="shipping" value="<%= shipping %>">
                                     </li>
-                                    <li>Total <span>₹<%= total.toFixed(2) %></span>
+                                    <li>Grand Total <span>₹<%= total.toFixed(2) %></span>
                                         <input type="hidden" name="total" value="<%= total %>">
                                     </li>
                                 </ul>
@@ -984,7 +984,7 @@
             });
             // Handle Razorpay Payment
   function handleRazorpayPayment(formData) {
-        console.log("DEBUG: Initiating payment with formData:", formData);
+       
 
         fetch('/checkout', {
             method: 'POST',
@@ -994,14 +994,14 @@
             body: JSON.stringify(formData),
         })
             .then(response => {
-                console.log("DEBUG: Checkout API Response Status:", response.status);
+              
                 if (!response.ok) {
                     throw new Error(`Checkout API failed: ${response.statusText}`);
                 }
                 return response.json();
             })
             .then(data => {
-                console.log("DEBUG: Razorpay Order Created Response Data:", data);
+               
 
                 if (data.success && data.razorpayOrderId) {
                     const options = {
@@ -1012,7 +1012,7 @@
                         description: 'Order Payment',
                         order_id: data.razorpayOrderId,
                         handler: function (response) {
-                            console.log("DEBUG: Payment Successful - Response from Razorpay:", response);
+                        
 
                             // Verify payment on server
                             fetch('/verify-payment', {
@@ -1026,24 +1026,24 @@
                                 }),
                             })
                                 .then(verifyResponse => {
-                                    console.log("DEBUG: Payment Verification API Response Status:", verifyResponse.status);
+                                  
                                     if (!verifyResponse.ok) {
                                         throw new Error(`Payment Verification Failed: ${verifyResponse.statusText}`);
                                     }
                                     return verifyResponse.json();
                                 })
                                 .then(verifyData => {
-                                    console.log("DEBUG: Payment Verification Data:", verifyData);
+                                   
                                     if (verifyData.success) {
-                                        console.log("DEBUG: Payment Verification Successful. Redirecting to success page...");
+                                      
                                         window.location.href = `/payment-success?orderId=${data.orderId}`;
                                     } else {
-                                        console.warn("DEBUG: Payment Verification Failed. Handling failure...");
+                                       
                                         handlePaymentFailure(data.orderId, data.amount);
                                     }
                                 })
                                 .catch(error => {
-                                    console.error("DEBUG: Error during payment verification:", error);
+                                  
                                     Swal.fire({
                                         icon: 'error',
                                         title: 'Payment Verification Error',
@@ -1060,76 +1060,84 @@
                             color: '#3399cc'
                         },
                         modal: {
-                            ondismiss: function () {
-                                console.warn("DEBUG: Payment modal dismissed by user.");
+                            // ondismiss: function () {
+                            
+
+                            //     // Revert any actions taken before the modal was opened
+                            //     // revertActions(formData);
+                            // }
+                             ondismiss: function () {
+                                console.log("DEBUG: Razorpay modal dismissed.");
+                                // Send a request to delete the preliminary order
+                                fetch('/delete-preliminary-order', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({ orderId: data.orderId }),
+                                })
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error(`Failed to delete preliminary order: ${response.statusText}`);
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(data => {
+                                        if (data.success) {
+                                            console.log("DEBUG: Preliminary order deleted successfully.");
+                                        } else {
+                                            console.warn("DEBUG: Preliminary order deletion failed:", data.message);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error("DEBUG: Error deleting preliminary order:", error.message);
+                                    });
                             }
                         }
                     };
 
-                    console.log("DEBUG: Initializing Razorpay instance with options:", options);
+                 
                     const razorpayInstance = new Razorpay(options);
 
                     razorpayInstance.open();
 
                     // Handle payment failure
                     razorpayInstance.on('payment.failed', function (response) {
-                        console.error("DEBUG: Payment Failed - Razorpay Response:", response.error);
+                
 
-                        window.location.href = `/payment-Failure?orderId=${data.orderId}`;
-
-                        // Save failed order details
-                        const failedOrderData = {
-                            userId: currentUserId, // From session or context
-                            orderNumber: generateUniqueOrderNumber(), // Generate a unique order number
-                            items: cartItems, // Cart items data
-                            shippingAddress: selectedAddressId, // User's shipping address ID
-                            paymentMethod: selectedPaymentMethod, // Razorpay, Card, UPI, etc.
-                            subtotal: calculateSubtotal(cartItems), // Function to calculate subtotal
-                            total: calculateTotal(cartItems), // Function to calculate total before discount
-                            grandTotal: calculateGrandTotal(cartItems), // Total after applying discounts and shipping
-                            discount: appliedDiscount || 0, // Discount applied
-                            coupon: appliedCouponId || null, // Coupon ID if any
-                            couponCode: appliedCouponCode || null, // Coupon code if any
-                        };
-
-                        console.log("DEBUG: Saving failed order details:", failedOrderData);
-
-                        fetch('/checkout', {
+                        // Save failed payment details to server
+                        fetch('/payment-failure', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json'
+                                'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify(failedOrderData),
+                            body: JSON.stringify({
+                                orderId: data.orderId,
+                                paymentId: response.error.metadata.payment_id || null,
+                                razorpayOrderId: response.error.metadata.order_id || null,
+                                reason: response.error.reason || 'Unknown reason',
+                                description: response.error.description || 'No description available',
+                            }),
                         })
-                            .then(res => {
-                                console.log("DEBUG: Failed Order Save API Response Status:", res.status);
-                                if (!res.ok) {
-                                    throw new Error(`Failed Order Save Failed: ${res.statusText}`);
+                            .then(failureResponse => {
+                             
+                                if (!failureResponse.ok) {
+                                    throw new Error(`Failed to save payment failure: ${failureResponse.statusText}`);
                                 }
-                                return res.json();
+                                return failureResponse.json();
                             })
-                            .then(saveResponse => {
-                                console.log("DEBUG: Failed Order Save Response Data:", saveResponse);
-                                if (saveResponse.status === 'ok') {
-                                    Swal.fire({
-                                        icon: 'info',
-                                        title: 'Payment Failed',
-                                        text: 'Order saved with failed payment status. Please try again.'
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Order Save Failed',
-                                        text: saveResponse.error || 'Unknown error occurred.',
-                                    });
-                                }
+                            .then(failureData => {
+                             
+                                window.location.href = `/payment-Failure?orderId=${data.orderId}`;
                             })
                             .catch(error => {
-                                console.error("DEBUG: Error saving failed order:", error);
+                             
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'Error',
-                                    text: 'Could not save order details. Please contact support.'
+                                    title: 'Payment Failure Error',
+                                    text: error.message || 'Unable to save payment failure details. Please contact support.',
+                                }).then(() => {
+                                    window.location.href = '/error-page '; // Adjust as needed
                                 });
                             });
                     });
@@ -1138,7 +1146,7 @@
                 }
             })
             .catch(error => {
-                console.error("DEBUG: Razorpay Integration Error:", error);
+         
                 Swal.fire({
                     icon: 'error',
                     title: 'Payment Failed',
@@ -1147,6 +1155,8 @@
                 });
             });
     }
+
+    
             async function handleWalletPayment(formData) {
                 try {
                     const response = await fetch('/checkout', {
@@ -1442,4 +1452,47 @@
                     console.error('Could not copy text: ', err);
                 });
             }
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const cartLinks = document.querySelectorAll('.site-header__cart');
+
+                cartLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        console.log('Cart link clicked');
+
+
+                        e.stopPropagation();
+
+
+                        window.location.href = '/cart';
+
+
+                        e.preventDefault();
+                    });
+                });
+            });
+        </script>
+        <script>
+            async function checkUserBlockStatus() {
+                try {
+                    const response = await fetch("/check-block-status", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    });
+                    const data = await response.json();
+
+                    if (data.blocked) {
+
+                        window.location.href = "/login"; // Redirect to the login page or home page
+                    }
+                } catch (error) {
+                    console.error("Error checking block status:", error);
+                }
+            }
+
+            // Check every 30 seconds
+            setInterval(checkUserBlockStatus, 2000);
         </script>

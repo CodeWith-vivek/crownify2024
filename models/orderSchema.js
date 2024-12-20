@@ -11,7 +11,7 @@ const orderSchema = new Schema(
     },
     orderNumber: {
       type: String,
-      required: true,
+  
       unique: true,
     },
     items: [cartItemSchema],
@@ -27,7 +27,7 @@ const orderSchema = new Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["Pending", "Completed", "Failed", "Refunded","Partially Paid"],
+      enum: ["Pending", "Completed", "Failed", "Refunded","Partially Paid","Canceled"],
       default: "Pending",
     },
     coupon: { type: mongoose.Schema.Types.ObjectId, ref: "Coupon" },

@@ -121,6 +121,7 @@ const loadBrandpage = async (req, res) => {
     const filteredProducts = products.filter(
       (product) => !blockedBrands.has(product.brand) // Check if the brand is blocked
     );
+    console.log("Filtered products:", filteredProducts);
 
     if (user) {
       const userData = await User.findOne({ _id: user });
@@ -500,54 +501,62 @@ const logout = async (req, res) => {
 
 const loadShopPage = async (req, res) => {
   try {
-
-    const user=req.session.user
+    const user = req.session.user;
     console.log("==== Incoming Shop Page Request ====");
     console.log("Query parameters:", req.query);
 
-    let search = req.query.search || "";
-    const page = parseInt(req.query.page) || 1;
+    const search = req.query.search || "";
     const limit = 12;
+
+    // Utility function to parse array parameters from the query
+    const parseArrayParam = (param) =>
+      req.query[param]
+        ? Array.isArray(req.query[param])
+          ? req.query[param]
+          : [req.query[param]]
+        : [];
+
+    // Check if filters or sort are applied
+    const isFiltered =
+      search ||
+      req.query.color ||
+      req.query.priceRange ||
+      req.query.categories ||
+      req.query.brands ||
+      req.query.sizes;
+
+    const page = isFiltered ? 1 : parseInt(req.query.page) || 1;
 
     console.log("Search term:", search);
     console.log("Page:", page, "Limit:", limit);
 
-    const sortOption = req.query.sort || "";
-    let sortCriteria = {};
+    // Sorting options mapped for better readability
+    const sortOptions = {
+      priceLowHigh: { salePrice: 1 },
+      priceHighLow: { salePrice: -1 },
+      alphaAsc: { productName: 1 },
+      alphaDesc: { productName: -1 },
+      newArrivals: { createdAt: -1 },
+      popularity: { popularity: -1 },
+    };
+    const sortCriteria = sortOptions[req.query.sort] || { createdAt: -1 };
 
-  
-    switch (sortOption) {
-      case "priceLowHigh":
-        sortCriteria = { salePrice: 1 };
-        break;
-      case "priceHighLow":
-        sortCriteria = { salePrice: -1 };
-        break;
-      case "alphaAsc":
-        sortCriteria = { productName: 1 };
-        break;
-      case "alphaDesc":
-        sortCriteria = { productName: -1 };
-        break;
-      case "newArrivals":
-        sortCriteria = { createdAt: -1 };
-        break;
-      case "popularity":
-        sortCriteria = { popularity: -1 };
-        break;
-      default:
-        sortCriteria = { createdAt: -1 };
-    }
-
-    console.log("Sort option:", sortOption);
+    console.log("Sort option:", req.query.sort);
     console.log("Sort criteria:", sortCriteria);
 
-  
+    // Fetch active brands and categories
+    const [activeCategories, activeBrands] = await Promise.all([
+      Category.find({ isListed: true }),
+      Brand.find({ isBlocked: false }),
+    ]);
+
+    // Build query for products
     const productsQuery = {
-      isBlocked: false,
+      isBlocked: false, // Exclude blocked products
+      category: { $in: activeCategories.map((cat) => cat._id) }, // Only include listed categories
+      brand: { $in: activeBrands.map((brand) => brand.brandName) }, // Only include active brands
     };
 
-    // Text search
     if (search) {
       productsQuery.$or = [
         { productName: { $regex: search, $options: "i" } },
@@ -555,136 +564,107 @@ const loadShopPage = async (req, res) => {
       ];
     }
 
-    console.log("Search query:", productsQuery.$or);
-
-  
-    const selectedColor = req.query.color;
-    if (selectedColor) {
-      productsQuery.variants = { $elemMatch: { color: selectedColor } };
+    if (req.query.color) {
+      productsQuery.variants = { $elemMatch: { color: req.query.color } };
     }
-    console.log("Selected color:", selectedColor);
 
- 
-    const priceRange = req.query.priceRange;
-    if (priceRange) {
-      const [minPrice, maxPrice] = priceRange.split("-").map(Number);
-      productsQuery.salePrice = {
-        $gte: minPrice,
-        $lte: maxPrice,
-      };
+    if (req.query.priceRange) {
+      const [minPrice, maxPrice] = req.query.priceRange.split("-").map(Number);
+      productsQuery.salePrice = { $gte: minPrice, $lte: maxPrice };
     }
-    console.log("Price range filter:", productsQuery.salePrice);
 
-   
-    const selectedCategories = req.query.categories
-      ? Array.isArray(req.query.categories)
-        ? req.query.categories
-        : [req.query.categories]
-      : [];
+    const selectedCategories = parseArrayParam("categories");
     if (selectedCategories.length > 0) {
       productsQuery.category = { $in: selectedCategories };
     }
-    console.log("Selected categories:", selectedCategories);
 
-  
-    const selectedBrands = req.query.brands
-      ? Array.isArray(req.query.brands)
-        ? req.query.brands
-        : [req.query.brands]
-      : [];
+    const selectedBrands = parseArrayParam("brands");
     if (selectedBrands.length > 0) {
       productsQuery.brand = { $in: selectedBrands };
     }
-    console.log("Selected brands:", selectedBrands);
 
- 
-    const selectedSizes = req.query.sizes
-      ? Array.isArray(req.query.sizes)
-        ? req.query.sizes
-        : [req.query.sizes]
-      : [];
+    const selectedSizes = parseArrayParam("sizes");
     if (selectedSizes.length > 0) {
-      productsQuery.size = { $in: selectedSizes };
+      productsQuery.variants = { $elemMatch: { size: { $in: selectedSizes } } };
     }
-    console.log("Selected sizes:", selectedSizes);
 
     console.log("Final query object:", productsQuery);
 
-  
-    const products = await Product.find(productsQuery)
-      .sort(sortCriteria)
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .populate("category");
-
-    console.log("Fetched products:", products.length);
-
-   
-    const totalProducts = await Product.countDocuments(productsQuery);
-    console.log("Total products matching query:", totalProducts);
-const productsWithDiscount = products.map((product) => {
-  const discount =
-    product.regularPrice > 0
-      ? ((product.regularPrice - product.salePrice) / product.regularPrice) *
-        100
-      : 0;
-  return {
-    ...product._doc, 
-    discountPercentage: Math.round(discount),
-  };
-});
-   
-    const uniqueColors = await Product.distinct("color");
-    console.log("Unique colors available:", uniqueColors);
-
-   
-    const [categories, brands] = await Promise.all([
-      Category.find({ isListed: true }),
-      Brand.find({ isBlocked: false }),
+    // Fetch data
+    const [products, totalProducts, uniqueColors] = await Promise.all([
+      Product.find(productsQuery)
+        .sort(sortCriteria)
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .populate("category"),
+      Product.countDocuments(productsQuery),
+      Product.distinct("color"),
     ]);
 
-    console.log("Fetched categories:", categories.length);
-    console.log("Fetched brands:", brands.length);
-if(user){
-  const userData= await User.findOne({_id:user})
-  return res.render("Shop", {
-    user:userData,
-  products: productsWithDiscount,
-  categories,
-  brands,
-  uniqueColors,
-  search,
-  sort: sortOption,
-  selectedColor,
-  currentPage: page,
-  totalPages: Math.ceil(totalProducts / limit),
-  productsPerPage: limit,
-  totalProducts,
-});}else{return res.render("Shop", {
-  products: productsWithDiscount,
-  categories,
-  brands,
-  uniqueColors,
-  search,
-  sort: sortOption,
-  selectedColor,
-  currentPage: page,
-  totalPages: Math.ceil(totalProducts / limit),
-  productsPerPage: limit,
-  totalProducts,
-})}
-   
- 
+    console.log("Fetched products:", products.length);
+    console.log("Total products matching query:", totalProducts);
+
+    // Calculate discounts
+    const productsWithDiscount = products.map((product) => {
+      const discount =
+        product.regularPrice > 0
+          ? ((product.regularPrice - product.salePrice) /
+              product.regularPrice) *
+            100
+          : 0;
+      return {
+        ...product._doc,
+        discountPercentage: Math.round(discount),
+      };
+    });
+
+    // Calculate product count for each category
+    const categoriesWithCounts = await Promise.all(
+      activeCategories.map(async (category) => {
+        const productCount = await Product.countDocuments({
+          category: category._id,
+          isBlocked: false,
+        });
+        return {
+          ...category._doc,
+          productCount,
+        };
+      })
+    );
+
+    console.log("Unique colors available:", uniqueColors);
+    console.log("Categories with product counts:", categoriesWithCounts);
+    console.log("Fetched brands:", activeBrands.length);
+
+    // Render the shop page
+    const renderData = {
+      products: productsWithDiscount,
+      categories: categoriesWithCounts,
+      brands: activeBrands,
+      uniqueColors,
+      search,
+      sort: req.query.sort,
+      selectedColor: req.query.color,
+      currentPage: page,
+      totalPages: Math.ceil(totalProducts / limit),
+      productsPerPage: limit,
+      totalProducts,
+    };
+
+    if (user) {
+      const userData = await User.findOne({ _id: user });
+      return res.render("Shop", { user: userData, ...renderData });
+    } else {
+      return res.render("Shop", renderData);
+    }
   } catch (error) {
-    console.error("Error in loadShopPage:", error);
+    console.error("Error in loadShopPage:", error.message, error.stack);
     return res.status(500).render("error", {
       message: "An error occurred while loading the shop page",
       error: process.env.NODE_ENV === "development" ? error : null,
     });
   }
 };
-
-
 
 //code to load product details page
 

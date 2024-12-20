@@ -52,4 +52,3 @@ app.use((req,res)=>{
   res.status(404).render("page-404")
 })
 app.listen(PORT, () => console.log(`server running on ${PORT}`));
-

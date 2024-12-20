@@ -9,6 +9,7 @@ const {adminAuth}=require("../middlewares/auth")
 const contactController = require("../controllers/contactController");
 const couponController=require("../controllers/couponController")
 const  reportController  = require("../controllers/reportController");
+const topsellingController=require("../controllers/topsellingController")
 
 const multer =require("multer")
 const storage=require("../helpers/multer")
@@ -69,6 +70,12 @@ router.get('/edit-coupon/:id',adminAuth,couponController.editCoupon)
 router.post('/edit-coupon/:id',adminAuth,couponController.updateCoupon)
 
 router.post("/sales-report", adminAuth,reportController.generateSalesReport);
+router.post("/sales-chart", adminAuth, reportController.salesChart);
 router.post("/sales-report/pdf",adminAuth,reportController.reportPdf)
+router.get("/overall-revenue",adminAuth,reportController.getOverallRevenue);
+router.get("/total-orders",adminAuth,reportController.getTotalOrders);
+router.get("/total-products",adminAuth,reportController.getTotalProducts);
+router.get("/total-categories",adminAuth,reportController.getTotalCategories);
+router.get("/top-selling-stats",adminAuth,topsellingController.getTopSellingStats);
 
 module.exports=router
