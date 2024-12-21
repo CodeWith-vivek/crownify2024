@@ -77,5 +77,10 @@ router.get("/total-orders",adminAuth,reportController.getTotalOrders);
 router.get("/total-products",adminAuth,reportController.getTotalProducts);
 router.get("/total-categories",adminAuth,reportController.getTotalCategories);
 router.get("/top-selling-stats",adminAuth,topsellingController.getTopSellingStats);
+router.post(
+  "/sales-report/excel",
+  adminAuth,
+  reportController.downloadExcel
+);
 
 module.exports=router

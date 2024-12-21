@@ -49,6 +49,69 @@
         #reportResults {
             margin-top: 20px;
         }
+        .table th, .table td {
+    text-align: center; /* Center-align the text in the cells */
+}
+
+.table th {
+    background-color: #f8f9fa; /* Light background for headers */
+    font-weight: bold; /* Bold text for headers */
+}
+
+.table tbody tr:hover {
+    background-color: #f1f1f1; /* Change background on hover for rows */
+}
+
+.table-responsive {
+    max-width: 100%; /* Ensure the table does not overflow */
+    overflow-x: auto; /* Allow horizontal scrolling on smaller screens */
+}
+
+/* Set fixed widths for specific columns */
+#bestSellingProducts th:nth-child(1),
+#bestSellingProducts td:nth-child(1) {
+    width: 10%; /* Rank */
+}
+
+#bestSellingProducts th:nth-child(2),
+#bestSellingProducts td:nth-child(2) {
+    width: 60%; /* Product Name */
+}
+
+#bestSellingProducts th:nth-child(3),
+#bestSellingProducts td:nth-child(3) {
+    width: 30%; /* Sales Count */
+}
+
+#bestSellingCategories th:nth-child(1),
+#bestSellingCategories td:nth-child(1) {
+    width: 10%; /* Rank */
+}
+
+#bestSellingCategories th:nth-child(2),
+#bestSellingCategories td:nth-child(2) {
+    width: 60%; /* Category Name */
+}
+
+#bestSellingCategories th:nth-child(3),
+#bestSellingCategories td:nth-child(3) {
+    width: 30%; /* Sales Count */
+}
+
+#bestSellingBrands th:nth-child(1),
+#bestSellingBrands td:nth-child(1) {
+    width: 10%; /* Rank */
+}
+
+#bestSellingBrands th:nth-child(2),
+#bestSellingBrands td:nth-child(2) {
+    width: 60%; /* Brand Name */
+}
+
+#bestSellingBrands th:nth-child(3),
+#bestSellingBrands td:nth-child(3) {
+    width: 30%; /* Sales Count */
+}
     </style>
 
 </head>
@@ -118,7 +181,7 @@
                 <li class="menu-item">
                     <a class="menu-link" href="/admin/contactMessages">
                         <i class="material-icons">question_answer</i>
-                        <span class="text">Enqiry contact</span>
+                        <span class="text">Enqiry </span>
                     </a>
                 </li>
             </ul>

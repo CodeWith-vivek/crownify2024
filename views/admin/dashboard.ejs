@@ -70,6 +70,73 @@
                 </div>
             </div>
             <div class="col-lg-12">
+                <!-- <div class="card mb-4">
+                    <div class="card-header">
+                        <h2 class="mb-0"><i class="fas fa-chart-line me-2"></i>Sales Report</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="reportForm">
+                            <div class="mb-3">
+                                <label for="type" class="form-label">Select Report Type:</label>
+                                <select id="type" name="type" class="form-select" required>
+                                    <option value="">-- Select Report Type --</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="yearly">Yearly</option>
+                                    <option value="custom">Custom Date Range</option>
+                                </select>
+                            </div>
+                
+                            <div id="customDateRange" class="row g-3" style="display: none;">
+                                <div class="col-md-6">
+                                    <label for="startDate" class="form-label">Start Date:</label>
+                                    <input type="date" id="startDate" name="startDate" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="endDate" class="form-label">End Date:</label>
+                                    <input type="date" id="endDate" name="endDate" class="form-control">
+                                </div>
+                            </div>
+                
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-file-alt me-2"></i>Generate Report
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="reportResults" class="card" style="display: none;">
+                    <div class="card-header">
+                        <h3 class="mb-0"><i class="fas fa-table me-2"></i>Report Results</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Order Count</th>
+                                        <th>Total Order Amount</th>
+                                        <th>Total Discount</th>
+                                        <th>Coupon Deductions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportData">
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button id="downloadReport" class="btn btn-secondary w-100">
+                            <i class="fas fa-file-pdf me-2"></i>Download Report as PDF
+                        </button>
+                    </div>
+                </div> -->
+
                 <div class="card mb-4">
                     <div class="card-header">
                         <h2 class="mb-0"><i class="fas fa-chart-line me-2"></i>Sales Report</h2>
@@ -87,7 +154,7 @@
                                     <option value="custom">Custom Date Range</option>
                                 </select>
                             </div>
-
+                
                             <div id="customDateRange" class="row g-3" style="display: none;">
                                 <div class="col-md-6">
                                     <label for="startDate" class="form-label">Start Date:</label>
@@ -98,17 +165,16 @@
                                     <input type="date" id="endDate" name="endDate" class="form-control">
                                 </div>
                             </div>
-
+                
                             <div class="mt-3">
                                 <button type="submit" class="btn btn-primary w-100">
                                     <i class="fas fa-file-alt me-2"></i>Generate Report
                                 </button>
                             </div>
-
                         </form>
                     </div>
                 </div>
-
+                
                 <div id="reportResults" class="card" style="display: none;">
                     <div class="card-header">
                         <h3 class="mb-0"><i class="fas fa-table me-2"></i>Report Results</h3>
@@ -118,26 +184,31 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Total Sales Count</th>
+                                        <th>Date</th>
+                                        <th>Order Count</th>
                                         <th>Total Order Amount</th>
                                         <th>Total Discount</th>
                                         <th>Coupon Deductions</th>
+                                        <th>Total MRP</th>
+                                        <th>Offer Discount</th>
+                                        <th>Sale Price</th>
+                                        <th>Delivery Charge</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr id="reportData">
-                                        <td id="totalSalesCount">0</td>
-                                        <td id="totalOrderAmount">₹0.00</td>
-                                        <td id="totalDiscount">₹0.00</td>
-                                        <td id="couponDeductions">₹0.00</td>
-                                    </tr>
+                                <tbody id="reportData">
+                                    <!-- Dynamic rows will be inserted here -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
                     <div class="mt-3">
-                        <button id="downloadReport" class="btn btn-secondary w-100">
+                        <button id="downloadReport" class="btn btn-danger w-100">
                             <i class="fas fa-file-pdf me-2"></i>Download Report as PDF
+                        </button>
+                    </div>
+                    <div class="mt-3">
+                        <button id="downloadExcel" class="btn btn-success w-100">
+                            <i class="fas fa-file-excel me-2"></i>Download Report as Excel
                         </button>
                     </div>
                 </div>
@@ -216,66 +287,78 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
         <script>
+            
+           
+
             document.getElementById('reportForm').addEventListener('submit', async (event) => {
-                event.preventDefault(); // Prevent the default form submission
+                    event.preventDefault(); // Prevent the default form submission
 
-                const formData = new FormData(event.target);
-                const data = Object.fromEntries(formData.entries());
+                    const formData = new FormData(event.target);
+                    const data = Object.fromEntries(formData.entries());
 
-                try {
-                    const response = await fetch('/admin/sales-report', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
-                    });
-
-                    // Log the response for debugging
-                    console.log('Response:', response);
-
-                    const result = await response.json();
-
-                    // Log the result for debugging
-                    console.log('Result:', result);
-
-                    if (result.status) {
-                        // Update the report results in the table
-                        document.getElementById('totalSalesCount').innerText = result.report.totalSalesCount;
-                        document.getElementById('totalOrderAmount').innerText = `₹${result.report.totalOrderAmount.toFixed(2)}`;
-                        document.getElementById('totalDiscount').innerText = `₹${result.report.totalDiscount.toFixed(2)}`;
-                        document.getElementById('couponDeductions').innerText = `₹${result.report.couponDeduction.toFixed(2)}`;
-
-                        // Show the results section
-                        document.getElementById('reportResults').style.display = 'block';
-
-                        // Show success alert
-                        Swal.fire({
-                            title: 'Success!',
-                            text: 'Report generated successfully.',
-                            icon: 'success',
-                            confirmButtonText: 'Okay'
+                    try {
+                        const response = await fetch('/admin/sales-report', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(data),
                         });
-                    } else {
-                        // Show error alert
+
+                        const result = await response.json();
+
+                        if (result.status) {
+                            // Clear previous report data
+                            const reportDataBody = document.getElementById('reportData');
+                            reportDataBody.innerHTML = ''; // Clear previous data
+
+                            // Populate the table with new report data
+                            result.report.forEach(entry => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                    <td>${entry.date}</td>
+                    <td>${entry.totalSalesCount}</td>
+                    <td>₹${entry.totalOrderAmount.toFixed(2)}</td>
+                    <td>₹${entry.totalDiscount.toFixed(2)}</td>
+                    <td>₹ ${entry.couponDeduction.toFixed(2)}</td>
+                    <td>₹${entry.totalMRP.toFixed(2)}</td>
+                    <td>₹${entry.offerDiscount.toFixed(2)}</td>
+                    <td>₹${entry.salePrice.toFixed(2)}</td>
+                    <td>₹${entry.deliveryCharge.toFixed(2)}</td>
+                `;
+                                reportDataBody.appendChild(row);
+                            });
+
+                            // Show the results section
+                            document.getElementById('reportResults').style.display = 'block';
+
+                            // Show success alert
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'Report generated successfully.',
+                                icon: 'success',
+                                confirmButtonText: 'Okay'
+                            });
+                        } else {
+                            // Show error alert
+                            Swal.fire({
+                                title: 'Error!',
+                                text: result.message || 'An error occurred while generating the report.',
+                                icon: 'error',
+                                confirmButtonText: 'Okay'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        // Show error alert for network or other issues
                         Swal.fire({
                             title: 'Error!',
-                            text: result.message || 'An error occurred while generating the report.',
+                            text: 'An internal error occurred. Please try again later.',
                             icon: 'error',
                             confirmButtonText: 'Okay'
                         });
                     }
-                } catch (error) {
-                    console.error('Error:', error);
-                    // Show error alert for network or other issues
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'An internal error occurred. Please try again later.',
-                        icon: 'error',
-                        confirmButtonText: 'Okay'
-                    });
-                }
-            });
+                })
 
             // Show custom date range fields based on selection
             document.getElementById('type').addEventListener('change', function () {
@@ -328,6 +411,61 @@
                     console.error('Error:', error);
                 }
             });
+             document.getElementById('downloadExcel').addEventListener('click', async () => {
+                    try {
+                        const type = document.getElementById('type').value;
+                        const startDate = document.getElementById('startDate').value;
+                        const endDate = document.getElementById('endDate').value;
+
+                        const data = { type, startDate, endDate };
+
+                        const response = await fetch('/admin/sales-report/excel', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(data),
+                        });
+
+                        if (response.ok) {
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+
+                            // Create a temporary anchor to trigger download
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = 'sales_report.xlsx';
+                            document.body.appendChild(a);
+                            a.click();
+                            a.remove();
+                            window.URL.revokeObjectURL(url);
+
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'Report downloaded successfully.',
+                                icon: 'success',
+                                confirmButtonText: 'Okay'
+                            });
+                        } else {
+                            const error = await response.json();
+                            Swal.fire({
+                                title: 'Error!',
+                                text: error.message || 'Failed to download the report.',
+                                icon: 'error',
+                                confirmButtonText: 'Okay'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'An internal error occurred. Please try again later.',
+                            icon: 'error',
+                            confirmButtonText: 'Okay'
+                        });
+                    }
+                });
+
         </script>
         <script>
             // Handle logout action with fetch
@@ -574,7 +712,7 @@
             });
         </script>
        <script>
-       document.addEventListener("DOMContentLoaded", async () => {
+     document.addEventListener("DOMContentLoaded", async () => {
             try {
                 console.log("Fetching top-selling stats...");
                 const response = await fetch("/admin/top-selling-stats");
@@ -585,7 +723,7 @@
                 }
 
                 const result = await response.json();
-                console.log("API Response:", result);
+                console.log("API Response:", result); // Log the full API response
 
                 if (result.success) {
                     console.log("Successfully fetched data. Rendering tables...");
@@ -596,12 +734,12 @@
                     productTable.innerHTML = result.data.topProducts
                         .map(
                             (product, index) => `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${product.productName}</td>
-                        <td>${product.salesCount}</td>
-                    </tr>
-                `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${product.productName}</td>
+                    <td>${product.salesCount}</td>
+                </tr>
+            `
                         )
                         .join("");
 
@@ -611,29 +749,33 @@
                     categoryTable.innerHTML = result.data.topCategories
                         .map(
                             (category, index) => `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${category.categoryName}</td>
-                        <td>${category.salesCount}</td>
-                    </tr>
-                `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${category.categoryName}</td>
+                    <td>${category.salesCount}</td>
+                </tr>
+            `
                         )
                         .join("");
 
                     // Populate Best-Selling Brands
                     const brandTable = document.getElementById("bestSellingBrands");
                     console.log("Top Brands:", result.data.topBrands);
-                    brandTable.innerHTML = result.data.topBrands
-                        .map(
-                            (brand, index) => `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${brand.brandName}</td>
-                        <td>${brand.salesCount}</td>
-                    </tr>
-                `
-                        )
-                        .join("");
+                    if (result.data.topBrands.length > 0) {
+                        brandTable.innerHTML = result.data.topBrands
+                            .map(
+                                (brand, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${brand.brandName || "Unknown Brand"}</td>
+                    <td>${brand.salesCount || 0}</td>
+                </tr>
+            `
+                            )
+                            .join("");
+                    } else {
+                        brandTable.innerHTML = `<tr><td colspan="3">No brands found</td></tr>`;
+                    }
 
                     console.log("Tables rendered successfully.");
                 } else {

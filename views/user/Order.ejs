@@ -115,11 +115,11 @@
                                 <h6 class="order-id">Order ID: <%= order.orderNumber || 'N/A' %>
                                 </h6>
                                 <% order.items.forEach(item=> { %>
-                                    <div class="product-info row">
+                                    <div class="product-info row ">
                                         <div class="col-3 col-md-2">
-                                            <img src="/uploads/product-image/<%= item.productImage || 'https://via.placeholder.com/80' %>"
+                                            <img src="/uploads/product-image/<%= item.productImage%>"
                                                 alt="<%= item.productId?.productName || 'Product Image' %>"
-                                                class="product-image img-fluid">
+                                                class="product-image">
                                         </div>
                                         <div class="col-9 col-md-10">
                                             <div class="product-details">

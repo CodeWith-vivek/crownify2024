@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Category = require("./categorySchema");
+
 const { Schema } = mongoose;
 
 // Subdocument schema for individual wishlist items
