@@ -1,5 +1,6 @@
 const express = require("express");
 
+
 const router = express.Router();
 const userController = require("../controllers/userController");
 const cartController = require("../controllers/cartContoller");
@@ -237,7 +238,7 @@ router.post("/checkout", userAuth, orderController.placeOrder);
 router.post("/verify-payment", userAuth, orderController.verifyRazorpayPayment);
 
 router.post("/apply-coupon", userAuth, couponController.couponApply);
-router.post("/remove-coupon", userAuth, couponController.removeCoupon); // Add this line
+router.post("/remove-coupon", userAuth, couponController.removeCoupon); 
 
 router.get("/payment-Success",userAuth,paymentController.loadPayment);
 router.get("/payment-Failure", userAuth, paymentController.loadFailure);
@@ -246,6 +247,8 @@ router.post("/retry-payment",userAuth,paymentController.retryPayment)
 
 router.post("/delete-preliminary-order",userAuth,orderController.deletepremilinaryOrder);
 router.get("/invoice/:orderId",userAuth,reportController.generateInvoicePDF);
+router.post("/update-order-status", userAuth,paymentController.updateOrderStatus);
+router.get('/get-order-details/:orderNumber',userAuth,paymentController.getOrderDetails)
 
 module.exports = router;
 

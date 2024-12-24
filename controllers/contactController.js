@@ -1,10 +1,12 @@
 const Contact = require("../models/contactSchema");
 
+//code to submit contact form
+
 const submitContactForm = async (req, res) => {
   const { email, message, phone, name } = req.body;
 
   try {
-    // Save the form data to the database
+  
     const newContact = new Contact({
       email,
       message,
@@ -13,14 +15,14 @@ const submitContactForm = async (req, res) => {
     });
     await newContact.save();
 
-    // Respond with success message
+  
     res
       .status(200)
       .json({ success: true, message: "Your message has been submitted!" });
   } catch (error) {
     console.error("Error submitting contact form:", error);
 
-    // Respond with error message
+  
     res
       .status(500)
       .json({
@@ -29,13 +31,16 @@ const submitContactForm = async (req, res) => {
       });
   }
 };
+
+//code to get contactPage
+
 const customerMessages = async (req, res) => {
   try {
-    let search = req.query.search || ""; // Retrieve search query
-    let page = parseInt(req.query.page) || 1; // Default to page 1
-    const limit = 8; // Set limit of messages per page
+    let search = req.query.search || ""; 
+    let page = parseInt(req.query.page) || 1; 
+    const limit = 8; 
 
-    // Fetch messages with search filter, pagination, and sorting
+   
     const messages = await Contact.find({
       $or: [
         { email: { $regex: ".*" + search + ".*", $options: "i" } },
@@ -47,7 +52,7 @@ const customerMessages = async (req, res) => {
       .skip((page - 1) * limit)
       .exec();
 
-    // Count total messages matching the search query
+ 
     const count = await Contact.find({
       $or: [
         { email: { $regex: ".*" + search + ".*", $options: "i" } },
@@ -55,7 +60,7 @@ const customerMessages = async (req, res) => {
       ],
     }).countDocuments();
 
-    // Render the view with messages and pagination details
+   
     res.render("contactMessages", {
       messages,
       search,
@@ -64,7 +69,7 @@ const customerMessages = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching customer messages:", error);
-    res.redirect("/admin/pageerror"); // Redirect to an error page
+    res.redirect("/admin/pageerror"); 
   }
 };
 

@@ -50,11 +50,12 @@
                             <span class="text-danger" id="min-error"></span>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="expiry-date" class="form-label">Expiry Date</label>
-                            <input type="date" class="form-control" id="expiry-date" name="expiryDate" required>
-                            <span class="text-danger" id="expiry-error"></span>
-                        </div>
+        <div class="mb-3">
+            <label for="expiry-date" class="form-label">Expiry Date</label>
+            <input type="date" class="form-control" id="expiry-date" name="expiryDate" required onkeydown="return false"
+                onkeypress="return false">
+            <span class="text-danger" id="expiry-error"></span>
+        </div>
 
                         <div class="mb-3">
                             <label for="usage-limit" class="form-label">Usage Limit</label>

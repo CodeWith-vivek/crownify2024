@@ -91,13 +91,13 @@
                                                                                             padding-bottom: 28px;">
                                 <div class="cart__discount" style="margin-bottom: 20px;">
                                     <h6>Discount codes</h6>
-                                <form id="couponForm" class="form-stacked">
-                                    <input type="text" placeholder="Coupon code" id="couponCodeInput">
-                                    <button type="button" id="applyCouponButton"
-                                        style="font-size: 14px; margin-top: 15px; color: #ffffff; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: #111111; padding: 0 30px; width: 100%; border: none; height: 50px;">Apply</button>
-                                    <button type="button" id="removeCouponButton"
-                                        style="font-size: 14px; margin-top: 15px; color: #ffffff; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: #111111; padding: 0 30px; border: none; height: 50px; width: 100%;">Remove</button>
-                                </form>
+                                    <form id="couponForm" class="form-stacked">
+                                        <input type="text" placeholder="Coupon code" id="couponCodeInput">
+                                        <button type="button" id="applyCouponButton"
+                                            style="font-size: 14px; margin-top: 15px; color: #ffffff; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: #111111; padding: 0 30px; width: 100%; border: none; height: 50px;">Apply</button>
+                                        <button type="button" id="removeCouponButton"
+                                            style="font-size: 14px; margin-top: 15px; color: #ffffff; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: #111111; padding: 0 30px; border: none; height: 50px; width: 100%;">Remove</button>
+                                    </form>
                                 </div>
 
                                 <button type="button" class="btn btn-secondary" id="viewCouponsButton"
@@ -169,7 +169,7 @@
                                     </tbody>
                                 </table>
                                 <ul class="checkout__total__all">
-                                    <li> Sale  Price Subtotal <span>₹<%= subtotal.toFixed(2) %></span>
+                                    <li> Sale Price Subtotal <span>₹<%= subtotal.toFixed(2) %></span>
                                         <input type="hidden" name="subtotal" value="<%= subtotal %>">
                                     </li>
                                     <li>Coupon Discount <span style="color: green; font-size: 14px;">₹<%=
@@ -983,181 +983,186 @@
                 });
             });
             // Handle Razorpay Payment
-  function handleRazorpayPayment(formData) {
-       
+        //    async function handleRazorpayPayment(formData) {
 
-        fetch('/checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData),
-        })
-            .then(response => {
-              
-                if (!response.ok) {
-                    throw new Error(`Checkout API failed: ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-               
 
-                if (data.success && data.razorpayOrderId) {
-                    const options = {
-                        key: data.key,
-                        amount: data.amount,
-                        currency: 'INR',
-                        name: 'CROWNIFY',
-                        description: 'Order Payment',
-                        order_id: data.razorpayOrderId,
-                        handler: function (response) {
-                        
+        //        await fetch('/checkout', {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json',
+        //             },
+        //             body: JSON.stringify(formData),
+        //         })
+        //             .then(response => {
 
-                            // Verify payment on server
-                            fetch('/verify-payment', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    ...response,
-                                    orderId: data.orderId
-                                }),
-                            })
-                                .then(verifyResponse => {
-                                  
-                                    if (!verifyResponse.ok) {
-                                        throw new Error(`Payment Verification Failed: ${verifyResponse.statusText}`);
-                                    }
-                                    return verifyResponse.json();
-                                })
-                                .then(verifyData => {
-                                   
-                                    if (verifyData.success) {
-                                      
-                                        window.location.href = `/payment-success?orderId=${data.orderId}`;
-                                    } else {
-                                       
-                                        handlePaymentFailure(data.orderId, data.amount);
-                                    }
-                                })
-                                .catch(error => {
-                                  
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Payment Verification Error',
-                                        text: error.message || 'An error occurred during payment verification.',
-                                    });
-                                });
-                        },
-                        prefill: {
-                            name: 'Customer Name',
-                            email: 'customer@example.com',
-                            contact: 'Customer Phone Number'
-                        },
-                        theme: {
-                            color: '#3399cc'
-                        },
-                        modal: {
-                            // ondismiss: function () {
-                            
+        //                 if (!response.ok) {
+        //                     if (data.message === "COUPON_INVALID") {
+        //                          Swal.fire({
+        //                             icon: 'error',
+        //                             title: 'Invalid Coupon',
+        //                             text: 'The applied coupon is no longer valid. Please refresh and try again.',
+        //                             confirmButtonColor: '#3085d6',
+        //                         });
+        //                         // Optionally refresh the page or update the cart
+        //                         window.location.reload();
+        //                         return;
+        //                     }
 
-                            //     // Revert any actions taken before the modal was opened
-                            //     // revertActions(formData);
-                            // }
-                             ondismiss: function () {
-                                console.log("DEBUG: Razorpay modal dismissed.");
-                                // Send a request to delete the preliminary order
-                                fetch('/delete-preliminary-order', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({ orderId: data.orderId }),
-                                })
-                                    .then(response => {
-                                        if (!response.ok) {
-                                            throw new Error(`Failed to delete preliminary order: ${response.statusText}`);
-                                        }
-                                        return response.json();
-                                    })
-                                    .then(data => {
-                                        if (data.success) {
-                                            console.log("DEBUG: Preliminary order deleted successfully.");
-                                        } else {
-                                            console.warn("DEBUG: Preliminary order deletion failed:", data.message);
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error("DEBUG: Error deleting preliminary order:", error.message);
-                                    });
-                            }
-                        }
-                    };
+        //                 }
+        //                 return response.json();
+        //             })
+        //             .then(data => {
 
-                 
-                    const razorpayInstance = new Razorpay(options);
 
-                    razorpayInstance.open();
+        //                 if (data.success && data.razorpayOrderId) {
+        //                     const options = {
+        //                         key: data.key,
+        //                         amount: data.amount,
+        //                         currency: 'INR',
+        //                         name: 'CROWNIFY',
+        //                         description: 'Order Payment',
+        //                         order_id: data.razorpayOrderId,
+        //                         handler: function (response) {
 
-                    // Handle payment failure
-                    razorpayInstance.on('payment.failed', function (response) {
-                
 
-                        // Save failed payment details to server
-                        fetch('/payment-failure', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                orderId: data.orderId,
-                                paymentId: response.error.metadata.payment_id || null,
-                                razorpayOrderId: response.error.metadata.order_id || null,
-                                reason: response.error.reason || 'Unknown reason',
-                                description: response.error.description || 'No description available',
-                            }),
-                        })
-                            .then(failureResponse => {
-                             
-                                if (!failureResponse.ok) {
-                                    throw new Error(`Failed to save payment failure: ${failureResponse.statusText}`);
-                                }
-                                return failureResponse.json();
-                            })
-                            .then(failureData => {
-                             
-                                window.location.href = `/payment-Failure?orderId=${data.orderId}`;
-                            })
-                            .catch(error => {
-                             
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Payment Failure Error',
-                                    text: error.message || 'Unable to save payment failure details. Please contact support.',
-                                }).then(() => {
-                                    window.location.href = '/error-page '; // Adjust as needed
-                                });
-                            });
-                    });
-                } else {
-                    throw new Error(data.message || 'Failed to create Razorpay order');
-                }
-            })
-            .catch(error => {
-         
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Payment Failed',
-                    text: error.message || 'Unable to process payment. Please try again.',
-                    confirmButtonText: 'Retry'
-                });
-            });
-    }
+        //                             // Verify payment on server
+        //                             fetch('/verify-payment', {
+        //                                 method: 'POST',
+        //                                 headers: {
+        //                                     'Content-Type': 'application/json',
+        //                                 },
+        //                                 body: JSON.stringify({
+        //                                     ...response,
+        //                                     orderId: data.orderId
+        //                                 }),
+        //                             })
+        //                                 .then(verifyResponse => {
 
-    
-            async function handleWalletPayment(formData) {
+        //                                     if (!verifyResponse.ok) {
+        //                                         throw new Error(`Payment Verification Failed: ${verifyResponse.statusText}`);
+        //                                     }
+        //                                     return verifyResponse.json();
+        //                                 })
+        //                                 .then(verifyData => {
+
+        //                                     if (verifyData.success) {
+
+        //                                         window.location.href = `/payment-success?orderId=${data.orderId}`;
+        //                                     } else {
+
+        //                                         handlePaymentFailure(data.orderId, data.amount);
+        //                                     }
+        //                                 })
+        //                                 .catch(error => {
+
+        //                                     Swal.fire({
+        //                                         icon: 'error',
+        //                                         title: 'Payment Verification Error',
+        //                                         text: error.message || 'An error occurred during payment verification.',
+        //                                     });
+        //                                 });
+        //                         },
+        //                         prefill: {
+        //                             name: 'Customer Name',
+        //                             email: 'customer@example.com',
+        //                             contact: 'Customer Phone Number'
+        //                         },
+        //                         theme: {
+        //                             color: '#3399cc'
+        //                         },
+        //                         modal: {
+
+        //                             ondismiss: function () {
+        //                                 console.log("DEBUG: Razorpay modal dismissed.");
+        //                                 // Send a request to delete the preliminary order
+        //                                 fetch('/delete-preliminary-order', {
+        //                                     method: 'POST',
+        //                                     headers: {
+        //                                         'Content-Type': 'application/json',
+        //                                     },
+        //                                     body: JSON.stringify({ orderId: data.orderId }),
+        //                                 })
+        //                                     .then(response => {
+        //                                         if (!response.ok) {
+        //                                             throw new Error(`Failed to delete preliminary order: ${response.statusText}`);
+        //                                         }
+        //                                         return response.json();
+        //                                     })
+        //                                     .then(data => {
+        //                                         if (data.success) {
+        //                                             console.log("DEBUG: Preliminary order deleted successfully.");
+        //                                         } else {
+        //                                             console.warn("DEBUG: Preliminary order deletion failed:", data.message);
+        //                                         }
+        //                                     })
+        //                                     .catch(error => {
+        //                                         console.error("DEBUG: Error deleting preliminary order:", error.message);
+        //                                     });
+        //                             }
+        //                         }
+        //                     };
+
+
+        //                     const razorpayInstance = new Razorpay(options);
+
+        //                     razorpayInstance.open();
+
+        //                     // Handle payment failure
+        //                     razorpayInstance.on('payment.failed', function (response) {
+
+
+        //                         // Save failed payment details to server
+        //                         fetch('/payment-failure', {
+        //                             method: 'POST',
+        //                             headers: {
+        //                                 'Content-Type': 'application/json',
+        //                             },
+        //                             body: JSON.stringify({
+        //                                 orderId: data.orderId,
+        //                                 paymentId: response.error.metadata.payment_id || null,
+        //                                 razorpayOrderId: response.error.metadata.order_id || null,
+        //                                 reason: response.error.reason || 'Unknown reason',
+        //                                 description: response.error.description || 'No description available',
+        //                             }),
+        //                         })
+        //                             .then(failureResponse => {
+
+        //                                 if (!failureResponse.ok) {
+        //                                     throw new Error(`Failed to save payment failure: ${failureResponse.statusText}`);
+        //                                 }
+        //                                 return failureResponse.json();
+        //                             })
+        //                             .then(failureData => {
+
+        //                                 window.location.href = `/payment-Failure?orderId=${data.orderId}`;
+        //                             })
+        //                             .catch(error => {
+
+        //                                 Swal.fire({
+        //                                     icon: 'error',
+        //                                     title: 'Payment Failure Error',
+        //                                     text: error.message || 'Unable to save payment failure details. Please contact support.',
+        //                                 }).then(() => {
+        //                                     window.location.href = '/error-page '; // Adjust as needed
+        //                                 });
+        //                             });
+        //                     });
+        //                 } else {
+        //                     throw new Error(data.message || 'Failed to create Razorpay order');
+        //                 }
+        //             })
+        //             .catch(error => {
+
+        //                 Swal.fire({
+        //                     icon: 'error',
+        //                     title: 'Payment Failed',
+        //                     text: error.message || 'Unable to process payment. Please try again.',
+        //                     confirmButtonText: 'Retry'
+        //                 });
+        //             });
+        //     }
+
+        async function handleRazorpayPayment(formData) {
                 try {
                     const response = await fetch('/checkout', {
                         method: 'POST',
@@ -1169,8 +1174,193 @@
 
                     const data = await response.json();
 
+                      if (data.message === "The applied coupon is no longer valid. Please refresh and try again.") {
+                        Swal.fire({
+                            title: 'Coupon Invalid',
+                            text: data.message, // Display the message sent from the backend
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                   fetch('/remove-coupon', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    }
+                                });
+                                // Reload the page when the OK button is clicked
+                                window.location.reload();
+                            }
+                        });
+                        // Return early to avoid triggering the catch block
+                        return;
+                    }
+                    if (data.success && data.razorpayOrderId) {
+                        const options = {
+                            key: data.key,
+                            amount: data.amount,
+                            currency: 'INR',
+                            name: 'CROWNIFY',
+                            description: 'Order Payment',
+                            order_id: data.razorpayOrderId,
+                            handler: async function (response) {
+                                try {
+                                    const verifyResponse = await fetch('/verify-payment', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                            ...response,
+                                            orderId: data.orderId
+                                        }),
+                                    });
+
+                                    const verifyData = await verifyResponse.json();
+
+                                    if (!verifyResponse.ok) {
+                                        throw new Error(`Payment Verification Failed: ${verifyResponse.statusText}`);
+                                    }
+
+                                    if (verifyData.success) {
+                                        window.location.href = `/payment-success?orderId=${data.orderId}`;
+                                    } else {
+                                        await handlePaymentFailure(data.orderId, data.amount);
+                                    }
+                                } catch (error) {
+                                    await Swal.fire({
+                                        icon: 'error',
+                                        title: 'Payment Verification Error',
+                                        text: error.message || 'An error occurred during payment verification.',
+                                    });
+                                }
+                            },
+                            prefill: {
+                                name: 'Customer Name',
+                                email: 'customer@example.com',
+                                contact: 'Customer Phone Number'
+                            },
+                            theme: {
+                                color: '#3399cc'
+                            },
+                           modal: {
+                                ondismiss: async function () {
+                                    console.log("DEBUG: Razorpay modal dismissed.");
+                                    try {
+                                        const response = await fetch('/delete-preliminary-order', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                            },
+                                            body: JSON.stringify({ orderId: data.orderId }),
+                                        });
+
+                                        const deleteData = await response.json();
+
+                                        if (!response.ok) {
+                                            throw new Error(`Failed to delete preliminary order: ${response.statusText}`);
+                                        }
+
+                                        if (deleteData.success) {
+                                            console.log("DEBUG: Preliminary order deleted successfully.");
+                                        } else {
+                                            console.warn("DEBUG: Preliminary order deletion failed:", deleteData.message);
+                                        }
+                                    } catch (error) {
+                                        console.error("DEBUG: Error deleting preliminary order:", error.message);
+                                    } finally {
+                                        // Refresh the page after the modal is dismissed
+                                        window.location.reload();
+                                    }
+                                }
+                            }
+                        };
+
+                        const razorpayInstance = new Razorpay(options);
+
+                        razorpayInstance.open();
+
+                        razorpayInstance.on('payment.failed', async function (response) {
+                            try {
+                                const failureResponse = await fetch('/payment-failure', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        orderId: data.orderId,
+                                        paymentId: response.error.metadata.payment_id || null,
+                                        razorpayOrderId: response.error.metadata.order_id || null,
+                                        reason: response.error.reason || 'Unknown reason',
+                                        description: response.error.description || 'No description available',
+                                    }),
+                                });
+
+                                const failureData = await failureResponse.json();
+
+                                if (!failureResponse.ok) {
+                                    throw new Error(`Failed to save payment failure: ${failureResponse.statusText}`);
+                                }
+
+                                window.location.href = `/payment-Failure?orderId=${data.orderId}`;
+                            } catch (error) {
+                                await Swal.fire({
+                                    icon: 'error',
+                                    title: 'Payment Failure Error',
+                                    text: error.message || 'Unable to save payment failure details. Please contact support.',
+                                });
+                                window.location.href = '/error-page';
+                            }
+                        });
+                    } else {
+                        throw new Error(data.message || 'Failed to create Razorpay order');
+                    }
+                } catch (error) {
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Payment Failed',
+                        text: error.message || 'Unable to process payment. Please try again.',
+                        confirmButtonText: 'Retry'
+                    });
+                }
+            }
+
+
+            async function handleWalletPayment(formData) {
+                try {
+                    const response = await fetch('/checkout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData),
+                    });
+
+                    const data = await response.json();
+                    if (data.message === "The applied coupon is no longer valid. Please refresh and try again.") {
+                        Swal.fire({
+                            title: 'Coupon Invalid',
+                            text: data.message, // Display the message sent from the backend
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                fetch('/remove-coupon', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    }
+                                });
+                                // Reload the page when the OK button is clicked
+                                window.location.reload();
+                            }
+                        });
+                        // Return early to avoid triggering the catch block
+                        return;
+                    }
+
                     if (data.success) {
-                        window.location.href =  `/payment-success?orderId=${data.orderId}`;
+                        window.location.href = `/payment-success?orderId=${data.orderId}`;
                     } else {
                         throw new Error(data.message || 'Unable to process wallet payment');
                     }
@@ -1199,7 +1389,7 @@
                     const data = await response.json();
 
                     if (data.success) {
-                       window.location.href = `/payment-success?orderId=${data.orderId}`;
+                        window.location.href = `/payment-success?orderId=${data.orderId}`;
                     } else {
                         throw new Error(data.message || 'Unable to place order');
                     }
@@ -1272,18 +1462,8 @@
                 });
             }
         </script>
-      <script>
-            // Function to remove the coupon from the session
-        
-            // Event listener for visibility change to check if user is leaving the checkout page
-            document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'hidden') {
-                    // Check if the current page is the checkout page
-                    if (window.location.pathname === '/checkout') {
-                        removeCouponFromSession();
-                    }
-                }
-            });
+        <script>
+
 
             // Alternatively, using beforeunload to check if the user is leaving the checkout page
             window.addEventListener('beforeunload', (event) => {
@@ -1323,114 +1503,114 @@
                     });
                 }
 
-             
-              
+
+
             });
-       function applyCoupon(couponCode) {
-            console.log("Applying coupon:", couponCode);
-            if (!couponCode) {
-                Swal.fire('Error', 'Please enter a coupon code.', 'error');
-                return;
-            }
-
-            // Select the subtotal element
-            const subtotalElement = document.querySelector('.checkout__total__all li:nth-child(1) span');
-            const subtotal = parseFloat(subtotalElement.textContent.replace('₹', '').replace(',', ''));
-
-            // Select the shipping element
-            const shippingElement = document.querySelector('.checkout__total__all li:nth-child(3) span');
-            const shipping = parseFloat(shippingElement.textContent.replace('₹', '').replace(',', ''));
-
-            const cartTotal = subtotal + shipping;
-
-            console.log("Subtotal before applying coupon:", subtotal);
-            console.log("Shipping cost:", shipping);
-            console.log("Total before applying coupon:", cartTotal);
-
-            fetch('/apply-coupon', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ couponCode, cartTotal }),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Coupon application response:", data);
-                    if (data.success) {
-                        const discount = parseFloat(data.discount.applied);
-                        const discountElement = document.querySelector('.checkout__total__all li:nth-child(2) span');
-                        discountElement.innerHTML = '₹' + discount.toFixed(2);
-
-                        const total = cartTotal - discount; // Calculate the new total after discount
-                        const totalElement = document.querySelector('.checkout__total__all li:nth-child(4) span');
-                        totalElement.innerHTML = '₹' + total.toFixed(2);
-
-                        // Update hidden input values if necessary
-                        document.querySelector('input[name="subtotal"]').value = subtotal;
-                        document.querySelector('input[name="shipping"]').value = shipping;
-                        document.querySelector('input[name="total"]').value = total;
-
-                        sessionStorage.setItem('appliedCoupon', couponCode);
-                        Swal.fire('Success', 'Coupon applied successfully!', 'success');
-                    } else {
-                        Swal.fire('Error', data.message || 'Failed to apply coupon.', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error("Fetch Error:", error);
-                    Swal.fire('Error', 'An error occurred. Try again.', 'error');
-                });
-        }
-  function removeCoupon() {
-        console.log("Removing coupon...");
-
-        // Get the original total before the coupon was applied
-        const totalElement = document.querySelector('.checkout__total__all li:nth-child(4) span');
-        const originalTotal = parseFloat(totalElement.textContent.replace('₹', '').replace(',', ''));
-
-        fetch('/remove-coupon', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cartTotal: originalTotal }), // Send the original total
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Remove coupon response:", data);
-                handleRemoveCouponResponse(data);
-            })
-            .catch(error => {
-                console.error("Fetch Error:", error);
-                Swal.fire('Error', 'An error occurred. Try again.', 'error');
-            });
-    }
-
-
-        function handleRemoveCouponResponse(data) {
-            if (data.success) {
-                // Update the discount amount to zero
-                discountAmountElement.innerHTML = '₹0';
-
-                // Check if finalTotal is defined
-                if (data.finalTotal !== undefined) {
-                    totalElement.innerHTML = '₹' + data.finalTotal.toFixed(2);
-                } else {
-                    console.error("finalTotal is undefined");
-                    totalElement.innerHTML = '₹0'; // Set a default value or handle accordingly
-                    Swal.fire('Error', 'Final total is not available after coupon removal.', 'error');
-                    return; // Exit the function if finalTotal is not available
+            function applyCoupon(couponCode) {
+                console.log("Applying coupon:", couponCode);
+                if (!couponCode) {
+                    Swal.fire('Error', 'Please enter a coupon code.', 'error');
+                    return;
                 }
 
-                // Clear the applied coupon from session storage
-                sessionStorage.removeItem('appliedCoupon');
-                Swal.fire('Success', 'Coupon removed successfully.', 'success')
-                .then(() => {
-                        window.location.reload();
+                // Select the subtotal element
+                const subtotalElement = document.querySelector('.checkout__total__all li:nth-child(1) span');
+                const subtotal = parseFloat(subtotalElement.textContent.replace('₹', '').replace(',', ''));
+
+                // Select the shipping element
+                const shippingElement = document.querySelector('.checkout__total__all li:nth-child(3) span');
+                const shipping = parseFloat(shippingElement.textContent.replace('₹', '').replace(',', ''));
+
+                const cartTotal = subtotal + shipping;
+
+                console.log("Subtotal before applying coupon:", subtotal);
+                console.log("Shipping cost:", shipping);
+                console.log("Total before applying coupon:", cartTotal);
+
+                fetch('/apply-coupon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ couponCode, cartTotal }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Coupon application response:", data);
+                        if (data.success) {
+                            const discount = parseFloat(data.discount.applied);
+                            const discountElement = document.querySelector('.checkout__total__all li:nth-child(2) span');
+                            discountElement.innerHTML = '₹' + discount.toFixed(2);
+
+                            const total = cartTotal - discount; // Calculate the new total after discount
+                            const totalElement = document.querySelector('.checkout__total__all li:nth-child(4) span');
+                            totalElement.innerHTML = '₹' + total.toFixed(2);
+
+                            // Update hidden input values if necessary
+                            document.querySelector('input[name="subtotal"]').value = subtotal;
+                            document.querySelector('input[name="shipping"]').value = shipping;
+                            document.querySelector('input[name="total"]').value = total;
+
+                            sessionStorage.setItem('appliedCoupon', couponCode);
+                            Swal.fire('Success', 'Coupon applied successfully!', 'success');
+                        } else {
+                            Swal.fire('Error', data.message || 'Failed to apply coupon.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Fetch Error:", error);
+                        Swal.fire('Error', 'An error occurred. Try again.', 'error');
                     });
-            } else {
-                Swal.fire('Error', data.message || 'Failed to remove coupon.', 'error');
             }
-        }
+            function removeCoupon() {
+                console.log("Removing coupon...");
+
+                // Get the original total before the coupon was applied
+                const totalElement = document.querySelector('.checkout__total__all li:nth-child(4) span');
+                const originalTotal = parseFloat(totalElement.textContent.replace('₹', '').replace(',', ''));
+
+                fetch('/remove-coupon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cartTotal: originalTotal }), // Send the original total
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Remove coupon response:", data);
+                        handleRemoveCouponResponse(data);
+                    })
+                    .catch(error => {
+                        console.error("Fetch Error:", error);
+                        Swal.fire('Error', 'An error occurred. Try again.', 'error');
+                    });
+            }
+
+
+            function handleRemoveCouponResponse(data) {
+                if (data.success) {
+                    // Update the discount amount to zero
+                    discountAmountElement.innerHTML = '₹0';
+
+                    // Check if finalTotal is defined
+                    if (data.finalTotal !== undefined) {
+                        totalElement.innerHTML = '₹' + data.finalTotal.toFixed(2);
+                    } else {
+                        console.error("finalTotal is undefined");
+                        totalElement.innerHTML = '₹0'; // Set a default value or handle accordingly
+                        Swal.fire('Error', 'Final total is not available after coupon removal.', 'error');
+                        return; // Exit the function if finalTotal is not available
+                    }
+
+                    // Clear the applied coupon from session storage
+                    sessionStorage.removeItem('appliedCoupon');
+                    Swal.fire('Success', 'Coupon removed successfully.', 'success')
+                        .then(() => {
+                            window.location.reload();
+                        });
+                } else {
+                    Swal.fire('Error', data.message || 'Failed to remove coupon.', 'error');
+                }
+            }
         </script>
-     
+
         <script>
             function copyToClipboard(code) {
                 navigator.clipboard.writeText(code).then(() => {
@@ -1496,62 +1676,85 @@
             // Check every 30 seconds
             setInterval(checkUserBlockStatus, 2000);
         </script>
-        
+
         <script>
             function confirmDeleteAddress(event, addressId) {
-                    event.preventDefault();
+                event.preventDefault();
 
-                    Swal.fire({
-                        title: 'Delete Address?',
-                        text: 'Are you sure you want to delete this address?',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes, delete it!',
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            fetch(`/delete-address/${addressId}`, {
-                                method: 'POST',
-                                headers: {
-                                    // Add any necessary headers here
+                Swal.fire({
+                    title: 'Delete Address?',
+                    text: 'Are you sure you want to delete this address?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/delete-address/${addressId}`, {
+                            method: 'POST',
+                            headers: {
+                                // Add any necessary headers here
+                            }
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
                                 }
+                                return response.json();
                             })
-                                .then(response => {
-                                    if (!response.ok) {
-                                        throw new Error('Network response was not ok');
-                                    }
-                                    return response.json();
-                                })
-                                .then(data => {
-                                    if (data.success) {
-                                        Swal.fire({
-                                            title: 'Deleted!',
-                                            text: 'Address deleted successfully.',
-                                            icon: 'success',
-                                            confirmButtonText: 'OK'
-                                        }).then(() => {
-                                            // Reload the page after successful deletion
-                                            window.location.reload();
-                                        });
-                                    } else {
-                                        Swal.fire({
-                                            title: 'Failed!',
-                                            text: data.message || 'Failed to delete address.',
-                                            icon: 'error',
-                                            confirmButtonText: 'OK'
-                                        });
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
+                            .then(data => {
+                                if (data.success) {
                                     Swal.fire({
-                                        title: 'Error!',
-                                        text: 'An error occurred while deleting the address. Please try again.',
+                                        title: 'Deleted!',
+                                        text: 'Address deleted successfully.',
+                                        icon: 'success',
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
+                                        // Reload the page after successful deletion
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Failed!',
+                                        text: data.message || 'Failed to delete address.',
                                         icon: 'error',
                                         confirmButtonText: 'OK'
                                     });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'An error occurred while deleting the address. Please try again.',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
                                 });
+                            });
+                    }
+                });
+            }
+        </script>
+        <script>
+            function removeCouponFromSession() {
+                console.log("Removing coupon...");
+
+                // Get the original total before the coupon was applied
+                const totalElement = document.querySelector('.checkout__total__all li:nth-child(4) span');
+                const originalTotal = parseFloat(totalElement.textContent.replace('₹', '').replace(',', ''));
+
+                fetch('/remove-coupon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cartTotal: originalTotal }), // Send the original total
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            console.error("Error removing coupon:", response.statusText);
                         }
+                    })
+                    .catch(error => {
+                        console.error("Fetch Error:", error);
                     });
-                }
+            }
         </script>

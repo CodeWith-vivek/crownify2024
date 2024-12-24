@@ -6,7 +6,7 @@ const Product = require("../models/productSchema");
 const categoryInfo = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = 4;
+    const limit = 6;
     const categoryData = await Category.find({})
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
@@ -64,7 +64,7 @@ const addCategoryOffer = async (req, res) => {
     const percentage = parseInt(req.body.percentage);
     const categoryId = req.body.categoryId;
 
-    // Validate maximum category offer percentage
+   
     if (percentage > 80) {
       return res.json({
         status: false,
@@ -72,7 +72,7 @@ const addCategoryOffer = async (req, res) => {
       });
     }
 
-    // Find the category
+  
     const category = await Category.findById(categoryId);
     if (!category) {
       return res
@@ -80,20 +80,20 @@ const addCategoryOffer = async (req, res) => {
         .json({ status: false, message: "Category not found" });
     }
 
-    // Find all products in the category
+
     const products = await Product.find({ category: category._id });
 
-    // Check if any product has a higher product offer
+  
     const hasHigherProductOffer = products.some(
       (product) => product.productOffer > percentage
     );
 
-    // Apply offer only to products with `productOffer === 0`
+  
     const productsToUpdate = products.filter(
       (product) => product.productOffer <= percentage
     );
 
-    // If no products are eligible for the category offer, reject the request
+   
     if (productsToUpdate.length === 0 && hasHigherProductOffer) {
       return res.json({
         status: false,
@@ -102,7 +102,7 @@ const addCategoryOffer = async (req, res) => {
       });
     }
 
-    // Update the category offer
+
     await Category.updateOne(
       { _id: categoryId },
       { $set: { categoryOffer: percentage } }
@@ -110,12 +110,12 @@ const addCategoryOffer = async (req, res) => {
 
     for (const product of productsToUpdate) {
       if (product.productOffer > 0) {
-        // Save the existing product offer in a temporary field
+    
         product.previousProductOffer = product.productOffer;
-        product.productOffer = 0; // Reset the product offer
+        product.productOffer = 0; 
       }
 
-      // Apply the category offer to sale price
+   
      product.salePrice = Math.floor(
        product.regularPrice - (product.regularPrice * percentage) / 100
      );
@@ -140,14 +140,14 @@ const removeCategoryOffer = async (req, res) => {
   try {
     const { categoryId } = req.body;
 
-    // Validate categoryId
+
     if (!categoryId) {
       return res
         .status(400)
         .json({ status: false, message: "Category ID is required" });
     }
 
-    // Find the category
+
     const category = await Category.findById(categoryId);
     if (!category) {
       return res
@@ -155,32 +155,32 @@ const removeCategoryOffer = async (req, res) => {
         .json({ status: false, message: "Category not found" });
     }
 
-    // Find all products in the category
+   
     const products = await Product.find({ category: category._id });
 
-    // Update each product in the category
+
     const productUpdates = products.map((product) => {
       if (product.previousProductOffer) {
-        // Restore the previous product offer
+    
         product.productOffer = product.previousProductOffer;
         product.salePrice =
           product.regularPrice -
           (product.regularPrice * product.previousProductOffer) / 100;
 
-        // Clear the temporary field
+    
         product.previousProductOffer = undefined;
       } else {
-        // Reset sale price to regular price if no previous offer exists
+  
         product.salePrice = product.regularPrice;
       }
 
       return product.save();
     });
 
-    // Await all product updates concurrently
+ 
     await Promise.all(productUpdates);
 
-    // Remove the category offer
+ 
     category.categoryOffer = 0;
     await category.save();
 
@@ -190,6 +190,9 @@ const removeCategoryOffer = async (req, res) => {
     res.status(500).json({ status: false, message: "Internal server error" });
   }
 };
+
+//code to list category
+
 const getListCategory=async(req,res)=>{
   try {
     let id=req.query.id
@@ -203,6 +206,7 @@ const getListCategory=async(req,res)=>{
 }
 
 
+//code to unlist category 
 
 const getUnlistCategory=async(req,res)=>{
   try {

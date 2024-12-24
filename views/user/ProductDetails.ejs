@@ -185,7 +185,7 @@
                                         <i class="fa <%= i < product.rating ? 'fa-star' : 'fa-star-o' %>"></i>
                                         <% } %>
                                 </div>
-                                <h5>₹<%= product.regularPrice.toFixed(2) %>
+                                <h5>₹<%= product.salePrice.toFixed(2) %>
                                 </h5>
                                 </h5>
                                 <% if (product) { %>
@@ -197,7 +197,7 @@
                                     </div>
                                     <div>
 
-                                        <div class="product__color__select" onclick="event.stopPropagation();">
+                                        <div class="product__color__select" >
                                             <% const uniqueColors=[...new Set(product.variants.map(variant=>
                                                 variant.color))];
                                                 %>
@@ -205,7 +205,7 @@
                                                     <% uniqueColors.forEach(color=> { %>
                                                         <label for="pc-<%= color %>" style="padding-right: 15px;
                                                     margin-left: 5px;">
-                                                            <input type="radio" name="color" id="pc-<%= color %>"
+                                                            <input type="radio" name="color" 
                                                                 value="<%= color %>">
                                                             <% if (color==="Multi" ) { %>
                                                                 <span style="

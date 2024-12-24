@@ -2,26 +2,26 @@ const mongoose = require("mongoose");
 
 const { Schema } = mongoose;
 
-// Subdocument schema for individual wishlist items
+
 const wishlistItemSchema = new Schema({
   productId: {
     type: Schema.Types.ObjectId,
-    ref: "Product", // Reference to the Product model
+    ref: "Product",
     required: true,
   },
   size: {
     type: String,
     enum: ["ONESIZE", "S / M", "M / L", "L / XL", "YOUTH"],
-     // Size is mandatory
+     
   },
   color: {
     type: String,
-     // Color is mandatory
+  
   },
   quantity: {
     type: Number,
-    default: 1, // Default quantity is 1
-    min: 1, // Quantity cannot be less than 1
+    default: 1, 
+    min: 1,
   },
   productImage: {
     type: String,
@@ -37,7 +37,7 @@ const wishlistItemSchema = new Schema({
   },
   addedAt: {
     type: Date,
-    default: Date.now, // Automatically records when the item is added
+    default: Date.now, 
   },
   productDetails: {
     productName: {
@@ -56,21 +56,21 @@ const wishlistItemSchema = new Schema({
   },
 });
 
-// Main Wishlist schema
+
 const wishlistSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User", // Reference to the User model
+      ref: "User", 
       required: true,
-      unique: true, // Ensures one wishlist per user
+      unique: true,
     },
     items: [wishlistItemSchema],
     status: {
       type: String,
       enum: ["In Stock", "Out of Stock"],
       default: "In Stock",
-    }, // Array of wishlist items
+    }, 
   },
   {
     timestamps: true,

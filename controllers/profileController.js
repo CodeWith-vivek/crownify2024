@@ -1,19 +1,19 @@
 const User = require("../models/userSchema");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
-const env = require("dotenv").config();
-const session = require("express-session");
+// const env = require("dotenv").config();
+// const session = require("express-session");
 const Address = require("../models/addressSchema");
-const express = require("express");
-const sharp = require("sharp");
+// const express = require("express");
+// const sharp = require("sharp");
 const Order = require("../models/orderSchema");
 
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs").promises;
+// const path = require("path");
+// const fs = require("fs").promises;
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+// const upload = multer({ storage: storage });
 
 //code for secure password
 
@@ -570,7 +570,6 @@ const updateUserAddress = async (req, res) => {
       town,
       state,
     } = req.body;
-    console.log("adadadadadadadadadad",req.body)
 
    
     const updatedAddress = await Address.findOneAndUpdate(
@@ -688,25 +687,24 @@ const validatCurrentPassword = async (req, res) => {
   }
 };
 
-
+//code to load user orders
 
 const loadUserOrder = async (req, res) => {
   try {
     const userId = req.session.user;
-    const page = parseInt(req.query.page) || 1; // Current page
-    const limit = parseInt(req.query.limit) || 10; // Items per page
-    const skip = (page - 1) * limit; // Calculate how many orders to skip
+    const page = parseInt(req.query.page) || 1; 
+    const limit = parseInt(req.query.limit) || 10; 
+    const skip = (page - 1) * limit; 
 
     const userData = await User.findById(userId).populate("addresses"); 
     const userOrders = await Order.find({ userId })
       .populate("items.productId")
       .sort({ orderedAt: -1 })
-      .skip(skip) // Skip the previous pages
-      .limit(limit); // Limit the number of orders returned
+      .skip(skip) 
+      .limit(limit); 
 
-    const totalOrders = await Order.countDocuments({ userId }); // Get total number of orders
+    const totalOrders = await Order.countDocuments({ userId }); 
 
-    // Function to get badge class based on order status
     const getBadgeClass = (status) => {
       const badgeClasses = {
         'Delivered': 'text-success',
@@ -722,25 +720,22 @@ const loadUserOrder = async (req, res) => {
       return badgeClasses[status] || 'bg-secondary';
     };
 
-    // Map over orders and their items to add badgeClass
     const ordersWithBadgeClasses = userOrders.map(order => {
       order.items = order.items.map(item => {
-        item.badgeClass = getBadgeClass(item.orderStatus); // Add badge class
+        item.badgeClass = getBadgeClass(item.orderStatus); 
         return item;
       });
       return order;
     });
 
-    // Calculate total pages
     const totalPages = Math.ceil(totalOrders / limit);
 
-    // Pass limit to the view
     res.render("Order", {
       user: userData,
-      orders: ordersWithBadgeClasses, // Use the modified orders
+      orders: ordersWithBadgeClasses, 
       currentPage: page,
       totalPages: totalPages,
-      limit: limit // Pass the limit to the view
+      limit: limit 
     });
   } catch (error) {
     console.error("Error retrieving data:", error);
@@ -768,7 +763,7 @@ const loadUserAddress = async (req, res) => {
     res.render("Address", {
       user: userData,
       orders: userOrders,
-      addressCount, // Added addressCount
+      addressCount, 
     });
   } catch (error) {
     console.error("Error retrieving data:", error);

@@ -2,7 +2,7 @@ const User = require("../models/userSchema");
 const Product = require("../models/productSchema");
 const Category = require("../models/categorySchema");
 const Brand = require("../models/brandSchema");
-const env = require("dotenv").config();
+// const env = require("dotenv").config();
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const Coupon = require("../models/couponSchema");
@@ -24,26 +24,44 @@ const loadHomepage = async (req, res) => {
   try {
     const user = req.session.user;
 
-    // Fetch products
-    const products = await Product.find({ isBlocked: false });
+    const listedCategories = await Category.find({ isListed: true });
 
-    // Fetch coupons (adjust this based on your database schema)
-    const coupons = await Coupon.find({}); // Replace with actual query
+    const unblockedBrands = await Brand.find({ isBlocked: false });
+
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
+    );
+
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName) 
+    );
+
+    const products = await Product.find({
+      isBlocked: false,
+      category: { $in: [...listedCategoryIds] }, 
+      brand: { $in: [...unblockedBrandNames] }, 
+    });
+
+    const coupons = await Coupon.find({});
 
     if (user) {
       const userData = await User.findOne({ _id: user });
-
-      // Pass coupons to the view
-      return res.render("Home", { user: userData, products, coupons });
+      return res.render("Home", {
+        user: userData,
+        products,
+        coupons,
+      });
     } else {
-      // Pass coupons to the view
       return res.render("Home", { products, coupons });
     }
   } catch (error) {
-    console.log("Home page not found", error);
-    res.status(500).send("server error");
+    console.error("Error loading home page:", error);
+    res.status(500).send("Server error");
   }
 };
+
+//code to load contact page
+
 const loadContactpage = async (req, res) => {
   try {
     const user = req.session.user;
@@ -62,23 +80,23 @@ const loadContactpage = async (req, res) => {
     res.status(500).send("server error");
   }
 };
+
+//code to load about page
+
 const loadAboutpage = async (req, res) => {
   try {
     const user = req.session.user;
 
-    // Fetch products
     const products = await Product.find({ isBlocked: false });
 
-    // Fetch coupons
-    const coupons = await Coupon.find({}); // Replace with your actual query if needed
+    const coupons = await Coupon.find({}); 
 
     if (user) {
       const userData = await User.findOne({ _id: user });
 
-      // Pass coupons to the view
       return res.render("About", { user: userData, products, coupons });
     } else {
-      // Pass coupons to the view
+
       return res.render("About", { products, coupons });
     }
   } catch (error) {
@@ -86,65 +104,73 @@ const loadAboutpage = async (req, res) => {
     res.status(500).send("server error");
   }
 };
-const loadFaqpage =async(req,res)=>{
-   try {
-     const user = req.session.user;
 
-     const products = await Product.find({ isBlocked: false });
+//code to load faq page
 
-     if (user) {
-       const userData = await User.findOne({ _id: user });
-
-       return res.render("FAQ", { user: userData, products });
-     } else {
-       return res.render("FAQ", { products });
-     }
-   } catch (error) {
-     console.log("FAQ page not found", error);
-     res.status(500).send("server error");
-   }
-
-}
-const loadBrandpage = async (req, res) => {
+const loadFaqpage = async (req, res) => {
   try {
     const user = req.session.user;
 
     const products = await Product.find({ isBlocked: false });
-    const brands = await Brand.find(); // Fetch all brands
 
-    // Create a Set of blocked brand names for quick lookup
-    const blockedBrands = new Set(
-      brands.filter((brand) => brand.isBlocked).map((brand) => brand.brandName)
+    if (user) {
+      const userData = await User.findOne({ _id: user });
+
+      return res.render("FAQ", { user: userData, products });
+    } else {
+      return res.render("FAQ", { products });
+    }
+  } catch (error) {
+    console.log("FAQ page not found", error);
+    res.status(500).send("server error");
+  }
+};
+
+//code to load brand page
+
+const loadBrandpage = async (req, res) => {
+  try {
+    const user = req.session.user;
+
+    const listedCategories = await Category.find({ isListed: true });
+
+    const unblockedBrands = await Brand.find({ isBlocked: false });
+
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
     );
 
-    // Filter products based on the blocked brands
-    const filteredProducts = products.filter(
-      (product) => !blockedBrands.has(product.brand) // Check if the brand is blocked
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName) 
     );
-    console.log("Filtered products:", filteredProducts);
+
+    const products = await Product.find({
+      isBlocked: false,
+      category: { $in: [...listedCategoryIds] }, 
+      brand: { $in: [...unblockedBrandNames] }, 
+    });
 
     if (user) {
       const userData = await User.findOne({ _id: user });
       return res.render("Brand", {
         user: userData,
-        products: filteredProducts,
+        products,
       });
     } else {
-      return res.render("Brand", { products: filteredProducts });
+      return res.render("Brand", { products });
     }
   } catch (error) {
-    console.log("Brand page not found", error);
-    res.status(500).send("server error");
+    console.error("Error loading brand page:", error);
+    res.status(500).send("Server error");
   }
 };
-
 //code for page not found
 
 const pageNotFound = async (req, res) => {
   try {
     res.render("page-404");
   } catch (error) {
-    console.log("error loading page not found",error)
+    console.log("error loading page not found", error);
     res.redirect("/pageNotFound");
   }
 };
@@ -164,7 +190,7 @@ const loadSignup = async (req, res) => {
   }
 };
 
-//code to load otp page 
+//code to load otp page
 
 const loadOtpverify = async (req, res) => {
   try {
@@ -173,12 +199,11 @@ const loadOtpverify = async (req, res) => {
       return res.redirect("/signup");
     }
 
-   
-    req.session.countdownTime = 120; 
+    req.session.countdownTime = 120;
 
     res.render("verify-otp", {
       userData,
-      countdownTime: req.session.countdownTime, 
+      countdownTime: req.session.countdownTime,
     });
   } catch (error) {
     console.log("verify otp page not loading", error);
@@ -233,13 +258,12 @@ async function sendVerificationEmail(email, otp) {
   }
 }
 
-//code for sign up 
+//code for sign up
 
 const signup = async (req, res) => {
   try {
     const { name, phone, email, password, cPassword } = req.body;
 
- 
     if (password !== cPassword) {
       return res.json({
         success: false,
@@ -250,9 +274,7 @@ const signup = async (req, res) => {
 
     const existingUser = await User.findOne({ email });
 
-   
     if (existingUser) {
-
       if (existingUser.googleId) {
         return res.json({
           success: false,
@@ -261,7 +283,6 @@ const signup = async (req, res) => {
         });
       }
 
-     
       return res.json({
         success: false,
         message: "User with this email already exists.",
@@ -273,7 +294,6 @@ const signup = async (req, res) => {
 
     const emailSent = await sendVerificationEmail(email, otp);
 
-  
     if (emailSent) {
       const hashedPassword = await securePassword(password);
       let avatarPath = req.file
@@ -312,6 +332,8 @@ const signup = async (req, res) => {
 };
 
 
+//code to verify otp
+
 const verifyOtp = async (req, res) => {
   try {
     const { otp } = req.body;
@@ -319,7 +341,7 @@ const verifyOtp = async (req, res) => {
 
     console.log("Stored OTP:", sessionOtp, "User-entered OTP:", otp);
 
-    // Check if session OTP is missing
+
     if (!sessionOtp) {
       return res.json({
         success: false,
@@ -327,11 +349,10 @@ const verifyOtp = async (req, res) => {
       });
     }
 
-    // Check if the entered OTP matches the session OTP
     if (otp.toString() === sessionOtp.toString()) {
       const user = req.session.userData;
 
-      // Ensure the user data is available
+      
       if (!user) {
         return res.status(400).json({
           success: false,
@@ -339,16 +360,16 @@ const verifyOtp = async (req, res) => {
         });
       }
 
-      const avatarPath = user.avatar || null; // Use null if no avatar
+      const avatarPath = user.avatar || null; 
 
-      // Create a new user with an initialized wishlist
+     
       const newUser = new User({
         name: user.name,
         email: user.email,
         phone: user.phone,
-        password: user.password, // Ensure password is hashed before saving
+        password: user.password, 
         avatar: avatarPath,
-        wishlist: [], // Initialize as an empty array
+        wishlist: [], 
       });
 
       // Attempt to save the new user
@@ -360,7 +381,7 @@ const verifyOtp = async (req, res) => {
         });
       });
 
-      // Set user ID in session and clear OTP and user data from session
+      
       req.session.user = newUser._id;
       req.session.userOtp = null;
       req.session.userData = null;
@@ -423,7 +444,9 @@ const loadLogin = async (req, res) => {
   }
 };
 
-    const login = async (req, res) => {
+//code to login user
+
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -455,7 +478,8 @@ const loadLogin = async (req, res) => {
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    existingUser.status = existingUser.lastLogin >= sixMonthsAgo ? "Active" : "Inactive";
+    existingUser.status =
+      existingUser.lastLogin >= sixMonthsAgo ? "Active" : "Inactive";
     await existingUser.save();
 
     req.session.user = existingUser._id;
@@ -497,18 +521,13 @@ const logout = async (req, res) => {
 
 //code to load shop page
 
-
-
 const loadShopPage = async (req, res) => {
   try {
     const user = req.session.user;
-    console.log("==== Incoming Shop Page Request ====");
-    console.log("Query parameters:", req.query);
-
+    
     const search = req.query.search || "";
     const limit = 12;
 
-    // Utility function to parse array parameters from the query
     const parseArrayParam = (param) =>
       req.query[param]
         ? Array.isArray(req.query[param])
@@ -516,7 +535,6 @@ const loadShopPage = async (req, res) => {
           : [req.query[param]]
         : [];
 
-    // Check if filters or sort are applied
     const isFiltered =
       search ||
       req.query.color ||
@@ -527,10 +545,6 @@ const loadShopPage = async (req, res) => {
 
     const page = isFiltered ? 1 : parseInt(req.query.page) || 1;
 
-    console.log("Search term:", search);
-    console.log("Page:", page, "Limit:", limit);
-
-    // Sorting options mapped for better readability
     const sortOptions = {
       priceLowHigh: { salePrice: 1 },
       priceHighLow: { salePrice: -1 },
@@ -541,20 +555,15 @@ const loadShopPage = async (req, res) => {
     };
     const sortCriteria = sortOptions[req.query.sort] || { createdAt: -1 };
 
-    console.log("Sort option:", req.query.sort);
-    console.log("Sort criteria:", sortCriteria);
-
-    // Fetch active brands and categories
     const [activeCategories, activeBrands] = await Promise.all([
       Category.find({ isListed: true }),
       Brand.find({ isBlocked: false }),
     ]);
 
-    // Build query for products
     const productsQuery = {
-      isBlocked: false, // Exclude blocked products
-      category: { $in: activeCategories.map((cat) => cat._id) }, // Only include listed categories
-      brand: { $in: activeBrands.map((brand) => brand.brandName) }, // Only include active brands
+      isBlocked: false,
+      category: { $in: activeCategories.map((cat) => cat._id) },
+      brand: { $in: activeBrands.map((brand) => brand.brandName) },
     };
 
     if (search) {
@@ -588,9 +597,6 @@ const loadShopPage = async (req, res) => {
       productsQuery.variants = { $elemMatch: { size: { $in: selectedSizes } } };
     }
 
-    console.log("Final query object:", productsQuery);
-
-    // Fetch data
     const [products, totalProducts, uniqueColors] = await Promise.all([
       Product.find(productsQuery)
         .sort(sortCriteria)
@@ -601,10 +607,6 @@ const loadShopPage = async (req, res) => {
       Product.distinct("color"),
     ]);
 
-    console.log("Fetched products:", products.length);
-    console.log("Total products matching query:", totalProducts);
-
-    // Calculate discounts
     const productsWithDiscount = products.map((product) => {
       const discount =
         product.regularPrice > 0
@@ -618,7 +620,6 @@ const loadShopPage = async (req, res) => {
       };
     });
 
-    // Calculate product count for each category
     const categoriesWithCounts = await Promise.all(
       activeCategories.map(async (category) => {
         const productCount = await Product.countDocuments({
@@ -632,11 +633,6 @@ const loadShopPage = async (req, res) => {
       })
     );
 
-    console.log("Unique colors available:", uniqueColors);
-    console.log("Categories with product counts:", categoriesWithCounts);
-    console.log("Fetched brands:", activeBrands.length);
-
-    // Render the shop page
     const renderData = {
       products: productsWithDiscount,
       categories: categoriesWithCounts,
@@ -668,12 +664,10 @@ const loadShopPage = async (req, res) => {
 
 //code to load product details page
 
-
 const loadProductDetails = async (req, res) => {
   try {
     const productId = req.params.id;
 
-  
     const product = await Product.findById(productId)
       .select({
         productName: 1,
@@ -688,20 +682,18 @@ const loadProductDetails = async (req, res) => {
       })
       .lean()
       .exec();
-     
 
     if (!product) {
       return res.status(404).send("Product not found");
     }
 
-   
     if (!Array.isArray(product.variants)) {
       product.variants = [];
     }
-     const totalQuantity = product.variants.reduce(
-       (total, variant) => total + (variant.quantity || 0),
-       0
-     );
+    const totalQuantity = product.variants.reduce(
+      (total, variant) => total + (variant.quantity || 0),
+      0
+    );
 
     const relatedProducts = await Product.find({
       brand: product.brand,
@@ -711,29 +703,25 @@ const loadProductDetails = async (req, res) => {
       .lean()
       .exec();
 
-   
     const templateData = {
       product: {
         ...product,
         variants: product.variants.map((variant) => ({
           size: variant.size,
           color: variant.color,
-          quantity: variant.quantity || 0, 
+          quantity: variant.quantity || 0,
         })),
         totalQuantity,
       },
       relatedProducts,
     };
- 
 
- 
     const userId = req.session.user;
     if (userId) {
       const user = await User.findById(userId).lean();
       templateData.user = user;
     }
 
-   
     const productScript = `
             <script>
                 const product = ${JSON.stringify(templateData.product)};
@@ -741,7 +729,6 @@ const loadProductDetails = async (req, res) => {
             </script>
         `;
 
-   
     return res.render("ProductDetails", {
       ...templateData,
       productScript,
@@ -769,5 +756,5 @@ module.exports = {
   loadBrandpage,
   loadContactpage,
   loadAboutpage,
-  loadFaqpage
+  loadFaqpage,
 };

@@ -3,6 +3,9 @@ const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const Transaction=require("../models/transactionSchema")
 
+
+//code to load wallet page
+
 const loadwalletpage = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -22,12 +25,12 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+//code to add money in wallet
+
 const addMoneyToWallet = async (req, res) => {
   try {
     const userId = req.session.user;
     const { amount } = req.body;
-
-    console.log("Adding amount:", amount, "for user ID:", userId);
 
     if (!amount || amount <= 0) {
       return res
@@ -43,19 +46,17 @@ const addMoneyToWallet = async (req, res) => {
     }
 
     const options = {
-      amount: amount * 100, // Amount in paise
+      amount: amount * 100, 
       currency: "INR",
       receipt: `receipt_${new Date().getTime()}`,
     };
 
     const order = await razorpay.orders.create(options);
-    console.log("Razorpay order created:", order); // Debug log
-
-    // Log the transaction for adding money to the wallet
+  
     const transaction = new Transaction({
       userId,
       amount,
-      type: "credit", // Since we are adding money to the wallet
+      type: "credit", 
       description: `Added money to wallet: `,
     });
     await transaction.save();
@@ -71,6 +72,9 @@ const addMoneyToWallet = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+//cod eto wallet balance
+
 const getWalletBalance = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -92,18 +96,12 @@ const getWalletBalance = async (req, res) => {
   }
 };
 
+//cod e for confirm payment
 
 const confirmPayment = async (req, res) => {
   try {
     const userId = req.session.user; 
     const { orderId, paymentId, signature, amount } = req.body;
-
-    console.log("Confirming payment with data:", {
-      orderId,
-      paymentId,
-      signature,
-      amount,
-    }); 
 
     if (!orderId || !paymentId || !signature || !amount) {
       return res
@@ -125,10 +123,7 @@ const confirmPayment = async (req, res) => {
       .update(body.toString())
       .digest("hex");
 
-    console.log("Expected Signature:", expectedSignature); // Debug log
-
     if (signature !== expectedSignature) {
-      console.error("Invalid payment signature"); // Debug log
       return res
         .status(400)
         .json({ success: false, message: "Invalid payment signature" });
@@ -136,13 +131,8 @@ const confirmPayment = async (req, res) => {
 
    
     user.wallet = (user.wallet || 0) + parseFloat(amount); 
-
-    console.log("User wallet before update:", user.wallet - parseFloat(amount)); // Debug log
-    console.log("User wallet after adding amount:", user.wallet); // Debug log
-
     await user.save();
 
-    // Step 3: Respond with updated balance
     return res.status(200).json({
       success: true,
       message: "Payment confirmed and wallet updated.",

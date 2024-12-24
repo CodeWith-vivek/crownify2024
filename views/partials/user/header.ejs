@@ -197,6 +197,27 @@ body, html {
     .wishlist-table td {
         padding: 10px; /* Adjust padding as needed */
     }
+  @media (max-width: 576px) {
+    .modal-dialog {
+        max-width: 90%; /* Adjust modal width to 90% of the screen */
+        margin: 10px auto; /* Add spacing around the modal */
+    }
+
+    .modal-body .list-group-item .row div {
+        font-size: 12px; /* Smaller text for extra small screens */
+    }
+
+    .modal-title {
+        font-size: 16px; /* Adjust modal title size */
+    }
+
+    .btn-danger {
+        font-size: 14px; /* Adjust button size */
+    }
+    .modal-content{
+        width:  100%;
+    }
+}
 </style>
 </head>
 
@@ -345,14 +366,7 @@ body, html {
                                     <li><a class="dropdown-item" href="/wallet"><i class="fa-solid fa-wallet"></i> Wallet</a>
                                     </li>
                                     <li><a class="dropdown-item" href="/orders"><i class="fa-solid fa-box"></i> Orders</a>
-                                    </li>
-                                <li>
-                                    <a class="dropdown-item" href="#" id="couponsLink">
-                                        <i class="fa-solid fa-ticket-alt"></i> Coupons
-                                    </a>
-                                </li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-cog"></i> Settings</a>
-                                    </li>
+                             
                                     <li><a class="dropdown-item" href="/logout"><i class="fa-solid fa-sign-out-alt"></i>
                                             Logout</a></li>
                                 </ul>

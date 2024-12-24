@@ -34,7 +34,7 @@ const userSchema = new Schema(
     },
     googleId: {
       type: String,
-      default: null, // Ensure null is explicitly allowed
+      default: null, 
     },
     password: {
       type: String,
@@ -106,7 +106,7 @@ const userSchema = new Schema(
       {
         coupon: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Coupon", // Reference to the Coupon model
+          ref: "Coupon", 
         },
         usedCount: {
           type: Number,

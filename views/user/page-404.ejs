@@ -58,58 +58,15 @@
 
                     if (data.blocked) {
 
-                        window.location.href = "/login"; // Redirect to the login page or home page
+                        window.location.href = "/login"; 
                     }
                 } catch (error) {
                     console.error("Error checking block status:", error);
                 }
             }
 
-            // Check every 30 seconds
+      
             setInterval(checkUserBlockStatus, 2000);
         </script>
 
-        <div class="container">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Your Orders</h5>
-                </div>
-                <div class="card-body">
-                    <div class="order-list">
-                        <% if (orders && orders.length> 0) { %>
-                            <% orders.forEach(order=> { %>
-                                <div class="order-item" data-order-id="<%= order.orderNumber %>">
-                                    <h6 class="order-id">Order ID: <%= order.orderNumber || 'N/A' %>
-                                    </h6>
-                                    <% order.items.forEach(item=> { %>
-                                        <div class="product-info">
-                                            <h3>
-                                                <%= item.productId?.productName || 'Product Name' %>
-                                            </h3>
-                                            <span class="badge <%= item.badgeClass %>">
-                                                <%= item.orderStatus || 'Pending' %>
-                                            </span>
-                                        </div>
-                                        <% }); %>
-                                </div>
-                                <% }); %>
-                                    <% } else { %>
-                                        <div class="alert alert-warning" role="alert">
-                                            You have not ordered anything yet.
-                                        </div>
-                                        <% } %>
-                    </div>
-        
-                    <!-- Pagination Controls -->
-                    <div class="pagination-controls">
-                        <% if (currentPage> 1) { %>
-                            <a href="?page=<%= currentPage - 1 %>&limit=<%= limit %>" class="btn btn-secondary">Previous</a>
-                            <% } %>
-                                <span>Page <%= currentPage %> of <%= totalPages %></span>
-                                <% if (currentPage < totalPages) { %>
-                                    <a href="?page=<%= currentPage + 1 %>&limit=<%= limit %>" class="btn btn-secondary">Next</a>
-                                    <% } %>
-                    </div>
-                </div>
-            </div>
-        </div>
+      

@@ -38,11 +38,11 @@ const orderSchema = new Schema(
     },
     subtotal: {
       type: Number,
-      required: true, // Add this to ensure subtotal is always saved
+      required: true, 
     },
     total: {
       type: Number,
-      required: true, // Total before discount
+      required: true, 
     },
     shipping: {
       type: Number,
@@ -50,7 +50,7 @@ const orderSchema = new Schema(
     },
     grandTotal: {
       type: Number,
-      required: true, // Total after discount + shipping
+      required: true, 
     },
     orderedAt: {
       type: Date,

@@ -1,4 +1,4 @@
-const { query } = require("express");
+// const { query } = require("express");
 const User=require("../models/userSchema")
 
 //code to load users list
@@ -55,6 +55,8 @@ const customerBlocked=async(req,res)=>{
      }
 
 }
+
+//code to unlblock the user
 
 const customerUnblocked=async(req,res)=>{
       try {

@@ -36,11 +36,41 @@ body.dark .justify-content-center{
 body.dark h1{
     color: white;
 }
+.justify-content-center {
+    background-color: transparent;
+}
+.pb-30{
+    background-color: transparent;
+}
+ .product-detail-column {
+        min-width: 300px; /* Set the minimum width you want */
+        white-space: nowrap; /* Prevents text wrapping */
+        overflow: hidden; /* Prevents overflow */
+        text-overflow: ellipsis; /* Adds ellipsis for overflowed text */
+    }
+    
+    @media (max-width: 768px) {
+    .table th, .table td {
+        font-size: 12px; /* Adjust font size for smaller screens */
+    }
+}
+.table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.table th, .table td {
+    padding: 8px;
+    text-align: left;
+    overflow: hidden; /* Prevents text overflow */
+    text-overflow: ellipsis; /* Adds ellipsis for overflowed text */
+    white-space: nowrap; /* Prevents text from wrapping */
+}
     </style>
 
 </head>
 
-<body class="dark">
+<body >
     <div class="screen-overlay"></div>
     <aside class="navbar-aside" id="offcanvas_aside">
         <div class="aside-top">
@@ -121,23 +151,18 @@ body.dark h1{
                         class="material-icons md-apps"></i> </button>
                 <ul class="nav">
 
-                    <li class="nav-item">
-                        <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons">dark_mode</i>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons">cast_connected</i>
-                    </li>
+                   
 
                     <li class="dropdown nav-item">
                         <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount"
                             aria-expanded="false"> <img class="img-xs rounded-circle"
                                 src="/assets/admin2/imgs/theme/logoCrownify.png" alt="User"></a>
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
-
-                            <a class="dropdown-item text-danger" id="logoutLink" href="/admin/logout"><i
-                                    class="material-icons md-exit_to_app"></i>Logout</a>
-                        </div>
+                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
+                        <a class="dropdown-item text-danger" id="logoutLink" href="/admin/logout">
+                            <i class="material-icons text-danger" style="font-size: 24px;">exit_to_app</i>
+                            Logout
+                        </a>
+                    </div>
                     </li>
                 </ul>
             </div>

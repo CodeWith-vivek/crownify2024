@@ -1,34 +1,27 @@
 const Product = require("../models/productSchema");
 const Order = require("../models/orderSchema");
 
+//code to get top selling 
 
 const getTopSellingStats = async (req, res) => {
   try {
-    console.log("Fetching top-selling stats...");
 
-    // Fetch Top Products
     const topProducts = await Order.aggregate([
       { $unwind: "$items" },
       {
         $group: {
-          _id: "$items.productId", // Group by productId
-          salesCount: { $sum: "$items.quantity" }, // Sum the quantity sold
+          _id: "$items.productId", 
+          salesCount: { $sum: "$items.quantity" }, 
         },
       },
-      { $sort: { salesCount: -1 } }, // Sort by salesCount descending
-      { $limit: 10 }, // Limit to top 10 products
+      { $sort: { salesCount: -1 } }, 
+      { $limit: 10 },
     ]);
 
-    console.log("Top Products Aggregated:", topProducts);
-
-    // Fetch details for top products
     const populatedProducts = await Product.find({
       _id: { $in: topProducts.map((p) => p._id) },
     }).select("productName productImage");
 
-    console.log("Populated Products Details:", populatedProducts);
-
-    // Merge sales count with product details
     const productsWithSalesCount = populatedProducts.map((product) => {
       const salesData = topProducts.find(
         (p) => p._id.toString() === product._id.toString()
@@ -39,22 +32,15 @@ const getTopSellingStats = async (req, res) => {
       };
     });
 
-    console.log("Products with Sales Count:", productsWithSalesCount);
-
-    // Sort products based on salesCount in descending order
     const rankedProducts = productsWithSalesCount.sort(
       (a, b) => b.salesCount - a.salesCount
     );
 
-    // Calculate total sales count for products
     const totalSoldProducts = rankedProducts.reduce(
       (total, product) => total + product.salesCount,
       0
     );
 
-    console.log("Total Sold Products Count:", totalSoldProducts);
-
-    // Fetch Top Categories
     const topCategories = await Order.aggregate([
       { $unwind: "$items" },
       {
@@ -94,14 +80,11 @@ const getTopSellingStats = async (req, res) => {
       { $limit: 10 },
     ]);
 
-    console.log("Top Categories Aggregated:", topCategories);
-
-    // Fetch Top Brands
   const topBrands = await Order.aggregate([
     { $unwind: "$items" },
     {
         $lookup: {
-            from: "products", // Lookup in the products collection
+            from: "products",
             localField: "items.productId",
             foreignField: "_id",
             as: "productInfo",
@@ -110,9 +93,9 @@ const getTopSellingStats = async (req, res) => {
     { $unwind: "$productInfo" },
     {
         $lookup: {
-            from: "brands", // Lookup in the brands collection
-            localField: "productInfo.brand", // This is the brand name (String)
-            foreignField: "brandName", // Match against the brandName field in brands
+            from: "brands", 
+            localField: "productInfo.brand",
+            foreignField: "brandName", 
             as: "brandInfo",
         },
     },
@@ -121,23 +104,20 @@ const getTopSellingStats = async (req, res) => {
         $group: {
             _id: "$productInfo.brand",
             salesCount: { $sum: "$items.quantity" },
-            brandName: { $first: "$brandInfo.brandName" }, // Fetch the brand name from the joined result
+            brandName: { $first: "$brandInfo.brandName" }, 
         },
     },
     {
         $project: {
             _id: 0,
             salesCount: 1,
-            brandName: { $ifNull: ["$brandName", "Unknown Brand"] }, // Use a default value if brand is not found
+            brandName: { $ifNull: ["$brandName", "Unknown Brand"] },
         },
     },
     { $sort: { salesCount: -1 } },
     { $limit: 10 },
 ]);
 
-    console.log("Top Brands Aggregated:", topBrands);
-
-    // Sending the response
     res.status(200).json({
       success: true,
       data: {

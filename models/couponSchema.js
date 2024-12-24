@@ -12,7 +12,7 @@ const couponSchema = new mongoose.Schema(
     discountType: {
       type: String,
       required: [true, "Discount type is required"],
-      enum: ["percentage", "fixed"], // Allowed values: percentage, fixed
+      enum: ["percentage", "fixed"], 
     },
     discountAmount: {
       type: Number,
@@ -22,7 +22,7 @@ const couponSchema = new mongoose.Schema(
     maxDiscount: {
       type: Number,
    
-      default: null, // Optional field
+      default: null, 
     },
     minPurchase: {
       type: Number,
@@ -43,7 +43,7 @@ const couponSchema = new mongoose.Schema(
       {
         user: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "User", // Assumes your user model is named 'User'
+          ref: "User", 
         },
         used_count: {
           type: Number,
@@ -62,10 +62,10 @@ const couponSchema = new mongoose.Schema(
       default: true,
     },
   },
-  { timestamps: true } // Automatically includes `createdAt` and `updatedAt` fields
+  { timestamps: true }
 );
 
-// Automatically delete expired coupons
+
 couponSchema.index({ expiryDate: 1 }, { expireAfterSeconds: 0 });
 
 module.exports = mongoose.model("Coupon", couponSchema);

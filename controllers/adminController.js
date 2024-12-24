@@ -88,7 +88,7 @@ const loadOrderlist = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1; 
     const search = req.query.search ? req.query.search.trim() : ""; 
-    const limit = 2;
+    const limit = 5;
     const query = search
       ? {
           $or: [
@@ -140,7 +140,7 @@ const updateOrderStatusByAdmin = async (req, res) => {
       });
     }
 
-    // Valid statuses
+    
     const validStatuses = [
       "Placed",
       "Shipped",
@@ -156,7 +156,7 @@ const updateOrderStatusByAdmin = async (req, res) => {
       });
     }
 
-    // Fetch the order
+
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({
@@ -165,7 +165,7 @@ const updateOrderStatusByAdmin = async (req, res) => {
       });
     }
 
-    // Find the order item based on size and color
+   
     const orderItemIndex = order.items.findIndex((item) => {
       if (!item.variant) return false;
 
@@ -193,7 +193,7 @@ const updateOrderStatusByAdmin = async (req, res) => {
 
     const orderItem = order.items[orderItemIndex];
 
-    // Check if the status is already updated
+  
     if (orderItem.orderStatus === newStatus) {
       return res.status(400).json({
         success: false,
@@ -204,7 +204,7 @@ const updateOrderStatusByAdmin = async (req, res) => {
     const productIdFromOrder = orderItem.productId;
 
     if (newStatus === "Returned") {
-      // Handle inventory update for returned items
+    
       const product = await Product.findById(productIdFromOrder);
       if (product) {
         const variantIndex = product.variants.findIndex(
@@ -219,23 +219,22 @@ const updateOrderStatusByAdmin = async (req, res) => {
         }
       }
 
-      // Refund logic for all payment methods
+
       const totalOrderPrice = order.items.reduce(
         (sum, item) => sum + item.totalPrice,
         0
       );
 
-      // Calculate the item's share (ratio) of the total price
+    
       const itemShare = orderItem.totalPrice / totalOrderPrice;
 
-      // Calculate the proportional discount for this item
       const discountForItem = Math.floor(order.discount * itemShare);
 
-      // Refund amount calculation
+   
       const refundAmount = Math.floor(orderItem.totalPrice - discountForItem);
       const userId = order.userId;
 
-      // Adjust the user's wallet
+    
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({
@@ -249,11 +248,11 @@ const updateOrderStatusByAdmin = async (req, res) => {
       await user.save();
     }
 
-    // Update the order item status
+
     order.items[orderItemIndex].orderStatus = newStatus;
      order.paymentStatus = "Completed";
 
-    // Check if all items have the same status
+
     const allItemsSameStatus = order.items.every(
       (item) => item.orderStatus === newStatus
     );

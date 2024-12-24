@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const transactionSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User ", // Reference to the User model
+    ref: "User ", 
     required: true,
   },
   amount: {
@@ -12,7 +12,7 @@ const transactionSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["credit", "debit"], // 'credit' for adding money, 'debit' for deductions
+    enum: ["credit", "debit"],
     required: true,
   },
   description: {
@@ -21,11 +21,11 @@ const transactionSchema = new mongoose.Schema({
   },
   date: {
     type: Date,
-    default: Date.now, // Automatically set to the current date
+    default: Date.now, 
   },
 });
 
-// Create the Transaction model
+
 const Transaction = mongoose.model("Transaction", transactionSchema);
 
 module.exports = Transaction;

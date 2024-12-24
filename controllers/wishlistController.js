@@ -1,6 +1,11 @@
 const User = require("../models/userSchema");
 const Product = require("../models/productSchema");
 const Wishlist=require("../models/wishlistSchema")
+const Category=require("../models/categorySchema")
+const Brand=require("../models/brandSchema")
+
+
+//code to load wishlist page
 
 const loadWishlistpage = async (req, res) => {
   try {
@@ -16,6 +21,16 @@ const loadWishlistpage = async (req, res) => {
       });
     }
 
+    const listedCategories = await Category.find({ isListed: true });
+    const unblockedBrands = await Brand.find({ isBlocked: false });
+
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
+    );
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName)
+    );
+
     const wishlist = await Wishlist.findOne({ userId }).populate({
       path: "items.productId",
       model: "Product",
@@ -25,39 +40,56 @@ const loadWishlistpage = async (req, res) => {
       },
     });
 
-    const wishlistItems = wishlist.items.map((item) => {
-      const product = item.productId;
+    if (!wishlist || wishlist.items.length === 0) {
+      return res.render("Wishlist", {
+        user,
+        wishlistItems: [],
+        isWishlistEmpty: true,
+        isGuest: false,
+      });
+    }
 
-    
-      const variantsBySize = product.variants.reduce((acc, variant) => {
-        if (!acc[variant.size]) {
-          acc[variant.size] = {
-            colors: [],
-            totalQuantity: 0,
-          };
+    const wishlistItems = wishlist.items
+      .map((item) => {
+        const product = item.productId;
+
+        if (
+          product.isBlocked || 
+          !listedCategoryIds.has(product.category?._id?.toString()) || 
+          !unblockedBrandNames.has(product.brand)
+        ) {
+          return null;
         }
 
-      
-        if (!acc[variant.size].colors.includes(variant.color)) {
-          acc[variant.size].colors.push(variant.color);
-        }
-        acc[variant.size].totalQuantity += variant.quantity;
+        const variantsBySize = product.variants.reduce((acc, variant) => {
+          if (!acc[variant.size]) {
+            acc[variant.size] = {
+              colors: [],
+              totalQuantity: 0,
+            };
+          }
 
-        return acc;
-      }, {});
+          if (!acc[variant.size].colors.includes(variant.color)) {
+            acc[variant.size].colors.push(variant.color);
+          }
+          acc[variant.size].totalQuantity += variant.quantity;
 
-      return {
-        productId: product._id,
-        productName: product.productName,
-        productImage: product.productImage[0],
-        brand: product.brand,
-        category:product.category,
-        salePrice: product.salePrice,
-        regularPrice: product.regularPrice,
-        variants: variantsBySize,
-        availableSizes: Object.keys(variantsBySize),
-      };
-    });
+          return acc;
+        }, {});
+
+        return {
+          productId: product._id,
+          productName: product.productName,
+          productImage: product.productImage[0],
+          brand: product.brand,
+          category: product.category,
+          salePrice: product.salePrice,
+          regularPrice: product.regularPrice,
+          variants: variantsBySize,
+          availableSizes: Object.keys(variantsBySize),
+        };
+      })
+      .filter((item) => item !== null); 
 
     res.render("Wishlist", {
       user,
@@ -73,6 +105,9 @@ const loadWishlistpage = async (req, res) => {
     });
   }
 };
+
+
+//code to get color by size
 
 const getColorsBySize = async (req, res) => {
   try {
@@ -124,7 +159,7 @@ const getColorsBySize = async (req, res) => {
 
 
 
-
+//cod eto add to wishlistt
 
 const addToWishlist = async (req, res) => {
   try {
@@ -210,6 +245,9 @@ const addToWishlist = async (req, res) => {
     });
   }
 };
+
+//code to remove from wishlist
+
 const removeFromWishlist = async (req, res) => {
   try {
     const { productId } = req.body;

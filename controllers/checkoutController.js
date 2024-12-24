@@ -8,18 +8,18 @@ const Coupon=require("../models/couponSchema")
 const loadCheckout = async (req, res) => {
   try {
     const userId = req.session.user;
-    console.log("User ID from session:", userId);
+  
 
-    // Validate session
+ 
     if (!userId) {
-      console.log("User not logged in, redirecting to login page");
+    
       return res.redirect("/login");
     }
 
-    // Fetch user data and cart items
+ 
     const userData = await User.findById(userId).populate("addresses");
     if (!userData) {
-      console.log("User data not found, redirecting to login page");
+    
       return res.redirect("/login");
     }
     const addressCount = userData.addresses ? userData.addresses.length : 0;
@@ -29,46 +29,45 @@ const loadCheckout = async (req, res) => {
       model: "Product",
     });
     if (!cartItems || !cartItems.items || cartItems.items.length === 0) {
-      console.log("No cart items found, redirecting to /cart");
+    
       return res.redirect("/cart");
     }
 
-    // Filter valid cart items
+   
     const validCartItems = cartItems.items.filter((item) => item.quantity > 0);
     if (validCartItems.length === 0) {
-      console.log("No valid cart items found, redirecting to /cart");
+    
       return res.redirect("/cart");
     }
 
-    // Calculate subtotal
+   
     const subtotal = validCartItems.reduce((total, item) => {
       const product = item.productId;
       const price = product.salePrice || product.regularPrice || 0;
       return total + item.quantity * price;
     }, 0);
 
-    const shipping = 40; // Fixed shipping cost
+    const shipping = 40;
     let total = subtotal + shipping;
     let discountAmount = 0;
 
-    // Apply coupon discount if available
+ 
     if (req.session.coupon) {
       const { discount } = req.session.coupon;
       if (discount) {
         let originalDiscountAmount = discount.calculatedAmount || 0;
         discountAmount = originalDiscountAmount;
 
-        // Apply maximum discount cap if applicable
+      
         if (discount.maxCap) {
           discountAmount = Math.min(discountAmount, discount.maxCap);
         }
       }
     }
 
-    // Final total calculation
+
     total = Math.max(0, total - discountAmount);
 
-    // Prepare product details for rendering
     const products = validCartItems.map((item) => {
       const product = item.productId;
       const price = product.salePrice || product.regularPrice || 0;
@@ -87,7 +86,7 @@ const loadCheckout = async (req, res) => {
 
     const coupons = await Coupon.find({ isActive: true });
 
-    // Render checkout page
+  
     res.render("checkout3", {
       coupons,
       user: userData,
@@ -102,15 +101,16 @@ const loadCheckout = async (req, res) => {
       coupon: req.session.coupon || null,
     });
 
-    console.log("Checkout page rendered successfully");
+  
 
-    // Clear coupon session after rendering
+   
     req.session.coupon = null;
   } catch (error) {
     console.error("Error on loading checkout:", error);
     res.redirect("/pageNotFound");
   }
 };
+
 //code to validate the quantity
 
 const validateQuantity = async (req, res) => {

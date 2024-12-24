@@ -6,7 +6,7 @@
         <div class="content-header">
             <div>
                 <h2 class="content-title card-title">Order Details</h2>
-                <p>Details for Order ID: <%= order._id %>
+                <p>Details for Order ID: <%= order.orderNumber %>
                 </p>
             </div>
         </div>
@@ -16,27 +16,14 @@
                 <div class="row align-items-center">
                     <div class="col-lg-6 col-md-6 mb-lg-0 mb-15">
                         <span>
-                            <i class="material-icons md-calendar_today"></i>
+                            <i class="material-icons text-primary" style="font-size: 24px;">calendar_today</i>
                             <b>
                                 <%= new Date(order.orderedAt).toLocaleString() %>
                             </b>
                         </span> <br>
-                        <small class="text-muted">Order ID: <%= order._id %></small>
+                        <small class="text-muted">Order ID: <%= order.orderNumber %></small>
                     </div>
-                    <!-- <div class="col-lg-6 col-md-6 ms-auto text-md-end">
-                        <select class="form-select d-inline-block mb-lg-0 mb-15 mw-200">
-                            <option selected>
-                                <%= orderItem.orderStatus %>
-                            </option>
-                            <option>Confirmed</option>
-                            <option>Shipped</option>
-                            <option>Delivered</option>
-                            <option>Returned</option>
-                        </select>
-                        <a class="btn btn-primary" href="#">Save</a>
-                        <a class="btn btn-secondary print ms-2" href="#"><i
-                                class="icon material-icons md-print"></i></a>
-                    </div> -->
+                  
                 </div>
             </header>
 
@@ -45,13 +32,14 @@
                     <div class="col-md-4">
                         <article class="icontext align-items-start">
                             <span class="icon icon-sm rounded-circle ">
-                                <i class="text-primary material-icons md-person"></i>
+                                <i class="material-icons text-primary" style="font-size: 24px;">person</i>
                             </span>
                             <div class="text">
                                 <h6 class="mb-1">Customer</h6>
                                 <p class="mb-1">
                                     <%= order.userId.name %> <br>
                                         <%= order.userId.email %> <br>
+                                        
                                 </p>
                             </div>
                         </article>
@@ -60,7 +48,7 @@
                     <div class="col-md-4">
                         <article class="icontext align-items-start">
                             <span class="icon icon-sm rounded-circle">
-                                <i class="text-primary material-icons md-local_shipping"></i>
+                                <i class="material-icons text-primary" style="font-size: 24px;">local_shipping</i>
                             </span>
                             <div class="text">
                                 <h6 class="mb-1">Order Info</h6>
@@ -75,15 +63,15 @@
                     <div class="col-md-4">
                         <article class="icontext align-items-start">
                             <span class="icon icon-sm rounded-circle">
-                                <i class="text-primary material-icons md-place"></i>
+                            <i class="material-icons text-primary" style="font-size: 24px;">place</i>
                             </span>
                             <div class="text">
                                 <h6 class="mb-1">Deliver To</h6>
-                                <p class="mb-1">
-                                    Address: <%= order.shippingAddress.flatHouseCompany %> <br>
-                                        City: <%= order.shippingAddress.city %> <br>
-                                            ZIP: <%= order.shippingAddress.postalCode %>
-                                </p>
+                            <p class="mb-1">
+                                Address: <%= order.shippingAddress?.flatHouseCompany || 'N/A' %> <br>
+                                    City: <%= order.shippingAddress?.city || 'N/A' %> <br>
+                                        ZIP: <%= order.shippingAddress?.postalCode || 'N/A' %>
+                            </p>
                             </div>
                         </article>
                     </div>
@@ -129,7 +117,8 @@
                                     <tr>
                                     <td colspan="4">
                                         <article class="float-end">
-                                            <p>*shipping extra</p><br>
+                                            <p>*Shipping extra</p><br>
+                                                <p>*Excluding coupon discount</p><br>
 
 
                                             <dl class="dlist">
@@ -139,7 +128,7 @@
                                                 <dd> <b class="h5">₹<%= orderItem.totalPrice %></b> </dd>
                                             </dl>
                                             <dl class="dlist">
-                                                <dt class="text-muted">Status:</dt>
+                                                <dt class="text-muted">Payment status:</dt>
                                                 <dd>
                                                     <span class="badge rounded-pill alert-success text-success"><%= order.paymentStatus %></span>
                                                 </dd>
