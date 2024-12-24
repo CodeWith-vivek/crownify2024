@@ -1,19 +1,19 @@
 const User = require("../models/userSchema");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
-// const env = require("dotenv").config();
-// const session = require("express-session");
+const env = require("dotenv").config();
+const session = require("express-session");
 const Address = require("../models/addressSchema");
-// const express = require("express");
-// const sharp = require("sharp");
+const express = require("express");
+const sharp = require("sharp");
 const Order = require("../models/orderSchema");
 
 const multer = require("multer");
-// const path = require("path");
-// const fs = require("fs").promises;
+const path = require("path");
+const fs = require("fs").promises;
 
 const storage = multer.memoryStorage();
-// const upload = multer({ storage: storage });
+const upload = multer({ storage: storage });
 
 //code for secure password
 

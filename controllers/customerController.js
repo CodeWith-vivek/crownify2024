@@ -1,4 +1,4 @@
-// const { query } = require("express");
+const { query } = require("express");
 const User=require("../models/userSchema")
 
 //code to load users list
