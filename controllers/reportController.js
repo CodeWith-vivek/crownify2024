@@ -4,16 +4,21 @@ const Category = require("../models/categorySchema");
 const PDFDocument = require("pdfkit");
 const path = require("path");
 const xlsx = require("xlsx");
+const pdfMake = require("pdfmake/build/pdfmake");
+const pdfFonts = require("pdfmake/build/vfs_fonts");
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 const fs = require("fs");
 const User = require("../models/userSchema");
 
 //code to download sales report in excel format
 
+
 const downloadExcel = async (req, res) => {
   const { type, startDate, endDate } = req.body;
 
   try {
+    // Validate input for custom date range
     if (type === "custom" && (!startDate || !endDate)) {
       return res.status(400).json({
         status: false,
@@ -21,512 +26,11 @@ const downloadExcel = async (req, res) => {
       });
     }
 
-    const dateQuery = getDateQuery1(type, startDate, endDate);
-    const orders = await Order.find({ orderedAt: dateQuery }).populate(
-      "items.productId"
-    );
-
-    if (!orders || orders.length === 0) {
-      return res.status(400).json({
-        status: false,
-        message: "No orders found for the specified period",
-      });
-    }
-
-    const reportData = processOrdersData1(orders, type, startDate, endDate);
-    const finalReport = generateFinalReport(reportData);
-
-    finalReport.sort((a, b) => new Date(a.Date) - new Date(b.Date));
-
-    const totals = calculateTotals(finalReport);
-
-    const workbook = xlsx.utils.book_new();
-    const worksheet = createMainWorksheet(
-      finalReport,
-      totals,
-      type,
-      startDate,
-      endDate
-    );
-    const summarySheet = createSummaryWorksheet(totals);
-
-    xlsx.utils.book_append_sheet(workbook, worksheet, "Sales Report");
-    xlsx.utils.book_append_sheet(workbook, summarySheet, "Summary");
-
-    const excelBuffer = xlsx.write(workbook, {
-      type: "buffer",
-      bookType: "xlsx",
-    });
-    const filename = getReportFileName(type, startDate, endDate);
-    res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
-    res.setHeader(
-      "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    );
-    res.status(200).send(excelBuffer);
-  } catch (error) {
-    console.error("Error generating Excel report:", error);
-    res.status(500).json({
-      status: false,
-      message: "Error generating Excel report",
-      error: error.message,
-    });
-  }
-};
-
-// code  to get report period based on period  type
-const getReportPeriod = (type, startDate, endDate) => {
-  const today = new Date();
-  switch (type) {
-    case "daily":
-      return today.toLocaleDateString();
-    case "weekly":
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(today.getDate() - today.getDay());
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
-      return `${startOfWeek.toLocaleDateString()} to ${endOfWeek.toLocaleDateString()}`;
-    case "monthly":
-      return today.toLocaleString("default", {
-        month: "long",
-        year: "numeric",
-      });
-    case "yearly":
-      return today.getFullYear().toString();
-    case "custom":
-      return `${new Date(startDate).toLocaleDateString()} to ${new Date(
-        endDate
-      ).toLocaleDateString()}`;
-  }
-};
-
-// code to generate report file name
-
-const getReportFileName = (type, startDate, endDate) => {
-  const timestamp = new Date().toISOString().slice(0, 10);
-  let periodStr = "";
-
-  switch (type) {
-    case "daily":
-      periodStr = new Date().toISOString().slice(0, 10);
-      break;
-    case "weekly":
-      periodStr = "Weekly";
-      break;
-    case "monthly":
-      periodStr = new Date()
-        .toLocaleString("default", { month: "long", year: "numeric" })
-        .replace(" ", "_");
-      break;
-    case "yearly":
-      periodStr = new Date().getFullYear().toString();
-      break;
-    case "custom":
-      periodStr = `${new Date(startDate)
-        .toISOString()
-        .slice(0, 10)}_to_${new Date(endDate).toISOString().slice(0, 10)}`;
-      break;
-  }
-
-  return `Sales_Report_${periodStr}_${timestamp}.xlsx`;
-};
-
-// code  to get date query based on report type
-
-const getDateQuery1 = (type, startDate, endDate) => {
-  const today = new Date();
-  let query = {};
-
-  switch (type) {
-    case "daily":
-      query = {
-        $gte: new Date(today.setHours(0, 0, 0, 0)),
-        $lte: new Date(today.setHours(23, 59, 59, 999)),
-      };
-      break;
-    case "weekly":
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(today.getDate() - today.getDay());
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
-      query = {
-        $gte: new Date(startOfWeek.setHours(0, 0, 0, 0)),
-        $lte: new Date(endOfWeek.setHours(23, 59, 59, 999)),
-      };
-      break;
-    case "monthly":
-      query = {
-        $gte: new Date(today.getFullYear(), today.getMonth(), 1),
-        $lte: new Date(
-          today.getFullYear(),
-          today.getMonth() + 1,
-          0,
-          23,
-          59,
-          59
-        ),
-      };
-      break;
-    case "yearly":
-      query = {
-        $gte: new Date(today.getFullYear(), 0, 1),
-        $lte: new Date(today.getFullYear(), 11, 31, 23, 59, 59),
-      };
-      break;
-    case "custom":
-      query = {
-        $gte: new Date(new Date(startDate).setHours(0, 0, 0, 0)),
-        $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)),
-      };
-      break;
-  }
-  return query;
-};
-
-// code to process orders data and generate report data
-const processOrdersData1 = (orders, type, startDate = null, endDate = null) => {
-  const reportData = {};
-
- 
-  const getDatesInRange = (startDate, endDate) => {
-    const dates = [];
-    let currentDate = new Date(startDate);
-    while (currentDate <= endDate) {
-      dates.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    return dates;
-  };
-
-  if (type === "daily") {
-    const today = new Date();
-    const dateKey = today.toISOString().slice(0, 10);
-    reportData[dateKey] = createEmptyReportObject();
-  } else if (type === "weekly") {
-    const today = new Date();
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay());
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-    const datesInWeek = getDatesInRange(startOfWeek, endOfWeek);
-    datesInWeek.forEach((date) => {
-      reportData[date.toISOString().slice(0, 10)] = createEmptyReportObject();
-    });
-  } else if (type === "monthly") {
-    const today = new Date();
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-
-    const datesInMonth = getDatesInRange(startOfMonth, endOfMonth);
-    datesInMonth.forEach((date) => {
-      reportData[date.toISOString().slice(0, 10)] = createEmptyReportObject();
-    });
-  } else if (type === "yearly") {
-    const months = [];
-    const currentYear = new Date().getFullYear();
-    for (let month = 0; month < 12; month++) {
-      const dateKey = new Date(currentYear, month, 1).toISOString().slice(0, 7);
-      reportData[dateKey] = createEmptyReportObject();
-    }
-  } else if (type === "custom" && startDate && endDate) {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const datesInRange = getDatesInRange(start, end);
-    datesInRange.forEach((date) => {
-      reportData[date.toISOString().slice(0, 10)] = createEmptyReportObject();
-    });
-  }
-
-  orders.forEach((order) => {
-    let dateKey;
-
-    if (type === "yearly") {
-      dateKey = new Date(order.orderedAt).toISOString().slice(0, 7); // YYYY-MM
-    } else {
-      dateKey = new Date(order.orderedAt).toISOString().slice(0, 10); // YYYY-MM-DD
-    }
-
-    if (!reportData[dateKey]) {
-      reportData[dateKey] = createEmptyReportObject();
-    }
-
-    let orderTotalMRP = 0;
-    let orderOfferDiscount = 0;
-    let orderSalePrice = 0;
-
-    order.items.forEach((item) => {
-      orderTotalMRP += item.regularPrice * item.quantity;
-      orderOfferDiscount +=
-        (item.regularPrice - item.salePrice) * item.quantity;
-      orderSalePrice += item.salePrice * item.quantity;
-    });
-
-    reportData[dateKey].totalSalesCount += 1;
-    reportData[dateKey].totalOrderAmount += order.grandTotal;
-    reportData[dateKey].couponDeduction += order.discount || 0;
-    reportData[dateKey].totalMRP += orderTotalMRP;
-    reportData[dateKey].offerDiscount += orderOfferDiscount;
-    reportData[dateKey].salePrice += orderSalePrice;
-    reportData[dateKey].deliveryCharge += order.shipping || 0;
-    reportData[dateKey].totalDiscount =
-      reportData[dateKey].couponDeduction + reportData[dateKey].offerDiscount;
-    reportData[dateKey].averageOrderValue =
-      reportData[dateKey].totalOrderAmount /
-      reportData[dateKey].totalSalesCount;
-  });
-
-  return reportData;
-};
-
-const createEmptyReportObject = () => ({
-  totalSalesCount: 0,
-  totalOrderAmount: 0,
-  totalDiscount: 0,
-  couponDeduction: 0,
-  totalMRP: 0,
-  offerDiscount: 0,
-  salePrice: 0,
-  deliveryCharge: 0,
-  averageOrderValue: 0,
-});
-
-const generateFinalReport = (reportData) => {
-  return Object.entries(reportData).map(([date, data]) => ({
-    Date: date,
-    "Total Sales Count": data.totalSalesCount,
-    "Total Order Amount": data.totalOrderAmount,
-    "Total Discount": data.totalDiscount,
-    "Coupon Deduction": data.couponDeduction,
-    "Total MRP": data.totalMRP,
-    "Offer Discount": data.offerDiscount,
-    "Sale Price": data.salePrice,
-    "Delivery Charge": data.deliveryCharge,
-    "Average Order Value": data.averageOrderValue,
-  }));
-};
-
-const calculateTotals = (finalReport) => {
-  return {
-    Date: "Grand Total",
-    "Total Sales Count": finalReport.reduce(
-      (sum, row) => sum + row["Total Sales Count"],
-      0
-    ),
-    "Total Order Amount": finalReport.reduce(
-      (sum, row) => sum + row["Total Order Amount"],
-      0
-    ),
-    "Total Discount": finalReport.reduce(
-      (sum, row) => sum + row["Total Discount"],
-      0
-    ),
-    "Coupon Deduction": finalReport.reduce(
-      (sum, row) => sum + row["Coupon Deduction"],
-      0
-    ),
-    "Total MRP": finalReport.reduce((sum, row) => sum + row["Total MRP"], 0),
-    "Offer Discount": finalReport.reduce(
-      (sum, row) => sum + row["Offer Discount"],
-      0
-    ),
-    "Sale Price": finalReport.reduce((sum, row) => sum + row["Sale Price"], 0),
-    "Delivery Charge": finalReport.reduce(
-      (sum, row) => sum + row["Delivery Charge"],
-      0
-    ),
-    "Average Order Value":
-      finalReport.reduce((sum, row) => sum + row["Average Order Value"], 0) /
-      finalReport.length,
-  };
-};
-
-
-const createMainWorksheet = (finalReport, totals, type, startDate, endDate) => {
-  const worksheetData = [
-    {
-      A: `Sales Report - ${type.charAt(0).toUpperCase() + type.slice(1)}`,
-      B: "",
-      C: "",
-      D: "",
-      E: "",
-    },
-    {
-      A: `Period: ${getReportPeriod(type, startDate, endDate)}`,
-      B: "",
-      C: "",
-      D: "",
-      E: "",
-    },
-    {
-      A: `Generated on: ${new Date().toLocaleString()}`,
-      B: "",
-      C: "",
-      D: "",
-      E: "",
-    },
-    { A: "", B: "", C: "", D: "", E: "" }, 
-    {
-      Date: "Date",
-      "Total Sales Count": "Total Sales Count",
-      "Total Order Amount": "Total Order Amount",
-      "Total Discount": "Total Discount",
-      "Coupon Deduction": "Coupon Deduction",
-      "Total MRP": "Total MRP",
-      "Offer Discount": "Offer Discount",
-      "Sale Price": "Sale Price",
-      "Delivery Charge": "Delivery Charge",
-      "Average Order Value": "Average Order Value",
-    },
-    ...finalReport,
-    totals,
-  ];
-
-  const worksheet = xlsx.utils.json_to_sheet(worksheetData, {
-    skipHeader: true,
-  });
-
-  applyStylesToWorksheet(worksheet);
-
-  return worksheet;
-};
-
-const createSummaryWorksheet = (totals) => {
-  const summaryData = [
-    { A: "Sales Report Summary", B: "", C: "", D: "", E: "" },
-    { A: "", B: "", C: "", D: "", E: "" },
-    { A: "Key Metrics", B: "Value", C: "", D: "", E: "" },
-    {
-      A: "Total Orders",
-      B: totals["Total Sales Count"],
-      C: "",
-      D: "",
-      E: "",
-    },
-    {
-      A: "Total Revenue",
-      B: totals["Total Order Amount"],
-      C: "",
-      D: "",
-      E: "",
-    },
-    {
-      A: "Total Discounts",
-      B: totals["Total Discount"],
-      C: "",
-      D: "",
-      E: "",
-    },
-    { A: "Net Sales", B: totals["Sale Price"], C: "", D: "", E: "" },
-    {
-      A: "Average Order Value",
-      B: totals["Average Order Value"],
-      C: "",
-      D: "",
-      E: "",
-    },
-    {
-      A: "Total Delivery Charges",
-      B: totals["Delivery Charge"],
-      C: "",
-      D: "",
-      E: "",
-    },
-  ];
-
-  return xlsx.utils.json_to_sheet(summaryData, { skipHeader: true });
-};
-
-
-const applyStylesToWorksheet = (worksheet) => {
-  const styles = {
-    header: {
-      font: { bold: true, size: 14 },
-      fill: { fgColor: { rgb: "4F81BD" } },
-      alignment: { horizontal: "center" },
-    },
-    subHeader: {
-      font: { bold: true, size: 12 },
-      fill: { fgColor: { rgb: "DCE6F1" } },
-    },
-    total: {
-      font: { bold: true },
-      fill: { fgColor: { rgb: "E4E4E4" } },
-    },
-    currency: {
-      numFmt: '"₹"#,##0.00',
-    },
-    border: {
-      border: {
-        top: { style: "thin" },
-        bottom: { style: "thin" },
-        left: { style: "thin" },
-        right: { style: "thin" },
-      },
-    },
-  };
-
-  const range = xlsx.utils.decode_range(worksheet["!ref"]);
-
-
-  for (let C = range.s.c; C <= range.e.c; ++C) {
-    const headerAddress = xlsx.utils.encode_cell({ r: 4, c: C });
-    if (!worksheet[headerAddress]) continue;
-    worksheet[headerAddress].s = { ...styles.header, ...styles.border };
-  }
-
-  worksheet["A1"].s = {
-    font: { bold: true, size: 16 },
-    alignment: { horizontal: "center" },
-    ...styles.border,
-  };
-  worksheet["A2"].s = styles.subHeader;
-  worksheet["A3"].s = styles.subHeader;
-
-  const lastRow = range.e.r;
-  for (let C = range.s.c; C <= range.e.c; ++C) {
-    const address = xlsx.utils.encode_cell({ r: lastRow, c: C });
-    if (!worksheet[address]) continue;
-    worksheet[address].s = { ...styles.total, ...styles.border };
-  }
-
-  const colWidths = [
-    { wch: 15 }, 
-    { wch: 15 }, 
-    { wch: 20 }, 
-    { wch: 15 }, 
-    { wch: 15 }, 
-    { wch: 15 },
-    { wch: 15 }, 
-    { wch: 15 }, 
-    { wch: 15 }, 
-    { wch: 20 }, 
-  ];
-  worksheet["!cols"] = colWidths;
-
-  for (let R = 5; R <= lastRow; ++R) {
-    const currencyCols = [2, 3, 4, 5, 6, 7, 8, 9];
-    currencyCols.forEach((C) => {
-      const address = xlsx.utils.encode_cell({ r: R, c: C });
-      if (!worksheet[address]) return;
-      worksheet[address].s = {
-        ...worksheet[address].s,
-        ...styles.currency,
-        ...styles.border,
-      };
-    });
-  }
-};
-
-//code to generate sales report
-
-const generateSalesReport = async (req, res) => {
-  const { type, startDate, endDate } = req.body;
-
-  try {
+    // Get all orders for the period without pagination
     let query = {};
     const today = new Date();
 
+    // Date range query logic based on the report type
     switch (type) {
       case "daily":
         query.orderedAt = {
@@ -557,14 +61,9 @@ const generateSalesReport = async (req, res) => {
         };
         break;
       case "custom":
-        if (!startDate || !endDate || new Date(startDate) > new Date(endDate)) {
-          return res
-            .status(400)
-            .json({ status: false, message: "Invalid date range" });
-        }
         query.orderedAt = {
-          $gte: new Date(startDate),
-          $lte: new Date(endDate),
+          $gte: new Date(new Date(startDate).setHours(0, 0, 0, 0)),
+          $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)),
         };
         break;
       default:
@@ -573,72 +72,376 @@ const generateSalesReport = async (req, res) => {
           .json({ status: false, message: "Invalid report type" });
     }
 
-    const orders = await Order.find(query).populate("items.productId"); 
+    // Fetch orders with detailed product information
+    const orders = await Order.find(query)
+      .populate({
+        path: "items.productId",
+        select: "productName brand regularPrice salePrice variants category",
+        populate: {
+          path: "category",
+          select: "name",
+        },
+      })
+      .sort({ orderedAt: -1 });
 
-    const reportData = {};
-    orders.forEach((order) => {
-      const dateKey =
-        type === "yearly"
-          ? new Date(order.orderedAt).toISOString().slice(0, 7) 
-          : type === "monthly"
-          ? new Date(order.orderedAt).toISOString().slice(0, 10) 
-          : new Date(order.orderedAt).toISOString().slice(0, 10); 
-
-      if (!reportData[dateKey]) {
-        reportData[dateKey] = {
-          totalSalesCount: 0,
-          totalOrderAmount: 0,
-          totalDiscount: 0,
-          couponDeduction: 0,
-          totalMRP: 0,
-          offerDiscount: 0,
-          salePrice: 0,
-          deliveryCharge: 0,
-        };
-      }
-
-      let orderTotalMRP = 0;
-      let orderOfferDiscount = 0;
-      let orderSalePrice = 0;
-
-      order.items.forEach((item) => {
-        orderTotalMRP += item.regularPrice * item.quantity; 
-        orderOfferDiscount +=
-          (item.regularPrice - item.salePrice) * item.quantity; 
-        orderSalePrice += item.salePrice * item.quantity; 
+    if (!orders || orders.length === 0) {
+      return res.status(400).json({
+        status: false,
+        message: "No orders found for the specified period",
       });
+    }
 
-      reportData[dateKey].totalSalesCount += 1;
-      reportData[dateKey].totalOrderAmount += order.grandTotal;
+    // Process orders data for Excel
+    const processedData = orders
+      .map((order) => {
+        const orderItems = order.items.map((item) => {
+          const product = item.productId;
+          const variant = product.variants[0];
 
-      reportData[dateKey].couponDeduction += order.discount; 
+          return {
+            orderNumber: order.orderNumber,
+            date: order.orderedAt.toISOString().split("T")[0],
+            productName: product.productName,
+            brand: product.brand,
+            category: product.category ? product.category.name : "N/A",
+            color: variant ? variant.color : "N/A",
+            size: variant ? variant.size : "N/A",
+            quantity: item.quantity,
+            regularPrice: item.regularPrice,
+            salePrice: item.salePrice,
+            itemDiscount: (item.regularPrice - item.salePrice) * item.quantity,
+            couponDiscount: order.discount / order.items.length,
+            shipping: order.shipping / order.items.length,
+            itemTotal: item.salePrice * item.quantity,
+          };
+        });
 
-      reportData[dateKey].totalDiscount =
-        reportData[dateKey].couponDeduction + reportData[dateKey].offerDiscount;
+        return orderItems;
+      })
+      .flat();
 
-      reportData[dateKey].totalMRP += orderTotalMRP;
-      reportData[dateKey].offerDiscount += orderOfferDiscount;
-      reportData[dateKey].salePrice += orderSalePrice;
+    // Calculate summary data
+    const summary = {
+      totalOrders: orders.length,
+      totalQuantity: processedData.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      ),
+      totalRegularPrice: processedData.reduce(
+        (sum, item) => sum + item.regularPrice * item.quantity,
+        0
+      ),
+      totalSalePrice: processedData.reduce(
+        (sum, item) => sum + item.salePrice * item.quantity,
+        0
+      ),
+      totalItemDiscount: processedData.reduce(
+        (sum, item) => sum + item.itemDiscount,
+        0
+      ),
+      totalCouponDiscount: processedData.reduce(
+        (sum, item) => sum + item.couponDiscount,
+        0
+      ),
+      totalShipping: processedData.reduce(
+        (sum, item) => sum + item.shipping,
+        0
+      ),
+      totalRevenue: processedData.reduce(
+        (sum, item) => sum + item.itemTotal + item.shipping,
+        0
+      ),
+    };
 
-      reportData[dateKey].deliveryCharge += order.shipping;
+    // Create workbook and worksheets
+    const workbook = xlsx.utils.book_new();
+
+    // Detailed orders worksheet
+    const detailsWorksheet = xlsx.utils.json_to_sheet(processedData);
+
+    // Summary worksheet
+    const summaryData = [
+      ["Sales Report Summary"],
+      [""],
+      ["Period", getReportPeriod(type, startDate, endDate)],
+      ["Generated On", new Date().toLocaleString()],
+      [""],
+      ["Metric", "Value"],
+      ["Total Orders", summary.totalOrders],
+      ["Total Quantity Sold", summary.totalQuantity],
+      ["Total Regular Price", summary.totalRegularPrice],
+      ["Total Sale Price", summary.totalSalePrice],
+      ["Total Item Discounts", summary.totalItemDiscount],
+      ["Total Coupon Discounts", summary.totalCouponDiscount],
+      ["Total Shipping", summary.totalShipping],
+      ["Total Revenue", summary.totalRevenue],
+    ];
+    const summaryWorksheet = xlsx.utils.aoa_to_sheet(summaryData);
+
+    // Apply styling
+    const headerStyle = {
+      font: { bold: true, color: { rgb: "FFFFFF" } },
+      fill: { fgColor: { rgb: "4472C4" } },
+      alignment: { horizontal: "center" },
+    };
+
+    const currencyStyle = { numFmt: '"₹"#,##0.00' };
+
+    // Apply styles to details worksheet
+    const detailsRange = xlsx.utils.decode_range(detailsWorksheet["!ref"]);
+    for (let C = detailsRange.s.c; C <= detailsRange.e.c; ++C) {
+      const headerCell = xlsx.utils.encode_cell({ r: 0, c: C });
+      detailsWorksheet[headerCell].s = headerStyle;
+    }
+
+    // Set column widths
+    detailsWorksheet["!cols"] = [
+      { wch: 12 }, // Order Number
+      { wch: 12 }, // Date
+      { wch: 30 }, // Product Name
+      { wch: 15 }, // Brand
+      { wch: 15 }, // Category
+      { wch: 10 }, // Color
+      { wch: 10 }, // Size
+      { wch: 10 }, // Quantity
+      { wch: 12 }, // Regular Price
+      { wch: 12 }, // Sale Price
+      { wch: 12 }, // Item Discount
+      { wch: 12 }, // Coupon Discount
+      { wch: 12 }, // Shipping
+      { wch: 12 }, // Item Total
+    ];
+
+    // Add worksheets to workbook
+    xlsx.utils.book_append_sheet(workbook, detailsWorksheet, "Order Details");
+    xlsx.utils.book_append_sheet(workbook, summaryWorksheet, "Summary");
+
+    // Generate Excel file
+    const excelBuffer = xlsx.write(workbook, {
+      type: "buffer",
+      bookType: "xlsx",
     });
 
-    const finalReport = Object.entries(reportData).map(([date, data]) => ({
-      date,
-      ...data,
-    }));
+    // Set response headers
+    const filename = `Sales_Report_${type}_${new Date()
+      .toISOString()
+      .slice(0, 10)}.xlsx`;
+    res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
 
-    return res.json({
-      status: true,
-      report: finalReport,
-    });
+    // Send the file
+    res.status(200).send(excelBuffer);
   } catch (error) {
-    console.error("Error fetching sales report:", error);
-    return res
-      .status(500)
-      .json({ status: false, message: "Internal server error" });
+    console.error("Error generating Excel report:", error);
+    res.status(500).json({
+      status: false,
+      message: "Error generating Excel report",
+      error: error.message,
+    });
   }
 };
+
+// Helper function to get report period
+const getReportPeriod = (type, startDate, endDate) => {
+  const today = new Date();
+  switch (type) {
+    case "daily":
+      return today.toLocaleDateString();
+    case "weekly":
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay());
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      return `${startOfWeek.toLocaleDateString()} to ${endOfWeek.toLocaleDateString()}`;
+    case "monthly":
+      return today.toLocaleString("default", {
+        month: "long",
+        year: "numeric",
+      });
+    case "yearly":
+      return today.getFullYear().toString();
+    case "custom":
+      return `${new Date(startDate).toLocaleDateString()} to ${new Date(
+        endDate
+      ).toLocaleDateString()}`;
+    default:
+      return "";
+  }
+};
+
+//code to generate sales report
+
+
+const generateSalesReport = async (req, res) => {
+    const { type, startDate, endDate, page = 1, limit = 10 } = req.body;
+    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+
+    try {
+        let query = {};
+        const today = new Date();
+
+        // Date range query logic based on the report type
+        switch (type) {
+            case "daily":
+                query.orderedAt = {
+                    $gte: new Date(today.setHours(0, 0, 0, 0)),
+                    $lte: new Date(today.setHours(23, 59, 59, 999)),
+                };
+                break;
+            case "weekly":
+                const startOfWeek = new Date();
+                startOfWeek.setDate(today.getDate() - today.getDay());
+                const endOfWeek = new Date();
+                endOfWeek.setDate(today.getDate() + (6 - today.getDay()));
+                query.orderedAt = {
+                    $gte: startOfWeek,
+                    $lte: endOfWeek,
+                };
+                break;
+            case "monthly":
+                query.orderedAt = {
+                    $gte: new Date(today.getFullYear(), today.getMonth(), 1),
+                    $lte: new Date(today.getFullYear(), today.getMonth() + 1, 0),
+                };
+                break;
+            case "yearly":
+                query.orderedAt = {
+                    $gte: new Date(today.getFullYear(), 0, 1),
+                    $lte: new Date(today.getFullYear(), 11, 31),
+                };
+                break;
+            case "custom":
+                if (!startDate || !endDate || new Date(startDate) > new Date(endDate)) {
+                    return res
+                        .status(400)
+                        .json({ status: false, message: "Invalid date range" });
+                }
+                query.orderedAt = {
+                    $gte: new Date(startDate),
+                    $lte: new Date(endDate),
+                };
+                break;
+            default:
+                return res
+                    .status(400)
+                    .json({ status: false, message: "Invalid report type" });
+        }
+
+        // Get total count for pagination
+        const totalOrders = await Order.countDocuments(query);
+        if (totalOrders === 0) {
+            return res.json({
+                status: true,
+                report: [],
+                totals: {},
+                pagination: {
+                    currentPage: page,
+                    totalPages: 0,
+                    totalOrders: 0,
+                    hasNextPage: false,
+                    hasPrevPage: false,
+                },
+            });
+        }
+
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        // Fetch orders with detailed product information
+        const orders = await Order.find(query)
+            .populate({
+                path: "items.productId",
+                select: "productName brand regularPrice salePrice variants category",
+                populate: {
+                    path: "category",
+                    select: "name",
+                },
+            })
+            .sort({ orderedAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        // // Calculate totals for all orders
+      
+        let totalQuantity = 0;
+        let totalRegularPrice = 0; // New variable for total regular price
+        let totalSalePrice = 0; // New variable for total sale price
+        let totalItemDiscount = 0; // New variable for total item discount
+        let totalCouponDiscount = 0; // New variable for total coupon discount
+        let totalItemTotal = 0;
+        let totalShipping = 0;
+        let totalOrderTotal = 0;
+
+        const report = orders.map((order) => {
+          const orderItemTotals = order.items.map((item) => {
+            const product = item.productId;
+            const variant = product.variants[0];
+
+            const itemTotal = item.salePrice * item.quantity;
+            const shipping = order.shipping / order.items.length;
+
+            totalQuantity += item.quantity;
+            totalRegularPrice += item.regularPrice * item.quantity; // Accumulate regular price
+            totalSalePrice += item.salePrice * item.quantity; // Accumulate sale price
+            totalItemDiscount +=
+              (item.regularPrice - item.salePrice) * item.quantity; // Accumulate item discount
+            totalCouponDiscount += order.discount / order.items.length; // Accumulate coupon discount
+            totalItemTotal += itemTotal; // Accumulate item total
+            totalShipping += shipping; // Accumulate shipping
+            totalOrderTotal += itemTotal + shipping; // Accumulate order total
+
+            return {
+              name: product.productName,
+              brand: product.brand,
+              color: variant ? variant.color : "N/A",
+              size: variant ? variant.size : "N/A",
+              category: product.category ? product.category.name : "N/A",
+              quantity: item.quantity,
+              regularPrice: item.regularPrice,
+              salePrice: item.salePrice,
+              itemDiscount: item.regularPrice - item.salePrice,
+              couponDiscount: order.discount / order.items.length,
+              itemTotal: itemTotal,
+              shipping: shipping,
+            };
+          });
+
+          return {
+            orderNumber: order.orderNumber,
+            date: order.orderedAt.toISOString().split("T")[0],
+            items: orderItemTotals,
+          };
+        });
+
+        return res.json({
+          status: true,
+          report,
+          totals: {
+            totalQuantity,
+            totalRegularPrice, // Add total regular price to the totals
+            totalSalePrice, // Add total sale price to the totals
+            totalItemDiscount, // Add total item discount to the totals
+            totalCouponDiscount, // Add total coupon discount to the totals
+            totalItemTotal,
+            totalShipping,
+            totalOrderTotal,
+          },
+          pagination: {
+            currentPage: page,
+            totalPages,
+            totalOrders,
+            hasNextPage: page < totalPages,
+            hasPrevPage: page > 1,
+          },
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ status: false, message: "Internal server error" });
+    }
+};
+
 
 //code to get overall revenue
 
@@ -831,11 +634,13 @@ const salesChart = async (req, res) => {
 
 //code to download report in pdf
 
+
+
+
 const reportPdf = async (req, res) => {
   const { type, startDate, endDate } = req.body;
 
   try {
-
     if (type === "custom" && (!startDate || !endDate)) {
       return res.status(400).json({
         status: false,
@@ -843,10 +648,57 @@ const reportPdf = async (req, res) => {
       });
     }
 
-    const dateQuery = getDateQuery(type, startDate, endDate);
-    const orders = await Order.find({
-      orderedAt: dateQuery,
-    }).populate("items.productId");
+    // Use the same date query logic from your original report generation
+    let query = {};
+    const today = new Date();
+
+    switch (type) {
+      case "daily":
+        query.orderedAt = {
+          $gte: new Date(today.setHours(0, 0, 0, 0)),
+          $lte: new Date(today.setHours(23, 59, 59, 999)),
+        };
+        break;
+      case "weekly":
+        const startOfWeek = new Date();
+        startOfWeek.setDate(today.getDate() - today.getDay());
+        const endOfWeek = new Date();
+        endOfWeek.setDate(today.getDate() + (6 - today.getDay()));
+        query.orderedAt = {
+          $gte: startOfWeek,
+          $lte: endOfWeek,
+        };
+        break;
+      case "monthly":
+        query.orderedAt = {
+          $gte: new Date(today.getFullYear(), today.getMonth(), 1),
+          $lte: new Date(today.getFullYear(), today.getMonth() + 1, 0),
+        };
+        break;
+      case "yearly":
+        query.orderedAt = {
+          $gte: new Date(today.getFullYear(), 0, 1),
+          $lte: new Date(today.getFullYear(), 11, 31),
+        };
+        break;
+      case "custom":
+        query.orderedAt = {
+          $gte: new Date(startDate),
+          $lte: new Date(endDate),
+        };
+        break;
+    }
+
+    const orders = await Order.find(query)
+      .populate({
+        path: "items.productId",
+        select: "productName brand regularPrice salePrice variants category",
+        populate: {
+          path: "category",
+          select: "name",
+        },
+      })
+      .sort({ orderedAt: -1 });
 
     if (!orders || orders.length === 0) {
       return res.status(404).json({
@@ -855,11 +707,57 @@ const reportPdf = async (req, res) => {
       });
     }
 
-    const reportData = processOrdersData(orders);
-    const finalReport = Object.entries(reportData).map(([date, data]) => ({
-      date,
-      ...data,
-    }));
+    // Calculate totals
+    let totals = {
+      totalQuantity: 0,
+      totalRegularPrice: 0,
+      totalSalePrice: 0,
+      totalItemDiscount: 0,
+      totalCouponDiscount: 0,
+      totalItemTotal: 0,
+      totalShipping: 0,
+      totalOrderTotal: 0,
+    };
+
+    const reportData = orders.map((order) => {
+      const orderDetails = {
+        orderNumber: order.orderNumber,
+        date: order.orderedAt.toISOString().split("T")[0],
+        items: order.items.map((item) => {
+          const product = item.productId;
+          const variant = product.variants[0];
+          const itemTotal = item.salePrice * item.quantity;
+          const shipping = order.shipping / order.items.length;
+
+          // Update totals
+          totals.totalQuantity += item.quantity;
+          totals.totalRegularPrice += item.regularPrice * item.quantity;
+          totals.totalSalePrice += item.salePrice * item.quantity;
+          totals.totalItemDiscount +=
+            (item.regularPrice - item.salePrice) * item.quantity;
+          totals.totalCouponDiscount += order.discount / order.items.length;
+          totals.totalItemTotal += itemTotal;
+          totals.totalShipping += shipping;
+          totals.totalOrderTotal += itemTotal + shipping;
+
+          return {
+            name: product.productName,
+            brand: product.brand,
+            color: variant ? variant.color : "N/A",
+            size: variant ? variant.size : "N/A",
+            category: product.category ? product.category.name : "N/A",
+            quantity: item.quantity,
+            regularPrice: item.regularPrice,
+            salePrice: item.salePrice,
+            itemDiscount: item.regularPrice - item.salePrice,
+            couponDiscount: order.discount / order.items.length,
+            itemTotal: itemTotal,
+            shipping: shipping,
+          };
+        }),
+      };
+      return orderDetails;
+    });
 
     const doc = new PDFDocument({
       margin: 50,
@@ -877,7 +775,15 @@ const reportPdf = async (req, res) => {
 
     doc.pipe(res);
 
-    generatePdfContent(doc, type, startDate, endDate, finalReport);
+    // Generate PDF content
+    generateEnhancedPdfContent(
+      doc,
+      type,
+      startDate,
+      endDate,
+      reportData,
+      totals
+    );
 
     doc.end();
   } catch (error) {
@@ -890,19 +796,219 @@ const reportPdf = async (req, res) => {
   }
 };
 
+
+
+
+
+const generateEnhancedPdfContent = (
+  doc,
+  type,
+  startDate,
+  endDate,
+  reportData,
+  totals
+) => {
+  // Header
+  doc
+    .fontSize(24)
+    .font("Helvetica-Bold")
+    .text("SALES REPORT", { align: "center" })
+    .fontSize(14)
+    .font("Helvetica")
+    .text(getReportPeriodText(type, startDate, endDate), { align: "center" });
+
+  doc.moveDown(1);
+
+  // Summary Section
+  doc
+    .fontSize(16)
+    .font("Helvetica-Bold")
+    .text("Summary", { align: "center", underline: true });
+
+  doc.moveDown(0.5);
+
+  // Format numbers for summary
+  const formattedSummary = {
+    headers: ["Metric", "Value"],
+    rows: [
+      ["Total Orders", reportData.length],
+      ["Total Items Sold", totals.totalQuantity],
+      ["Total Regular Price", totals.totalRegularPrice],
+      ["Total Sale Price", totals.totalSalePrice],
+      ["Total Item Discounts", totals.totalItemDiscount],
+      ["Total Coupon Discounts", totals.totalCouponDiscount],
+      ["Total Shipping", totals.totalShipping],
+      ["Total Order Value", totals.totalOrderTotal],
+    ],
+  };
+
+  generateTable(doc, formattedSummary, true);
+  doc.moveDown(1);
+
+  // Add a new page for Order Details
+  doc.addPage();
+
+  // Order Details Section
+  doc
+    .fontSize(16)
+    .font("Helvetica-Bold")
+    .text("Order Details", { align: "center", underline: true });
+
+  doc.moveDown(0.5);
+
+  // Define column widths as percentages of the table width
+  const columnWidths = {
+    orderNumber: 0.1, // 10%
+    name: 0.2, // 20%
+    brand: 0.1, // 10%
+    category: 0.1, // 10%
+    quantity: 0.07, // 7%
+    salePrice: 0.1, // 10%
+    itemDiscount: 0.11, // 11%
+    shipping: 0.07, // 7%
+    couponDiscount: 0.08, // 8%
+    total: 0.07, // 7%
+  };
+
+  const orderTable = {
+    headers: [
+      "Order Number",
+      "Product",
+      "Brand",
+      "Category",
+      "Qty",
+      "Price",
+      "Offer Discount",
+      "Shipping",
+      "Coupon ",
+      "Total",
+    ],
+    columnWidths,
+    rows: [],
+  };
+
+  // Prepare order details rows
+  reportData.forEach((order) => {
+    order.items.forEach((item) => {
+      orderTable.rows.push([
+        order.orderNumber,
+        item.name,
+        item.brand,
+        item.category,
+        item.quantity.toString(),
+        item.salePrice,
+        item.itemDiscount * item.quantity,
+        item.shipping,
+        item.couponDiscount,
+        item.itemTotal,
+      ]);
+    });
+  });
+
+  generateTable(doc, orderTable, false);
+};
+
+
+
+
+const generateTable = (doc, tableData, isSimpleTable) => {
+  const { headers, rows, columnWidths } = tableData;
+  const tablePadding = 10;
+  const cellPadding = 5;
+  const fontSize = 7; // Font size
+  const extraRowSpace = 10; // Additional space after each row
+  const tableWidth = doc.page.width - 2 * tablePadding;
+
+  let startX = tablePadding;
+  let startY = doc.y + cellPadding;
+
+  // Calculate column widths
+  let colWidths;
+  if (isSimpleTable) {
+    colWidths = headers.map(() => tableWidth / headers.length);
+  } else {
+    colWidths = Object.values(columnWidths).map((width) => tableWidth * width);
+  }
+
+  // Function to draw table header
+  const drawTableHeader = () => {
+    doc.fontSize(fontSize).font("Helvetica-Bold"); // Set font size and bold font for header
+    let x = startX;
+    headers.forEach((header, i) => {
+      doc.text(header, x, startY, {
+        width: colWidths[i],
+        align: "center", // Center-align the header
+        lineBreak: false,
+      });
+      x += colWidths[i];
+    });
+
+    // Draw header separator line
+    doc
+      .moveTo(startX, startY + fontSize + 2)
+      .lineTo(startX + tableWidth, startY + fontSize + 2)
+      .stroke();
+
+    return startY + fontSize + cellPadding;
+  };
+
+  // Draw initial header
+  startY = drawTableHeader();
+
+  // Draw rows
+  doc.font("Helvetica").fontSize(fontSize); // Set font size for rows
+
+  let rowCount = 0; // Initialize row count
+
+  rows.forEach((row) => {
+    const rowHeight = fontSize + cellPadding + extraRowSpace; // Increased row height
+
+    // Check if we need a new page
+    if (rowCount >= 30) {
+      // Limit to 10 rows per page
+      doc.addPage();
+      startY = tablePadding;
+      startY = drawTableHeader();
+      rowCount = 0; // Reset row count for new page
+    }
+
+    let x = startX;
+    row.forEach((cell, i) => {
+      // Truncate long text and add ellipsis if necessary
+      let cellText = cell.toString();
+      const maxWidth = colWidths[i] - cellPadding;
+
+      doc.text(cellText, x, startY, {
+        width: maxWidth,
+        align: "center", // Center-align the cell text
+        lineBreak: false,
+        ellipsis: true,
+      });
+
+      x += colWidths[i];
+    });
+
+    startY += rowHeight; // Move down by the new row height
+    rowCount++; // Increment row count
+  });
+
+  // Update document Y position
+  doc.y = startY + cellPadding;
+};
 const getReportPeriodText = (type, startDate, endDate) => {
+  const today = new Date();
   switch (type) {
     case "daily":
-      return `Daily Report - ${new Date().toLocaleDateString()}`;
+      return `Daily Report - ${today.toLocaleDateString()}`;
     case "weekly":
-      return "Weekly Report";
+      return `Weekly Report - Week of ${today.toLocaleDateString()}`;
     case "monthly":
-      return `Monthly Report - ${new Date().toLocaleString("default", {
+      return `Monthly Report - ${today.toLocaleString("default", {
         month: "long",
         year: "numeric",
       })}`;
     case "yearly":
-      return `Yearly Report - ${new Date().getFullYear()}`;
+      return `Yearly Report - ${today.getFullYear()}`;
     case "custom":
       return `Custom Report (${new Date(
         startDate
@@ -912,96 +1018,8 @@ const getReportPeriodText = (type, startDate, endDate) => {
   }
 };
 
-const getDateQuery = (type, startDate, endDate) => {
-  const today = new Date();
-  let query = {};
 
-  switch (type) {
-    case "daily":
-      query = {
-        $gte: new Date(today.setHours(0, 0, 0, 0)),
-        $lte: new Date(today.setHours(23, 59, 59, 999)),
-      };
-      break;
-    case "weekly":
-      const startOfWeek = new Date();
-      startOfWeek.setDate(today.getDate() - today.getDay());
-      const endOfWeek = new Date();
-      endOfWeek.setDate(today.getDate() + (6 - today.getDay()));
-      query = {
-        $gte: startOfWeek,
-        $lte: endOfWeek,
-      };
-      break;
-    case "monthly":
-      query = {
-        $gte: new Date(today.getFullYear(), today.getMonth(), 1),
-        $lte: new Date(today.getFullYear(), today.getMonth() + 1, 0),
-      };
-      break;
-    case "yearly":
-      query = {
-        $gte: new Date(today.getFullYear(), 0, 1),
-        $lte: new Date(today.getFullYear(), 11, 31),
-      };
-      break;
-    case "custom":
-      query = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
-      };
-      break;
-  }
-  return query;
-};
 
-const processOrdersData = (orders) => {
-  const reportData = {};
-
-  orders.forEach((order) => {
-    const dateKey = new Date(order.orderedAt).toISOString().slice(0, 10); 
-
-    if (!reportData[dateKey]) {
-      reportData[dateKey] = {
-        totalSalesCount: 0,
-        totalOrderAmount: 0,
-        totalDiscount: 0,
-        couponDeduction: 0,
-        totalMRP: 0,
-        offerDiscount: 0,
-        salePrice: 0,
-        deliveryCharge: 0,
-        averageOrderValue: 0,
-      };
-    }
-
-    let orderTotalMRP = 0;
-    let orderOfferDiscount = 0;
-    let orderSalePrice = 0;
-
-    order.items.forEach((item) => {
-      orderTotalMRP += item.regularPrice * item.quantity;
-      orderOfferDiscount +=
-        (item.regularPrice - item.salePrice) * item.quantity;
-      orderSalePrice += item.salePrice * item.quantity;
-    });
-
-    reportData[dateKey].totalSalesCount += 1;
-    reportData[dateKey].totalOrderAmount += order.grandTotal;
-    reportData[dateKey].couponDeduction += order.discount || 0;
-    reportData[dateKey].totalMRP += orderTotalMRP;
-    reportData[dateKey].offerDiscount += orderOfferDiscount;
-    reportData[dateKey].salePrice += orderSalePrice;
-    reportData[dateKey].deliveryCharge += order.shipping || 0;
-    reportData[dateKey].totalDiscount =
-      reportData[dateKey].couponDeduction + reportData[dateKey].offerDiscount;
-    reportData[dateKey].averageOrderValue =
-      reportData[dateKey].totalOrderAmount /
-      reportData[dateKey].totalSalesCount;
-  });
-
-  return reportData;
-};
 const getTotalOrders = async (req, res) => {
   try {
 
@@ -1017,44 +1035,6 @@ const getTotalOrders = async (req, res) => {
       .status(500)
       .json({ status: false, message: "Internal server error" });
   }
-};
-const generatePdfContent = (doc, type, startDate, endDate, finalReport) => {
-
-  const colors = {
-    primary: "#2563eb", 
-    secondary: "#64748b", 
-    accent: "#0284c7", 
-    success: "#16a34a", 
-    text: "#1e293b", 
-    lightGray: "#f1f5f9", 
-  };
-
-  doc
-    .fontSize(28)
-    .font("Helvetica-Bold")
-    .fillColor(colors.primary)
-    .text("SALES REPORT", 50, 50)
-    .fontSize(14)
-    .font("Helvetica")
-    .fillColor(colors.secondary)
-    .text(getReportPeriodText(type, startDate, endDate), 50, doc.y + 10);
-
-  doc.moveDown(2);
-  doc.fontSize(12).fillColor(colors.text);
-  finalReport.forEach((report) => {
-    doc.text(`Date: ${report.date}`, 50);
-    doc.text(`Total Sales Count: ${report.totalSalesCount}`, 50);
-    doc.text(
-      `Total Order Amount: ${formatCurrency(report.totalOrderAmount)}`,
-      50
-    );
-    doc.text(`Total Discount: ${formatCurrency(report.totalDiscount)}`, 50);
-    doc.text(
-      `Average Order Value: ${formatCurrency(report.averageOrderValue)}`,
-      50
-    );
-    doc.moveDown(1);
-  });
 };
 
 //code to total products
@@ -1278,9 +1258,6 @@ function generateHr(doc, y) {
   doc.strokeColor("#aaaaaa").lineWidth(1).moveTo(50, y).lineTo(550, y).stroke();
 }
 
-function formatCurrency(cents) {
-  return "₹" + cents.toFixed(2);
-}
 
 function generateTableRow(doc, y, item, quantity, unitCost, lineTotal) {
   doc

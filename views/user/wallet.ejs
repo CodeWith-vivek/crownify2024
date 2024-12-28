@@ -35,38 +35,65 @@
                             </div>
                         </div>
                     </div>
-                    <div class="transaction-history"
-                        style="max-height: 200px; overflow-y: hidden; border: 1px solid #ddd;">
-                        <h3 class="mb-4"
-                            style="font-size: 1.25rem; position: sticky; top: 0; background: white; z-index: 1; padding: 8px;">
+                  
+   
+                    <div class="transaction-history" style="border: 1px solid #ddd;">
+                        <h3 class="mb-4" style="font-size: 1.25rem; position: sticky; top: 0; background: white; z-index: 1; padding: 8px;">
                             Recent Transactions
                         </h3>
-                        <div class="transaction-list" style="max-height: calc(200px - 48px); overflow-y: auto;">
-                            <% transactions.forEach(transaction=> { %>
-                                <div class="transaction-item p-3 mb-3 d-flex align-items-center">
-                                    <div class="icon-container me-3 d-flex align-items-center justify-content-center"
-                                        style="width: 40px; height: 40px; border-radius: 50%; background-color: <%= transaction.type === 'credit' ? '#e6f4ea' : '#fdecea' %>; margin-right: 8px;">
-                                        <i class="bi <%= transaction.type === 'credit' ? 'bi-wallet-fill text-success' : 'bi-cash-stack text-danger' %>"
-                                            style="font-size: 1.5rem;"></i>
+                        <div class="transaction-list">
+                            <% if (transactions.length> 0) { %>
+                                <% transactions.forEach(transaction=> { %>
+                                    <div class="transaction-item p-3 mb-3 d-flex align-items-center">
+                                        <div class="icon-container me-3 d-flex align-items-center justify-content-center"
+                                            style="width: 40px; height: 40px; border-radius: 50%; background-color: <%= transaction.type === 'credit' ? '#e6f4ea' : '#fdecea' %>; margin-right: 8px;">
+                                            <i class="bi <%= transaction.type === 'credit' ? 'bi-wallet-fill text-success' : 'bi-cash-stack text-danger' %>"
+                                                style="font-size: 1.5rem;"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h4 class="fs-1 mb-0 ms-1" style="font-size: 0.875rem;">
+                                                <%= transaction.description %>
+                                            </h4>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="fs-5 fw-bold <%= transaction.type === 'credit' ? 'text-success' : 'text-danger' %>"
+                                                style="font-size: 0.75rem;">
+                                                <%= transaction.type==='credit' ? '+' : '-' %>₹<%= transaction.amount.toFixed(2) %>
+                                            </span>
+                                            <p class="text-muted mb-0" style="font-size: 0.75rem;">
+                                                <%= transaction.date.toISOString().split('T')[0] %>
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div class="flex-grow-1">
-                                        <h4 class="fs-1 mb-0 ms-1" style="font-size: 0.875rem;">
-                                            <%= transaction.description %>
-                                        </h4>
-                                    </div>
-                                    <div class="text-end">
-                                        <span
-                                            class="fs-5 fw-bold <%= transaction.type === 'credit' ? 'text-success' : 'text-danger' %>"
-                                            style="font-size: 0.75rem;">
-                                            <%= transaction.type==='credit' ? '+' : '-' %>₹<%=
-                                                    transaction.amount.toFixed(2) %>
+                                    <% }); %>
+                                        <% } else { %>
+                                            <p class="text-center">No transactions found.</p>
+                                            <% } %>
+                        </div>
+                    
+                  
+                        <div class="pagination-controls mt-4 d-flex justify-content-center align-items-center">
+                            <% if (currentPage> 1) { %>
+                                <a href="?page=1&limit=5" class="btn btn-outline-primary me-2" title="First Page">
+                                    <i class="bi bi-chevron-double-left"></i>
+                                </a>
+                                <a href="?page=<%= currentPage - 1 %>&limit=5" class="btn btn-outline-primary me-2" title="Previous Page">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                                <% } %>
+                                    <div class="page-info mx-2">
+                                        <span class="badge bg-secondary fs-6">
+                                            Page <%= currentPage %> of <%= totalPages %>
                                         </span>
-                                        <p class="text-muted mb-0" style="font-size: 0.75rem;">
-                                            <%= transaction.date.toISOString().split('T')[0] %>
-                                        </p>
                                     </div>
-                                </div>
-                                <% }) %>
+                                    <% if (currentPage < totalPages) { %>
+                                        <a href="?page=<%= currentPage + 1 %>&limit=5" class="btn btn-outline-primary ms-2" title="Next Page">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                        <a href="?page=<%= totalPages %>&limit=5" class="btn btn-outline-primary ms-2" title="Last Page">
+                                            <i class="bi bi-chevron-double-right"></i>
+                                        </a>
+                                        <% } %>
                         </div>
                     </div>
                 </div>
@@ -109,7 +136,7 @@
                     console.log("Response from server:", data); // Debug log
 
                     if (data.success) {
-                     
+
                         const options = {
                             key: RAZORPAY_KEY_ID, // Enter the Test API Key ID
                             amount: data.amount * 100, // Amount in paise

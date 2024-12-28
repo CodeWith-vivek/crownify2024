@@ -1,46 +1,45 @@
 <%- include("../../views/partials/user/headerpaymentSuccess") %>
-    <!-- <body class="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4">
-    <div class="card w-full max-w-md">
-        <div class="card-header text-center">
-            <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-                <svg class="h-10 w-10 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m3-5a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <h2 class="text-2xl font-bold text-gray-900">Payment Successful!</h2>
-        </div>
-        <div class="card-content text-center">
-            <p class="text-gray-600 mb-4">
-                Thank you for your purchase. Your order has been successfully processed.
-            </p>
-            <div class="bg-gray-100 rounded-lg p-4 mb-4">
-                <p class="text-sm font-medium text-gray-500">Order Number</p>
-                <p class="text-lg font-semibold text-gray-900">#123456</p>
-            </div>
-            <p class="text-sm text-gray-500">
-                A confirmation email has been sent to your registered email address.
-            </p>
-        </div>
-        <div class="card-footer flex flex-col space-y-2">
-            <a href="/order-details" class="button w-full">View Order Details</a>
-            <a href="/" class="button outline w-full">Continue Shopping</a>
-        </div>
-    </div>
-</body> -->
 
     <body>
         <div class="container-fluid crownify4 d-flex justify-content-center align-items-center">
             <img src="/assets/admin/images/logo/Crownify_logo_text.png" class="custom-logo">
         </div>
-        <div class="wrapper" style="background-color: antiquewhite">
-            <div class="card">
+        <!-- <div class="wrapper" style="background-color: antiquewhite">
+            <div class="card"> -->
+            <div class="wrapper" style="position: relative; overflow: hidden;">
+                <!-- Background Blur -->
+                <div style="
+                    position: absolute; 
+                    top: 0; 
+                    left: 0; 
+                    right: 0; 
+                    bottom: 0; 
+                    background: url('/assets/images/NavyBlurCap.webp') no-repeat center center; 
+                    background-size: cover; 
+                    filter: blur(8px); 
+                    z-index: 0;">
+                </div>
+            
+                <!-- Card Content -->
+                <div class="card" style="
+                    position: relative; 
+                    z-index: 1; 
+                    background-color: #fff; 
+                    border-radius: 10px; 
+                    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); 
+                    padding: 20px; 
+                    text-align: center;
+                ">
                 <div class="icon-container">
-                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    <!-- <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg> -->
+                    <svg class="icon" fill="none" stroke="red" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="60"
+                        height="60">
+                        <circle cx="12" cy="12" r="10" stroke="red" stroke-width="2" fill="#fdecea"></circle>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 9L9 15M9 9l6 6" stroke="red"></path>
                     </svg>
                 </div>
                 <h1>Order Placed Payment Failed</h1>
@@ -89,9 +88,11 @@
                             </span>
                         </p>
                         <p>
-                            <span class="value">
-                                <%= order.paymentStatus %>
-                            </span>
+                        
+                                <span class="value" style="color: red;">
+                                        <%= order.paymentStatus %>
+                                    </span>
+                           
                         </p>
                         <p>
                             <span class="value">INR <%= order.grandTotal.toFixed(2) %></span>

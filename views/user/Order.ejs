@@ -148,12 +148,12 @@
                                                             || 0) * item.quantity %>
                                                     </p>
                                                 </div>
-                                                <div class="order-detail col-12 col-md-4">
-                                                    <h4>Status</h4>
-                                                    <span class="badge <%= item.badgeClass %>">
-                                                        <%= item.orderStatus || 'Pending' %>
-                                                    </span>
-                                                </div>
+                                            <div class="order-detail col-12 col-md-4">
+                                                <h4>Status</h4>
+                                                <span class="badge <%= item.badgeClass %> <%= item.orderStatus === 'Failed' ? 'text-danger bg-light' : '' %>">
+                                                    <%= item.orderStatus || 'Pending' %>
+                                                </span>
+                                            </div>
                                             </div>
                                             <hr> <!-- Optional: Add a horizontal line between items -->
                                             <% }); %>
@@ -162,45 +162,42 @@
                                         style="font-size: smaller;">
                                         View <i class="bi bi-chevron-down ms-1"></i>
                                     </button>
+<% const allDelivered=order.items.every(item=> item.orderStatus === 'Delivered');
+    const anyFailed = order.paymentStatus === 'Failed' &&
+    order.items.some(item => item.orderStatus === 'Failed' && item.orderStatus !== 'canceled');
+    const paymentCompleted = order.paymentStatus === 'Completed';
+    %>
 
-                                    <% const allDelivered=order.items.every(item=> item.orderStatus === 'Delivered');
-                                        const anyFailed = order.paymentStatus === 'Failed' || order.items.some(item =>
-                                        item.orderStatus === 'Failed');
-                                        const paymentCompleted = order.paymentStatus === 'Completed';
-                                        %>
+    <% if (anyFailed) { %>
+        <button class="btn btn-primary btn w-100 mb-2 pay-now-btn" data-order-id="<%= order.orderNumber %>">
+            Retry Payment
+        </button>
+        <% } %>
 
-                                        <% if (anyFailed) { %>
-                                            <button class="btn btn-primary btn w-100 mb-2 pay-now-btn"
-                                                data-order-id="<%= order.orderNumber %>">
-                                                Pay Now
-                                            </button>
-                                            <% } %>
+            <% if (allDelivered || paymentCompleted) { %>
+                <button class="btn btn-success btn w-100 mb-2 invoice-btn" data-order-id="<%= order.orderNumber %>">
+                    Download Invoice
+                </button>
+                <% } %>
 
-                                                <% if (allDelivered || paymentCompleted) { %>
-                                                    <button class="btn btn-success btn w-100 mb-2 invoice-btn"
-                                                        data-order-id="<%= order.orderNumber %>">
-                                                        Download Invoice
-                                                    </button>
-                                                    <% } %>
-
-                                                        <div class="order-summary">
-                                                            <div class="summary-row">
-                                                                <span>Subtotal:</span>
-                                                                <span>₹<%= order.subtotal || 0 %></span>
-                                                            </div>
-                                                            <div class="summary-row">
-                                                                <span>Discount :</span>
-                                                                <span>-₹<%= order.discount || 0 %></span>
-                                                            </div>
-                                                            <div class="summary-row">
-                                                                <span>Shipping:</span>
-                                                                <span>₹40</span>
-                                                            </div>
-                                                            <div class="summary-row">
-                                                                <span>Total:</span>
-                                                                <span>₹<%= order.grandTotal || 0 %></span>
-                                                            </div>
-                                                        </div>
+                    <div class="order-summary">
+                        <div class="summary-row">
+                            <span>Subtotal:</span>
+                            <span>₹<%= order.subtotal || 0 %></span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Discount :</span>
+                            <span>-₹<%= order.discount || 0 %></span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Shipping:</span>
+                            <span>₹40</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Total:</span>
+                            <span>₹<%= order.grandTotal || 0 %></span>
+                        </div>
+                    </div>
                                 </div>
                                 <% }); %>
                                     <% } else { %>
@@ -267,7 +264,7 @@
                             const itemPrice = (productId.salePrice || productId.regularPrice || 0) * item.quantity;
 
                             // Badge class helper
-                            const getBadgeClass = (status) => {
+                         const getBadgeClass = (status) => {
                                 const badgeClasses = {
                                     'Failed': 'bg-danger',
                                     'Delivered': 'bg-success',
@@ -279,9 +276,8 @@
                                     'Placed': 'bg-warning',
                                     'Confirmed': 'bg-warning',
                                     'Canceled': 'bg-danger',
-
                                 };
-                                return badgeClasses[status] || 'bg-secondary';
+                                return badgeClasses[status] || ''; // Return an empty string for undefined statuses
                             };
 
                             // Action button helper
@@ -296,23 +292,24 @@
             data-product-price="${itemPrice}"
         `;
 
-                                switch (status) {
+                             switch (status) {
                                     case 'Delivered':
                                         return `
-                    <button class="btn btn-warning btn-sm return-item" ${commonAttributes}>
-                        Return
-                    </button>`;
+        <button class="btn btn-warning btn-sm return-item" ${commonAttributes}>
+            Return
+        </button>`;
                                     case 'Return requested':
                                         return `
-                    <button class="btn btn-danger btn-sm cancel-return" ${commonAttributes}>
-                        Cancel Return
-                    </button>`;
+        <button class="btn btn-danger btn-sm cancel-return" ${commonAttributes}>
+            Cancel Return
+        </button>`;
                                     case 'Placed':
                                     case 'Confirmed':
+                                    case 'Failed': // New case added for 'Failed'
                                         return `
-                    <button class="btn btn-danger btn-sm cancel-item" ${commonAttributes}>
-                        Cancel
-                    </button>`;
+        <button class="btn btn-danger btn-sm cancel-item" ${commonAttributes}>
+            Cancel
+        </button>`;
                                     default:
                                         return '';
                                 }

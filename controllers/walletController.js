@@ -4,16 +4,30 @@ const crypto = require("crypto");
 const Transaction=require("../models/transactionSchema")
 
 
-//code to load wallet page
 
 const loadwalletpage = async (req, res) => {
   try {
     const userId = req.session.user;
     const userData = await User.findById(userId);
-       const transactions = await Transaction.find({ userId }).sort({
-         date: -1,
-       }); 
-    return res.render("wallet", { user: userData, transactions });
+
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 5; // Default limit of 5 per page
+    const skip = (page - 1) * limit;
+
+    const totalTransactions = await Transaction.countDocuments({ userId });
+    const totalPages = Math.ceil(totalTransactions / limit);
+
+    const transactions = await Transaction.find({ userId })
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return res.render("wallet", {
+      user: userData,
+      transactions,
+      currentPage: page,
+      totalPages,
+    });
   } catch (error) {
     console.log("Error loading wallet page", error);
     res.status(500).send("Server error");

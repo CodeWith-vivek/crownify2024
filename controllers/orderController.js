@@ -401,6 +401,370 @@ if (paymentMethod === "Wallet") {
 
 // code to cancel order
 
+// const cancelOrder = async (req, res) => {
+//   try {
+//     const { orderNumber, productSize, productColor, cancelComment } = req.body;
+//     console.log(req.body);
+
+//     if (!orderNumber || !productSize || !productColor) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Missing required fields",
+//         receivedData: req.body,
+//       });
+//     }
+
+//     const userId = req.session.user;
+
+//     const order = await Order.findOne({ orderNumber, userId });
+
+//     if (!order) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Order not found",
+//       });
+//     }
+
+//     const orderItemIndex = order.items.findIndex((item) => {
+//       if (!item.variant) return false;
+
+//       const itemSize = item.variant.size.toUpperCase();
+//       const requestSize = productSize.toUpperCase();
+
+//       const itemColor = item.variant.color.toUpperCase();
+//       const requestColor = productColor.toUpperCase();
+
+//       return itemSize === requestSize && itemColor === requestColor;
+//     });
+
+//     if (orderItemIndex === -1) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Product not found in order",
+//       });
+//     }
+
+//     const orderItem = order.items[orderItemIndex];
+
+//     if (orderItem.orderStatus === "canceled") {
+//       return res.status(400).json({
+//         success: false,
+//         message: "This item is already canceled",
+//       });
+//     }
+
+//     const productIdFromOrder = orderItem.productId;
+
+//     const product = await Product.findById(productIdFromOrder);
+//     if (product) {
+//       const variantIndex = product.variants.findIndex(
+//         (v) =>
+//           v.size.toUpperCase() === productSize.toUpperCase() &&
+//           v.color.toUpperCase() === productColor.toUpperCase()
+//       );
+
+//       if (variantIndex !== -1) {
+//         product.variants[variantIndex].quantity += orderItem.quantity;
+//         await product.save();
+//       }
+//     }
+
+//     const totalOrderPrice = order.items.reduce(
+//       (sum, item) => sum + item.totalPrice,
+//       0
+//     );
+
+//     const itemShare = orderItem.totalPrice / totalOrderPrice;
+
+//     const discountForItem = order.discount * itemShare;
+
+//     const refundAmount = Math.floor(orderItem.totalPrice - discountForItem);
+//     let refundShipping = 0;
+
+//     if (
+//       order.paymentMethod === "RazorPay" ||
+//       order.paymentMethod === "Wallet"
+//     ) {
+//       const user = await User.findById(userId);
+//       if (!user) {
+//         return res.status(404).json({
+//           success: false,
+//           message: "User not found for wallet refund",
+//         });
+//       }
+
+//       user.wallet = (user.wallet || 0) + refundAmount;
+
+//       const totalShippingCharge = order.shipping || 0;
+//       const itemsCount = order.items.length;
+
+//       const shippingPerItem =
+//         itemsCount > 0 ? totalShippingCharge / itemsCount : 0;
+
+//       const remainingItems = order.items.filter(
+//         (item, index) =>
+//           item.orderStatus !== "canceled" && index !== orderItemIndex
+//       );
+
+//       if (remainingItems.length === 0) {
+//         refundShipping = totalShippingCharge;
+//         order.shipping = 0;
+//       } else {
+//         refundShipping = Math.floor(shippingPerItem); 
+//         order.shipping -= refundShipping;
+//       }
+
+//       user.wallet += refundShipping;
+
+//       await user.save();
+
+//       const transaction = new Transaction({
+//         userId,
+//         amount: refundAmount + refundShipping, 
+//         type: "credit",
+//         description: `Refund for canceled order item: ${orderItem.productName}`,
+//       });
+//       await transaction.save();
+//     }
+
+//     console.log("Updated Shipping Charge:", order.shipping);
+
+//     order.items[orderItemIndex].orderStatus = "canceled";
+//     if (cancelComment) {
+//       order.items[orderItemIndex].cancelComment = cancelComment;
+//     }
+//     await order.save();
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Order item canceled successfully",
+//       refundAmount,
+//       refundShipping,
+//     });
+//   } catch (error) {
+//     console.error("Cancel product error:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: error.message || "Error canceling product from order",
+//       receivedData: req.body,
+//     });
+//   }
+// };
+
+// const cancelOrder = async (req, res) => {
+//   try {
+//     const { orderNumber, productSize, productColor, cancelComment } = req.body;
+//     console.log(req.body);
+
+//     if (!orderNumber || !productSize || !productColor) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Missing required fields",
+//         receivedData: req.body,
+//       });
+//     }
+
+//     const userId = req.session.user;
+
+//     const order = await Order.findOne({ orderNumber, userId });
+
+//     if (!order) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Order not found",
+//       });
+//     }
+
+//     const orderItemIndex = order.items.findIndex((item) => {
+//       if (!item.variant) return false;
+
+//       const itemSize = item.variant.size.toUpperCase();
+//       const requestSize = productSize.toUpperCase();
+
+//       const itemColor = item.variant.color.toUpperCase();
+//       const requestColor = productColor.toUpperCase();
+
+//       return itemSize === requestSize && itemColor === requestColor;
+//     });
+
+//     if (orderItemIndex === -1) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Product not found in order",
+//       });
+//     }
+
+//     const orderItem = order.items[orderItemIndex];
+
+//     // Handle cases where order status is "Failed"
+//     if (orderItem.orderStatus === "Failed") {
+//       // Update payment status
+//       order.items[orderItemIndex].orderStatus = "canceled";
+//       order.items[orderItemIndex].paymentStatus = "Canceled";
+
+//       if (cancelComment) {
+//         order.items[orderItemIndex].cancelComment = cancelComment;
+//       }
+
+//       // Perform only one action: refund OR inventory restoration
+//       if (
+//         order.paymentMethod === "RazorPay" ||
+//         order.paymentMethod === "Wallet"
+//       ) {
+//         // Refund to wallet
+//         const user = await User.findById(userId);
+//         if (!user) {
+//           return res.status(404).json({
+//             success: false,
+//             message: "User not found for wallet refund",
+//           });
+//         }
+
+//         const refundAmount = orderItem.totalPrice;
+//         user.wallet = (user.wallet || 0) + refundAmount;
+//         await user.save();
+
+//         const transaction = new Transaction({
+//           userId,
+//           amount: refundAmount,
+//           type: "credit",
+//           description: `Refund for failed order item: ${orderItem.productName}`,
+//         });
+//         await transaction.save();
+//       } else {
+//         // Restore inventory
+//         const productIdFromOrder = orderItem.productId;
+//         const product = await Product.findById(productIdFromOrder);
+
+//         if (product) {
+//           const variantIndex = product.variants.findIndex(
+//             (v) =>
+//               v.size.toUpperCase() === productSize.toUpperCase() &&
+//               v.color.toUpperCase() === productColor.toUpperCase()
+//           );
+
+//           if (variantIndex !== -1) {
+//             product.variants[variantIndex].quantity += orderItem.quantity;
+//             await product.save();
+//           }
+//         }
+//       }
+
+//       await order.save();
+
+//       return res.status(200).json({
+//         success: true,
+//         message: "Failed order item canceled successfully",
+//       });
+//     }
+
+//     // Existing cancellation logic for other statuses
+//     if (orderItem.orderStatus === "canceled") {
+//       return res.status(400).json({
+//         success: false,
+//         message: "This item is already canceled",
+//       });
+//     }
+
+//     // Existing logic for other statuses...
+//     const productIdFromOrder = orderItem.productId;
+
+//     const product = await Product.findById(productIdFromOrder);
+//     if (product) {
+//       const variantIndex = product.variants.findIndex(
+//         (v) =>
+//           v.size.toUpperCase() === productSize.toUpperCase() &&
+//           v.color.toUpperCase() === productColor.toUpperCase()
+//       );
+
+//       if (variantIndex !== -1) {
+//         product.variants[variantIndex].quantity += orderItem.quantity;
+//         await product.save();
+//       }
+//     }
+
+//     const totalOrderPrice = order.items.reduce(
+//       (sum, item) => sum + item.totalPrice,
+//       0
+//     );
+
+//     const itemShare = orderItem.totalPrice / totalOrderPrice;
+
+//     const discountForItem = order.discount * itemShare;
+
+//     const refundAmount = Math.floor(orderItem.totalPrice - discountForItem);
+//     let refundShipping = 0;
+
+//     if (
+//       order.paymentMethod === "RazorPay" ||
+//       order.paymentMethod === "Wallet"
+//     ) {
+//       const user = await User.findById(userId);
+//       if (!user) {
+//         return res.status(404).json({
+//           success: false,
+//           message: "User not found for wallet refund",
+//         });
+//       }
+
+//       user.wallet = (user.wallet || 0) + refundAmount;
+
+//       const totalShippingCharge = order.shipping || 0;
+//       const itemsCount = order.items.length;
+
+//       const shippingPerItem =
+//         itemsCount > 0 ? totalShippingCharge / itemsCount : 0;
+
+//       const remainingItems = order.items.filter(
+//         (item, index) =>
+//           item.orderStatus !== "canceled" && index !== orderItemIndex
+//       );
+
+//       if (remainingItems.length === 0) {
+//         refundShipping = totalShippingCharge;
+//         order.shipping = 0;
+//       } else {
+//         refundShipping = Math.floor(shippingPerItem);
+//         order.shipping -= refundShipping;
+//       }
+
+//       user.wallet += refundShipping;
+
+//       await user.save();
+
+//       const transaction = new Transaction({
+//         userId,
+//         amount: refundAmount + refundShipping,
+//         type: "credit",
+//         description: `Refund for canceled order item: ${orderItem.productName}`,
+//       });
+//       await transaction.save();
+//     }
+
+//     console.log("Updated Shipping Charge:", order.shipping);
+
+//     order.items[orderItemIndex].orderStatus = "canceled";
+//     if (cancelComment) {
+//       order.items[orderItemIndex].cancelComment = cancelComment;
+//     }
+//     await order.save();
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Order item canceled successfully",
+//       refundAmount,
+//       refundShipping,
+//     });
+//   } catch (error) {
+//     console.error("Cancel product error:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: error.message || "Error canceling product from order",
+//       receivedData: req.body,
+//     });
+//   }
+// };
+
 const cancelOrder = async (req, res) => {
   try {
     const { orderNumber, productSize, productColor, cancelComment } = req.body;
@@ -446,6 +810,33 @@ const cancelOrder = async (req, res) => {
 
     const orderItem = order.items[orderItemIndex];
 
+    // Skip refund and inventory restoration if order status is "Failed"
+ if (orderItem.orderStatus === "Failed") {
+   if (cancelComment) {
+     order.items[orderItemIndex].cancelComment = cancelComment;
+   }
+
+   // Update both orderStatus and paymentStatus to "Canceled"
+   order.items[orderItemIndex].orderStatus = "canceled";
+   order.items[orderItemIndex].paymentStatus = "Failed";
+
+   console.log("Before Save - Order Item:", order.items[orderItemIndex]);
+
+   await order.save();
+
+   // Fetch the updated order
+   const updatedOrder = await Order.findOne({ orderNumber, userId });
+   console.log("Updated Order:", updatedOrder);
+
+   return res.status(200).json({
+     success: true,
+     message:
+       "Failed order item marked as canceled successfully. No refund or inventory restoration applied.",
+   });
+ }
+
+
+    // Existing cancellation logic for other statuses
     if (orderItem.orderStatus === "canceled") {
       return res.status(400).json({
         success: false,
@@ -453,6 +844,7 @@ const cancelOrder = async (req, res) => {
       });
     }
 
+    // Existing logic for other statuses...
     const productIdFromOrder = orderItem.productId;
 
     const product = await Product.findById(productIdFromOrder);
@@ -510,7 +902,7 @@ const cancelOrder = async (req, res) => {
         refundShipping = totalShippingCharge;
         order.shipping = 0;
       } else {
-        refundShipping = Math.floor(shippingPerItem); 
+        refundShipping = Math.floor(shippingPerItem);
         order.shipping -= refundShipping;
       }
 
@@ -520,7 +912,7 @@ const cancelOrder = async (req, res) => {
 
       const transaction = new Transaction({
         userId,
-        amount: refundAmount + refundShipping, 
+        amount: refundAmount + refundShipping,
         type: "credit",
         description: `Refund for canceled order item: ${orderItem.productName}`,
       });
