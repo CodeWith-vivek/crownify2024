@@ -152,62 +152,250 @@
                             </div>
 
                 </div>
-            
-                    <div class="cart-summary "
-                        style="  background-color: #f3efe9; padding: 20px 20px 20px 20px; margin-top: 30px;">
-                        <div class="summary-card">
-                            <h6 class="text-center"><b>CART TOTAL</b></h6>
 
-                            <ul class="list-unstyled col-12">
-                                <li class="summary-row d-flex justify-content-between">
-                                    <span style="width: 100px;">Sale Price Subtotal</span>
-                                    <span style="color: #f94242; margin-top: 15px;"><b>₹<%= subtotal.toFixed(2) %></b></span>
-                                </li>
-                                <!-- <li class="summary1-row d-flex justify-content-between">
+                <div class="cart-summary "
+                    style="  background-color: #f3efe9; padding: 20px 20px 20px 20px; margin-top: 30px;">
+                    <div class="summary-card">
+                        <h6 class="text-center"><b>CART TOTAL</b></h6>
+
+                        <ul class="list-unstyled col-12">
+                            <li class="summary-row d-flex justify-content-between">
+                                <span style="width: 100px;">Sale Price Subtotal</span>
+                                <span style="color: #f94242; margin-top: 15px;"><b>₹<%= subtotal.toFixed(2) %>
+                                            </b></span>
+                            </li>
+                            <!-- <li class="summary1-row d-flex justify-content-between">
                                     <span>Discount</span>
                                     <span style="color: #1acf20;"><b>₹0</b></span>
                                 </li> -->
-                                <li class="summary-row d-flex justify-content-between">
-                                    <span>Shipping</span>
-                                    <span>₹<%= shippingCharge.toFixed(2) %></span>
-                                </li>
-                                <li class="summary-row total d-flex justify-content-between">
-                                    <span>Total</span>
-                                    <strong style="color: #f94242;">₹<%= total.toFixed(2) %></strong>
-                                </li>
-                            </ul>
-                            <a href="/checkout" class="btn btn-primary w-100 "
-                                style="border-radius: 0px; background-color: black;">Proceed to
-                                Checkout</a>
-                        </div>
+                            <li class="summary-row d-flex justify-content-between">
+                                <span>Shipping</span>
+                                <span>₹<%= shippingCharge.toFixed(2) %></span>
+                            </li>
+                            <li class="summary-row total d-flex justify-content-between">
+                                <span>Total</span>
+                                <strong style="color: #f94242;">₹<%= total.toFixed(2) %></strong>
+                            </li>
+                        </ul>
+                        <a href="/checkout" class="btn btn-primary w-100 "
+                            style="border-radius: 0px; background-color: black;">Proceed to
+                            Checkout</a>
                     </div>
                 </div>
-                <% } %>
             </div>
+            <% } %>
+        </div>
         </div>
     </section>
 
 
     <%- include("../../views/partials/user/footershop") %>
         <script>
-            document.addEventListener('DOMContentLoaded', () => {
+            // document.addEventListener('DOMContentLoaded', () => {
+            //     const checkoutButton = document.querySelector('a[href="/checkout"]');
+
+            //     if (checkoutButton) {
+            //         checkoutButton.addEventListener('click', async function (e) {
+            //             e.preventDefault();
+
+            //             try {
+
+            //                 const cartItems = document.querySelectorAll('.cart-item');
+            //                 let hasClientSideOutOfStock = false;
+            //                 let clientSideOutOfStockProducts = [];
+
+            //                 cartItems.forEach(item => {
+            //                     const stockStatus = item.querySelector('.stock-status');
+            //                     const productName = item.querySelector('.product-info h6').textContent.trim();
+
+            //                     if (stockStatus && stockStatus.textContent.trim() === 'Out of Stock') {
+            //                         hasClientSideOutOfStock = true;
+            //                         clientSideOutOfStockProducts.push(productName);
+            //                     }
+            //                 });
+
+            //                 if (hasClientSideOutOfStock) {
+            //                     Swal.fire({
+            //                         title: 'Out of Stock Items Detected',
+            //                         html: `
+            //                 <p>Please remove the following out of stock items from your cart to proceed to checkout:</p>
+            //                 <ul style="list-style: none; padding: 0;">
+            //                     ${clientSideOutOfStockProducts.map(product => `<li style="margin: 5px 0;">${product}</li>`).join('')}
+            //                 </ul>
+            //             `,
+            //                         icon: 'warning',
+            //                         confirmButtonText: 'OK'
+            //                     });
+            //                     return;
+            //                 }
+
+            //                 const response = await fetch('/checkout/validate', {
+            //                     method: 'POST',
+            //                     headers: {
+            //                         'Content-Type': 'application/json'
+            //                     }
+            //                 });
+
+            //                 const data = await response.json();
+
+            //                 if (!data.success) {
+
+            //                     Swal.fire({
+            //                         title: 'Stock Validation Failed',
+            //                         html: `
+            //                 <p>${data.message}</p>
+            //                 ${data.outOfStockItems ? `
+            //                     <p>The following items are out of stock:</p>
+            //                     <ul style="list-style: none; padding: 0;">
+            //                         ${data.outOfStockItems.map(item => `
+            //                             <li style="margin: 5px 0;">
+            //                                 ${item.productName} (Size: ${item.size}, Color: ${item.color})
+            //                             </li>
+            //                         `).join('')}
+            //                     </ul>
+            //                 ` : ''}
+            //             `,
+            //                         icon: 'error',
+            //                         confirmButtonText: 'OK'
+            //                     });
+            //                 } else {
+
+            //                     window.location.href = '/checkout';
+            //                 }
+
+            //             } catch (error) {
+            //                 console.error('Error during checkout validation:', error);
+            //                 Swal.fire({
+            //                     title: 'Error',
+            //                     text: 'An error occurred while validating your cart. Please try again.',
+            //                     icon: 'error',
+            //                     confirmButtonText: 'OK'
+            //                 });
+            //             }
+            //         });
+            //     }
+            // });
+
+            // document.addEventListener('DOMContentLoaded', () => {
+            //         const checkoutButton = document.querySelector('a[href="/checkout"]');
+
+            //         if (checkoutButton) {
+            //             checkoutButton.addEventListener('click', async function (e) {
+            //                 e.preventDefault();
+
+            //                 try {
+            //                     console.log("Checkout button clicked");
+
+            //                     // Check for client-side out-of-stock items
+            //                     const cartItems = document.querySelectorAll('.cart-item');
+            //                     console.log(`Found ${cartItems.length} items in the cart`);
+
+            //                     let hasClientSideOutOfStock = false;
+            //                     let clientSideOutOfStockProducts = [];
+
+            //                     cartItems.forEach(item => {
+            //                         const stockStatus = item.querySelector('.stock-status');
+            //                         const productName = item.querySelector('.product-info h6').textContent.trim();
+
+            //                         console.log(`Checking product: ${productName}`);
+            //                         if (stockStatus) {
+            //                             console.log(`Stock status: ${stockStatus.textContent.trim()}`);
+            //                         }
+
+            //                         if (stockStatus && stockStatus.textContent.trim() === 'Out of Stock') {
+            //                             console.log(`Product is out of stock: ${productName}`);
+            //                             hasClientSideOutOfStock = true;
+            //                             clientSideOutOfStockProducts.push(productName);
+            //                         }
+            //                     });
+
+            //                     if (hasClientSideOutOfStock) {
+            //                         console.log("Client-side out-of-stock items detected:", clientSideOutOfStockProducts);
+            //                         Swal.fire({
+            //                             title: 'Out of Stock Items Detected',
+            //                             html: `
+            //                 <p>Please remove the following out-of-stock items from your cart to proceed to checkout:</p>
+            //                 <ul style="list-style: none; padding: 0;">
+            //                     ${clientSideOutOfStockProducts.map(product => `<li style="margin: 5px 0;">${product}</li>`).join('')}
+            //                 </ul>
+            //             `,
+            //                             icon: 'warning',
+            //                             confirmButtonText: 'OK'
+            //                         });
+            //                         return;
+            //                     }
+
+            //                     // Send request to server for validation
+            //                     console.log("No client-side out-of-stock items detected. Sending validation request to server...");
+
+            //                     const response = await fetch('/checkout/validate', {
+            //                         method: 'POST',
+            //                         headers: {
+            //                             'Content-Type': 'application/json'
+            //                         }
+            //                     });
+
+            //                     const data = await response.json();
+            //                     console.log("Server validation response:", data);
+
+            //                     if (!data.success) {
+            //                         console.log("Validation failed on server:", data);
+
+            //                         Swal.fire({
+            //                             title: 'Stock Validation Failed',
+            //                             html: `
+            //                 <p>${data.message}</p>
+            //                 ${data.outOfStockItems ? `
+            //                     <p>The following items are out of stock:</p>
+            //                     <ul style="list-style: none; padding: 0;">
+            //                         ${data.outOfStockItems.map(item => `
+            //                             <li style="margin: 5px 0;">
+            //                                 ${item.productName} (Size: ${item.size}, Color: ${item.color})
+            //                             </li>
+            //                         `).join('')}
+            //                     </ul>
+            //                 ` : ''}
+            //             `,
+            //                             icon: 'error',
+            //                             confirmButtonText: 'OK'
+            //                         });
+            //                     } else {
+            //                         console.log("Validation successful. Redirecting to checkout...");
+            //                         // window.location.href = '/checkout';
+            //                     }
+
+            //                 } catch (error) {
+            //                     console.error('Error during checkout validation:', error);
+            //                     Swal.fire({
+            //                         title: 'Error',
+            //                         text: 'An error occurred while validating your cart. Please try again.',
+            //                         icon: 'error',
+            //                         confirmButtonText: 'OK'
+            //                     });
+            //                 }
+            //             });
+            //         } else {
+            //             console.log("Checkout button not found on the page");
+            //         }
+            //     });
+
+            document.addEventListener("DOMContentLoaded", () => {
                 const checkoutButton = document.querySelector('a[href="/checkout"]');
 
                 if (checkoutButton) {
-                    checkoutButton.addEventListener('click', async function (e) {
+                    checkoutButton.addEventListener("click", async function (e) {
                         e.preventDefault();
 
                         try {
-
-                            const cartItems = document.querySelectorAll('.cart-item');
+                            const cartItems = document.querySelectorAll(".cart-item");
                             let hasClientSideOutOfStock = false;
                             let clientSideOutOfStockProducts = [];
 
-                            cartItems.forEach(item => {
-                                const stockStatus = item.querySelector('.stock-status');
-                                const productName = item.querySelector('.product-info h6').textContent.trim();
+                            cartItems.forEach((item) => {
+                                const stockStatus = item.querySelector(".stock-status");
+                                const productName = item.querySelector(".product-info h6").textContent.trim();
 
-                                if (stockStatus && stockStatus.textContent.trim() === 'Out of Stock') {
+                                if (stockStatus && stockStatus.textContent.trim() === "Out of Stock") {
                                     hasClientSideOutOfStock = true;
                                     clientSideOutOfStockProducts.push(productName);
                                 }
@@ -215,60 +403,70 @@
 
                             if (hasClientSideOutOfStock) {
                                 Swal.fire({
-                                    title: 'Out of Stock Items Detected',
+                                    title: "Out of Stock Items Detected",
                                     html: `
-                            <p>Please remove the following out of stock items from your cart to proceed to checkout:</p>
-                            <ul style="list-style: none; padding: 0;">
-                                ${clientSideOutOfStockProducts.map(product => `<li style="margin: 5px 0;">${product}</li>`).join('')}
-                            </ul>
-                        `,
-                                    icon: 'warning',
-                                    confirmButtonText: 'OK'
+              <p>Please remove the following out-of-stock items from your cart to proceed to checkout:</p>
+              <ul>
+                ${clientSideOutOfStockProducts.map((product) => `<li>${product}</li>`).join("")}
+              </ul>
+            `,
+                                    icon: "warning",
+                                    confirmButtonText: "OK",
                                 });
                                 return;
                             }
 
-                            const response = await fetch('/checkout/validate', {
-                                method: 'POST',
+                            const response = await fetch("/checkout/validate", {
+                                method: "POST",
                                 headers: {
-                                    'Content-Type': 'application/json'
-                                }
+                                    "Content-Type": "application/json",
+                                },
                             });
 
                             const data = await response.json();
 
                             if (!data.success) {
-
                                 Swal.fire({
-                                    title: 'Stock Validation Failed',
+                                    title: "Validation Failed",
                                     html: `
-                            <p>${data.message}</p>
-                            ${data.outOfStockItems ? `
-                                <p>The following items are out of stock:</p>
-                                <ul style="list-style: none; padding: 0;">
-                                    ${data.outOfStockItems.map(item => `
-                                        <li style="margin: 5px 0;">
-                                            ${item.productName} (Size: ${item.size}, Color: ${item.color})
-                                        </li>
-                                    `).join('')}
-                                </ul>
-                            ` : ''}
-                        `,
-                                    icon: 'error',
-                                    confirmButtonText: 'OK'
+              <p>${data.message}</p>
+              ${data.outOfStockItems.length > 0 ? `
+                <p>Out of stock items:</p>
+                <ul>
+                  ${data.outOfStockItems.map(item => `
+                    <li>
+                      ${item.productName} (Size: ${item.size || "N/A"}, Color: ${item.color || "N/A"}) - ${item.message}
+                    </li>
+                  `).join("")}
+                </ul>
+              ` : ""}
+              ${data.blockedItems.length > 0 ? `
+                <p>Blocked items:</p>
+                <ul>
+                  ${data.blockedItems.map(item => `
+                    <li>
+                      ${item.productName} - ${item.reason}
+                    </li>
+                  `).join("")}
+                </ul>
+              ` : ""}
+            `,
+                                    icon: "error",
+                                    confirmButtonText: "OK",
+                                }).then(() => {
+                                    // Reload the page after the user acknowledges the alert
+                                    location.reload();
                                 });
                             } else {
-
-                                window.location.href = '/checkout';
+                                window.location.href = "/checkout";
                             }
-
                         } catch (error) {
-                            console.error('Error during checkout validation:', error);
+                            console.error("Error during checkout validation:", error);
                             Swal.fire({
-                                title: 'Error',
-                                text: 'An error occurred while validating your cart. Please try again.',
-                                icon: 'error',
-                                confirmButtonText: 'OK'
+                                title: "Error",
+                                text: "An error occurred while validating your cart. Please try again.",
+                                icon: "error",
+                                confirmButtonText: "OK",
                             });
                         }
                     });
@@ -483,196 +681,6 @@
         </script>
 
         <script>
-            function copyToClipboard(code) {
-                navigator.clipboard.writeText(code).then(() => {
-                    // Use SweetAlert for feedback
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Copied!',
-                        text: 'Coupon code copied to clipboard: ' + code,
-                        timer: 2000, // Auto-close after 2 seconds
-                        showConfirmButton: false
-                    });
-                }).catch((err) => {
-                    // Handle error with SweetAlert
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Could not copy text. Please try again!',
-                    });
-                    console.error('Could not copy text: ', err);
-                });
-            }
-        </script>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                // Apply Coupon Form Submission
-                const couponForm = document.getElementById('couponForm');
-
-                if (couponForm) {
-                    const couponCodeInput = document.getElementById('couponCodeInput');
-                    const discountAmountElement = document.querySelector('span[style*="color: #1acf20;"]');
-                    const totalElement = document.querySelector('strong[style*="color: #f94242;"]');
-
-                    couponForm.addEventListener('submit', (event) => {
-                        event.preventDefault();
-
-                        const couponCode = couponCodeInput.value.trim();
-                        if (!couponCode) {
-                            Swal.fire('Error', 'Please enter a coupon code.', 'error');
-                            return;
-                        }
-
-                        const subtotalElement = document.querySelector('span[style*="color: #f94242;"]');
-                        if (!subtotalElement) {
-                            console.error("Cart subtotal element not found");
-                            return;
-                        }
-
-                        const subtotal = parseFloat(subtotalElement.textContent.replace('₹', ''));
-                        const shippingLabel = Array.from(document.querySelectorAll('span'))
-                            .find(span => span.textContent.includes('Shipping'));
-                        if (!shippingLabel || !shippingLabel.nextElementSibling) {
-                            console.error("Shipping element not found");
-                            return;
-                        }
-
-                        const shipping = parseFloat(shippingLabel.nextElementSibling.textContent.replace('₹', ''));
-                        const cartTotal = subtotal + shipping;
-
-                        // Remove coupon from session storage if it's there
-                        sessionStorage.removeItem('appliedCoupon');
-
-                        fetch('/apply-coupon', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ couponCode, cartTotal }),
-                        })
-                            .then(response => response.json())
-                            .then(data => {
-                                console.log("Server Response:", data);
-                                if (data.success) {
-                                    const discount = parseFloat(data.discount.applied);
-                                    discountAmountElement.innerHTML = '₹' + discount.toFixed(2);
-                                    const total = parseFloat(data.finalTotal);
-                                    totalElement.innerHTML = '₹' + total.toFixed(2);
-                                } else {
-                                    Swal.fire('Error', data.message || 'Failed to apply coupon.', 'error');
-                                }
-                            })
-                            .catch(error => {
-                                console.error("Fetch Error:", error);
-                                Swal.fire('Error', 'An error occurred. Try again.', 'error');
-                            });
-                    });
-
-                    // Function to clear coupon
-                    function clearCoupon() {
-                        fetch('/remove-coupon', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                        })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    console.log('Coupon cleared successfully.');
-                                } else {
-                                    console.error('Failed to clear coupon:', data.message);
-                                }
-                            })
-                            .catch(error => console.error('Error clearing coupon:', error));
-                    }
-
-                    // On page load, check for an applied coupon in session storage
-                    const storedCouponCode = sessionStorage.getItem('appliedCoupon');
-                    if (storedCouponCode) {
-                        couponCodeInput.value = storedCouponCode; // Set the coupon input value
-                        couponForm.dispatchEvent(new Event('submit')); // Trigger submit to apply the coupon
-                    }
-
-                    // Detect when the user is leaving or refreshing the cart or checkout page
-                    window.addEventListener('beforeunload', () => {
-                        if (window.location.pathname !== '/cart' && window.location.pathname !== '/checkout') {
-                            clearCoupon();
-                        }
-                    });
-
-                    // Remove Coupon
-                    const removeCouponButton = document.getElementById('removeCouponButton');
-                    if (removeCouponButton) {
-                        removeCouponButton.addEventListener('click', () => {
-                            fetch('/remove-coupon', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        discountAmountElement.innerHTML = '₹0';
-                                        totalElement.innerHTML = '₹' + data.finalTotal.toFixed(2);
-                                        sessionStorage.removeItem('appliedCoupon'); // Clear from session storage
-                                        Swal.fire('Success', 'Coupon removed successfully.', 'success');
-                                    } else {
-                                        Swal.fire('Error', data.message || 'Failed to remove coupon.', 'error');
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error("Fetch Error:", error);
-                                    Swal.fire('Error', 'An error occurred. Try again.', 'error');
-                                });
-                        });
-                    }
-                }
-
-                // Remove Cart Item
-                const removeButtons = document.querySelectorAll('.cart__close');
-                removeButtons.forEach(button => {
-                    button.addEventListener('click', () => {
-                        const productId = button.getAttribute('data-product-id');
-                        const row = button.closest('tr.cart-item');
-                        const size = row.querySelector('td:nth-child(3) p').innerText;
-                        const color = row.querySelector('.product-color:nth-child(4) p').innerText;
-
-                        Swal.fire({
-                            title: 'Are you sure?',
-                            text: "You won't be able to revert this!",
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#3085d6',
-                            cancelButtonColor: '#d33',
-                            confirmButtonText: 'Yes, remove it!'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                fetch(`/cart/remove`, {
-                                    method: 'DELETE',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ productId, size, color }),
-                                })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            row.remove();
-                                            Swal.fire('Removed!', 'Your item has been removed from the cart.', 'success')
-                                                .then(() => location.reload()); // Reload the page to reflect changes
-                                        } else {
-                                            Swal.fire('Error', data.message || 'Failed to remove item.', 'error');
-                                        }
-                                    })
-                                    .catch(error => Swal.fire('Error', 'An error occurred. Try again.', 'error'));
-                            }
-                        });
-                    });
-                });
-
-                // Copy Coupon Code
-                function copyToClipboard(code) {
-                    navigator.clipboard.writeText(code).then(() => {
-                        alert('Coupon code copied to clipboard: ' + code);
-                    }).catch(err => console.error('Could not copy text:', err));
-                }
-            });
-        </script>
-        <script>
             async function checkUserBlockStatus() {
                 try {
                     const response = await fetch("/check-block-status", {
@@ -695,3 +703,4 @@
             // Check every 30 seconds
             setInterval(checkUserBlockStatus, 2000);
         </script>
+        

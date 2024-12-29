@@ -7,6 +7,8 @@ const Address = require("../models/addressSchema");
 const express = require("express");
 const sharp = require("sharp");
 const Order = require("../models/orderSchema");
+const Category = require("../models/categorySchema");
+const Brand = require("../models/brandSchema");
 
 const multer = require("multer");
 const path = require("path");
@@ -34,13 +36,33 @@ function generateOtp() {
 
 //code to load forgot password page
 
+
+
 const getForgotPassPage = async (req, res) => {
   try {
     if (req.session.isLoggedIn) {
-      return res.redirect("/"); 
+      const userId = req.session.user; // Assuming the user's ID is stored in the session
+      const user = await User.findById(userId)
+        .populate("cart")
+        .populate("wishlist");
+
+      // Calculate cart and wishlist counts
+      const cartCount =
+        user.cart && user.cart.length > 0 ? user.cart[0].items.length : 0; // Assuming cart structure
+      const wishlistCount =
+        user.wishlist && user.wishlist.length > 0
+          ? user.wishlist[0].items.length
+          : 0; // Assuming wishlist structure
+
+      return res.redirect("/", { cartCount, wishlistCount });
     }
-    res.render("forgot-password");
-  } catch (error) {}
+
+    // Render forgot-password page without user-specific data
+    res.render("forgot-password", { cartCount: 0, wishlistCount: 0 });
+  } catch (error) {
+    console.log("Error loading forgot-password page:", error);
+    res.status(500).redirect("/pageNotFound");
+  }
 };
 
 //code to send verification email
@@ -92,18 +114,43 @@ const sendVerificationEmail = async (email, otp) => {
 
 //code to load otp page
 
-const loadOtpPage = async (req, res) => {
-  if (!req.session.userOtp || !req.session.email) {
-  
-    return res.redirect("/forget-password");
-  }
 
-  // Render OTP page
-  const countdownTime = req.session.countdownTime || 120; 
-  res.render("forgetPass-otp", {
-    userData: req.session.email, 
-    countdownTime,
-  });
+const loadOtpPage = async (req, res) => {
+  try {
+    if (!req.session.userOtp || !req.session.email) {
+      return res.redirect("/forget-password");
+    }
+
+    let cartCount = 0;
+    let wishlistCount = 0;
+
+    if (req.session.user) {
+      // Fetch the user data if the user is logged in
+      const user = await User.findById(req.session.user)
+        .populate("cart")
+        .populate("wishlist");
+
+      // Calculate cart and wishlist counts
+      cartCount =
+        user.cart && user.cart.length > 0 ? user.cart[0].items.length : 0; // Assuming cart structure
+      wishlistCount =
+        user.wishlist && user.wishlist.length > 0
+          ? user.wishlist[0].items.length
+          : 0; // Assuming wishlist structure
+    }
+
+    // Render the forgetPass-otp page with counts
+    const countdownTime = req.session.countdownTime || 120;
+    res.render("forgetPass-otp", {
+      userData: req.session.email,
+      countdownTime,
+      cartCount,
+      wishlistCount,
+    });
+  } catch (error) {
+    console.log("Error loading OTP page:", error);
+    res.status(500).redirect("/pageNotFound");
+  }
 };
 
 
@@ -319,14 +366,38 @@ const resendOtpForgot = async (req, res) => {
 
 // code to load reset pass page
 
+
 const getResetPassPage = async (req, res) => {
   try {
     if (req.session.isLoggedIn) {
       return res.redirect("/");
     }
 
-    res.render("reset-password");
+    let cartCount = 0;
+    let wishlistCount = 0;
+
+    if (req.session.user) {
+      // Fetch user data if the user is logged in
+      const user = await User.findById(req.session.user)
+        .populate("cart")
+        .populate("wishlist");
+
+      // Calculate cart and wishlist counts
+      cartCount =
+        user.cart && user.cart.length > 0 ? user.cart[0].items.length : 0; // Adjust as per your cart structure
+      wishlistCount =
+        user.wishlist && user.wishlist.length > 0
+          ? user.wishlist[0].items.length
+          : 0; // Adjust as per your wishlist structure
+    }
+
+    // Render reset-password page with counts
+    res.render("reset-password", {
+      cartCount,
+      wishlistCount,
+    });
   } catch (error) {
+    console.log("Error loading reset-password page:", error);
     res.redirect("/pageNotFound");
   }
 };
@@ -387,39 +458,182 @@ const userProfile = async (req, res) => {
   try {
     const userId = req.session.user;
 
-   
-    const userData = await User.findById(userId).populate("addresses"); 
-    const userOrders = await Order.find({ userId })
-      .populate("items.productId")
-      .sort({
-        orderedAt: -1,
-      });
+    // Fetch all required data in parallel
+    const [listedCategories, unblockedBrands, userData, userOrders] =
+      await Promise.all([
+        Category.find({ isListed: true }),
+        Brand.find({ isBlocked: false }),
+        User.findById(userId)
+          .populate({
+            path: "addresses",
+          })
+          .populate({
+            path: "wishlist",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          })
+          .populate({
+            path: "cart",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          }),
+        Order.find({ userId })
+          .populate({
+            path: "items.productId",
+            populate: {
+              path: "category",
+              model: "Category",
+            },
+          })
+          .sort({ orderedAt: -1 }),
+      ]);
 
-   
-    res.render("profile", {
+    // Create Sets for efficient lookups
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
+    );
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName)
+    );
+
+    // Comprehensive product validity check
+    const isValidProduct = (product) => {
+      return (
+        product &&
+        !product.isBlocked &&
+        listedCategoryIds.has(product.category?._id?.toString()) &&
+        unblockedBrandNames.has(product.brand)
+      );
+    };
+
+    // Calculate filtered cart count
+    const cartCount = userData?.cart?.[0]?.items
+      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
+          .length
+      : 0;
+
+    // Calculate filtered wishlist count
+    const wishlistCount = userData?.wishlist?.[0]?.items
+      ? userData.wishlist[0].items.filter((item) =>
+          isValidProduct(item.productId)
+        ).length
+      : 0;
+
+    // Filter orders to include only valid products
+    const filteredOrders = userOrders
+      .map((order) => ({
+        ...order.toObject(),
+        items: order.items.filter((item) => isValidProduct(item.productId)),
+      }))
+      .filter((order) => order.items.length > 0);
+
+    // Prepare profile data
+    const profileData = {
       user: userData,
-      orders: userOrders,
-    });
+      orders: filteredOrders,
+      cartCount,
+      wishlistCount,
+    };
+
+    // Render the profile page with filtered data
+    res.render("profile", profileData);
   } catch (error) {
-    console.error("Error retrieving data:", error);
+    console.error("Error retrieving user profile data:", error);
     res.redirect("/pageNotFound");
   }
 };
 
 // code to load add address page
 
+
 const loadAddAddressPage = async (req, res) => {
   try {
     const userId = req.session.user;
-    const userData = await User.findById(userId);
 
-    res.render("addAddress", { user: userData });
+    // Fetch all required data in parallel
+    const [listedCategories, unblockedBrands, userData] = await Promise.all([
+      Category.find({ isListed: true }),
+      Brand.find({ isBlocked: false }),
+      User.findById(userId)
+        .populate({
+          path: "cart",
+          populate: {
+            path: "items.productId",
+            model: "Product",
+            populate: {
+              path: "category",
+              model: "Category",
+            },
+          },
+        })
+        .populate({
+          path: "wishlist",
+          populate: {
+            path: "items.productId",
+            model: "Product",
+            populate: {
+              path: "category",
+              model: "Category",
+            },
+          },
+        }),
+    ]);
+
+    // Create Sets for efficient lookups
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
+    );
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName)
+    );
+
+    // Comprehensive product validity check
+    const isValidProduct = (product) => {
+      return (
+        product &&
+        !product.isBlocked &&
+        listedCategoryIds.has(product.category?._id?.toString()) &&
+        unblockedBrandNames.has(product.brand)
+      );
+    };
+
+    // Calculate filtered cart count
+    const cartCount = userData?.cart?.[0]?.items
+      ? userData.cart[0].items.filter((item) =>
+          isValidProduct(item.productId)
+        ).length
+      : 0;
+
+    // Calculate filtered wishlist count
+    const wishlistCount = userData?.wishlist?.[0]?.items
+      ? userData.wishlist[0].items.filter((item) =>
+          isValidProduct(item.productId)
+        ).length
+      : 0;
+
+    // Render the add address page with filtered data
+    res.render("addAddress", {
+      user: userData,
+      cartCount,
+      wishlistCount,
+    });
   } catch (error) {
     console.error("Error loading add address page:", error);
     res.status(500).send("Server error");
   }
 };
-
 // code to set primary address
 
 const setPrimaryAddress = async (req, res) => {
@@ -515,36 +729,99 @@ const deleteUserAddress = async (req, res) => {
 
 //code to load edit address page
 
+
+
 const editUserAddress = async (req, res) => {
   try {
     const userId = req.session.user;
 
- 
-    const [userData, address] = await Promise.all([
-      User.findById(userId),
-      Address.findOne({
-        _id: req.params.id,
-        userId: userId,
-      }),
-    ]);
+    // Fetch all required data in parallel
+    const [listedCategories, unblockedBrands, userData, address] =
+      await Promise.all([
+        Category.find({ isListed: true }),
+        Brand.find({ isBlocked: false }),
+        User.findById(userId)
+          .populate({
+            path: "cart",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          })
+          .populate({
+            path: "wishlist",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          }),
+        Address.findOne({
+          _id: req.params.id,
+          userId: userId,
+        }),
+      ]);
 
-    
+    // Check if user is logged in
     if (!userData) {
       return res.redirect("/login");
     }
 
+    // Check if address exists
     if (!address) {
       return res.redirect("/profile");
     }
 
-  
-    res.render("editAddress", {
+    // Create Sets for efficient lookups
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
+    );
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName)
+    );
+
+    // Comprehensive product validity check
+    const isValidProduct = (product) => {
+      return (
+        product &&
+        !product.isBlocked &&
+        listedCategoryIds.has(product.category?._id?.toString()) &&
+        unblockedBrandNames.has(product.brand)
+      );
+    };
+
+    // Calculate filtered cart count
+    const cartCount = userData?.cart?.[0]?.items
+      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
+          .length
+      : 0;
+
+    // Calculate filtered wishlist count
+    const wishlistCount = userData?.wishlist?.[0]?.items
+      ? userData.wishlist[0].items.filter((item) =>
+          isValidProduct(item.productId)
+        ).length
+      : 0;
+
+    // Prepare render data
+    const renderData = {
       address,
       user: userData,
       pageTitle: "Edit Address",
-    });
+      cartCount,
+      wishlistCount,
+    };
+
+    // Render the edit address page with filtered data
+    res.render("editAddress", renderData);
   } catch (error) {
-   
     console.error("Edit Address Error:", error);
     res.redirect("/user/profile#address");
   }
@@ -692,53 +969,144 @@ const validatCurrentPassword = async (req, res) => {
 const loadUserOrder = async (req, res) => {
   try {
     const userId = req.session.user;
-    const page = parseInt(req.query.page) || 1; 
-    const limit = parseInt(req.query.limit) || 10; 
-    const skip = (page - 1) * limit; 
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
-    const userData = await User.findById(userId).populate("addresses"); 
-    const userOrders = await Order.find({ userId })
-      .populate("items.productId")
-      .sort({ orderedAt: -1 })
-      .skip(skip) 
-      .limit(limit); 
+    // Fetch all required data in parallel
+    const [
+      listedCategories,
+      unblockedBrands,
+      userData,
+      userOrders,
+      totalOrders,
+    ] = await Promise.all([
+      Category.find({ isListed: true }),
+      Brand.find({ isBlocked: false }),
+      User.findById(userId)
+        .populate("addresses")
+        .populate({
+          path: "cart",
+          populate: {
+            path: "items.productId",
+            model: "Product",
+            populate: {
+              path: "category",
+              model: "Category",
+            },
+          },
+        })
+        .populate({
+          path: "wishlist",
+          populate: {
+            path: "items.productId",
+            model: "Product",
+            populate: {
+              path: "category",
+              model: "Category",
+            },
+          },
+        }),
+      Order.find({ userId })
+        .populate({
+          path: "items.productId",
+          populate: {
+            path: "category",
+            model: "Category",
+          },
+        })
+        .sort({ orderedAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Order.countDocuments({ userId }),
+    ]);
 
-    const totalOrders = await Order.countDocuments({ userId }); 
+    // Create Sets for efficient lookups
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
+    );
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName)
+    );
 
-    const getBadgeClass = (status) => {
-      const badgeClasses = {
-        'Delivered': 'text-success',
-        'Shipped': 'text-purple',
-        'Return requested': 'text-orange',
-        'Returned':'text-info',
-        'Return Approved': 'text-info',
-        'Return Rejected': 'text-danger',
-        'Placed': 'text-warning',
-        'Confirmed': 'text-warning',
-        'canceled': 'text-danger'
-      };
-      return badgeClasses[status] || 'bg-secondary';
+    // Comprehensive product validity check
+    const isValidProduct = (product) => {
+      return (
+        product &&
+        !product.isBlocked &&
+        listedCategoryIds.has(product.category?._id?.toString()) &&
+        unblockedBrandNames.has(product.brand)
+      );
     };
 
-    const ordersWithBadgeClasses = userOrders.map(order => {
-      order.items = order.items.map(item => {
-        item.badgeClass = getBadgeClass(item.orderStatus); 
-        return item;
-      });
-      return order;
-    });
+    // Calculate filtered cart count
+    const cartCount = userData?.cart?.[0]?.items
+      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
+          .length
+      : 0;
 
+    // Calculate filtered wishlist count
+    const wishlistCount = userData?.wishlist?.[0]?.items
+      ? userData.wishlist[0].items.filter((item) =>
+          isValidProduct(item.productId)
+        ).length
+      : 0;
+
+    // Badge class function
+    const getBadgeClass = (status) => {
+      const badgeClasses = {
+        Delivered: "text-success",
+        Shipped: "text-purple",
+        "Return requested": "text-orange",
+        Returned: "text-info",
+        "Return Approved": "text-info",
+        "Return Rejected": "text-danger",
+        Placed: "text-warning",
+        Confirmed: "text-warning",
+        canceled: "text-danger",
+      };
+      return badgeClasses[status] || "bg-secondary";
+    };
+
+    // Filter and process orders
+    const processedOrders = userOrders
+      .map((order) => {
+        // Filter order items based on product validity
+        const validItems = order.items.filter((item) =>
+          isValidProduct(item.productId)
+        );
+
+        // Only keep orders with valid items
+        if (validItems.length === 0) return null;
+
+        // Add badge classes to valid items
+        const processedItems = validItems.map((item) => ({
+          ...item.toObject(),
+          badgeClass: getBadgeClass(item.orderStatus),
+        }));
+
+        return {
+          ...order.toObject(),
+          items: processedItems,
+        };
+      })
+      .filter((order) => order !== null);
+
+    // Calculate total pages
     const totalPages = Math.ceil(totalOrders / limit);
 
+    // Render the orders page
     res.render("Order", {
       user: userData,
-      orders: ordersWithBadgeClasses, 
+      orders: processedOrders,
       currentPage: page,
       totalPages: totalPages,
-      limit: limit 
+      limit: limit,
+      cartCount,
+      wishlistCount,
     });
   } catch (error) {
-    console.error("Error retrieving data:", error);
+    console.error("Error retrieving user orders:", error);
     res.redirect("/pageNotFound");
   }
 };
@@ -749,24 +1117,98 @@ const loadUserAddress = async (req, res) => {
   try {
     const userId = req.session.user;
 
-  
-    const userData = await User.findById(userId).populate("addresses");
-       const addressCount = userData.addresses ? userData.addresses.length : 0;
-   
-    const userOrders = await Order.find({ userId })
-      .populate("items.productId")
-      .sort({
-        orderedAt: -1,
-      });
+    // Fetch all required data in parallel
+    const [listedCategories, unblockedBrands, userData, userOrders] =
+      await Promise.all([
+        Category.find({ isListed: true }),
+        Brand.find({ isBlocked: false }),
+        User.findById(userId)
+          .populate("addresses")
+          .populate({
+            path: "cart",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          })
+          .populate({
+            path: "wishlist",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          }),
+        Order.find({ userId })
+          .populate({
+            path: "items.productId",
+            populate: {
+              path: "category",
+              model: "Category",
+            },
+          })
+          .sort({ orderedAt: -1 }),
+      ]);
 
-   
+    // Create Sets for efficient lookups
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
+    );
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName)
+    );
+
+    // Comprehensive product validity check
+    const isValidProduct = (product) => {
+      return (
+        product &&
+        !product.isBlocked &&
+        listedCategoryIds.has(product.category?._id?.toString()) &&
+        unblockedBrandNames.has(product.brand)
+      );
+    };
+
+    // Calculate address count
+    const addressCount = userData.addresses ? userData.addresses.length : 0;
+
+    // Calculate filtered cart count
+    const cartCount = userData?.cart?.[0]?.items
+      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
+          .length
+      : 0;
+
+    // Calculate filtered wishlist count
+    const wishlistCount = userData?.wishlist?.[0]?.items
+      ? userData.wishlist[0].items.filter((item) =>
+          isValidProduct(item.productId)
+        ).length
+      : 0;
+
+    // Filter orders to include only valid products
+    const filteredOrders = userOrders
+      .map((order) => ({
+        ...order.toObject(),
+        items: order.items.filter((item) => isValidProduct(item.productId)),
+      }))
+      .filter((order) => order.items.length > 0);
+
+    // Render the address page with filtered data
     res.render("Address", {
       user: userData,
-      orders: userOrders,
-      addressCount, 
+      orders: filteredOrders,
+      addressCount,
+      cartCount,
+      wishlistCount,
     });
   } catch (error) {
-    console.error("Error retrieving data:", error);
+    console.error("Error retrieving user address data:", error);
     res.redirect("/pageNotFound");
   }
 };
@@ -777,21 +1219,94 @@ const loadUserAccountDetails = async (req, res) => {
   try {
     const userId = req.session.user;
 
-  
-    const userData = await User.findById(userId).populate("addresses");
-    const userOrders = await Order.find({ userId })
-      .populate("items.productId")
-      .sort({
-        orderedAt: -1,
-      });
+    // Fetch all required data in parallel
+    const [listedCategories, unblockedBrands, userData, userOrders] =
+      await Promise.all([
+        Category.find({ isListed: true }),
+        Brand.find({ isBlocked: false }),
+        User.findById(userId)
+          .populate("addresses")
+          .populate({
+            path: "cart",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          })
+          .populate({
+            path: "wishlist",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          }),
+        Order.find({ userId })
+          .populate({
+            path: "items.productId",
+            populate: {
+              path: "category",
+              model: "Category",
+            },
+          })
+          .sort({ orderedAt: -1 }),
+      ]);
 
-   
+    // Create Sets for efficient lookups
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
+    );
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName)
+    );
+
+    // Comprehensive product validity check
+    const isValidProduct = (product) => {
+      return (
+        product &&
+        !product.isBlocked &&
+        listedCategoryIds.has(product.category?._id?.toString()) &&
+        unblockedBrandNames.has(product.brand)
+      );
+    };
+
+    // Calculate filtered cart count
+    const cartCount = userData?.cart?.[0]?.items
+      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
+          .length
+      : 0;
+
+    // Calculate filtered wishlist count
+    const wishlistCount = userData?.wishlist?.[0]?.items
+      ? userData.wishlist[0].items.filter((item) =>
+          isValidProduct(item.productId)
+        ).length
+      : 0;
+
+    // Filter orders to include only valid products
+    const filteredOrders = userOrders
+      .map((order) => ({
+        ...order.toObject(),
+        items: order.items.filter((item) => isValidProduct(item.productId)),
+      }))
+      .filter((order) => order.items.length > 0);
+
+    // Render the account details page with filtered data
     res.render("AccountDetails", {
       user: userData,
-      orders: userOrders,
+      orders: filteredOrders,
+      cartCount,
+      wishlistCount,
     });
   } catch (error) {
-    console.error("Error retrieving data:", error);
+    console.error("Error retrieving user account details:", error);
     res.redirect("/pageNotFound");
   }
 };

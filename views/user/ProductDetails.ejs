@@ -58,6 +58,11 @@
                                     <% } %>
                                         <span> - <%= product.reviewsCount %> Reviews</span>
                             </div>
+                        <% if (product.discountPercentage> 0) { %>
+                            <h6 style="color: red;"><b><%= product.discountPercentage %>% off</b></h6>
+                            <% } else { %>
+                                <h6><b>NO DISCOUNT</b></p>
+                                <% } %>
                             <h3>₹<%= product.salePrice.toFixed(2) %><span>₹<%= product.regularPrice.toFixed(2) %></span>
                             </h3>
                             <h2></h2>

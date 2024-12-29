@@ -2,34 +2,148 @@ const User = require("../models/userSchema");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const Transaction=require("../models/transactionSchema")
+const Category=require("../models/categorySchema")
+const Brand=require("../models/brandSchema")
 
 
 
+
+// const loadwalletpage = async (req, res) => {
+//   try {
+//     const userId = req.session.user;
+//     const userData = await User.findById(userId)
+//       .populate("cart")
+//       .populate("wishlist");
+//     const cartCount =
+//       userData.cart && userData.cart.length > 0
+//         ? userData.cart[0].items.length
+//         : 0; // Assuming cart is an array of carts
+//     const wishlistCount =
+//       userData.wishlist && userData.wishlist.length > 0
+//         ? userData.wishlist[0].items.length
+//         : 0; // Assuming wishlist is an array of wishlists
+
+//     const page = parseInt(req.query.page) || 1; // Default to page 1
+//     const limit = parseInt(req.query.limit) || 5; // Default limit of 5 per page
+//     const skip = (page - 1) * limit;
+
+//     const totalTransactions = await Transaction.countDocuments({ userId });
+//     const totalPages = Math.ceil(totalTransactions / limit);
+
+//     const transactions = await Transaction.find({ userId })
+//       .sort({ date: -1 })
+//       .skip(skip)
+//       .limit(limit);
+
+//     return res.render("wallet", {
+//       user: userData,
+//       transactions,
+//       currentPage: page,
+//       totalPages,
+//       cartCount,
+//       wishlistCount,
+//     });
+//   } catch (error) {
+//     console.log("Error loading wallet page", error);
+//     res.status(500).send("Server error");
+//   }
+// };
 const loadwalletpage = async (req, res) => {
   try {
     const userId = req.session.user;
-    const userData = await User.findById(userId);
 
-    const page = parseInt(req.query.page) || 1; // Default to page 1
-    const limit = parseInt(req.query.limit) || 5; // Default limit of 5 per page
-    const skip = (page - 1) * limit;
+    // Fetch all required data in parallel
+    const [
+      listedCategories,
+      unblockedBrands,
+      userData,
+      totalTransactions,
+      transactions,
+    ] = await Promise.all([
+      Category.find({ isListed: true }),
+      Brand.find({ isBlocked: false }),
+      User.findById(userId)
+        .populate({
+          path: "cart",
+          populate: {
+            path: "items.productId",
+            model: "Product",
+            populate: {
+              path: "category",
+              model: "Category",
+            },
+          },
+        })
+        .populate({
+          path: "wishlist",
+          populate: {
+            path: "items.productId",
+            model: "Product",
+            populate: {
+              path: "category",
+              model: "Category",
+            },
+          },
+        }),
+      Transaction.countDocuments({ userId }),
+      Transaction.find({ userId })
+        .sort({ date: -1 })
+        .skip(
+          (parseInt(req.query.page) || 1 - 1) * (parseInt(req.query.limit) || 5)
+        )
+        .limit(parseInt(req.query.limit) || 5),
+    ]);
 
-    const totalTransactions = await Transaction.countDocuments({ userId });
+    // Create Sets for efficient lookups
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
+    );
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName)
+    );
+
+    // Comprehensive product validity check
+    const isValidProduct = (product) => {
+      return (
+        product &&
+        !product.isBlocked &&
+        listedCategoryIds.has(product.category?._id?.toString()) &&
+        unblockedBrandNames.has(product.brand)
+      );
+    };
+
+    // Calculate filtered cart count
+    const cartCount = userData?.cart?.[0]?.items
+      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
+          .length
+      : 0;
+
+    // Calculate filtered wishlist count
+    const wishlistCount = userData?.wishlist?.[0]?.items
+      ? userData.wishlist[0].items.filter((item) =>
+          isValidProduct(item.productId)
+        ).length
+      : 0;
+
+    // Pagination calculations
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
     const totalPages = Math.ceil(totalTransactions / limit);
 
-    const transactions = await Transaction.find({ userId })
-      .sort({ date: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    return res.render("wallet", {
+    // Prepare render data
+    const renderData = {
       user: userData,
       transactions,
       currentPage: page,
       totalPages,
-    });
+      cartCount,
+      wishlistCount,
+    };
+
+    // Render the wallet page
+    return res.render("wallet", renderData);
   } catch (error) {
-    console.log("Error loading wallet page", error);
+    console.error("Error loading wallet page:", error);
     res.status(500).send("Server error");
   }
 };

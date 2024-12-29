@@ -232,6 +232,7 @@ router.post(
   checkoutController.validateQuantity
 );
 
+
 //order
 
 router.post("/checkout", userAuth, orderController.placeOrder);

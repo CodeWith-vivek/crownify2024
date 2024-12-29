@@ -80,50 +80,67 @@ const loadFailure = async (req, res) => {
 
 //code for payment failure case
 
- const paymentFailure = async (req, res) => {
-   const { orderId, paymentId, razorpayOrderId, reason, description } =
-     req.body;
 
-   try {
-  
-     const order = await Order.findById(orderId);
-     if (order) {
+const paymentFailure = async (req, res) => {
+  const { orderId, paymentId, razorpayOrderId, reason, description } = req.body;
 
-       order.paymentStatus = "Failed";
-       order.items.forEach((item) => {
-         item.orderStatus = "Failed";
-       });
+  try {
+    const order = await Order.findById(orderId);
+    if (order) {
+      // Find the user to update their cart array
+      const user = await User.findById(order.userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found.",
+        });
+      }
 
-       order.paymentDetails = {
-         paymentId,
-         razorpayOrderId,
-         failureReason: reason,
-         failureDescription: description,
-         paymentDate: new Date(),
-       };
-       await order.save();
+      // Find the cart to get its ID before deletion
+      const cart = await Cart.findOne({ userId: order.userId });
 
-        req.session.coupon = null;
-       await Cart.deleteOne({ userId: order.userId });
+      // Update order status
+      order.paymentStatus = "Failed";
+      order.items.forEach((item) => {
+        item.orderStatus = "Failed";
+      });
 
-       return res
-         .status(200)
-         .json({
-           success: true,
-           message: "Payment failure recorded and cart deleted.",
-         });
-     } else {
-       return res
-         .status(404)
-         .json({ success: false, message: "Order not found." });
-     }
-   } catch (error) {
-     console.error("DEBUG: Error handling payment failure:", error);
-     return res
-       .status(500)
-       .json({ success: false, message: "Internal server error." });
-   }
- };
+      order.paymentDetails = {
+        paymentId,
+        razorpayOrderId,
+        failureReason: reason,
+        failureDescription: description,
+        paymentDate: new Date(),
+      };
+      await order.save();
+
+      if (cart) {
+        // Remove cart from user's cart array
+        user.cart = user.cart.filter((cartId) => !cartId.equals(cart._id));
+        await user.save();
+      }
+
+      req.session.coupon = null;
+      await Cart.deleteOne({ userId: order.userId });
+
+      return res.status(200).json({
+        success: true,
+        message: "Payment failure recorded and cart deleted.",
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found.",
+      });
+    }
+  } catch (error) {
+    console.error("DEBUG: Error handling payment failure:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+    });
+  }
+};
 
 //code for retry payment
 

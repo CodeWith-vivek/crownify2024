@@ -20,120 +20,415 @@ const securePassword = async (password) => {
 
 //code for loading homepage
 
+
+
+
 const loadHomepage = async (req, res) => {
   try {
-    const user = req.session.user;
+    const userId = req.session.user;
 
-    const listedCategories = await Category.find({ isListed: true });
+    // If no user is logged in, render the page with default values
+    if (!userId) {
+      const [products, coupons] = await Promise.all([
+        Product.find({
+          isBlocked: false,
+        }).populate("category"),
+        Coupon.find({}),
+      ]);
 
-    const unblockedBrands = await Brand.find({ isBlocked: false });
+      return res.render("Home", {
+        products,
+        coupons,
+        cartCount: 0,
+        wishlistCount: 0,
+      });
+    }
 
+    // Fetch all required data in parallel for logged-in users
+    const [listedCategories, unblockedBrands, products, coupons, userData] =
+      await Promise.all([
+        Category.find({ isListed: true }),
+        Brand.find({ isBlocked: false }),
+        Product.find({
+          isBlocked: false,
+        }).populate("category"),
+        Coupon.find({}),
+        User.findById(userId)
+          .populate({
+            path: "cart",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          })
+          .populate({
+            path: "wishlist",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          }),
+      ]);
+
+    // Create Sets for efficient lookups
     const listedCategoryIds = new Set(
       listedCategories.map((cat) => cat._id.toString())
     );
-
     const unblockedBrandNames = new Set(
-      unblockedBrands.map((brand) => brand.brandName) 
+      unblockedBrands.map((brand) => brand.brandName)
     );
 
-    const products = await Product.find({
-      isBlocked: false,
-      category: { $in: [...listedCategoryIds] }, 
-      brand: { $in: [...unblockedBrandNames] }, 
+    // Filter function for valid products
+    const isValidProduct = (product) => {
+      return (
+        product &&
+        !product.isBlocked &&
+        listedCategoryIds.has(product.category?._id?.toString()) &&
+        unblockedBrandNames.has(product.brand)
+      );
+    };
+
+    // Filter products based on categories and brands
+    const filteredProducts = products.filter((product) =>
+      isValidProduct(product)
+    );
+
+    // Calculate filtered cart count
+    const cartCount = userData?.cart?.[0]?.items
+      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
+          .length
+      : 0;
+
+    // Calculate filtered wishlist count
+    const wishlistCount = userData?.wishlist?.[0]?.items
+      ? userData.wishlist[0].items.filter((item) =>
+          isValidProduct(item.productId)
+        ).length
+      : 0;
+
+    return res.render("Home", {
+      user: userData,
+      products: filteredProducts,
+      coupons,
+      cartCount,
+      wishlistCount,
     });
-
-    const coupons = await Coupon.find({});
-
-    if (user) {
-      const userData = await User.findOne({ _id: user });
-      return res.render("Home", {
-        user: userData,
-        products,
-        coupons,
-      });
-    } else {
-      return res.render("Home", { products, coupons });
-    }
   } catch (error) {
     console.error("Error loading home page:", error);
     res.status(500).send("Server error");
   }
 };
-
 //code to load contact page
+
 
 const loadContactpage = async (req, res) => {
   try {
-    const user = req.session.user;
+    const userId = req.session.user;
 
-    const products = await Product.find({ isBlocked: false });
-
-    if (user) {
-      const userData = await User.findOne({ _id: user });
-
-      return res.render("contact", { user: userData, products });
-    } else {
-      return res.render("contact", { products });
+    // If no user is logged in, render the page with default values
+    if (!userId) {
+      const products = await Product.find({ isBlocked: false });
+      return res.render("contact", {
+        products,
+        cartCount: 0,
+        wishlistCount: 0,
+      });
     }
+
+    // Fetch all required data in parallel for logged-in users
+    const [listedCategories, unblockedBrands, products, userData] =
+      await Promise.all([
+        Category.find({ isListed: true }),
+        Brand.find({ isBlocked: false }),
+        Product.find({ isBlocked: false }),
+        User.findById(userId)
+          .populate({
+            path: "cart",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          })
+          .populate({
+            path: "wishlist",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          }),
+      ]);
+
+    // Create Sets for efficient lookups
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
+    );
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName)
+    );
+
+    // Comprehensive product validity check
+    const isValidProduct = (product) => {
+      return (
+        product &&
+        !product.isBlocked &&
+        listedCategoryIds.has(product.category?._id?.toString()) &&
+        unblockedBrandNames.has(product.brand)
+      );
+    };
+
+    // Calculate filtered cart count
+    const cartCount = userData?.cart?.[0]?.items
+      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
+          .length
+      : 0;
+
+    // Calculate filtered wishlist count
+    const wishlistCount = userData?.wishlist?.[0]?.items
+      ? userData.wishlist[0].items.filter((item) =>
+          isValidProduct(item.productId)
+        ).length
+      : 0;
+
+    // Filter products based on categories and brands
+    const filteredProducts = products.filter((product) =>
+      isValidProduct(product)
+    );
+
+    return res.render("contact", {
+      user: userData,
+      products: filteredProducts,
+      cartCount,
+      wishlistCount,
+    });
   } catch (error) {
-    console.log("Contact page not found", error);
-    res.status(500).send("server error");
+    console.error("Error loading contact page:", error);
+    res.status(500).send("Server error");
   }
 };
-
 //code to load about page
+
 
 const loadAboutpage = async (req, res) => {
   try {
-    const user = req.session.user;
+    const userId = req.session.user;
 
-    const products = await Product.find({ isBlocked: false });
+    // If no user is logged in, render the page with default values
+    if (!userId) {
+      const [products, coupons] = await Promise.all([
+        Product.find({ isBlocked: false }),
+        Coupon.find({}),
+      ]);
 
-    const coupons = await Coupon.find({}); 
-
-    if (user) {
-      const userData = await User.findOne({ _id: user });
-
-      return res.render("About", { user: userData, products, coupons });
-    } else {
-
-      return res.render("About", { products, coupons });
+      return res.render("About", {
+        products,
+        coupons,
+        cartCount: 0,
+        wishlistCount: 0,
+      });
     }
+
+    // Fetch all required data in parallel for logged-in users
+    const [listedCategories, unblockedBrands, products, coupons, userData] =
+      await Promise.all([
+        Category.find({ isListed: true }),
+        Brand.find({ isBlocked: false }),
+        Product.find({ isBlocked: false }),
+        Coupon.find({}),
+        User.findById(userId)
+          .populate({
+            path: "cart",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          })
+          .populate({
+            path: "wishlist",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          }),
+      ]);
+
+    // Create Sets for efficient lookups
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
+    );
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName)
+    );
+
+    // Comprehensive product validity check
+    const isValidProduct = (product) => {
+      return (
+        product &&
+        !product.isBlocked &&
+        listedCategoryIds.has(product.category?._id?.toString()) &&
+        unblockedBrandNames.has(product.brand)
+      );
+    };
+
+    // Calculate filtered cart count
+    const cartCount = userData?.cart?.[0]?.items
+      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
+          .length
+      : 0;
+
+    // Calculate filtered wishlist count
+    const wishlistCount = userData?.wishlist?.[0]?.items
+      ? userData.wishlist[0].items.filter((item) =>
+          isValidProduct(item.productId)
+        ).length
+      : 0;
+
+    // Filter products based on categories and brands
+    const filteredProducts = products.filter((product) =>
+      isValidProduct(product)
+    );
+
+    return res.render("About", {
+      user: userData,
+      products: filteredProducts,
+      coupons,
+      cartCount,
+      wishlistCount,
+    });
   } catch (error) {
-    console.log("About page not found", error);
-    res.status(500).send("server error");
+    console.error("Error loading about page:", error);
+    res.status(500).send("Server error");
   }
 };
 
 //code to load faq page
 
+
 const loadFaqpage = async (req, res) => {
   try {
-    const user = req.session.user;
+    const userId = req.session.user;
 
-    const products = await Product.find({ isBlocked: false });
-
-    if (user) {
-      const userData = await User.findOne({ _id: user });
-
-      return res.render("FAQ", { user: userData, products });
-    } else {
-      return res.render("FAQ", { products });
+    // If no user is logged in, render the page with default values
+    if (!userId) {
+      const products = await Product.find({ isBlocked: false });
+      return res.render("FAQ", {
+        products,
+        cartCount: 0,
+        wishlistCount: 0,
+      });
     }
+
+    // Fetch all required data in parallel for logged-in users
+    const [listedCategories, unblockedBrands, products, userData] =
+      await Promise.all([
+        Category.find({ isListed: true }),
+        Brand.find({ isBlocked: false }),
+        Product.find({ isBlocked: false }),
+        User.findById(userId)
+          .populate({
+            path: "cart",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          })
+          .populate({
+            path: "wishlist",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          }),
+      ]);
+
+    // Create Sets for efficient lookups
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
+    );
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName)
+    );
+
+    // Comprehensive product validity check
+    const isValidProduct = (product) => {
+      return (
+        product &&
+        !product.isBlocked &&
+        listedCategoryIds.has(product.category?._id?.toString()) &&
+        unblockedBrandNames.has(product.brand)
+      );
+    };
+
+    // Calculate filtered cart count
+    const cartCount = userData?.cart?.[0]?.items
+      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
+          .length
+      : 0;
+
+    // Calculate filtered wishlist count
+    const wishlistCount = userData?.wishlist?.[0]?.items
+      ? userData.wishlist[0].items.filter((item) =>
+          isValidProduct(item.productId)
+        ).length
+      : 0;
+
+    // Filter products based on categories and brands
+    const filteredProducts = products.filter((product) =>
+      isValidProduct(product)
+    );
+
+    return res.render("FAQ", {
+      user: userData,
+      products: filteredProducts,
+      cartCount,
+      wishlistCount,
+    });
   } catch (error) {
-    console.log("FAQ page not found", error);
-    res.status(500).send("server error");
+    console.error("Error loading FAQ page:", error);
+    res.status(500).send("Server error");
   }
 };
 
+
 //code to load brand page
+
 
 const loadBrandpage = async (req, res) => {
   try {
-    const user = req.session.user;
+    const userId = req.session.user;
 
     const listedCategories = await Category.find({ isListed: true });
-
     const unblockedBrands = await Brand.find({ isBlocked: false });
 
     const listedCategoryIds = new Set(
@@ -141,23 +436,77 @@ const loadBrandpage = async (req, res) => {
     );
 
     const unblockedBrandNames = new Set(
-      unblockedBrands.map((brand) => brand.brandName) 
+      unblockedBrands.map((brand) => brand.brandName)
     );
 
     const products = await Product.find({
       isBlocked: false,
-      category: { $in: [...listedCategoryIds] }, 
-      brand: { $in: [...unblockedBrandNames] }, 
+      category: { $in: [...listedCategoryIds] },
+      brand: { $in: [...unblockedBrandNames] },
     });
 
-    if (user) {
-      const userData = await User.findOne({ _id: user });
+    if (userId) {
+      const userData = await User.findById(userId)
+        .populate({
+          path: "cart",
+          populate: {
+            path: "items.productId",
+            model: "Product",
+            populate: {
+              path: "category",
+              model: "Category",
+            },
+          },
+        })
+        .populate({
+          path: "wishlist",
+          populate: {
+            path: "items.productId",
+            model: "Product",
+            populate: {
+              path: "category",
+              model: "Category",
+            },
+          },
+        });
+
+      // Valid product filter function
+      const isValidProduct = (product) => {
+        return (
+          product &&
+          !product.isBlocked &&
+          listedCategoryIds.has(product.category?._id?.toString()) &&
+          unblockedBrandNames.has(product.brand)
+        );
+      };
+
+      // Calculate cart count for valid products
+      const cartCount = userData?.cart?.[0]?.items
+        ? userData.cart[0].items.filter((item) =>
+            isValidProduct(item.productId)
+          ).length
+        : 0;
+
+      // Calculate wishlist count for valid products
+      const wishlistCount = userData?.wishlist?.[0]?.items
+        ? userData.wishlist[0].items.filter((item) =>
+            isValidProduct(item.productId)
+          ).length
+        : 0;
+
       return res.render("Brand", {
         user: userData,
         products,
+        cartCount,
+        wishlistCount,
       });
     } else {
-      return res.render("Brand", { products });
+      // If no user is logged in, set counts to 0
+      return res.render("Brand", {
+        products,
+        cartCount: 0,
+        wishlistCount: 0,
+      });
     }
   } catch (error) {
     console.error("Error loading brand page:", error);
@@ -178,19 +527,44 @@ const pageNotFound = async (req, res) => {
 // code load signup page
 
 const loadSignup = async (req, res) => {
-  try {
-    const userData = req.session.userData || {};
 
-    req.session.userData = null;
+   try {
+     const userId = req.session.user; // Assuming userId is stored in session
+     let userData = req.session.userData || {};
 
-    res.render("signup", { data: userData });
-  } catch (error) {
-    console.log("signup page not loading", error);
-    res.status(500).redirect("/pageNotFound");
-  }
+     // If userId exists, fetch user data to get cart and wishlist counts
+     if (userId) {
+       const user = await User.findById(userId)
+         .populate("cart")
+         .populate("wishlist");
+
+       // Calculate cart and wishlist counts
+       const cartCount =
+         user.cart && user.cart.length > 0 ? user.cart[0].items.length : 0; // Assuming cart is an array of carts
+       const wishlistCount =
+         user.wishlist && user.wishlist.length > 0
+           ? user.wishlist[0].items.length
+           : 0; // Assuming wishlist is an array of wishlists
+
+       // Merge counts with userData
+       userData = {
+         ...userData,
+         cartCount,
+         wishlistCount,
+       };
+     }
+
+     req.session.userData = null; // Clear session data
+
+     res.render("signup", { data: userData });
+   } catch (error) {
+     console.log("Signup page not loading", error);
+     res.status(500).redirect("/pageNotFound");
+   }
 };
 
 //code to load otp page
+
 
 const loadOtpverify = async (req, res) => {
   try {
@@ -199,14 +573,33 @@ const loadOtpverify = async (req, res) => {
       return res.redirect("/signup");
     }
 
+    const userId = userData._id; // Assuming `userData` includes the user's ID
+    let cartCount = 0;
+    let wishlistCount = 0;
+
+    // Fetch user data if userId exists
+    if (userId) {
+      const user = await User.findById(userId)
+        .populate("cart")
+        .populate("wishlist");
+      cartCount =
+        user.cart && user.cart.length > 0 ? user.cart[0].items.length : 0; // Assuming cart structure
+      wishlistCount =
+        user.wishlist && user.wishlist.length > 0
+          ? user.wishlist[0].items.length
+          : 0; // Assuming wishlist structure
+    }
+
     req.session.countdownTime = 120;
 
     res.render("verify-otp", {
       userData,
       countdownTime: req.session.countdownTime,
+      cartCount,
+      wishlistCount,
     });
   } catch (error) {
-    console.log("verify otp page not loading", error);
+    console.log("Verify OTP page not loading", error);
     res.status(500).send("server error");
   }
 };
@@ -432,14 +825,31 @@ const resendOtp = async (req, res) => {
 
 //code to load login page
 
+
 const loadLogin = async (req, res) => {
   try {
+    // Check if the user is logged in
     if (!req.session.user) {
-      return res.render("login", { data: null });
+      return res.render("login", { data: null }); // Render login page if not logged in
     } else {
+      const userId = req.session.user; // Assuming user ID is stored in session
+      const user = await User.findById(userId)
+        .populate("cart")
+        .populate("wishlist");
+
+      // Calculate cart and wishlist counts
+      const cartCount =
+        user.cart && user.cart.length > 0 ? user.cart[0].items.length : 0; // Assuming cart is an array of carts
+      const wishlistCount =
+        user.wishlist && user.wishlist.length > 0
+          ? user.wishlist[0].items.length
+          : 0; // Assuming wishlist is an array of wishlists
+
+      // Redirect to homepage or wherever the user should go
       res.redirect("/");
     }
   } catch (error) {
+    console.log("Error loading login page:", error);
     res.redirect("/pageNotFound");
   }
 };
@@ -521,10 +931,11 @@ const logout = async (req, res) => {
 
 //code to load shop page
 
+
 const loadShopPage = async (req, res) => {
   try {
-    const user = req.session.user;
-    
+    const userId = req.session.user;
+
     const search = req.query.search || "";
     const limit = 12;
 
@@ -647,9 +1058,55 @@ const loadShopPage = async (req, res) => {
       totalProducts,
     };
 
-    if (user) {
-      const userData = await User.findOne({ _id: user });
-      return res.render("Shop", { user: userData, ...renderData });
+    if (userId) {
+      const userData = await User.findById(userId)
+        .populate({
+          path: "cart",
+          populate: {
+            path: "items.productId",
+            model: "Product",
+          },
+        })
+        .populate({
+          path: "wishlist",
+          populate: {
+            path: "items.productId",
+            model: "Product",
+          },
+        });
+
+      // Valid product filter function
+      const isValidProduct = (product) => {
+        return (
+          product &&
+          !product.isBlocked &&
+          activeCategories
+            .map((cat) => cat._id.toString())
+            .includes(product.category?.toString()) &&
+          activeBrands.map((brand) => brand.brandName).includes(product.brand)
+        );
+      };
+
+      // Calculate cart count for valid products
+      const cartCount = userData?.cart?.[0]?.items
+        ? userData.cart[0].items.filter((item) =>
+            isValidProduct(item.productId)
+          ).length
+        : 0;
+
+      // Calculate wishlist count for valid products
+      const wishlistCount = userData?.wishlist?.[0]?.items
+        ? userData.wishlist[0].items.filter((item) =>
+            isValidProduct(item.productId)
+          ).length
+        : 0;
+
+      return res.render("Shop", {
+        user: userData,
+        ...renderData,
+        cartCount,
+        wishlistCount,
+      });
     } else {
       return res.render("Shop", renderData);
     }
@@ -667,42 +1124,88 @@ const loadShopPage = async (req, res) => {
 const loadProductDetails = async (req, res) => {
   try {
     const productId = req.params.id;
+    const userId = req.session.user;
 
-    const product = await Product.findById(productId)
-      .select({
-        productName: 1,
-        productImage: 1,
-        description: 1,
-        brand: 1,
-        regularPrice: 1,
-        salePrice: 1,
-        rating: 1,
-        reviewsCount: 1,
-        variants: 1,
-      })
-      .lean()
-      .exec();
+    // Fetch all required data in parallel
+    const [listedCategories, unblockedBrands, product] = await Promise.all([
+      Category.find({ isListed: true }),
+      Brand.find({ isBlocked: false }),
+      Product.findById(productId)
+        .select({
+          productName: 1,
+          productImage: 1,
+          description: 1,
+          brand: 1,
+          category: 1,
+          regularPrice: 1,
+          salePrice: 1,
+          rating: 1,
+          reviewsCount: 1,
+          variants: 1,
+          isBlocked: 1,
+        })
+        .lean()
+        .exec(),
+    ]);
 
-    if (!product) {
-      return res.status(404).send("Product not found");
+    // Create Sets for efficient lookups
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
+    );
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName)
+    );
+
+    // Comprehensive product validity check
+    const isValidProduct = (checkProduct) => {
+      return (
+        checkProduct &&
+        !checkProduct.isBlocked &&
+        listedCategoryIds.has(checkProduct.category?._id?.toString()) &&
+        unblockedBrandNames.has(checkProduct.brand)
+      );
+    };
+
+    // Check if the current product is valid
+    if (!product || !isValidProduct(product)) {
+      return res.status(404).send("Product not found or unavailable");
     }
 
-    if (!Array.isArray(product.variants)) {
-      product.variants = [];
-    }
+    // Calculate discount percentage
+    const discount =
+      product.regularPrice > 0
+        ? Math.floor(
+            ((product.regularPrice - product.salePrice) /
+              product.regularPrice) *
+              100
+          )
+        : 0;
+    product.discountPercentage = discount;
+
+    // Ensure variants array exists
+    product.variants = Array.isArray(product.variants) ? product.variants : [];
+
+    // Calculate total quantity from variants
     const totalQuantity = product.variants.reduce(
       (total, variant) => total + (variant.quantity || 0),
       0
     );
 
+    // Get related products with comprehensive filtering
     const relatedProducts = await Product.find({
       brand: product.brand,
       _id: { $ne: productId },
+      isBlocked: false,
     })
-      .limit(4)
       .lean()
       .exec();
 
+    // Filter related products
+    const filteredRelatedProducts = relatedProducts.filter((relProduct) =>
+      isValidProduct(relProduct)
+    );
+
+    // Prepare template data
     const templateData = {
       product: {
         ...product,
@@ -712,27 +1215,72 @@ const loadProductDetails = async (req, res) => {
           quantity: variant.quantity || 0,
         })),
         totalQuantity,
+        discountPercentage: Math.round(discount),
       },
-      relatedProducts,
+      relatedProducts: filteredRelatedProducts.slice(0, 4),
     };
 
-    const userId = req.session.user;
+    // If user is logged in, fetch additional data
     if (userId) {
-      const user = await User.findById(userId).lean();
-      templateData.user = user;
+      const userData = await User.findById(userId)
+        .populate({
+          path: "cart",
+          populate: {
+            path: "items.productId",
+            model: "Product",
+            populate: {
+              path: "category",
+              model: "Category",
+            },
+          },
+        })
+        .populate({
+          path: "wishlist",
+          populate: {
+            path: "items.productId",
+            model: "Product",
+            populate: {
+              path: "category",
+              model: "Category",
+            },
+          },
+        });
+
+      // Calculate filtered cart count
+      const cartCount = userData?.cart?.[0]?.items
+        ? userData.cart[0].items.filter((item) =>
+            isValidProduct(item.productId)
+          ).length
+        : 0;
+
+      // Calculate filtered wishlist count
+      const wishlistCount = userData?.wishlist?.[0]?.items
+        ? userData.wishlist[0].items.filter((item) =>
+            isValidProduct(item.productId)
+          ).length
+        : 0;
+
+      templateData.user = userData;
+      templateData.cartCount = cartCount;
+      templateData.wishlistCount = wishlistCount;
+    } else {
+      // Set default counts for non-logged in users
+      templateData.cartCount = 0;
+      templateData.wishlistCount = 0;
     }
 
+    // Pass product data as a script for client-side use
     const productScript = `
-            <script>
-                const product = ${JSON.stringify(templateData.product)};
-                console.log('Product data loaded:', product);
-            </script>
-        `;
+      <script>
+        const product = ${JSON.stringify(templateData.product)};
+        console.log('Product data loaded:', product);
+      </script>
+    `;
 
+    // Render the product details page
     return res.render("ProductDetails", {
       ...templateData,
       productScript,
-      product,
     });
   } catch (error) {
     console.error("Error loading product details:", error);

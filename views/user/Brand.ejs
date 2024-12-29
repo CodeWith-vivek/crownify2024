@@ -98,8 +98,32 @@
                                             </div>
                                             <!-- End product name -->
                                             <!-- product price -->
+                                            <h5>
+                                                    <span
+                                                        style="padding-left: 10px; text-decoration: line-through; color: rgb(179, 179, 179); font-size: 0.9em; margin-right: 8px;">
+                                                        ₹<%= product.regularPrice.toFixed(2) %>
+                                                    </span>
+                                            </h5>
                                             <div class="product-price">
                                                 <span class="price">₹<%= product.salePrice.toFixed(2) %></span>
+                                            </div>
+                                            <div class="rating-container">
+                                               
+                                               
+                                                            <div class="stock-status">
+                                                                <% const totalQuantity=product.variants ? product.variants.reduce((sum, variant)=> sum +
+                                                                    variant.quantity, 0) : 0; %>
+                                                                    <% if (totalQuantity> 10) { %>
+                                                                        <span style="color: green;">In stock</span>
+                                                                        <% } else if (totalQuantity>= 1) { %>
+                                                                            <span style="color: orange;">
+                                                                                <%= totalQuantity %> left
+                                                                            </span>
+                                                                            <% } else { %>
+                                                                                <span style="color: red;">Out of
+                                                                                    stock</span>
+                                                                                <% } %>
+                                                            </div>
                                             </div>
                                             <!-- End product price -->
                                         </div>
@@ -176,8 +200,32 @@
                                             </div>
                                             <!-- End product name -->
                                             <!-- product price -->
+                                              <h5>
+                                                    <span
+                                                        style="padding-left: 10px; text-decoration: line-through; color: rgb(179, 179, 179); font-size: 0.9em; margin-right: 8px;">
+                                                        ₹<%= product.regularPrice.toFixed(2) %>
+                                                    </span>
+                                            </h5>
                                             <div class="product-price">
                                                 <span class="price">₹<%= product.salePrice.toFixed(2) %></span>
+                                            </div>
+                                            <div class="rating-container">
+                                            
+                                            
+                                                <div class="stock-status">
+                                                    <% const totalQuantity=product.variants ? product.variants.reduce((sum, variant)=> sum +
+                                                        variant.quantity, 0) : 0; %>
+                                                        <% if (totalQuantity> 10) { %>
+                                                            <span style="color: green;">In stock</span>
+                                                            <% } else if (totalQuantity>= 1) { %>
+                                                                <span style="color: orange;">
+                                                                    <%= totalQuantity %> left
+                                                                </span>
+                                                                <% } else { %>
+                                                                    <span style="color: red;">Out of
+                                                                        stock</span>
+                                                                    <% } %>
+                                                </div>
                                             </div>
                                             <!-- End product price -->
                                         </div>
@@ -251,8 +299,32 @@
                                             </div>
                                             <!-- End product name -->
                                             <!-- product price -->
+                                                <h5>
+                                                    <span
+                                                        style="padding-left: 10px; text-decoration: line-through; color: rgb(179, 179, 179); font-size: 0.9em; margin-right: 8px;">
+                                                        ₹<%= product.regularPrice.toFixed(2) %>
+                                                    </span>
+                                                </h5>
                                             <div class="product-price">
                                                 <span class="price">₹<%= product.salePrice.toFixed(2) %></span>
+                                            </div>
+                                            <div class="rating-container">
+                                            
+                                            
+                                                <div class="stock-status">
+                                                    <% const totalQuantity=product.variants ? product.variants.reduce((sum, variant)=> sum +
+                                                        variant.quantity, 0) : 0; %>
+                                                        <% if (totalQuantity> 10) { %>
+                                                            <span style="color: green;">In stock</span>
+                                                            <% } else if (totalQuantity>= 1) { %>
+                                                                <span style="color: orange;">
+                                                                    <%= totalQuantity %> left
+                                                                </span>
+                                                                <% } else { %>
+                                                                    <span style="color: red;">Out of
+                                                                        stock</span>
+                                                                    <% } %>
+                                                </div>
                                             </div>
                                             <!-- End product price -->
                                         </div>
@@ -326,8 +398,32 @@
                                             </div>
                                             <!-- End product name -->
                                             <!-- product price -->
+                                            <h5>
+                                                <span
+                                                    style="padding-left: 10px; text-decoration: line-through; color: rgb(179, 179, 179); font-size: 0.9em; margin-right: 8px;">
+                                                    ₹<%= product.regularPrice.toFixed(2) %>
+                                                </span>
+                                            </h5>
                                             <div class="product-price">
                                                 <span class="price">₹<%= product.salePrice.toFixed(2) %></span>
+                                            </div>
+                                            <div class="rating-container">
+                                            
+                                            
+                                                <div class="stock-status">
+                                                    <% const totalQuantity=product.variants ? product.variants.reduce((sum, variant)=> sum +
+                                                        variant.quantity, 0) : 0; %>
+                                                        <% if (totalQuantity> 10) { %>
+                                                            <span style="color: green;">In stock</span>
+                                                            <% } else if (totalQuantity>= 1) { %>
+                                                                <span style="color: orange;">
+                                                                    <%= totalQuantity %> left
+                                                                </span>
+                                                                <% } else { %>
+                                                                    <span style="color: red;">Out of
+                                                                        stock</span>
+                                                                    <% } %>
+                                                </div>
                                             </div>
                                             <!-- End product price -->
                                         </div>

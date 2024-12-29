@@ -112,12 +112,12 @@
             <div class="hero__inner">
                 <div class="container">
                     <div class="wrap-text right text-medium font-bold">
-                        <h2 class="h2 mega-title">MAKE IT PERSONAL</h2>
-                        <div class="rte-setting mega-subtitle" style="line-height: 40px">Make your jewels even more meaningful by <br>
-                            personalizing them
-                            with a name, monogram, coordinates, date,<br> or a special message.</div>
+                        <h2 class="h2 mega-title">BUY PERSONAL CAP</h2>
+                        <div class="rte-setting mega-subtitle" style="line-height: 40px">Make your cap dream even more meaningful by <br>
+                            purchasing it
+                            from top brand.</div>
                         <a href="/shop" class="btn" style="    background-color: black;
-    color: cornsilk; border-radius: 0px;">personalize Now</a>
+    color: cornsilk; border-radius: 0px;">SHOP NOW</a>
                     </div>
                 </div>
             </div>
@@ -134,8 +134,8 @@
             <div class="row">
                 <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3">
                     <div class="section-header text-center">
-                        <h2 class="h2">Shop these looks</h2>
-                        <p>Shop from hundreds of collections for a fashionable look.</p>
+                        <h2 class="h2">Shop these Caps</h2>
+                        <p>Shop from collections for a caps $ hats.</p>
                     </div>
                     <div class="productSlider grid-products grid-products-hover-gry">
                         <% products.forEach(product=> { %>
@@ -156,19 +156,7 @@
                                             alt="<%= product.productName %>" title="<%= product.productName %>" style="    border-radius: 14px;">
                                         <!-- End hover image -->
                                     </a>
-                                    <!-- end product image -->
-                                    <!-- Start product button -->
-                                    <!-- <form class="variants add" action="#" method="post">
-                                        <button class="btn btn-addto-cart" type="button" tabindex="0">Add To Cart</button>
-                                    </form> -->
-                                    <!-- <div class="button-set">
-                                        <div class="wishlist-btn">
-                                            <a class="wishlist add-to-wishlist" href="wishlist.html">
-                                                <i class="icon anm anm-heart-l"></i>
-                                            </a>
-                                        </div>
-                                    </div> -->
-                                    <!-- end product button -->
+                              
                                 </div>
                                 <!-- end product image -->
                                 <!--start product details -->
@@ -181,9 +169,16 @@
                                     </div>
                                     <!-- End product name -->
                                     <!-- product price -->
+                                    <h5>
+                                        <span
+                                            style="padding-left: 10px; text-decoration: line-through; color: rgb(179, 179, 179); font-size: 0.9em; margin-right: 8px;">
+                                            ₹<%= product.regularPrice.toFixed(2) %>
+                                        </span>
+                                    </h5>
                                     <div class="product-price">
                                         <span class="price">$<%= product.salePrice.toFixed(2) %></span>
                                     </div>
+                                 
                                     <!-- End product price -->
                                 </div>
                                 <!-- End product details -->
@@ -224,13 +219,7 @@
         </div>
         <!--Feature Content-->
 
-        <!--Three Column Products-->
-       
-        <!--End Three Column Products-->
-
-        <!-- Instagram Section-->
      
-        <!--End Instagram Section-->
 
     </div>
     <!--End Body Content-->
@@ -292,7 +281,7 @@
 </script>
 <script>
     document.getElementById('couponsLink').addEventListener('click', function (e) {
-            e.preventDefault(); // Prevent default link behavior
+            e.preventDefault(); 
             const couponsModal = new bootstrap.Modal(document.getElementById('couponsModal'));
             couponsModal.show();
         });

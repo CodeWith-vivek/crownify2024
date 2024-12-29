@@ -276,170 +276,173 @@ const getReportPeriod = (type, startDate, endDate) => {
 
 
 const generateSalesReport = async (req, res) => {
-    const { type, startDate, endDate, page = 1, limit = 10 } = req.body;
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+  const { type, startDate, endDate, page = 1, limit = 10 } = req.body;
+  const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
 
-    try {
-        let query = {};
-        const today = new Date();
+  try {
+    let query = {};
+    const today = new Date();
 
-        // Date range query logic based on the report type
-        switch (type) {
-            case "daily":
-                query.orderedAt = {
-                    $gte: new Date(today.setHours(0, 0, 0, 0)),
-                    $lte: new Date(today.setHours(23, 59, 59, 999)),
-                };
-                break;
-            case "weekly":
-                const startOfWeek = new Date();
-                startOfWeek.setDate(today.getDate() - today.getDay());
-                const endOfWeek = new Date();
-                endOfWeek.setDate(today.getDate() + (6 - today.getDay()));
-                query.orderedAt = {
-                    $gte: startOfWeek,
-                    $lte: endOfWeek,
-                };
-                break;
-            case "monthly":
-                query.orderedAt = {
-                    $gte: new Date(today.getFullYear(), today.getMonth(), 1),
-                    $lte: new Date(today.getFullYear(), today.getMonth() + 1, 0),
-                };
-                break;
-            case "yearly":
-                query.orderedAt = {
-                    $gte: new Date(today.getFullYear(), 0, 1),
-                    $lte: new Date(today.getFullYear(), 11, 31),
-                };
-                break;
-            case "custom":
-                if (!startDate || !endDate || new Date(startDate) > new Date(endDate)) {
-                    return res
-                        .status(400)
-                        .json({ status: false, message: "Invalid date range" });
-                }
-                query.orderedAt = {
-                    $gte: new Date(startDate),
-                    $lte: new Date(endDate),
-                };
-                break;
-            default:
-                return res
-                    .status(400)
-                    .json({ status: false, message: "Invalid report type" });
+    // Date range query logic based on the report type
+    switch (type) {
+      case "daily":
+        query.orderedAt = {
+          $gte: new Date(today.setHours(0, 0, 0, 0)),
+          $lte: new Date(today.setHours(23, 59, 59, 999)),
+        };
+        break;
+      case "weekly":
+        const startOfWeek = new Date();
+        startOfWeek.setDate(today.getDate() - today.getDay());
+        const endOfWeek = new Date();
+        endOfWeek.setDate(today.getDate() + (6 - today.getDay()));
+        query.orderedAt = {
+          $gte: startOfWeek,
+          $lte: endOfWeek,
+        };
+        break;
+      case "monthly":
+        query.orderedAt = {
+          $gte: new Date(today.getFullYear(), today.getMonth(), 1),
+          $lte: new Date(today.getFullYear(), today.getMonth() + 1, 0),
+        };
+        break;
+      case "yearly":
+        query.orderedAt = {
+          $gte: new Date(today.getFullYear(), 0, 1),
+          $lte: new Date(today.getFullYear(), 11, 31),
+        };
+        break;
+      case "custom":
+        if (!startDate || !endDate || new Date(startDate) > new Date(endDate)) {
+          return res
+            .status(400)
+            .json({ status: false, message: "Invalid date range" });
         }
-
-        // Get total count for pagination
-        const totalOrders = await Order.countDocuments(query);
-        if (totalOrders === 0) {
-            return res.json({
-                status: true,
-                report: [],
-                totals: {},
-                pagination: {
-                    currentPage: page,
-                    totalPages: 0,
-                    totalOrders: 0,
-                    hasNextPage: false,
-                    hasPrevPage: false,
-                },
-            });
-        }
-
-        const totalPages = Math.ceil(totalOrders / limit);
-
-        // Fetch orders with detailed product information
-        const orders = await Order.find(query)
-            .populate({
-                path: "items.productId",
-                select: "productName brand regularPrice salePrice variants category",
-                populate: {
-                    path: "category",
-                    select: "name",
-                },
-            })
-            .sort({ orderedAt: -1 })
-            .skip(skip)
-            .limit(limit);
-
-        // // Calculate totals for all orders
-      
-        let totalQuantity = 0;
-        let totalRegularPrice = 0; // New variable for total regular price
-        let totalSalePrice = 0; // New variable for total sale price
-        let totalItemDiscount = 0; // New variable for total item discount
-        let totalCouponDiscount = 0; // New variable for total coupon discount
-        let totalItemTotal = 0;
-        let totalShipping = 0;
-        let totalOrderTotal = 0;
-
-        const report = orders.map((order) => {
-          const orderItemTotals = order.items.map((item) => {
-            const product = item.productId;
-            const variant = product.variants[0];
-
-            const itemTotal = item.salePrice * item.quantity;
-            const shipping = order.shipping / order.items.length;
-
-            totalQuantity += item.quantity;
-            totalRegularPrice += item.regularPrice * item.quantity; // Accumulate regular price
-            totalSalePrice += item.salePrice * item.quantity; // Accumulate sale price
-            totalItemDiscount +=
-              (item.regularPrice - item.salePrice) * item.quantity; // Accumulate item discount
-            totalCouponDiscount += order.discount / order.items.length; // Accumulate coupon discount
-            totalItemTotal += itemTotal; // Accumulate item total
-            totalShipping += shipping; // Accumulate shipping
-            totalOrderTotal += itemTotal + shipping; // Accumulate order total
-
-            return {
-              name: product.productName,
-              brand: product.brand,
-              color: variant ? variant.color : "N/A",
-              size: variant ? variant.size : "N/A",
-              category: product.category ? product.category.name : "N/A",
-              quantity: item.quantity,
-              regularPrice: item.regularPrice,
-              salePrice: item.salePrice,
-              itemDiscount: item.regularPrice - item.salePrice,
-              couponDiscount: order.discount / order.items.length,
-              itemTotal: itemTotal,
-              shipping: shipping,
-            };
-          });
-
-          return {
-            orderNumber: order.orderNumber,
-            date: order.orderedAt.toISOString().split("T")[0],
-            items: orderItemTotals,
-          };
-        });
-
-        return res.json({
-          status: true,
-          report,
-          totals: {
-            totalQuantity,
-            totalRegularPrice, // Add total regular price to the totals
-            totalSalePrice, // Add total sale price to the totals
-            totalItemDiscount, // Add total item discount to the totals
-            totalCouponDiscount, // Add total coupon discount to the totals
-            totalItemTotal,
-            totalShipping,
-            totalOrderTotal,
-          },
-          pagination: {
-            currentPage: page,
-            totalPages,
-            totalOrders,
-            hasNextPage: page < totalPages,
-            hasPrevPage: page > 1,
-          },
-        });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ status: false, message: "Internal server error" });
+        query.orderedAt = {
+          $gte: new Date(startDate),
+          $lte: new Date(endDate),
+        };
+        break;
+      default:
+        return res
+          .status(400)
+          .json({ status: false, message: "Invalid report type" });
     }
+
+    // Get total count for pagination
+    const totalOrders = await Order.countDocuments(query);
+    if (totalOrders === 0) {
+      return res.status(404).json({
+        status: false,
+        message: "No orders found for the selected criteria.",
+        report: [],
+        totals: {},
+        pagination: {
+          currentPage: page,
+          totalPages: 0,
+          totalOrders: 0,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
+      });
+    }
+
+    const totalPages = Math.ceil(totalOrders / limit);
+
+    // Fetch orders with detailed product information
+    const orders = await Order.find(query)
+      .populate({
+        path: "items.productId",
+        select: "productName brand regularPrice salePrice variants category",
+        populate: {
+          path: "category",
+          select: "name",
+        },
+      })
+      .sort({ orderedAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // // Calculate totals for all orders
+
+    let totalQuantity = 0;
+    let totalRegularPrice = 0; // New variable for total regular price
+    let totalSalePrice = 0; // New variable for total sale price
+    let totalItemDiscount = 0; // New variable for total item discount
+    let totalCouponDiscount = 0; // New variable for total coupon discount
+    let totalItemTotal = 0;
+    let totalShipping = 0;
+    let totalOrderTotal = 0;
+
+    const report = orders.map((order) => {
+      const orderItemTotals = order.items.map((item) => {
+        const product = item.productId;
+        const variant = product.variants[0];
+
+        const itemTotal = item.salePrice * item.quantity;
+        const shipping = order.shipping / order.items.length;
+
+        totalQuantity += item.quantity;
+        totalRegularPrice += item.regularPrice * item.quantity; // Accumulate regular price
+        totalSalePrice += item.salePrice * item.quantity; // Accumulate sale price
+        totalItemDiscount +=
+          (item.regularPrice - item.salePrice) * item.quantity; // Accumulate item discount
+        totalCouponDiscount += order.discount / order.items.length; // Accumulate coupon discount
+        totalItemTotal += itemTotal; // Accumulate item total
+        totalShipping += shipping; // Accumulate shipping
+        totalOrderTotal += itemTotal + shipping; // Accumulate order total
+
+        return {
+          name: product.productName,
+          brand: product.brand,
+          color: variant ? variant.color : "N/A",
+          size: variant ? variant.size : "N/A",
+          category: product.category ? product.category.name : "N/A",
+          quantity: item.quantity,
+          regularPrice: item.regularPrice,
+          salePrice: item.salePrice,
+          itemDiscount: item.regularPrice - item.salePrice,
+          couponDiscount: order.discount / order.items.length,
+          itemTotal: itemTotal,
+          shipping: shipping,
+        };
+      });
+
+      return {
+        orderNumber: order.orderNumber,
+        date: order.orderedAt.toISOString().split("T")[0],
+        items: orderItemTotals,
+      };
+    });
+
+    return res.json({
+      status: true,
+      report,
+      totals: {
+        totalQuantity,
+        totalRegularPrice, // Add total regular price to the totals
+        totalSalePrice, // Add total sale price to the totals
+        totalItemDiscount, // Add total item discount to the totals
+        totalCouponDiscount, // Add total coupon discount to the totals
+        totalItemTotal,
+        totalShipping,
+        totalOrderTotal,
+      },
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalOrders,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ status: false, message: "Internal server error" });
+  }
 };
 
 
@@ -636,7 +639,6 @@ const salesChart = async (req, res) => {
 
 
 
-
 const reportPdf = async (req, res) => {
   const { type, startDate, endDate } = req.body;
 
@@ -653,40 +655,67 @@ const reportPdf = async (req, res) => {
     const today = new Date();
 
     switch (type) {
-      case "daily":
+      case "daily": {
+        const startOfDay = new Date(today);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(today);
+        endOfDay.setHours(23, 59, 59, 999);
         query.orderedAt = {
-          $gte: new Date(today.setHours(0, 0, 0, 0)),
-          $lte: new Date(today.setHours(23, 59, 59, 999)),
+          $gte: startOfDay,
+          $lte: endOfDay,
         };
         break;
-      case "weekly":
-        const startOfWeek = new Date();
+      }
+      case "weekly": {
+        const startOfWeek = new Date(today);
         startOfWeek.setDate(today.getDate() - today.getDay());
-        const endOfWeek = new Date();
+        startOfWeek.setHours(0, 0, 0, 0);
+        const endOfWeek = new Date(today);
         endOfWeek.setDate(today.getDate() + (6 - today.getDay()));
+        endOfWeek.setHours(23, 59, 59, 999);
         query.orderedAt = {
           $gte: startOfWeek,
           $lte: endOfWeek,
         };
         break;
-      case "monthly":
+      }
+      case "monthly": {
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        const endOfMonth = new Date(
+          today.getFullYear(),
+          today.getMonth() + 1,
+          0
+        );
+        endOfMonth.setHours(23, 59, 59, 999);
         query.orderedAt = {
-          $gte: new Date(today.getFullYear(), today.getMonth(), 1),
-          $lte: new Date(today.getFullYear(), today.getMonth() + 1, 0),
+          $gte: startOfMonth,
+          $lte: endOfMonth,
         };
         break;
-      case "yearly":
+      }
+      case "yearly": {
+        const startOfYear = new Date(today.getFullYear(), 0, 1);
+        startOfYear.setHours(0, 0, 0, 0);
+        const endOfYear = new Date(today.getFullYear(), 11, 31);
+        endOfYear.setHours(23, 59, 59, 999);
         query.orderedAt = {
-          $gte: new Date(today.getFullYear(), 0, 1),
-          $lte: new Date(today.getFullYear(), 11, 31),
+          $gte: startOfYear,
+          $lte: endOfYear,
         };
         break;
-      case "custom":
+      }
+      case "custom": {
+        const customStartDate = new Date(startDate);
+        customStartDate.setHours(0, 0, 0, 0);
+        const customEndDate = new Date(endDate);
+        customEndDate.setHours(23, 59, 59, 999);
         query.orderedAt = {
-          $gte: new Date(startDate),
-          $lte: new Date(endDate),
+          $gte: customStartDate,
+          $lte: customEndDate,
         };
         break;
+      }
     }
 
     const orders = await Order.find(query)
@@ -707,7 +736,7 @@ const reportPdf = async (req, res) => {
       });
     }
 
-    // Calculate totals
+    // Calculate totals with safe defaults
     let totals = {
       totalQuantity: 0,
       totalRegularPrice: 0,
@@ -719,45 +748,68 @@ const reportPdf = async (req, res) => {
       totalOrderTotal: 0,
     };
 
-    const reportData = orders.map((order) => {
-      const orderDetails = {
-        orderNumber: order.orderNumber,
-        date: order.orderedAt.toISOString().split("T")[0],
-        items: order.items.map((item) => {
-          const product = item.productId;
-          const variant = product.variants[0];
-          const itemTotal = item.salePrice * item.quantity;
-          const shipping = order.shipping / order.items.length;
+    const reportData = orders
+      .map((order) => {
+        // Ensure order has required fields
+        if (!order || !order.items) return null;
 
-          // Update totals
-          totals.totalQuantity += item.quantity;
-          totals.totalRegularPrice += item.regularPrice * item.quantity;
-          totals.totalSalePrice += item.salePrice * item.quantity;
-          totals.totalItemDiscount +=
-            (item.regularPrice - item.salePrice) * item.quantity;
-          totals.totalCouponDiscount += order.discount / order.items.length;
-          totals.totalItemTotal += itemTotal;
-          totals.totalShipping += shipping;
-          totals.totalOrderTotal += itemTotal + shipping;
+        const orderDetails = {
+          orderNumber: order.orderNumber || "N/A",
+          date: order.orderedAt
+            ? order.orderedAt.toISOString().split("T")[0]
+            : "N/A",
+          items: order.items
+            .map((item) => {
+              // Safely access nested properties
+              const product = item.productId || {};
+              const variant = (product.variants && product.variants[0]) || {};
+              const quantity = item.quantity || 0;
+              const regularPrice = item.regularPrice || 0;
+              const salePrice = item.salePrice || 0;
+              const shipping =
+                (order.shipping || 0) / (order.items.length || 1);
+              const itemTotal = salePrice * quantity;
 
-          return {
-            name: product.productName,
-            brand: product.brand,
-            color: variant ? variant.color : "N/A",
-            size: variant ? variant.size : "N/A",
-            category: product.category ? product.category.name : "N/A",
-            quantity: item.quantity,
-            regularPrice: item.regularPrice,
-            salePrice: item.salePrice,
-            itemDiscount: item.regularPrice - item.salePrice,
-            couponDiscount: order.discount / order.items.length,
-            itemTotal: itemTotal,
-            shipping: shipping,
-          };
-        }),
-      };
-      return orderDetails;
-    });
+              // Update totals
+              totals.totalQuantity += quantity;
+              totals.totalRegularPrice += regularPrice * quantity;
+              totals.totalSalePrice += salePrice * quantity;
+              totals.totalItemDiscount += (regularPrice - salePrice) * quantity;
+              totals.totalCouponDiscount +=
+                (order.discount || 0) / (order.items.length || 1);
+              totals.totalItemTotal += itemTotal;
+              totals.totalShipping += shipping;
+              totals.totalOrderTotal += itemTotal + shipping;
+
+              return {
+                name: product.productName || "N/A",
+                brand: product.brand || "N/A",
+                color: variant.color || "N/A",
+                size: variant.size || "N/A",
+                category: (product.category && product.category.name) || "N/A",
+                quantity: quantity,
+                regularPrice: regularPrice,
+                salePrice: salePrice,
+                itemDiscount: regularPrice - salePrice,
+                couponDiscount:
+                  (order.discount || 0) / (order.items.length || 1),
+                itemTotal: itemTotal,
+                shipping: shipping,
+              };
+            })
+            .filter(Boolean), // Remove any null items
+        };
+        return orderDetails;
+      })
+      .filter(Boolean); // Remove any null orders
+
+    // Check if we have valid report data
+    if (!reportData || reportData.length === 0) {
+      return res.status(404).json({
+        status: false,
+        message: "No valid order data found for the specified period",
+      });
+    }
 
     const doc = new PDFDocument({
       margin: 50,
@@ -795,10 +847,6 @@ const reportPdf = async (req, res) => {
     });
   }
 };
-
-
-
-
 
 const generateEnhancedPdfContent = (
   doc,
@@ -858,16 +906,16 @@ const generateEnhancedPdfContent = (
 
   // Define column widths as percentages of the table width
   const columnWidths = {
-    orderNumber: 0.1, // 10%
-    name: 0.2, // 20%
-    brand: 0.1, // 10%
-    category: 0.1, // 10%
-    quantity: 0.07, // 7%
-    salePrice: 0.1, // 10%
-    itemDiscount: 0.11, // 11%
-    shipping: 0.07, // 7%
-    couponDiscount: 0.08, // 8%
-    total: 0.07, // 7%
+    orderNumber: 0.1,
+    name: 0.2,
+    brand: 0.1,
+    category: 0.1,
+    quantity: 0.07,
+    salePrice: 0.1,
+    itemDiscount: 0.11,
+    shipping: 0.07,
+    couponDiscount: 0.08,
+    total: 0.07,
   };
 
   const orderTable = {
@@ -880,43 +928,48 @@ const generateEnhancedPdfContent = (
       "Price",
       "Offer Discount",
       "Shipping",
-      "Coupon ",
+      "Coupon",
       "Total",
     ],
     columnWidths,
     rows: [],
   };
 
-  // Prepare order details rows
+  // Prepare order details rows with safe value handling
   reportData.forEach((order) => {
+    if (!order || !order.items) return;
+
     order.items.forEach((item) => {
-      orderTable.rows.push([
-        order.orderNumber,
-        item.name,
-        item.brand,
-        item.category,
-        item.quantity.toString(),
-        item.salePrice,
-        item.itemDiscount * item.quantity,
-        item.shipping,
-        item.couponDiscount,
-        item.itemTotal,
-      ]);
+      if (!item) return;
+
+      const row = [
+        order.orderNumber || "N/A",
+        item.name || "N/A",
+        item.brand || "N/A",
+        item.category || "N/A",
+        (item.quantity || 0).toString(),
+        item.salePrice || 0,
+        (item.itemDiscount || 0) * (item.quantity || 0),
+        item.shipping || 0,
+        item.couponDiscount || 0,
+        item.itemTotal || 0,
+      ];
+
+      // Ensure all values in the row are strings
+      const safeRow = row.map((value) => String(value || "N/A"));
+      orderTable.rows.push(safeRow);
     });
   });
 
   generateTable(doc, orderTable, false);
 };
 
-
-
-
 const generateTable = (doc, tableData, isSimpleTable) => {
   const { headers, rows, columnWidths } = tableData;
   const tablePadding = 10;
   const cellPadding = 5;
-  const fontSize = 7; // Font size
-  const extraRowSpace = 10; // Additional space after each row
+  const fontSize = 7;
+  const extraRowSpace = 10;
   const tableWidth = doc.page.width - 2 * tablePadding;
 
   let startX = tablePadding;
@@ -932,18 +985,17 @@ const generateTable = (doc, tableData, isSimpleTable) => {
 
   // Function to draw table header
   const drawTableHeader = () => {
-    doc.fontSize(fontSize).font("Helvetica-Bold"); // Set font size and bold font for header
+    doc.fontSize(fontSize).font("Helvetica-Bold");
     let x = startX;
     headers.forEach((header, i) => {
-      doc.text(header, x, startY, {
+      doc.text(String(header || ""), x, startY, {
         width: colWidths[i],
-        align: "center", // Center-align the header
+        align: "center",
         lineBreak: false,
       });
       x += colWidths[i];
     });
 
-    // Draw header separator line
     doc
       .moveTo(startX, startY + fontSize + 2)
       .lineTo(startX + tableWidth, startY + fontSize + 2)
@@ -952,35 +1004,29 @@ const generateTable = (doc, tableData, isSimpleTable) => {
     return startY + fontSize + cellPadding;
   };
 
-  // Draw initial header
   startY = drawTableHeader();
-
-  // Draw rows
-  doc.font("Helvetica").fontSize(fontSize); // Set font size for rows
-
-  let rowCount = 0; // Initialize row count
+  doc.font("Helvetica").fontSize(fontSize);
+  let rowCount = 0;
 
   rows.forEach((row) => {
-    const rowHeight = fontSize + cellPadding + extraRowSpace; // Increased row height
+    const rowHeight = fontSize + cellPadding + extraRowSpace;
 
-    // Check if we need a new page
     if (rowCount >= 30) {
-      // Limit to 10 rows per page
       doc.addPage();
       startY = tablePadding;
       startY = drawTableHeader();
-      rowCount = 0; // Reset row count for new page
+      rowCount = 0;
     }
 
     let x = startX;
     row.forEach((cell, i) => {
-      // Truncate long text and add ellipsis if necessary
-      let cellText = cell.toString();
+      // Ensure cell value is a string and handle null/undefined
+      const cellText = String(cell || "N/A");
       const maxWidth = colWidths[i] - cellPadding;
 
       doc.text(cellText, x, startY, {
         width: maxWidth,
-        align: "center", // Center-align the cell text
+        align: "center",
         lineBreak: false,
         ellipsis: true,
       });
@@ -988,20 +1034,36 @@ const generateTable = (doc, tableData, isSimpleTable) => {
       x += colWidths[i];
     });
 
-    startY += rowHeight; // Move down by the new row height
-    rowCount++; // Increment row count
+    startY += rowHeight;
+    rowCount++;
   });
 
-  // Update document Y position
   doc.y = startY + cellPadding;
 };
+
 const getReportPeriodText = (type, startDate, endDate) => {
   const today = new Date();
+
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   switch (type) {
     case "daily":
-      return `Daily Report - ${today.toLocaleDateString()}`;
-    case "weekly":
-      return `Weekly Report - Week of ${today.toLocaleDateString()}`;
+      return `Daily Report - ${formatDate(today)}`;
+    case "weekly": {
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay());
+      const endOfWeek = new Date(today);
+      endOfWeek.setDate(today.getDate() + (6 - today.getDay()));
+      return `Weekly Report - ${formatDate(startOfWeek)} to ${formatDate(
+        endOfWeek
+      )}`;
+    }
     case "monthly":
       return `Monthly Report - ${today.toLocaleString("default", {
         month: "long",
@@ -1010,13 +1072,14 @@ const getReportPeriodText = (type, startDate, endDate) => {
     case "yearly":
       return `Yearly Report - ${today.getFullYear()}`;
     case "custom":
-      return `Custom Report (${new Date(
-        startDate
-      ).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()})`;
+      return `Custom Report - ${formatDate(startDate)} to ${formatDate(
+        endDate
+      )}`;
     default:
       return "Sales Report";
   }
 };
+
 
 
 

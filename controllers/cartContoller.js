@@ -17,105 +17,153 @@ const loadCartPage = async (req, res) => {
     const shippingCharge = 40;
     let isCartEmpty = true;
 
-    if (req.session && req.session.user) {
-      const userId = req.session.user;
-
-    
-      const cart = await Cart.findOne({ userId }).populate({
-        path: "items.productId",
-        model: "Product",
-        populate: {
-          path: "category",
-          model: "Category",
-        },
+    if (!req.session || !req.session.user) {
+      return res.render("cart", {
+        user: null,
+        cartItems: [],
+        subtotal: 0,
+        shippingCharge,
+        total: shippingCharge,
+        isCartEmpty: true,
+        isGuest: true,
+        coupons: [],
+        cartCount: 0,
+        wishlistCount: 0,
       });
-
-   
-      const listedCategories = await Category.find({ isListed: true });
-      const unblockedBrands = await Brand.find({ isBlocked: false });
-
-     
-      const listedCategoryIds = new Set(
-        listedCategories.map((cat) => cat._id.toString())
-      );
-      const unblockedBrandNames = new Set(
-        unblockedBrands.map((brand) => brand.brandName)
-      );
-
-      if (cart && cart.items.length > 0) {
-        cartItems = cart.items
-          .map((item) => {
-            const product = item.productId;
-
-          
-            if (
-              product.isBlocked || 
-              !listedCategoryIds.has(product.category?._id?.toString()) || 
-              !unblockedBrandNames.has(product.brand)
-            ) {
-              return null;
-            }
-
-            const variant = product.variants.find(
-              (v) =>
-                v.size === item.variant.size && v.color === item.variant.color
-            );
-
-            if (!variant) {
-              console.error("Variant not found for item:", item);
-              return null; 
-            }
-
-            return {
-              product,
-              productCategory: product.category
-                ? product.category.name
-                : "Unknown",
-              productName: product.productName,
-              productBrand: product.brand,
-              productImage: product.productImage[0],
-              quantity: item.quantity,
-              color: item.variant.color,
-              size: item.variant.size,
-              selectedVariantStockLevel: variant.quantity,
-              itemTotal: Math.floor(
-                item.quantity * (product.salePrice || product.regularPrice)
-              ),
-            };
-          })
-          .filter((item) => item !== null); 
-
-        isCartEmpty = cartItems.length === 0; 
-      }
-
-    
-      subtotal = Math.floor(
-        cartItems.reduce((total, item) => total + item.itemTotal, 0)
-      );
-    } else {
-      isCartEmpty = true;
     }
 
-   
-    const total = Math.floor(subtotal + shippingCharge);
-
-    const user = await User.findOne({ _id: userId });
-    const coupons = await Coupon.find({ isActive: true });
+  
+    const [cart, user, listedCategories, unblockedBrands, coupons] =
+      await Promise.all([
+        Cart.findOne({ userId }).populate({
+          path: "items.productId",
+          model: "Product",
+          populate: {
+            path: "category",
+            model: "Category",
+          },
+        }),
+        User.findOne({ _id: userId })
+          .populate({
+            path: "cart",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          })
+          .populate({
+            path: "wishlist",
+            populate: {
+              path: "items.productId",
+              model: "Product",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          }),
+        Category.find({ isListed: true }),
+        Brand.find({ isBlocked: false }),
+        Coupon.find({ isActive: true }),
+      ]);
 
   
-    res.render("cart", {
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
+    );
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName)
+    );
+
+ 
+    const isValidProduct = (product) => {
+      return (
+        product &&
+        !product.isBlocked &&
+        listedCategoryIds.has(product.category?._id?.toString()) &&
+        unblockedBrandNames.has(product.brand)
+      );
+    };
+
+    // Process cart items
+    if (cart && cart.items.length > 0) {
+      cartItems = cart.items
+        .map((item) => {
+          const product = item.productId;
+
+          if (!isValidProduct(product)) {
+            return null;
+          }
+
+          const variant = product.variants.find(
+            (v) =>
+              v.size === item.variant.size && v.color === item.variant.color
+          );
+
+          if (!variant) {
+            console.error("Variant not found for item:", item);
+            return null;
+          }
+
+          return {
+            product,
+            productCategory: product.category
+              ? product.category.name
+              : "Unknown",
+            productName: product.productName,
+            productBrand: product.brand,
+            productImage: product.productImage[0],
+            quantity: item.quantity,
+            color: item.variant.color,
+            size: item.variant.size,
+            selectedVariantStockLevel: variant.quantity,
+            itemTotal: Math.floor(
+              item.quantity * (product.salePrice || product.regularPrice)
+            ),
+          };
+        })
+        .filter((item) => item !== null);
+
+      isCartEmpty = cartItems.length === 0;
+    }
+
+    // Calculate subtotal and total
+    subtotal = Math.floor(
+      cartItems.reduce((total, item) => total + item.itemTotal, 0)
+    );
+    const total = Math.floor(subtotal + shippingCharge);
+
+    // Calculate filtered counts
+    const cartCount = user?.cart?.[0]?.items
+      ? user.cart[0].items.filter((item) => isValidProduct(item.productId))
+          .length
+      : 0;
+
+    const wishlistCount = user?.wishlist?.[0]?.items
+      ? user.wishlist[0].items.filter((item) => isValidProduct(item.productId))
+          .length
+      : 0;
+
+    return res.render("cart", {
       user,
       cartItems,
       subtotal,
       shippingCharge,
       total,
       isCartEmpty,
-      isGuest: !req.session.user,
+      isGuest: false,
       coupons,
+      cartCount,
+      wishlistCount,
     });
   } catch (error) {
     console.error("Cart page error:", error.stack || error);
-    res.status(500).render("error", {
+    // Since the error view isn't found, let's send a basic error response
+    res.status(500).send({
       message: "Error loading cart",
       error: error.toString(),
     });
@@ -243,6 +291,8 @@ const addToCart = async (req, res) => {
 };
 
 
+
+
 // code to get stock of each variant 
 
 const getVarientQuantity = async (req, res) => {
@@ -289,11 +339,12 @@ const updateStockAfterAdd = async (productId, size, color, quantity) => {
 
 // code to delete item from cart
 
+
 const deleteFromCart = async (req, res) => {
   try {
     const { productId, size, color } = req.body;
 
-
+    // Check if the user is logged in
     if (!req.session || !req.session.user) {
       return res.status(401).json({
         success: false,
@@ -301,7 +352,7 @@ const deleteFromCart = async (req, res) => {
       });
     }
 
-
+    // Find the user's cart
     const cart = await Cart.findOne({ userId: req.session.user });
     if (!cart) {
       return res.status(404).json({
@@ -310,7 +361,7 @@ const deleteFromCart = async (req, res) => {
       });
     }
 
-  
+    // Find the index of the item to remove
     const itemIndex = cart.items.findIndex(
       (item) =>
         item.productId.equals(productId) &&
@@ -318,6 +369,7 @@ const deleteFromCart = async (req, res) => {
         item.variant.color === color
     );
 
+    // Check if the item exists in the cart
     if (itemIndex === -1) {
       return res.status(404).json({
         success: false,
@@ -325,23 +377,44 @@ const deleteFromCart = async (req, res) => {
       });
     }
 
-    
-    cart.items.splice(itemIndex, 1);
+    console.log("Cart items before removal:", cart.items);
 
-  
-    const updatedCartTotal = Math.floor(
-      cart.items.reduce((total, item) => {
-        return total + item.itemTotal;
-      }, 0)
+    // Remove the item from the cart
+    cart.items.splice(itemIndex, 1);
+    console.log("Cart items after removal:", cart.items);
+
+    // Recalculate the total price
+    const updatedSubtotal = cart.items.reduce(
+      (total, item) => total + item.totalPrice,
+      0
+    );
+    const shippingCharge = cart.cartSummary.shippingCharge; // Assuming this is fixed
+    const discount = cart.cartSummary.discount || 0; // Set to 0 if not defined
+
+    // Update the cart summary
+    cart.cartSummary.subtotal = updatedSubtotal;
+    cart.cartSummary.total = Math.floor(
+      updatedSubtotal + shippingCharge - discount
     );
 
-   
-    await cart.save();
+    // Save the updated cart
+    const savedCart = await cart.save();
+    console.log("Saved cart:", savedCart);
+
+    // Check if the cart is now empty
+    if (cart.items.length === 0) {
+      // If the cart is empty, remove it from the user's cart array
+      await User.updateOne(
+        { _id: req.session.user },
+        { $pull: { cart: cart._id } }
+      );
+      console.log("Cart removed from user's cart array");
+    }
 
     return res.status(200).json({
       success: true,
       message: "Item removed from cart successfully",
-      newTotal: updatedCartTotal,
+      newTotal: cart.cartSummary.total,
     });
   } catch (error) {
     console.error("Error removing item from cart:", error);

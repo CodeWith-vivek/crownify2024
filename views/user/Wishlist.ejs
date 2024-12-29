@@ -49,7 +49,7 @@
                                             <td class="product-remove text-center">
                                                 <a href="javascript:void(0);" class="remove-btn"
                                                     data-product-id="<%= item.productId %>">
-                                                    <i class="icon icon anm anm-times-l"></i>
+                                                    <i class="icon icon anm anm-times-l" style="color: black;"></i>
                                                 </a>
                                             </td>
                                             <!-- Product Image -->
@@ -101,7 +101,7 @@
                                             <!-- Add to Cart -->
                                             <td class="product-subtotal text-center">
                                                 <button type="button" class="btn btn-small btn-add-to-cart add-to-cart-btn"
-                                                    style="background-color: black;" disabled>
+                                                    style="background-color: black; color: white;" disabled>
                                                     Add To Cart
                                                 </button>
                                             </td>
@@ -254,6 +254,9 @@
                         icon: 'error',
                         title: 'Oops...',
                         text: result.message || 'Failed to add product to cart',
+                    }).then(() => {
+                        // Reload the page after closing the alert
+                        location.reload();
                     });
                 }
             } catch (error) {

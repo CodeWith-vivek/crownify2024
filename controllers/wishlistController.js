@@ -7,10 +7,53 @@ const Brand=require("../models/brandSchema")
 
 //code to load wishlist page
 
+
 const loadWishlistpage = async (req, res) => {
   try {
     const userId = req.session?.user;
-    const user = userId ? await User.findById(userId) : null;
+
+    // Fetch user with populated cart and wishlist
+    const user = userId
+      ? await User.findById(userId)
+          .populate({
+            path: "cart",
+            populate: {
+              path: "items.productId",
+              populate: {
+                path: "category",
+                model: "Category",
+              },
+            },
+          })
+          .populate("wishlist")
+      : null;
+
+    // Fetch listed categories and unblocked brands first
+    const [listedCategories, unblockedBrands] = await Promise.all([
+      Category.find({ isListed: true }).lean(),
+      Brand.find({ isBlocked: false }).lean(),
+    ]);
+
+    const listedCategoryIds = new Set(
+      listedCategories.map((cat) => cat._id.toString())
+    );
+    const unblockedBrandNames = new Set(
+      unblockedBrands.map((brand) => brand.brandName)
+    );
+
+    // Calculate filtered cart count
+    const cartCount =
+      user && user.cart && user.cart.length > 0
+        ? user.cart[0].items.filter((item) => {
+            const product = item.productId;
+            return (
+              product &&
+              !product.isBlocked &&
+              listedCategoryIds.has(product.category?._id?.toString()) &&
+              unblockedBrandNames.has(product.brand)
+            );
+          }).length
+        : 0;
 
     if (!user) {
       return res.render("Wishlist", {
@@ -21,24 +64,17 @@ const loadWishlistpage = async (req, res) => {
       });
     }
 
-    const listedCategories = await Category.find({ isListed: true });
-    const unblockedBrands = await Brand.find({ isBlocked: false });
-
-    const listedCategoryIds = new Set(
-      listedCategories.map((cat) => cat._id.toString())
-    );
-    const unblockedBrandNames = new Set(
-      unblockedBrands.map((brand) => brand.brandName)
-    );
-
-    const wishlist = await Wishlist.findOne({ userId }).populate({
-      path: "items.productId",
-      model: "Product",
-      populate: {
-        path: "category",
-        model: "Category",
-      },
-    });
+    // Fetch user's wishlist with populated product details
+    const wishlist = await Wishlist.findOne({ userId })
+      .populate({
+        path: "items.productId",
+        model: "Product",
+        populate: {
+          path: "category",
+          model: "Category",
+        },
+      })
+      .lean();
 
     if (!wishlist || wishlist.items.length === 0) {
       return res.render("Wishlist", {
@@ -46,56 +82,62 @@ const loadWishlistpage = async (req, res) => {
         wishlistItems: [],
         isWishlistEmpty: true,
         isGuest: false,
+        cartCount,
       });
     }
 
+    // Filter and map valid wishlist items
     const wishlistItems = wishlist.items
       .map((item) => {
         const product = item.productId;
-
         if (
-          product.isBlocked || 
-          !listedCategoryIds.has(product.category?._id?.toString()) || 
+          !product ||
+          product.isBlocked ||
+          !listedCategoryIds.has(product.category?._id?.toString()) ||
           !unblockedBrandNames.has(product.brand)
         ) {
           return null;
         }
 
-        const variantsBySize = product.variants.reduce((acc, variant) => {
-          if (!acc[variant.size]) {
-            acc[variant.size] = {
-              colors: [],
-              totalQuantity: 0,
-            };
-          }
-
-          if (!acc[variant.size].colors.includes(variant.color)) {
-            acc[variant.size].colors.push(variant.color);
-          }
-          acc[variant.size].totalQuantity += variant.quantity;
-
-          return acc;
-        }, {});
+        const variantsBySize = (product.variants || []).reduce(
+          (acc, variant) => {
+            if (!acc[variant.size]) {
+              acc[variant.size] = {
+                colors: [],
+                totalQuantity: 0,
+              };
+            }
+            if (!acc[variant.size].colors.includes(variant.color)) {
+              acc[variant.size].colors.push(variant.color);
+            }
+            acc[variant.size].totalQuantity += variant.quantity;
+            return acc;
+          },
+          {}
+        );
 
         return {
           productId: product._id,
           productName: product.productName,
-          productImage: product.productImage[0],
+          productImage: product.productImage?.[0] || "/default-image.jpg",
           brand: product.brand,
-          category: product.category,
+          category: product.category?.categoryName || "Unknown",
           salePrice: product.salePrice,
           regularPrice: product.regularPrice,
           variants: variantsBySize,
           availableSizes: Object.keys(variantsBySize),
         };
       })
-      .filter((item) => item !== null); 
+      .filter((item) => item !== null);
 
+    // Render wishlist page
     res.render("Wishlist", {
       user,
       wishlistItems,
       isWishlistEmpty: wishlistItems.length === 0,
       isGuest: false,
+      cartCount,
+      wishlistCount: wishlistItems.length,
     });
   } catch (error) {
     console.error("Wishlist page error:", error);
@@ -252,6 +294,7 @@ const removeFromWishlist = async (req, res) => {
   try {
     const { productId } = req.body;
 
+  
     if (!req.session || !req.session.user) {
       return res.status(401).json({
         success: false,
@@ -261,6 +304,7 @@ const removeFromWishlist = async (req, res) => {
 
     const userId = req.session.user;
 
+   
     const wishlist = await Wishlist.findOne({ userId });
 
     if (!wishlist) {
@@ -270,10 +314,12 @@ const removeFromWishlist = async (req, res) => {
       });
     }
 
+    // Find the index of the item to remove
     const itemIndex = wishlist.items.findIndex(
       (item) => item.productId.toString() === productId
     );
 
+    // Check if the item exists in the wishlist
     if (itemIndex === -1) {
       return res.status(404).json({
         success: false,
@@ -281,11 +327,26 @@ const removeFromWishlist = async (req, res) => {
       });
     }
 
-  
-    wishlist.items.splice(itemIndex, 1);
-    await wishlist.save();
+    console.log("Wishlist items before removal:", wishlist.items);
 
-  
+    // Remove the item from the wishlist
+    wishlist.items.splice(itemIndex, 1);
+    console.log("Wishlist items after removal:", wishlist.items);
+
+    // Save the updated wishlist
+    const savedWishlist = await wishlist.save();
+    console.log("Saved wishlist:", savedWishlist);
+
+    // Check if the wishlist is now empty
+    if (wishlist.items.length === 0) {
+      // If the wishlist is empty, remove it from the user's wishlist array
+      await User.updateOne(
+        { _id: userId },
+        { $pull: { wishlist: wishlist._id } } // Assuming your User schema has a wishlist array
+      );
+      console.log("Wishlist removed from user's wishlist array");
+    }
+
     return res.status(200).json({
       success: true,
       message: "Product removed from wishlist successfully.",

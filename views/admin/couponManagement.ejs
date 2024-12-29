@@ -255,19 +255,27 @@
                 }
 
                 // Validate Discount Type
-                const discountType = document.getElementById('discount-type').value;
-                if (discountType === '') {
-                    document.getElementById('type-error').textContent = 'Discount type is required.';
-                    isValid = false;
-                }
+              const discountType = document.getElementById('discount-type').value;
+               if (discountType === '') {
+                   document.getElementById('type-error').textContent = 'Discount type is required.';
+                   isValid = false;
+               } else {
+                   document.getElementById('type-error').textContent = ''; // Clear error if valid
+               }
 
-                // Validate Discount Amount
-                const discountAmount = parseFloat(document.getElementById('discount-amount').value);
-                if (isNaN(discountAmount) || discountAmount < 0) {
-                    document.getElementById('amount-error').textContent = 'Discount amount must be a positive number.';
-                    isValid = false;
-                }
-
+               // Validate Discount Amount
+               const discountAmount = parseFloat(document.getElementById('discount-amount').value);
+               if (isNaN(discountAmount) || discountAmount < 0) {
+                   document.getElementById('amount-error').textContent = 'Discount amount must be a positive number.';
+                   isValid = false;
+               } else {
+                   if (discountType === 'percentage' && discountAmount > 80) {
+                       document.getElementById('amount-error').textContent = 'Percentage discount cannot exceed 80.';
+                       isValid = false;
+                   } else {
+                       document.getElementById('amount-error').textContent = ''; // Clear error if valid
+                   }
+               }
                 // Validate Max Discount (optional)
               const maxDiscountInput = document.getElementById('max-discount').value.trim();
                if (maxDiscountInput !== '') { // Only validate if not empty

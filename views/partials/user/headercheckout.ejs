@@ -203,6 +203,59 @@
             color: #000;
             line-height: 1;
         }
+          .site-cart,
+.site-header__wishlist {
+    position: relative;
+}
+
+/* Cart badge styling */
+.cart-count {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: #dc0909;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Wishlist badge styling */
+.wishlist-count {
+    position: absolute;
+    top: -10px;
+    right: 7px;
+    background-color: #291616;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    
+}
+
+/* Hover effects */
+.site-cart:hover .cart-count {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+.site-header__wishlist:hover .wishlist-count {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
         
  
     </style>
@@ -359,6 +412,9 @@
                         
                             <a href="/wishlist" class="wishlist-trigger" title="Cart">
                                 <i class="icon anm anm-heart-l"></i>
+                                <span class="wishlist-count">
+                                    <%= locals.wishlistCount ? (wishlistCount> 9 ? '10+' : wishlistCount) : '0' %>
+                                </span>
                             </a>
                         
                         </div>
@@ -366,6 +422,9 @@
                             <a href="/cart
                                                                             " class="site-header__cart" title="Cart">
                                 <i class="icon anm anm-bag-l"></i>
+                                <span class="cart-count">
+                                    <%= locals.cartCount ? (cartCount> 9 ? '10+' : cartCount) : '0' %>
+                                </span>
                         
                             </a>
                         </div>

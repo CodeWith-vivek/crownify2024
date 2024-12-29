@@ -321,144 +321,8 @@ const getEditProduct = async (req, res) => {
 
 //code to edit product in admin side
 
-// const editProduct = async (req, res) => {
-//   try {
 
-//     const productId = req.params.id;
-//     const updates = req.body;
 
-//     if (!updates.productName) {
-
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "Product name is required." });
-//     }
-
-//     const regularPrice = Number(updates.regularPrice);
- 
-//     if (isNaN(regularPrice) || regularPrice < 0) {
-
-//       return res.status(400).json({
-//         success: false,
-//         message: "Regular price must be a valid positive number.",
-//       });
-//     }
-
-//     const salePrice = Number(updates.salePrice);
-
-//     if (isNaN(salePrice) || salePrice < 0) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Sale price must be a valid positive number.",
-//       });
-//     }
-
-//     const product = await Product.findById(productId);
-//     if (!product) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Product not found" });
-//     }
-
-//     product.productName = updates.productName || product.productName;
-//     product.description = updates.description || product.description;
-//     product.brand = updates.brand || product.brand;
-
-//     if (updates.category) {
-//       const category = await Category.findOne({ name: updates.category });
-//       if (!category) {
-//         return res
-//           .status(400)
-//           .json({ success: false, message: "Invalid category name" });
-//       }
-
-//       product.category = category._id; 
-
-//       if (category.categoryOffer >= 0) {
-//         const discount = (regularPrice * category.categoryOffer) / 100;
-//         product.salePrice = Math.max(regularPrice - discount, 0); 
-//       } else {
-//         product.salePrice = salePrice; 
-//       }
-//     }
-
-//     product.regularPrice = regularPrice;
-//     if (!updates.category || !product.salePrice) {
-//       product.salePrice = salePrice;
-//     }
-
-//     const images = product.productImage || [];
-//     const uploadDir = path.join(__dirname, "../public/uploads/product-image");
-
-//     if (req.files && req.files.length > 0) {
-//       const totalImages = images.length + req.files.length;
-//       if (totalImages > 4) {
-//         return res.status(400).json({
-//           success: false,
-//           message:
-//             "You cannot upload more than 4 images. You need to delete previous images to add more.",
-//         });
-//       }
-
-//       for (let i = 0; i < req.files.length; i++) {
-//         const originalImagePath = req.files[i].path;
-//         const resizedImagePath = path.join(uploadDir, req.files[i].filename);
-
-//         await sharp(originalImagePath)
-//           .resize({ width: 440, height: 440, fit: "cover" })
-//           .toFile(resizedImagePath);
-
-//         images.push(req.files[i].filename);
-//         fs.unlinkSync(originalImagePath);
-//       }
-//       product.productImage = images;
-//     }
-
-//     const variants = [];
-
-//     if (
-//       Array.isArray(updates.colors) &&
-//       Array.isArray(updates.sizes) &&
-//       Array.isArray(updates.quantities)
-//     ) {
-//       if (
-//         updates.colors.length !== updates.sizes.length ||
-//         updates.colors.length !== updates.quantities.length
-//       ) {
-
-//         return res.status(400).json({
-//           success: false,
-//           message: "Colors, sizes, and quantities must have the same length.",
-//         });
-//       }
-
-//       updates.colors.forEach((color, index) => {
-//         variants.push({
-//           color: color,
-//           size: updates.sizes[index] || null,
-//           quantity: Number(updates.quantities[index]) || 1,
-//         });
-//       });
-//     } else {
-//       variants.push({
-//         color: updates.colors || "Default",
-//         size: updates.sizes || "ONESIZE",
-//         quantity: Number(updates.quantities) || 1,
-//       });
-//     }
-
-//     product.variants = variants;
-
-//     await product.save();
-//     return res.json({ success: true, message: "Product updated successfully" });
-//   } catch (error) {
-//     console.error("Error updating product:", error);
-//     return res.status(500).json({
-//       success: false,
-//       message: "An error occurred while updating the product",
-//     });
-//   }
-// };
 const editProduct = async (req, res) => {
   try {
     console.log("Starting editProduct function...");
@@ -475,8 +339,8 @@ const editProduct = async (req, res) => {
         .json({ success: false, message: "Product name is required." });
     }
 
-    const regularPrice = Number(updates.regularPrice);
-    console.log("Parsed regular price:", regularPrice);
+    const regularPrice = Math.floor(Number(updates.regularPrice));
+    console.log("Parsed and floored regular price:", regularPrice);
 
     if (isNaN(regularPrice) || regularPrice < 0) {
       console.log("Validation failed: Regular price is invalid.");
@@ -486,8 +350,8 @@ const editProduct = async (req, res) => {
       });
     }
 
-    const salePrice = Number(updates.salePrice);
-    console.log("Parsed sale price:", salePrice);
+    const salePrice = Math.floor(Number(updates.salePrice));
+    console.log("Parsed and floored sale price:", salePrice);
 
     if (isNaN(salePrice) || salePrice < 0) {
       console.log("Validation failed: Sale price is invalid.");
@@ -512,7 +376,7 @@ const editProduct = async (req, res) => {
 
     if (updates.category) {
       console.log("Category update detected. Validating category...");
-    const category = await Category.findById(updates.category);
+      const category = await Category.findById(updates.category);
       if (!category) {
         console.log("Validation failed: Invalid category name.");
         return res
@@ -524,7 +388,9 @@ const editProduct = async (req, res) => {
       console.log("Category updated:", category);
 
       if (category.categoryOffer >= 0) {
-        const discount = (regularPrice * category.categoryOffer) / 100;
+        const discount = Math.floor(
+          (regularPrice * category.categoryOffer) / 100
+        );
         product.salePrice = Math.max(regularPrice - discount, 0);
         console.log(
           "Sale price updated with category offer:",
@@ -594,7 +460,7 @@ const editProduct = async (req, res) => {
         variants.push({
           color: color,
           size: updates.sizes[index] || null,
-          quantity: Number(updates.quantities[index]) || 1,
+          quantity: Math.floor(Number(updates.quantities[index])) || 1,
         });
         console.log("Variant added:", variants[variants.length - 1]);
       });
@@ -602,7 +468,7 @@ const editProduct = async (req, res) => {
       variants.push({
         color: updates.colors || "Default",
         size: updates.sizes || "ONESIZE",
-        quantity: Number(updates.quantities) || 1,
+        quantity: Math.floor(Number(updates.quantities)) || 1,
       });
       console.log("Default variant added:", variants[0]);
     }
@@ -620,6 +486,7 @@ const editProduct = async (req, res) => {
     });
   }
 };
+
 
 //code to delete the image
 
