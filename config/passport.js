@@ -8,16 +8,13 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/auth/google/callback",
+      callbackURL: "https://crownify.vivekanand.tech/auth/google/callback",
     },
-    async ( accessToken, refreshToken, profile, done) => {
+    async (accessToken, refreshToken, profile, done) => {
       try {
-
-let user=await User.findOne({googleId:profile.id})
-if(user){
-  return done(null,user)
-
-
+        let user = await User.findOne({ googleId: profile.id });
+        if (user) {
+          return done(null, user);
         } else {
           user = new User({
             name: profile.displayName,
