@@ -12,12 +12,11 @@ const loadCheckout = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    // Redirect to login if user is not logged in
+
     if (!userId) {
       return res.redirect("/login");
     }
 
-    // Fetch all required data in parallel
     const [listedCategories, unblockedBrands, userData] = await Promise.all([
       Category.find({ isListed: true }),
       Brand.find({ isBlocked: false }),
@@ -49,12 +48,11 @@ const loadCheckout = async (req, res) => {
         }),
     ]);
 
-    // Redirect to login if user data is not found
+
     if (!userData) {
       return res.redirect("/login");
     }
 
-    // Create Sets for efficient lookups
     const listedCategoryIds = new Set(
       listedCategories.map((cat) => cat._id.toString())
     );
@@ -62,7 +60,6 @@ const loadCheckout = async (req, res) => {
       unblockedBrands.map((brand) => brand.brandName)
     );
 
-    // Comprehensive product validity check
     const isValidProduct = (product) => {
       return (
         product &&
@@ -72,7 +69,6 @@ const loadCheckout = async (req, res) => {
       );
     };
 
-    // Calculate filtered cart and wishlist counts
     const cartCount = userData?.cart?.[0]?.items
       ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
           .length
@@ -84,7 +80,6 @@ const loadCheckout = async (req, res) => {
         ).length
       : 0;
 
-    // Fetch cart items with detailed population
     const cartItems = await Cart.findOne({ userId }).populate({
       path: "items.productId",
       model: "Product",
@@ -94,12 +89,10 @@ const loadCheckout = async (req, res) => {
       },
     });
 
-    // Redirect to cart if no cart items are found
     if (!cartItems || !cartItems.items || cartItems.items.length === 0) {
       return res.redirect("/cart");
     }
 
-    // Filter valid cart items based on product validity and quantity
     const validCartItems = cartItems.items.filter(
       (item) => isValidProduct(item.productId) && item.quantity > 0
     );
@@ -108,7 +101,6 @@ const loadCheckout = async (req, res) => {
       return res.redirect("/cart");
     }
 
-    // Calculate subtotal for valid cart items
     const subtotal = validCartItems.reduce((total, item) => {
       const product = item.productId;
       const price = product.salePrice || product.regularPrice || 0;
@@ -119,24 +111,20 @@ const loadCheckout = async (req, res) => {
     let total = subtotal + shipping;
     let discountAmount = 0;
 
-    // Apply coupon discount if available
     if (req.session.coupon) {
       const { discount } = req.session.coupon;
       if (discount) {
         let originalDiscountAmount = discount.calculatedAmount || 0;
         discountAmount = originalDiscountAmount;
 
-        // Ensure discount does not exceed max cap
         if (discount.maxCap) {
           discountAmount = Math.min(discountAmount, discount.maxCap);
         }
       }
     }
 
-    // Calculate total after applying discount
     total = Math.max(0, total - discountAmount);
 
-    // Prepare product details for rendering
     const products = validCartItems.map((item) => {
       const product = item.productId;
       const price = product.salePrice || product.regularPrice || 0;
@@ -153,10 +141,8 @@ const loadCheckout = async (req, res) => {
       };
     });
 
-    // Fetch active coupons
     const coupons = await Coupon.find({ isActive: true });
 
-    // Render the checkout page with all necessary data
     res.render("checkout3", {
       coupons,
       user: userData,
@@ -173,7 +159,6 @@ const loadCheckout = async (req, res) => {
       wishlistCount,
     });
 
-    // Clear the coupon session variable after rendering
     req.session.coupon = null;
   } catch (error) {
     console.error("Error on loading checkout:", error);
@@ -181,8 +166,8 @@ const loadCheckout = async (req, res) => {
   }
 };
 
-//code to validate the quantity
 
+//code to validate the quantity
 
 const validateQuantity = async (req, res) => {
   try {
@@ -214,7 +199,6 @@ const validateQuantity = async (req, res) => {
         continue;
       }
 
-      // Check if the product is blocked
       if (currentProduct.isBlocked) {
         blockedItems.push({
           productName: currentProduct.productName,
@@ -223,7 +207,6 @@ const validateQuantity = async (req, res) => {
         continue;
       }
 
-      // Check if the category is blocked
       if (currentProduct.category && !currentProduct.category.isListed) {
         blockedItems.push({
           productName: currentProduct.productName,
@@ -243,7 +226,6 @@ const validateQuantity = async (req, res) => {
 
       const cartItemVariant = item.variant;
 
-      // Check for variant
       const variant = currentProduct.variants.find(
         (v) =>
           v.color.toLowerCase() === cartItemVariant.color.toLowerCase() &&
@@ -260,7 +242,6 @@ const validateQuantity = async (req, res) => {
         continue;
       }
 
-      // Check stock levels
       if (variant.quantity === 0) {
         outOfStockItems.push({
           productName: currentProduct.productName,
@@ -278,12 +259,11 @@ const validateQuantity = async (req, res) => {
           message: `Only ${variant.quantity} items available`,
         });
       } else {
-        // If the item is valid, keep it in the cart
+
         validCartItems.push(item);
       }
     }
 
-    // Update the cart to exclude blocked items only
     cart.items = cart.items.filter((item) =>
       validCartItems.some((validItem) =>
         validItem.productId.equals(item.productId)

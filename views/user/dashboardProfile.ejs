@@ -32,13 +32,13 @@
 
                 if (data.blocked) {
 
-                    window.location.href = "/login"; // Redirect to the login page or home page
+                    window.location.href = "/login"; 
                 }
             } catch (error) {
                 console.error("Error checking block status:", error);
             }
         }
 
-        // Check every 30 seconds
+       
         setInterval(checkUserBlockStatus, 2000);
     </script>

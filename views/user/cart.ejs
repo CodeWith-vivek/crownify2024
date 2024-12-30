@@ -46,7 +46,7 @@
                                 <table class="table table-responsive cart-table">
                                     <thead>
                                         <tr>
-                                            <th style="width: 24%;">Product</th>
+                                            <th style="width: 200px;">Product</th>
                                             <th>Brand</th>
                                             <th>size</th>
                                             <th>Color</th>
@@ -164,10 +164,7 @@
                                 <span style="color: #f94242; margin-top: 15px;"><b>₹<%= subtotal.toFixed(2) %>
                                             </b></span>
                             </li>
-                            <!-- <li class="summary1-row d-flex justify-content-between">
-                                    <span>Discount</span>
-                                    <span style="color: #1acf20;"><b>₹0</b></span>
-                                </li> -->
+                    
                             <li class="summary-row d-flex justify-content-between">
                                 <span>Shipping</span>
                                 <span>₹<%= shippingCharge.toFixed(2) %></span>
@@ -191,194 +188,7 @@
 
     <%- include("../../views/partials/user/footershop") %>
         <script>
-            // document.addEventListener('DOMContentLoaded', () => {
-            //     const checkoutButton = document.querySelector('a[href="/checkout"]');
-
-            //     if (checkoutButton) {
-            //         checkoutButton.addEventListener('click', async function (e) {
-            //             e.preventDefault();
-
-            //             try {
-
-            //                 const cartItems = document.querySelectorAll('.cart-item');
-            //                 let hasClientSideOutOfStock = false;
-            //                 let clientSideOutOfStockProducts = [];
-
-            //                 cartItems.forEach(item => {
-            //                     const stockStatus = item.querySelector('.stock-status');
-            //                     const productName = item.querySelector('.product-info h6').textContent.trim();
-
-            //                     if (stockStatus && stockStatus.textContent.trim() === 'Out of Stock') {
-            //                         hasClientSideOutOfStock = true;
-            //                         clientSideOutOfStockProducts.push(productName);
-            //                     }
-            //                 });
-
-            //                 if (hasClientSideOutOfStock) {
-            //                     Swal.fire({
-            //                         title: 'Out of Stock Items Detected',
-            //                         html: `
-            //                 <p>Please remove the following out of stock items from your cart to proceed to checkout:</p>
-            //                 <ul style="list-style: none; padding: 0;">
-            //                     ${clientSideOutOfStockProducts.map(product => `<li style="margin: 5px 0;">${product}</li>`).join('')}
-            //                 </ul>
-            //             `,
-            //                         icon: 'warning',
-            //                         confirmButtonText: 'OK'
-            //                     });
-            //                     return;
-            //                 }
-
-            //                 const response = await fetch('/checkout/validate', {
-            //                     method: 'POST',
-            //                     headers: {
-            //                         'Content-Type': 'application/json'
-            //                     }
-            //                 });
-
-            //                 const data = await response.json();
-
-            //                 if (!data.success) {
-
-            //                     Swal.fire({
-            //                         title: 'Stock Validation Failed',
-            //                         html: `
-            //                 <p>${data.message}</p>
-            //                 ${data.outOfStockItems ? `
-            //                     <p>The following items are out of stock:</p>
-            //                     <ul style="list-style: none; padding: 0;">
-            //                         ${data.outOfStockItems.map(item => `
-            //                             <li style="margin: 5px 0;">
-            //                                 ${item.productName} (Size: ${item.size}, Color: ${item.color})
-            //                             </li>
-            //                         `).join('')}
-            //                     </ul>
-            //                 ` : ''}
-            //             `,
-            //                         icon: 'error',
-            //                         confirmButtonText: 'OK'
-            //                     });
-            //                 } else {
-
-            //                     window.location.href = '/checkout';
-            //                 }
-
-            //             } catch (error) {
-            //                 console.error('Error during checkout validation:', error);
-            //                 Swal.fire({
-            //                     title: 'Error',
-            //                     text: 'An error occurred while validating your cart. Please try again.',
-            //                     icon: 'error',
-            //                     confirmButtonText: 'OK'
-            //                 });
-            //             }
-            //         });
-            //     }
-            // });
-
-            // document.addEventListener('DOMContentLoaded', () => {
-            //         const checkoutButton = document.querySelector('a[href="/checkout"]');
-
-            //         if (checkoutButton) {
-            //             checkoutButton.addEventListener('click', async function (e) {
-            //                 e.preventDefault();
-
-            //                 try {
-            //                     console.log("Checkout button clicked");
-
-            //                     // Check for client-side out-of-stock items
-            //                     const cartItems = document.querySelectorAll('.cart-item');
-            //                     console.log(`Found ${cartItems.length} items in the cart`);
-
-            //                     let hasClientSideOutOfStock = false;
-            //                     let clientSideOutOfStockProducts = [];
-
-            //                     cartItems.forEach(item => {
-            //                         const stockStatus = item.querySelector('.stock-status');
-            //                         const productName = item.querySelector('.product-info h6').textContent.trim();
-
-            //                         console.log(`Checking product: ${productName}`);
-            //                         if (stockStatus) {
-            //                             console.log(`Stock status: ${stockStatus.textContent.trim()}`);
-            //                         }
-
-            //                         if (stockStatus && stockStatus.textContent.trim() === 'Out of Stock') {
-            //                             console.log(`Product is out of stock: ${productName}`);
-            //                             hasClientSideOutOfStock = true;
-            //                             clientSideOutOfStockProducts.push(productName);
-            //                         }
-            //                     });
-
-            //                     if (hasClientSideOutOfStock) {
-            //                         console.log("Client-side out-of-stock items detected:", clientSideOutOfStockProducts);
-            //                         Swal.fire({
-            //                             title: 'Out of Stock Items Detected',
-            //                             html: `
-            //                 <p>Please remove the following out-of-stock items from your cart to proceed to checkout:</p>
-            //                 <ul style="list-style: none; padding: 0;">
-            //                     ${clientSideOutOfStockProducts.map(product => `<li style="margin: 5px 0;">${product}</li>`).join('')}
-            //                 </ul>
-            //             `,
-            //                             icon: 'warning',
-            //                             confirmButtonText: 'OK'
-            //                         });
-            //                         return;
-            //                     }
-
-            //                     // Send request to server for validation
-            //                     console.log("No client-side out-of-stock items detected. Sending validation request to server...");
-
-            //                     const response = await fetch('/checkout/validate', {
-            //                         method: 'POST',
-            //                         headers: {
-            //                             'Content-Type': 'application/json'
-            //                         }
-            //                     });
-
-            //                     const data = await response.json();
-            //                     console.log("Server validation response:", data);
-
-            //                     if (!data.success) {
-            //                         console.log("Validation failed on server:", data);
-
-            //                         Swal.fire({
-            //                             title: 'Stock Validation Failed',
-            //                             html: `
-            //                 <p>${data.message}</p>
-            //                 ${data.outOfStockItems ? `
-            //                     <p>The following items are out of stock:</p>
-            //                     <ul style="list-style: none; padding: 0;">
-            //                         ${data.outOfStockItems.map(item => `
-            //                             <li style="margin: 5px 0;">
-            //                                 ${item.productName} (Size: ${item.size}, Color: ${item.color})
-            //                             </li>
-            //                         `).join('')}
-            //                     </ul>
-            //                 ` : ''}
-            //             `,
-            //                             icon: 'error',
-            //                             confirmButtonText: 'OK'
-            //                         });
-            //                     } else {
-            //                         console.log("Validation successful. Redirecting to checkout...");
-            //                         // window.location.href = '/checkout';
-            //                     }
-
-            //                 } catch (error) {
-            //                     console.error('Error during checkout validation:', error);
-            //                     Swal.fire({
-            //                         title: 'Error',
-            //                         text: 'An error occurred while validating your cart. Please try again.',
-            //                         icon: 'error',
-            //                         confirmButtonText: 'OK'
-            //                     });
-            //                 }
-            //             });
-            //         } else {
-            //             console.log("Checkout button not found on the page");
-            //         }
-            //     });
-
+       
             document.addEventListener("DOMContentLoaded", () => {
                 const checkoutButton = document.querySelector('a[href="/checkout"]');
 
@@ -454,7 +264,7 @@
                                     icon: "error",
                                     confirmButtonText: "OK",
                                 }).then(() => {
-                                    // Reload the page after the user acknowledges the alert
+                                 
                                     location.reload();
                                 });
                             } else {
@@ -625,10 +435,7 @@
                 });
 
                 function removeCartItem(productId, size, color) {
-                    console.log('Removing item with details:');
-                    console.log('Product ID:', productId);
-                    console.log('Size:', size);
-                    console.log('Color:', color);
+                
                     fetch(`/cart/remove`, {
                         method: 'DELETE',
                         headers: {
@@ -641,8 +448,7 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                console.log('Item removed successfully:', data);
-
+                           
                                 const row = document.querySelector(`tr.cart-item[data-product-id="${productId}"]`);
                                 if (row) {
                                     row.remove();
@@ -693,14 +499,13 @@
 
                     if (data.blocked) {
 
-                        window.location.href = "/login"; // Redirect to the login page or home page
+                        window.location.href = "/login";
                     }
                 } catch (error) {
                     console.error("Error checking block status:", error);
                 }
             }
 
-            // Check every 30 seconds
             setInterval(checkUserBlockStatus, 2000);
         </script>
         

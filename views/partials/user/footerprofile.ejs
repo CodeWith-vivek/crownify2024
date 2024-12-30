@@ -19,7 +19,7 @@
                     <div class="col-12 col-sm-12 col-md-3 col-lg-3 footer-links">
                         <h4 class="h4">Informations</h4>
                         <ul>
-                            <li><a href="#">About us</a></li>
+                            <li><a href="/About">About us</a></li>
                             <li><a href="#">Careers</a></li>
                             <li><a href="#">Privacy policy</a></li>
                             <li><a href="#">Terms &amp; condition</a></li>
@@ -30,10 +30,10 @@
                         <h4 class="h4">Customer Services</h4>
                         <ul>
                             <li><a href="#">Request Personal Data</a></li>
-                            <li><a href="#">FAQ's</a></li>
-                            <li><a href="#">Contact Us</a></li>
+                            <li><a href="/faq">FAQ's</a></li>
+                            <li><a href="/contact">Contact Us</a></li>
                             <li><a href="#">Orders and Returns</a></li>
-                            <li><a href="#">Support Center</a></li>
+                            <li><a href="/contact">Support Center</a></li>
                         </ul>
                     </div>
                     <div class="col-12 col-sm-12 col-md-3 col-lg-3">
@@ -41,7 +41,7 @@
                             <div class="display-table-cell footer-newsletter">
                                 <form action="#" method="post">
                                     <label class="h4">Newsletter</label>
-                                    <p>Be the first to hear about new trending and offers and see how you've helped.</p>
+                                    <p style="line-height: 1.6;">Be the first to hear about new trending and offers and see how you've helped.</p>
                                     <div class="input-group">
                                         <input type="email" class="input-group__field newsletter__input" name="EMAIL"
                                             value="" placeholder="Email address" required="">
@@ -57,11 +57,11 @@
                     </div>
                     <div class="col-12 col-sm-12 col-md-3 col-lg-3 contact-box">
                         <h4 class="h4">About Us</h4>
-                        <p>Belle – Responsive eCommerce Html Template with clean &amp; modern design for your online
-                            fashion store and other web shop.</p>
+                        <p style="line-height: 1.6;">Crownify – Your go-to store for premium headwear, blending style, comfort, and quality for
+                            every occasion.</p>
                         <ul class="addressFooter">
                             <li class="email"><i class="icon anm anm-envelope-l"></i>
-                                <p>sales@yousite.com</p>
+                                <p>crownify24@gmail.com</p>
                             </li>
                         </ul>
                     </div>
@@ -74,7 +74,7 @@
                     <!--Footer Copyright-->
                     <div
                         class="col-12 col-sm-12 col-md-6 col-lg-6 order-1 order-md-0 order-lg-0 order-sm-1 copyright text-sm-center text-md-left text-lg-left">
-                        <span></span> <a href="templateshub.net">Templates Hub</a>
+               
                     </div>
                     <!--End Footer Copyright-->
                     <!--Footer Payment Icon-->
@@ -90,13 +90,13 @@
 </footer>
 <span id="site-scroll"><i class="icon anm anm-angle-up-r"></i></span>
 <script>
-    // Function to set the active class based on the current route
+   
     document.addEventListener('DOMContentLoaded', () => {
-        const currentPath = window.location.pathname; // Get the current route
+        const currentPath = window.location.pathname; 
         const navLinks = document.querySelectorAll('.nav-link');
 
         navLinks.forEach(link => {
-            // Match the href with the current path
+         
             if (link.getAttribute('href') === currentPath) {
                 link.classList.add('active');
             } else {
@@ -109,7 +109,7 @@
 <script>
     function confirmPrimaryAddress(event, addressId) {
         event.preventDefault();
-        console.log("Function called with addressId:", addressId); // Debug log
+  
 
         Swal.fire({
             title: 'Set as Primary Address?',
@@ -125,20 +125,19 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    credentials: 'same-origin'  // Important for sessions
+                    credentials: 'same-origin' 
                 })
                     .then(async response => {
-                        console.log("Response status:", response.status); // Debug log
-
+                     
                         if (!response.ok) {
                             const text = await response.text();
-                            console.log("Error response body:", text); // Debug log
+                            console.log("Error response body:", text); 
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
                         return response.json();
                     })
                     .then(data => {
-                        console.log("Success response:", data); // Debug log
+                      
                         if (data.success) {
                             Swal.fire({
                                 title: 'Success!',
@@ -185,7 +184,7 @@
                 fetch(`/delete-address/${addressId}`, {
                     method: 'POST',
                     headers: {
-                        // Add CSRF token if you're using it
+              
                         'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content,
                     }
                 })
@@ -206,7 +205,7 @@
                                 const addressCard = event.target.closest('.col-lg-6');
                                 if (addressCard) {
                                     addressCard.remove();
-                                    // checkAndUpdateAddressDisplay();
+                                  
                                 }
                             });
                         } else {
@@ -247,14 +246,14 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                // Add any necessary authentication headers here
+              
             },
             body: JSON.stringify(updatedData)
         })
             .then(response => {
                 if (response.ok) {
-                    // Handle successful response (e.g., refresh the page or update the UI)
-                    window.location.reload(); // Reload to reflect changes
+                  
+                    window.location.reload();
                 } else {
                     throw new Error('Failed to edit address');
                 }
@@ -273,15 +272,14 @@
 
         cartLinks.forEach(link => {
             link.addEventListener('click', (e) => {
-                console.log('Cart link clicked');
+        
 
-                // Prevent any existing event handlers
                 e.stopPropagation();
 
-                // Ensure default navigation
+            
                 window.location.href = '/cart';
 
-                // Prevent default link behavior
+            
                 e.preventDefault();
             });
         });

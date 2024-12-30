@@ -33,9 +33,9 @@
                         <div class="shop__sidebar__search">
                             <form action="/shop" method="GET">
                                 <input type="hidden" name="sort" value="<%= sort || '' %>">
-                                <!-- Preserve current sort option -->
+                              
                                 <input type="hidden" name="page" value="<%= currentPage || 1 %>">
-                                <!-- Preserve current page -->
+                            
                                 <input type="text" id="searchInput" name="search" placeholder="Search..."
                                     value="<%= search || '' %>">
                                 <button type="submit"><span class="icon_search"></span></button>
@@ -71,33 +71,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- <div class="card" style="background: transparent;">
-                                        <div class="card-heading">
-                                            <a data-toggle="collapse" data-target="#collapseTwo">Branding</a>
-                                        </div>
-                                        <div id="collapseTwo" class="collapse show" data-parent="#accordionExample">
-                                            <div class="card-body">
-                                                <div class="shop__sidebar__brand">
-                                                    <ul>
-                                                        <% if (brands.length===0) { %>
-                                                            <li>No brands available</li>
-                                                            <% } else { %>
-                                                                <% brands.forEach(brand=> { %>
-                                                                    <li>
-                                                                        <label>
-                                                                            <input type="checkbox" name="brands"
-                                                                                value="<%= brand._id %>"
-                                                                                onchange="document.getElementById('filterForm').submit();">
-                                                                            <%= brand.brandName %>
-                                                                        </label>
-                                                                    </li>
-                                                                    <% }); %>
-                                                                        <% } %>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div> -->
+                                 
                                     <div class="card" style="background: transparent;">
                                         <div class="card-heading">
                                             <a data-toggle="collapse" data-target="#collapseThree">Filter Price</a>
@@ -119,42 +93,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- <div class="card" style="background: transparent;">
-                                        <div class="card-heading">
-                                            <a data-toggle="collapse" data-target="#collapseFour">Size</a>
-                                        </div>
-                                        <div id="collapseFour" class="collapse show" data-parent="#accordionExample">
-                                            <div class="card-body">
-                                                <div class="shop__sidebar__size">
-                                                    <label for="ONESIZE">
-                                                        <input type="checkbox" name="sizes" value="ONESIZE"
-                                                            onchange="document.getElementById('filterForm').submit();">
-                                                        ONESIZE
-                                                    </label>
-                                                    <label for="S/M">
-                                                        <input type="checkbox" name="sizes" value="S/M"
-                                                            onchange="document.getElementById('filterForm').submit();">
-                                                        S / M
-                                                    </label>
-                                                    <label for="M/L">
-                                                        <input type="checkbox" name="sizes" value="M/L"
-                                                            onchange="document.getElementById('filterForm').submit();">
-                                                        M / L
-                                                    </label>
-                                                    <label for="L/XL">
-                                                        <input type="checkbox" name="sizes" value="L/XL"
-                                                            onchange="document.getElementById('filterForm').submit();">
-                                                        L / XL
-                                                    </label>
-                                                    <label for="YOUTH">
-                                                        <input type="checkbox" name="sizes" value="YOUTH"
-                                                            onchange="document.getElementById('filterForm').submit();">
-                                                        YOUTH
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div> -->
+                                   
                                     <div class="card" style="background: transparent;">
                                         <div class="card-heading">
                                             <a data-toggle="collapse" data-target="#collapseFive">Colors</a>
@@ -271,6 +210,13 @@
                                             <h6>
                                                 <%= product.productName %>
                                             </h6>
+                                            <p>
+                                                <strong>
+                                                <%= product.brand %></strong><br>
+                                                    <strong>
+                                                    <%= product.category.name %></strong>
+                                            </p>
+                                            
                                             <a href="#" class="add-cart"
                                                 onclick="event.preventDefault(); event.stopPropagation(); handleAddToCart('<%= product._id %>')"></a>
                                             <div class="rating-container">
@@ -443,7 +389,7 @@
 
                 cartLinks.forEach(link => {
                     link.addEventListener('click', (e) => {
-                        console.log('Cart link clicked');
+                     
 
 
                         e.stopPropagation();
@@ -476,10 +422,10 @@
                             icon: "success",
                             title: "Added to Wishlist!",
                             text: result.message,
-                            timer: 1500, // Display for 1.5 seconds
+                            timer: 1500,
                             showConfirmButton: false,
                         }).then(() => {
-                            // Reload the page after the SweetAlert message is dismissed
+                        
                             window.location.reload();
                         });
                     } else {
@@ -488,7 +434,7 @@
                             title: "Failed to Add to Wishlist",
                             text: result.message,
                         }).then(() => {
-                            // Reload the page after the SweetAlert message is dismissed
+                            
                             window.location.reload();
                         });
                     }
@@ -515,13 +461,13 @@
 
                     if (data.blocked) {
 
-                        window.location.href = "/login"; // Redirect to the login page or home page
+                        window.location.href = "/login"; 
                     }
                 } catch (error) {
                     console.error("Error checking block status:", error);
                 }
             }
 
-            // Check every 30 seconds
+            
             setInterval(checkUserBlockStatus, 2000);
         </script>

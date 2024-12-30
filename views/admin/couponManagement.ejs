@@ -9,7 +9,7 @@
     <div class="card">
         <div class="card-body">
             <div class="row">
-                <!-- Add Coupon Form -->
+             
                 <div class="col-md-3">
                     <form id="add-coupon-form" onsubmit="return validateForm()">
                         <div class="mb-3">
@@ -94,7 +94,7 @@
                                 </tr>
                             </thead>
                             <tbody id="coupon-list">
-                                <!-- Dynamic rows will be added here -->
+                            
                             </tbody>
                         </table>
                     </div>
@@ -122,7 +122,7 @@
                 }
             }
 
-            // Render Coupons
+          
             function renderCoupons(coupons) {
                 const couponList = document.getElementById('coupon-list');
                 couponList.innerHTML = '';
@@ -145,7 +145,7 @@
                 });
             }
 
-            // Add Coupon
+          
             async function addCoupon(event) {
                 event.preventDefault();
                 const formData = new FormData(event.target);
@@ -158,7 +158,7 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(payload), // ... (existing code) ...
+                        body: JSON.stringify(payload), 
                     });
 
                     const result = await response.json();
@@ -189,7 +189,7 @@
                 
             }
 
-            // Delete Coupon
+          
            async function deleteCoupon(id) {
                 const result = await Swal.fire({
                     title: 'Are you sure?',
@@ -233,37 +233,32 @@
                     window.location.href = `/admin/edit-coupon/${id}`;
                 }
         
-            // Initialize
             document.getElementById('add-coupon-form').addEventListener('submit', addCoupon);
             loadCoupons();
         </script>
         <script>
-            // Function to validate the form
+           
            function validateForm() {
                 let isValid = true;
 
-                // Clear previous error messages
                 document.querySelectorAll('.text-danger').forEach(element => {
                     element.textContent = '';
                 });
 
-                // Validate Coupon Code
                 const code = document.getElementById('coupon-code').value.trim();
                 if (code === '') {
                     document.getElementById('code-error').textContent = 'Coupon code is required.';
                     isValid = false;
                 }
 
-                // Validate Discount Type
               const discountType = document.getElementById('discount-type').value;
                if (discountType === '') {
                    document.getElementById('type-error').textContent = 'Discount type is required.';
                    isValid = false;
                } else {
-                   document.getElementById('type-error').textContent = ''; // Clear error if valid
+                   document.getElementById('type-error').textContent = ''; 
                }
 
-               // Validate Discount Amount
                const discountAmount = parseFloat(document.getElementById('discount-amount').value);
                if (isNaN(discountAmount) || discountAmount < 0) {
                    document.getElementById('amount-error').textContent = 'Discount amount must be a positive number.';
@@ -273,12 +268,12 @@
                        document.getElementById('amount-error').textContent = 'Percentage discount cannot exceed 80.';
                        isValid = false;
                    } else {
-                       document.getElementById('amount-error').textContent = ''; // Clear error if valid
+                       document.getElementById('amount-error').textContent = ''; 
                    }
                }
-                // Validate Max Discount (optional)
+ 
               const maxDiscountInput = document.getElementById('max-discount').value.trim();
-               if (maxDiscountInput !== '') { // Only validate if not empty
+               if (maxDiscountInput !== '') { 
                    const maxDiscount = parseFloat(maxDiscountInput);
                    if (isNaN(maxDiscount) || maxDiscount < 0) {
                        document.getElementById('max-error').textContent = 'Max discount must be a positive number or zero.';
@@ -286,28 +281,24 @@
                    }
                }
 
-                // Validate Min Purchase
                 const minPurchase = parseFloat(document.getElementById('min-purchase').value);
                 if (isNaN(minPurchase) || minPurchase < 0) {
                     document.getElementById('min-error').textContent = 'Min purchase must be a positive number.';
                     isValid = false;
                 }
 
-                // Validate Expiry Date
                 const expiryDate = document.getElementById('expiry-date').value;
                 if (expiryDate === '') {
                     document.getElementById('expiry-error').textContent = 'Expiry date is required.';
                     isValid = false;
                 }
 
-                // Validate Usage Limit
                const usageLimit = parseInt(document.getElementById('usage-limit').value, 10);
                if (isNaN(usageLimit) || (usageLimit !== 0 && usageLimit < 1)) {
                    document.getElementById('usage-error').textContent = 'Usage limit must be at least 1 or 0 for unlimited usage.';
                    isValid = false;
                }
 
-                // Validate Description
               const description = document.getElementById('description').value.trim();
                if (description.length === 0) {
                    document.getElementById('description-error').textContent = 'Description is required.';
@@ -316,13 +307,12 @@
                    document.getElementById('description-error').textContent = 'Description cannot exceed 500 characters.';
                    isValid = false;
                } else {
-                   document.getElementById('description-error').textContent = ''; // Clear error if valid
+                   document.getElementById('description-error').textContent = ''; 
                }
 
-                return isValid; // Prevent form submission if invalid
+                return isValid; 
             }
 
-            // Enable Add Coupon button only if the form is valid
             document.getElementById('add-coupon-form').addEventListener('input', function () {
                 const isFormValid = validateForm();
                 document.getElementById('add-coupon-btn').disabled = !isFormValid;

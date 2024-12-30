@@ -12,7 +12,6 @@ const loadWishlistpage = async (req, res) => {
   try {
     const userId = req.session?.user;
 
-    // Fetch user with populated cart and wishlist
     const user = userId
       ? await User.findById(userId)
           .populate({
@@ -28,7 +27,6 @@ const loadWishlistpage = async (req, res) => {
           .populate("wishlist")
       : null;
 
-    // Fetch listed categories and unblocked brands first
     const [listedCategories, unblockedBrands] = await Promise.all([
       Category.find({ isListed: true }).lean(),
       Brand.find({ isBlocked: false }).lean(),
@@ -41,7 +39,6 @@ const loadWishlistpage = async (req, res) => {
       unblockedBrands.map((brand) => brand.brandName)
     );
 
-    // Calculate filtered cart count
     const cartCount =
       user && user.cart && user.cart.length > 0
         ? user.cart[0].items.filter((item) => {
@@ -64,7 +61,6 @@ const loadWishlistpage = async (req, res) => {
       });
     }
 
-    // Fetch user's wishlist with populated product details
     const wishlist = await Wishlist.findOne({ userId })
       .populate({
         path: "items.productId",
@@ -86,7 +82,6 @@ const loadWishlistpage = async (req, res) => {
       });
     }
 
-    // Filter and map valid wishlist items
     const wishlistItems = wishlist.items
       .map((item) => {
         const product = item.productId;
@@ -130,7 +125,6 @@ const loadWishlistpage = async (req, res) => {
       })
       .filter((item) => item !== null);
 
-    // Render wishlist page
     res.render("Wishlist", {
       user,
       wishlistItems,
@@ -314,12 +308,10 @@ const removeFromWishlist = async (req, res) => {
       });
     }
 
-    // Find the index of the item to remove
     const itemIndex = wishlist.items.findIndex(
       (item) => item.productId.toString() === productId
     );
 
-    // Check if the item exists in the wishlist
     if (itemIndex === -1) {
       return res.status(404).json({
         success: false,
@@ -327,24 +319,16 @@ const removeFromWishlist = async (req, res) => {
       });
     }
 
-    console.log("Wishlist items before removal:", wishlist.items);
-
-    // Remove the item from the wishlist
     wishlist.items.splice(itemIndex, 1);
-    console.log("Wishlist items after removal:", wishlist.items);
-
-    // Save the updated wishlist
+ 
     const savedWishlist = await wishlist.save();
-    console.log("Saved wishlist:", savedWishlist);
 
-    // Check if the wishlist is now empty
     if (wishlist.items.length === 0) {
-      // If the wishlist is empty, remove it from the user's wishlist array
       await User.updateOne(
         { _id: userId },
-        { $pull: { wishlist: wishlist._id } } // Assuming your User schema has a wishlist array
+        { $pull: { wishlist: wishlist._id } } 
       );
-      console.log("Wishlist removed from user's wishlist array");
+
     }
 
     return res.status(200).json({

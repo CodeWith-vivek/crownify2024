@@ -269,6 +269,13 @@ body, html {
     transform: scale(1.1);
     transition: transform 0.2s ease;
 }
+.product-size, .product-color {
+    white-space: nowrap; /* Prevent text wrapping */
+    min-width: 100px; /* Ensure a minimum width */
+}
+
+/* Adjust table layout */
+
 </style>
 </head>
 
@@ -385,11 +392,11 @@ body, html {
                         </div>
                     </div>
                     <!--Mobile Logo-->
-                    <div class="col-4 col-sm-3 col-md-3 col-lg-2 d-flex align-items-center justify-content-end">
+                    <div class="col-4 col-sm-3 col-md-3 col-lg-2 d-flex align-items-center justify-content-end" >
                     
                         <div class="site-header__wishlist">
                           
-                                <a href="/wishlist" class="wishlist-trigger" title="Cart">
+                                <a href="/wishlist" class="wishlist-trigger" title="Cart" style="padding: 0px 20px 0px 0px">
                                 <i class="icon anm anm-heart-l"></i>
                             <span class="wishlist-count">
                                 <%= locals.wishlistCount ? (wishlistCount> 9 ? '10+' : wishlistCount) : '0' %>

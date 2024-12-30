@@ -18,7 +18,6 @@ const downloadExcel = async (req, res) => {
   const { type, startDate, endDate } = req.body;
 
   try {
-    // Validate input for custom date range
     if (type === "custom" && (!startDate || !endDate)) {
       return res.status(400).json({
         status: false,
@@ -26,11 +25,9 @@ const downloadExcel = async (req, res) => {
       });
     }
 
-    // Get all orders for the period without pagination
     let query = {};
     const today = new Date();
 
-    // Date range query logic based on the report type
     switch (type) {
       case "daily":
         query.orderedAt = {
@@ -72,7 +69,6 @@ const downloadExcel = async (req, res) => {
           .json({ status: false, message: "Invalid report type" });
     }
 
-    // Fetch orders with detailed product information
     const orders = await Order.find(query)
       .populate({
         path: "items.productId",
@@ -91,7 +87,6 @@ const downloadExcel = async (req, res) => {
       });
     }
 
-    // Process orders data for Excel
     const processedData = orders
       .map((order) => {
         const orderItems = order.items.map((item) => {
@@ -120,7 +115,6 @@ const downloadExcel = async (req, res) => {
       })
       .flat();
 
-    // Calculate summary data
     const summary = {
       totalOrders: orders.length,
       totalQuantity: processedData.reduce(
@@ -153,13 +147,10 @@ const downloadExcel = async (req, res) => {
       ),
     };
 
-    // Create workbook and worksheets
     const workbook = xlsx.utils.book_new();
 
-    // Detailed orders worksheet
     const detailsWorksheet = xlsx.utils.json_to_sheet(processedData);
 
-    // Summary worksheet
     const summaryData = [
       ["Sales Report Summary"],
       [""],
@@ -178,7 +169,6 @@ const downloadExcel = async (req, res) => {
     ];
     const summaryWorksheet = xlsx.utils.aoa_to_sheet(summaryData);
 
-    // Apply styling
     const headerStyle = {
       font: { bold: true, color: { rgb: "FFFFFF" } },
       fill: { fgColor: { rgb: "4472C4" } },
@@ -187,42 +177,37 @@ const downloadExcel = async (req, res) => {
 
     const currencyStyle = { numFmt: '"₹"#,##0.00' };
 
-    // Apply styles to details worksheet
     const detailsRange = xlsx.utils.decode_range(detailsWorksheet["!ref"]);
     for (let C = detailsRange.s.c; C <= detailsRange.e.c; ++C) {
       const headerCell = xlsx.utils.encode_cell({ r: 0, c: C });
       detailsWorksheet[headerCell].s = headerStyle;
     }
 
-    // Set column widths
     detailsWorksheet["!cols"] = [
-      { wch: 12 }, // Order Number
-      { wch: 12 }, // Date
-      { wch: 30 }, // Product Name
-      { wch: 15 }, // Brand
-      { wch: 15 }, // Category
-      { wch: 10 }, // Color
-      { wch: 10 }, // Size
-      { wch: 10 }, // Quantity
-      { wch: 12 }, // Regular Price
-      { wch: 12 }, // Sale Price
-      { wch: 12 }, // Item Discount
-      { wch: 12 }, // Coupon Discount
-      { wch: 12 }, // Shipping
-      { wch: 12 }, // Item Total
+      { wch: 12 }, 
+      { wch: 12 }, 
+      { wch: 30 }, 
+      { wch: 15 }, 
+      { wch: 15 }, 
+      { wch: 10 }, 
+      { wch: 10 }, 
+      { wch: 10 }, 
+      { wch: 12 }, 
+      { wch: 12 }, 
+      { wch: 12 }, 
+      { wch: 12 },
+      { wch: 12 }, 
+      { wch: 12 }, 
     ];
 
-    // Add worksheets to workbook
     xlsx.utils.book_append_sheet(workbook, detailsWorksheet, "Order Details");
     xlsx.utils.book_append_sheet(workbook, summaryWorksheet, "Summary");
 
-    // Generate Excel file
     const excelBuffer = xlsx.write(workbook, {
       type: "buffer",
       bookType: "xlsx",
     });
 
-    // Set response headers
     const filename = `Sales_Report_${type}_${new Date()
       .toISOString()
       .slice(0, 10)}.xlsx`;
@@ -232,7 +217,6 @@ const downloadExcel = async (req, res) => {
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
 
-    // Send the file
     res.status(200).send(excelBuffer);
   } catch (error) {
     console.error("Error generating Excel report:", error);
@@ -244,7 +228,8 @@ const downloadExcel = async (req, res) => {
   }
 };
 
-// Helper function to get report period
+// code for to get report period period
+
 const getReportPeriod = (type, startDate, endDate) => {
   const today = new Date();
   switch (type) {
@@ -283,7 +268,6 @@ const generateSalesReport = async (req, res) => {
     let query = {};
     const today = new Date();
 
-    // Date range query logic based on the report type
     switch (type) {
       case "daily":
         query.orderedAt = {
@@ -330,7 +314,6 @@ const generateSalesReport = async (req, res) => {
           .json({ status: false, message: "Invalid report type" });
     }
 
-    // Get total count for pagination
     const totalOrders = await Order.countDocuments(query);
     if (totalOrders === 0) {
       return res.status(404).json({
@@ -350,7 +333,6 @@ const generateSalesReport = async (req, res) => {
 
     const totalPages = Math.ceil(totalOrders / limit);
 
-    // Fetch orders with detailed product information
     const orders = await Order.find(query)
       .populate({
         path: "items.productId",
@@ -364,13 +346,11 @@ const generateSalesReport = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    // // Calculate totals for all orders
-
     let totalQuantity = 0;
-    let totalRegularPrice = 0; // New variable for total regular price
-    let totalSalePrice = 0; // New variable for total sale price
-    let totalItemDiscount = 0; // New variable for total item discount
-    let totalCouponDiscount = 0; // New variable for total coupon discount
+    let totalRegularPrice = 0;
+    let totalSalePrice = 0; 
+    let totalItemDiscount = 0;
+    let totalCouponDiscount = 0; 
     let totalItemTotal = 0;
     let totalShipping = 0;
     let totalOrderTotal = 0;
@@ -384,14 +364,14 @@ const generateSalesReport = async (req, res) => {
         const shipping = order.shipping / order.items.length;
 
         totalQuantity += item.quantity;
-        totalRegularPrice += item.regularPrice * item.quantity; // Accumulate regular price
-        totalSalePrice += item.salePrice * item.quantity; // Accumulate sale price
+        totalRegularPrice += item.regularPrice * item.quantity; 
+        totalSalePrice += item.salePrice * item.quantity; 
         totalItemDiscount +=
-          (item.regularPrice - item.salePrice) * item.quantity; // Accumulate item discount
-        totalCouponDiscount += order.discount / order.items.length; // Accumulate coupon discount
-        totalItemTotal += itemTotal; // Accumulate item total
-        totalShipping += shipping; // Accumulate shipping
-        totalOrderTotal += itemTotal + shipping; // Accumulate order total
+          (item.regularPrice - item.salePrice) * item.quantity; 
+        totalCouponDiscount += order.discount / order.items.length; 
+        totalItemTotal += itemTotal; 
+        totalShipping += shipping; 
+        totalOrderTotal += itemTotal + shipping; 
 
         return {
           name: product.productName,
@@ -421,10 +401,10 @@ const generateSalesReport = async (req, res) => {
       report,
       totals: {
         totalQuantity,
-        totalRegularPrice, // Add total regular price to the totals
-        totalSalePrice, // Add total sale price to the totals
-        totalItemDiscount, // Add total item discount to the totals
-        totalCouponDiscount, // Add total coupon discount to the totals
+        totalRegularPrice, 
+        totalSalePrice, 
+        totalItemDiscount, 
+        totalCouponDiscount,
         totalItemTotal,
         totalShipping,
         totalOrderTotal,
@@ -461,7 +441,6 @@ const getOverallRevenue = async (req, res) => {
       },
     ]);
 
-    console.log("Overall revenue data:", overallRevenue);
 
     if (overallRevenue.length === 0) {
       console.warn("No revenue data available.");
@@ -479,9 +458,6 @@ const getOverallRevenue = async (req, res) => {
     const { totalRevenue, totalDiscount } = overallRevenue[0];
     const netRevenue = totalRevenue - totalDiscount;
 
-    console.log("Total Revenue:", totalRevenue);
-    console.log("Total Discount:", totalDiscount);
-    console.log("Net Revenue:", netRevenue);
 
     return res.json({
       status: true,
@@ -650,7 +626,6 @@ const reportPdf = async (req, res) => {
       });
     }
 
-    // Use the same date query logic from your original report generation
     let query = {};
     const today = new Date();
 
@@ -736,7 +711,6 @@ const reportPdf = async (req, res) => {
       });
     }
 
-    // Calculate totals with safe defaults
     let totals = {
       totalQuantity: 0,
       totalRegularPrice: 0,
@@ -750,7 +724,6 @@ const reportPdf = async (req, res) => {
 
     const reportData = orders
       .map((order) => {
-        // Ensure order has required fields
         if (!order || !order.items) return null;
 
         const orderDetails = {
@@ -760,7 +733,6 @@ const reportPdf = async (req, res) => {
             : "N/A",
           items: order.items
             .map((item) => {
-              // Safely access nested properties
               const product = item.productId || {};
               const variant = (product.variants && product.variants[0]) || {};
               const quantity = item.quantity || 0;
@@ -770,7 +742,6 @@ const reportPdf = async (req, res) => {
                 (order.shipping || 0) / (order.items.length || 1);
               const itemTotal = salePrice * quantity;
 
-              // Update totals
               totals.totalQuantity += quantity;
               totals.totalRegularPrice += regularPrice * quantity;
               totals.totalSalePrice += salePrice * quantity;
@@ -797,13 +768,12 @@ const reportPdf = async (req, res) => {
                 shipping: shipping,
               };
             })
-            .filter(Boolean), // Remove any null items
+            .filter(Boolean),
         };
         return orderDetails;
       })
-      .filter(Boolean); // Remove any null orders
+      .filter(Boolean); 
 
-    // Check if we have valid report data
     if (!reportData || reportData.length === 0) {
       return res.status(404).json({
         status: false,
@@ -827,7 +797,6 @@ const reportPdf = async (req, res) => {
 
     doc.pipe(res);
 
-    // Generate PDF content
     generateEnhancedPdfContent(
       doc,
       type,
@@ -856,7 +825,7 @@ const generateEnhancedPdfContent = (
   reportData,
   totals
 ) => {
-  // Header
+
   doc
     .fontSize(24)
     .font("Helvetica-Bold")
@@ -867,7 +836,6 @@ const generateEnhancedPdfContent = (
 
   doc.moveDown(1);
 
-  // Summary Section
   doc
     .fontSize(16)
     .font("Helvetica-Bold")
@@ -875,7 +843,6 @@ const generateEnhancedPdfContent = (
 
   doc.moveDown(0.5);
 
-  // Format numbers for summary
   const formattedSummary = {
     headers: ["Metric", "Value"],
     rows: [
@@ -893,10 +860,8 @@ const generateEnhancedPdfContent = (
   generateTable(doc, formattedSummary, true);
   doc.moveDown(1);
 
-  // Add a new page for Order Details
   doc.addPage();
 
-  // Order Details Section
   doc
     .fontSize(16)
     .font("Helvetica-Bold")
@@ -904,7 +869,6 @@ const generateEnhancedPdfContent = (
 
   doc.moveDown(0.5);
 
-  // Define column widths as percentages of the table width
   const columnWidths = {
     orderNumber: 0.1,
     name: 0.2,
@@ -935,7 +899,6 @@ const generateEnhancedPdfContent = (
     rows: [],
   };
 
-  // Prepare order details rows with safe value handling
   reportData.forEach((order) => {
     if (!order || !order.items) return;
 
@@ -955,7 +918,6 @@ const generateEnhancedPdfContent = (
         item.itemTotal || 0,
       ];
 
-      // Ensure all values in the row are strings
       const safeRow = row.map((value) => String(value || "N/A"));
       orderTable.rows.push(safeRow);
     });
@@ -975,7 +937,6 @@ const generateTable = (doc, tableData, isSimpleTable) => {
   let startX = tablePadding;
   let startY = doc.y + cellPadding;
 
-  // Calculate column widths
   let colWidths;
   if (isSimpleTable) {
     colWidths = headers.map(() => tableWidth / headers.length);
@@ -983,7 +944,6 @@ const generateTable = (doc, tableData, isSimpleTable) => {
     colWidths = Object.values(columnWidths).map((width) => tableWidth * width);
   }
 
-  // Function to draw table header
   const drawTableHeader = () => {
     doc.fontSize(fontSize).font("Helvetica-Bold");
     let x = startX;
@@ -1020,7 +980,6 @@ const generateTable = (doc, tableData, isSimpleTable) => {
 
     let x = startX;
     row.forEach((cell, i) => {
-      // Ensure cell value is a string and handle null/undefined
       const cellText = String(cell || "N/A");
       const maxWidth = colWidths[i] - cellPadding;
 
@@ -1082,6 +1041,7 @@ const getReportPeriodText = (type, startDate, endDate) => {
 
 
 
+//code to get total orders
 
 const getTotalOrders = async (req, res) => {
   try {
@@ -1140,6 +1100,8 @@ const getTotalCategories = async (req, res) => {
 };
 
 //code to generate invoice for user
+
+
 
 const generateInvoicePDF = async (req, res) => {
   try {
@@ -1234,6 +1196,7 @@ const generateInvoicePDF = async (req, res) => {
       doc,
       invoiceTableTop,
       "Item",
+      "Status",
       "Quantity",
       "Unit Sale Price",
       "Total"
@@ -1247,9 +1210,10 @@ const generateInvoicePDF = async (req, res) => {
         doc,
         position,
         item.productId.productName,
+        item.orderStatus || "N/A", 
         item.quantity,
-        formatCurrency(item.productId.salePrice),
-        formatCurrency(item.quantity * item.productId.salePrice)
+        item.productId.salePrice,
+        item.quantity * item.productId.salePrice
       );
       generateHr(doc, position + 20);
     }
@@ -1260,8 +1224,9 @@ const generateInvoicePDF = async (req, res) => {
       subtotalPosition,
       "",
       "",
+      "",
       "Subtotal",
-      formatCurrency(order.subtotal)
+      order.subtotal
     );
     const discountPosition = subtotalPosition + 20;
     generateTableRow(
@@ -1269,18 +1234,12 @@ const generateInvoicePDF = async (req, res) => {
       discountPosition,
       "",
       "",
+      "",
       "Discount",
-      formatCurrency(order.discount)
+      order.discount
     );
     const shippingPosition = discountPosition + 20;
-    generateTableRow(
-      doc,
-      shippingPosition,
-      "",
-      "",
-      "Shipping",
-      formatCurrency(40)
-    );
+    generateTableRow(doc, shippingPosition, "", "", "", "Shipping", 40);
     const grandTotalPosition = shippingPosition + 25;
     doc.font("Helvetica-Bold");
     generateTableRow(
@@ -1288,8 +1247,9 @@ const generateInvoicePDF = async (req, res) => {
       grandTotalPosition,
       "",
       "",
+      "",
       "Grand Total",
-      formatCurrency(order.grandTotal)
+      order.grandTotal
     );
     doc.font("Helvetica");
 
@@ -1317,15 +1277,16 @@ const generateInvoicePDF = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
 function generateHr(doc, y) {
   doc.strokeColor("#aaaaaa").lineWidth(1).moveTo(50, y).lineTo(550, y).stroke();
 }
 
-
-function generateTableRow(doc, y, item, quantity, unitCost, lineTotal) {
+function generateTableRow(doc, y, item, status, quantity, unitCost, lineTotal) {
   doc
     .fontSize(10)
     .text(item, 50, y)
+    .text(status, 200, y, { width: 70, align: "right" })
     .text(quantity, 280, y, { width: 90, align: "right" })
     .text(unitCost, 370, y, { width: 90, align: "right" })
     .text(lineTotal, 0, y, { align: "right" });

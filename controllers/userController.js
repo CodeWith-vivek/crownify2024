@@ -20,14 +20,10 @@ const securePassword = async (password) => {
 
 //code for loading homepage
 
-
-
-
 const loadHomepage = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    // If no user is logged in, render the page with default values
     if (!userId) {
       const [products, coupons] = await Promise.all([
         Product.find({
@@ -44,7 +40,6 @@ const loadHomepage = async (req, res) => {
       });
     }
 
-    // Fetch all required data in parallel for logged-in users
     const [listedCategories, unblockedBrands, products, coupons, userData] =
       await Promise.all([
         Category.find({ isListed: true }),
@@ -77,8 +72,6 @@ const loadHomepage = async (req, res) => {
             },
           }),
       ]);
-
-    // Create Sets for efficient lookups
     const listedCategoryIds = new Set(
       listedCategories.map((cat) => cat._id.toString())
     );
@@ -86,7 +79,6 @@ const loadHomepage = async (req, res) => {
       unblockedBrands.map((brand) => brand.brandName)
     );
 
-    // Filter function for valid products
     const isValidProduct = (product) => {
       return (
         product &&
@@ -96,18 +88,15 @@ const loadHomepage = async (req, res) => {
       );
     };
 
-    // Filter products based on categories and brands
     const filteredProducts = products.filter((product) =>
       isValidProduct(product)
     );
 
-    // Calculate filtered cart count
     const cartCount = userData?.cart?.[0]?.items
       ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
           .length
       : 0;
 
-    // Calculate filtered wishlist count
     const wishlistCount = userData?.wishlist?.[0]?.items
       ? userData.wishlist[0].items.filter((item) =>
           isValidProduct(item.productId)
@@ -126,6 +115,7 @@ const loadHomepage = async (req, res) => {
     res.status(500).send("Server error");
   }
 };
+
 //code to load contact page
 
 
@@ -133,7 +123,6 @@ const loadContactpage = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    // If no user is logged in, render the page with default values
     if (!userId) {
       const products = await Product.find({ isBlocked: false });
       return res.render("contact", {
@@ -143,7 +132,6 @@ const loadContactpage = async (req, res) => {
       });
     }
 
-    // Fetch all required data in parallel for logged-in users
     const [listedCategories, unblockedBrands, products, userData] =
       await Promise.all([
         Category.find({ isListed: true }),
@@ -174,7 +162,6 @@ const loadContactpage = async (req, res) => {
           }),
       ]);
 
-    // Create Sets for efficient lookups
     const listedCategoryIds = new Set(
       listedCategories.map((cat) => cat._id.toString())
     );
@@ -182,7 +169,6 @@ const loadContactpage = async (req, res) => {
       unblockedBrands.map((brand) => brand.brandName)
     );
 
-    // Comprehensive product validity check
     const isValidProduct = (product) => {
       return (
         product &&
@@ -192,20 +178,17 @@ const loadContactpage = async (req, res) => {
       );
     };
 
-    // Calculate filtered cart count
     const cartCount = userData?.cart?.[0]?.items
       ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
           .length
       : 0;
 
-    // Calculate filtered wishlist count
     const wishlistCount = userData?.wishlist?.[0]?.items
       ? userData.wishlist[0].items.filter((item) =>
           isValidProduct(item.productId)
         ).length
       : 0;
 
-    // Filter products based on categories and brands
     const filteredProducts = products.filter((product) =>
       isValidProduct(product)
     );
@@ -221,6 +204,7 @@ const loadContactpage = async (req, res) => {
     res.status(500).send("Server error");
   }
 };
+
 //code to load about page
 
 
@@ -228,7 +212,6 @@ const loadAboutpage = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    // If no user is logged in, render the page with default values
     if (!userId) {
       const [products, coupons] = await Promise.all([
         Product.find({ isBlocked: false }),
@@ -243,7 +226,6 @@ const loadAboutpage = async (req, res) => {
       });
     }
 
-    // Fetch all required data in parallel for logged-in users
     const [listedCategories, unblockedBrands, products, coupons, userData] =
       await Promise.all([
         Category.find({ isListed: true }),
@@ -275,7 +257,6 @@ const loadAboutpage = async (req, res) => {
           }),
       ]);
 
-    // Create Sets for efficient lookups
     const listedCategoryIds = new Set(
       listedCategories.map((cat) => cat._id.toString())
     );
@@ -283,7 +264,6 @@ const loadAboutpage = async (req, res) => {
       unblockedBrands.map((brand) => brand.brandName)
     );
 
-    // Comprehensive product validity check
     const isValidProduct = (product) => {
       return (
         product &&
@@ -293,20 +273,17 @@ const loadAboutpage = async (req, res) => {
       );
     };
 
-    // Calculate filtered cart count
     const cartCount = userData?.cart?.[0]?.items
       ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
           .length
       : 0;
 
-    // Calculate filtered wishlist count
     const wishlistCount = userData?.wishlist?.[0]?.items
       ? userData.wishlist[0].items.filter((item) =>
           isValidProduct(item.productId)
         ).length
       : 0;
 
-    // Filter products based on categories and brands
     const filteredProducts = products.filter((product) =>
       isValidProduct(product)
     );
@@ -331,7 +308,6 @@ const loadFaqpage = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    // If no user is logged in, render the page with default values
     if (!userId) {
       const products = await Product.find({ isBlocked: false });
       return res.render("FAQ", {
@@ -341,7 +317,6 @@ const loadFaqpage = async (req, res) => {
       });
     }
 
-    // Fetch all required data in parallel for logged-in users
     const [listedCategories, unblockedBrands, products, userData] =
       await Promise.all([
         Category.find({ isListed: true }),
@@ -372,7 +347,6 @@ const loadFaqpage = async (req, res) => {
           }),
       ]);
 
-    // Create Sets for efficient lookups
     const listedCategoryIds = new Set(
       listedCategories.map((cat) => cat._id.toString())
     );
@@ -380,7 +354,6 @@ const loadFaqpage = async (req, res) => {
       unblockedBrands.map((brand) => brand.brandName)
     );
 
-    // Comprehensive product validity check
     const isValidProduct = (product) => {
       return (
         product &&
@@ -390,20 +363,17 @@ const loadFaqpage = async (req, res) => {
       );
     };
 
-    // Calculate filtered cart count
     const cartCount = userData?.cart?.[0]?.items
       ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
           .length
       : 0;
 
-    // Calculate filtered wishlist count
     const wishlistCount = userData?.wishlist?.[0]?.items
       ? userData.wishlist[0].items.filter((item) =>
           isValidProduct(item.productId)
         ).length
       : 0;
 
-    // Filter products based on categories and brands
     const filteredProducts = products.filter((product) =>
       isValidProduct(product)
     );
@@ -470,7 +440,6 @@ const loadBrandpage = async (req, res) => {
           },
         });
 
-      // Valid product filter function
       const isValidProduct = (product) => {
         return (
           product &&
@@ -480,14 +449,12 @@ const loadBrandpage = async (req, res) => {
         );
       };
 
-      // Calculate cart count for valid products
       const cartCount = userData?.cart?.[0]?.items
         ? userData.cart[0].items.filter((item) =>
             isValidProduct(item.productId)
           ).length
         : 0;
 
-      // Calculate wishlist count for valid products
       const wishlistCount = userData?.wishlist?.[0]?.items
         ? userData.wishlist[0].items.filter((item) =>
             isValidProduct(item.productId)
@@ -501,7 +468,6 @@ const loadBrandpage = async (req, res) => {
         wishlistCount,
       });
     } else {
-      // If no user is logged in, set counts to 0
       return res.render("Brand", {
         products,
         cartCount: 0,
@@ -513,6 +479,7 @@ const loadBrandpage = async (req, res) => {
     res.status(500).send("Server error");
   }
 };
+
 //code for page not found
 
 const pageNotFound = async (req, res) => {
@@ -529,24 +496,21 @@ const pageNotFound = async (req, res) => {
 const loadSignup = async (req, res) => {
 
    try {
-     const userId = req.session.user; // Assuming userId is stored in session
+     const userId = req.session.user; 
      let userData = req.session.userData || {};
 
-     // If userId exists, fetch user data to get cart and wishlist counts
      if (userId) {
        const user = await User.findById(userId)
          .populate("cart")
          .populate("wishlist");
 
-       // Calculate cart and wishlist counts
        const cartCount =
-         user.cart && user.cart.length > 0 ? user.cart[0].items.length : 0; // Assuming cart is an array of carts
+         user.cart && user.cart.length > 0 ? user.cart[0].items.length : 0; 
        const wishlistCount =
          user.wishlist && user.wishlist.length > 0
            ? user.wishlist[0].items.length
-           : 0; // Assuming wishlist is an array of wishlists
+           : 0; 
 
-       // Merge counts with userData
        userData = {
          ...userData,
          cartCount,
@@ -554,7 +518,7 @@ const loadSignup = async (req, res) => {
        };
      }
 
-     req.session.userData = null; // Clear session data
+     req.session.userData = null; 
 
      res.render("signup", { data: userData });
    } catch (error) {
@@ -573,21 +537,20 @@ const loadOtpverify = async (req, res) => {
       return res.redirect("/signup");
     }
 
-    const userId = userData._id; // Assuming `userData` includes the user's ID
+    const userId = userData._id; 
     let cartCount = 0;
     let wishlistCount = 0;
 
-    // Fetch user data if userId exists
     if (userId) {
       const user = await User.findById(userId)
         .populate("cart")
         .populate("wishlist");
       cartCount =
-        user.cart && user.cart.length > 0 ? user.cart[0].items.length : 0; // Assuming cart structure
+        user.cart && user.cart.length > 0 ? user.cart[0].items.length : 0;
       wishlistCount =
         user.wishlist && user.wishlist.length > 0
           ? user.wishlist[0].items.length
-          : 0; // Assuming wishlist structure
+          : 0; 
     }
 
     req.session.countdownTime = 120;
@@ -694,6 +657,7 @@ const signup = async (req, res) => {
         : null;
 
       req.session.userOtp = otp;
+      
       req.session.userData = {
         name,
         phone,
@@ -732,9 +696,6 @@ const verifyOtp = async (req, res) => {
     const { otp } = req.body;
     const sessionOtp = req.session.userOtp;
 
-    console.log("Stored OTP:", sessionOtp, "User-entered OTP:", otp);
-
-
     if (!sessionOtp) {
       return res.json({
         success: false,
@@ -765,9 +726,7 @@ const verifyOtp = async (req, res) => {
         wishlist: [], 
       });
 
-      // Attempt to save the new user
       await newUser.save().catch((saveError) => {
-        console.log("Error saving user:", saveError);
         return res.status(400).json({
           success: false,
           message: "Error saving user. Please try again.",
@@ -828,24 +787,22 @@ const resendOtp = async (req, res) => {
 
 const loadLogin = async (req, res) => {
   try {
-    // Check if the user is logged in
+
     if (!req.session.user) {
-      return res.render("login", { data: null }); // Render login page if not logged in
+      return res.render("login", { data: null }); 
     } else {
-      const userId = req.session.user; // Assuming user ID is stored in session
+      const userId = req.session.user; 
       const user = await User.findById(userId)
         .populate("cart")
         .populate("wishlist");
 
-      // Calculate cart and wishlist counts
       const cartCount =
-        user.cart && user.cart.length > 0 ? user.cart[0].items.length : 0; // Assuming cart is an array of carts
+        user.cart && user.cart.length > 0 ? user.cart[0].items.length : 0; 
       const wishlistCount =
         user.wishlist && user.wishlist.length > 0
           ? user.wishlist[0].items.length
-          : 0; // Assuming wishlist is an array of wishlists
+          : 0; 
 
-      // Redirect to homepage or wherever the user should go
       res.redirect("/");
     }
   } catch (error) {
@@ -1075,7 +1032,6 @@ const loadShopPage = async (req, res) => {
           },
         });
 
-      // Valid product filter function
       const isValidProduct = (product) => {
         return (
           product &&
@@ -1087,14 +1043,12 @@ const loadShopPage = async (req, res) => {
         );
       };
 
-      // Calculate cart count for valid products
       const cartCount = userData?.cart?.[0]?.items
         ? userData.cart[0].items.filter((item) =>
             isValidProduct(item.productId)
           ).length
         : 0;
 
-      // Calculate wishlist count for valid products
       const wishlistCount = userData?.wishlist?.[0]?.items
         ? userData.wishlist[0].items.filter((item) =>
             isValidProduct(item.productId)
@@ -1126,7 +1080,6 @@ const loadProductDetails = async (req, res) => {
     const productId = req.params.id;
     const userId = req.session.user;
 
-    // Fetch all required data in parallel
     const [listedCategories, unblockedBrands, product] = await Promise.all([
       Category.find({ isListed: true }),
       Brand.find({ isBlocked: false }),
@@ -1148,7 +1101,6 @@ const loadProductDetails = async (req, res) => {
         .exec(),
     ]);
 
-    // Create Sets for efficient lookups
     const listedCategoryIds = new Set(
       listedCategories.map((cat) => cat._id.toString())
     );
@@ -1156,7 +1108,6 @@ const loadProductDetails = async (req, res) => {
       unblockedBrands.map((brand) => brand.brandName)
     );
 
-    // Comprehensive product validity check
     const isValidProduct = (checkProduct) => {
       return (
         checkProduct &&
@@ -1166,12 +1117,10 @@ const loadProductDetails = async (req, res) => {
       );
     };
 
-    // Check if the current product is valid
     if (!product || !isValidProduct(product)) {
       return res.status(404).send("Product not found or unavailable");
     }
 
-    // Calculate discount percentage
     const discount =
       product.regularPrice > 0
         ? Math.floor(
@@ -1182,16 +1131,13 @@ const loadProductDetails = async (req, res) => {
         : 0;
     product.discountPercentage = discount;
 
-    // Ensure variants array exists
     product.variants = Array.isArray(product.variants) ? product.variants : [];
 
-    // Calculate total quantity from variants
     const totalQuantity = product.variants.reduce(
       (total, variant) => total + (variant.quantity || 0),
       0
     );
 
-    // Get related products with comprehensive filtering
     const relatedProducts = await Product.find({
       brand: product.brand,
       _id: { $ne: productId },
@@ -1200,12 +1146,10 @@ const loadProductDetails = async (req, res) => {
       .lean()
       .exec();
 
-    // Filter related products
     const filteredRelatedProducts = relatedProducts.filter((relProduct) =>
       isValidProduct(relProduct)
     );
 
-    // Prepare template data
     const templateData = {
       product: {
         ...product,
@@ -1220,7 +1164,6 @@ const loadProductDetails = async (req, res) => {
       relatedProducts: filteredRelatedProducts.slice(0, 4),
     };
 
-    // If user is logged in, fetch additional data
     if (userId) {
       const userData = await User.findById(userId)
         .populate({
@@ -1246,14 +1189,12 @@ const loadProductDetails = async (req, res) => {
           },
         });
 
-      // Calculate filtered cart count
       const cartCount = userData?.cart?.[0]?.items
         ? userData.cart[0].items.filter((item) =>
             isValidProduct(item.productId)
           ).length
         : 0;
 
-      // Calculate filtered wishlist count
       const wishlistCount = userData?.wishlist?.[0]?.items
         ? userData.wishlist[0].items.filter((item) =>
             isValidProduct(item.productId)
@@ -1264,12 +1205,10 @@ const loadProductDetails = async (req, res) => {
       templateData.cartCount = cartCount;
       templateData.wishlistCount = wishlistCount;
     } else {
-      // Set default counts for non-logged in users
       templateData.cartCount = 0;
       templateData.wishlistCount = 0;
     }
 
-    // Pass product data as a script for client-side use
     const productScript = `
       <script>
         const product = ${JSON.stringify(templateData.product)};
@@ -1277,7 +1216,6 @@ const loadProductDetails = async (req, res) => {
       </script>
     `;
 
-    // Render the product details page
     return res.render("ProductDetails", {
       ...templateData,
       productScript,

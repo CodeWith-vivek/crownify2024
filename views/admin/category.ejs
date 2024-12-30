@@ -7,7 +7,7 @@
                 <p>Add, edit or delete a category</p>
             </div>
             <div>
-                <!-- <input type="text" placeholder="Search Categories" class="form-control bg-white"> -->
+              
             </div>
         </div>
         <div class="card">
@@ -273,7 +273,7 @@
                         if (response.ok && data.status) {
                             Swal.fire('Offer Removed', 'The offer has been removed successfully.', 'success')
                                 .then(() => {
-                                    location.reload(); // Reload the page to reflect the changes
+                                    location.reload(); 
                                 });
                         } else {
                             Swal.fire('Failed', data.message || 'Removing offer failed.', 'error');

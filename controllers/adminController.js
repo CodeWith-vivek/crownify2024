@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const Order = require("../models/orderSchema");
 const Product = require("../models/productSchema");
 const { session } = require("passport");
+const Transaction = require("../models/transactionSchema");
 
 
 //admin side page error
@@ -13,6 +14,7 @@ const pageerror = async (req, res) => {
 };
 
 //admin login 
+
 const loadLogin = (req, res) => {
   if (req.session.admin) {
     return res.redirect("/admin/dashboard");
@@ -22,6 +24,7 @@ const loadLogin = (req, res) => {
 
 
 //admin login code
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -64,6 +67,7 @@ const loadDashboard = async (req, res) => {
 };
 
 //code to logout admin
+
 
 const logout = async (req, res) => {
   try {
@@ -127,11 +131,11 @@ const loadOrderlist = async (req, res) => {
 
 //code to change status of order by admin
 
+
 const updateOrderStatusByAdmin = async (req, res) => {
   try {
     const { orderId, productSize, productColor, newStatus } = req.body;
 
-    // Validate required fields
     if (!orderId || !productSize || !productColor || !newStatus) {
       return res.status(400).json({
         success: false,
@@ -140,7 +144,6 @@ const updateOrderStatusByAdmin = async (req, res) => {
       });
     }
 
-    
     const validStatuses = [
       "Placed",
       "Shipped",
@@ -156,7 +159,6 @@ const updateOrderStatusByAdmin = async (req, res) => {
       });
     }
 
-
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({
@@ -165,7 +167,6 @@ const updateOrderStatusByAdmin = async (req, res) => {
       });
     }
 
-   
     const orderItemIndex = order.items.findIndex((item) => {
       if (!item.variant) return false;
 
@@ -184,16 +185,13 @@ const updateOrderStatusByAdmin = async (req, res) => {
         message: "Product not found in order",
         debug: {
           receivedData: { size: productSize, color: productColor },
-          availableItems: order.items.map((item) => ({
-            variant: item.variant,
-          })),
+          availableItems: order.items.map((item) => item.variant),
         },
       });
     }
 
     const orderItem = order.items[orderItemIndex];
 
-  
     if (orderItem.orderStatus === newStatus) {
       return res.status(400).json({
         success: false,
@@ -203,8 +201,9 @@ const updateOrderStatusByAdmin = async (req, res) => {
 
     const productIdFromOrder = orderItem.productId;
 
+    let refundAmount = 0;
+
     if (newStatus === "Returned") {
-    
       const product = await Product.findById(productIdFromOrder);
       if (product) {
         const variantIndex = product.variants.findIndex(
@@ -219,23 +218,16 @@ const updateOrderStatusByAdmin = async (req, res) => {
         }
       }
 
-
       const totalOrderPrice = order.items.reduce(
         (sum, item) => sum + item.totalPrice,
         0
       );
 
-    
       const itemShare = orderItem.totalPrice / totalOrderPrice;
-
       const discountForItem = Math.floor(order.discount * itemShare);
+      refundAmount = Math.floor(orderItem.totalPrice - discountForItem);
 
-   
-      const refundAmount = Math.floor(orderItem.totalPrice - discountForItem);
-      const userId = order.userId;
-
-    
-      const user = await User.findById(userId);
+      const user = await User.findById(order.userId);
       if (!user) {
         return res.status(404).json({
           success: false,
@@ -243,15 +235,27 @@ const updateOrderStatusByAdmin = async (req, res) => {
         });
       }
 
-      user.wallet = Math.floor((user.wallet || 0) + refundAmount);
-
+      user.wallet = (user.wallet || 0) + refundAmount;
       await user.save();
+
+      const transaction = new Transaction({
+        userId: order.userId,
+        amount: refundAmount,
+        type: "credit",
+        description: `Refund for returned order item: ${orderItem.productName}`,
+      });
+      await transaction.save();
     }
 
-
     order.items[orderItemIndex].orderStatus = newStatus;
-     order.paymentStatus = "Completed";
 
+
+    if (newStatus === "Shipped" && order.paymentMethod === "COD") {
+
+    } else {
+ 
+      order.paymentStatus = "Completed";
+    }
 
     const allItemsSameStatus = order.items.every(
       (item) => item.orderStatus === newStatus
@@ -265,6 +269,7 @@ const updateOrderStatusByAdmin = async (req, res) => {
     res.json({
       success: true,
       message: `Order item status updated to ${newStatus} successfully`,
+      refundAmount,
       updatedOrder: order,
     });
   } catch (error) {

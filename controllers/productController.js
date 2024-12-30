@@ -325,25 +325,20 @@ const getEditProduct = async (req, res) => {
 
 const editProduct = async (req, res) => {
   try {
-    console.log("Starting editProduct function...");
-
     const productId = req.params.id;
     const updates = req.body;
-    console.log("Product ID:", productId);
-    console.log("Updates received:", updates);
 
     if (!updates.productName) {
-      console.log("Validation failed: Product name is missing.");
+ 
       return res
         .status(400)
         .json({ success: false, message: "Product name is required." });
     }
 
     const regularPrice = Math.floor(Number(updates.regularPrice));
-    console.log("Parsed and floored regular price:", regularPrice);
 
     if (isNaN(regularPrice) || regularPrice < 0) {
-      console.log("Validation failed: Regular price is invalid.");
+
       return res.status(400).json({
         success: false,
         message: "Regular price must be a valid positive number.",
@@ -351,10 +346,9 @@ const editProduct = async (req, res) => {
     }
 
     const salePrice = Math.floor(Number(updates.salePrice));
-    console.log("Parsed and floored sale price:", salePrice);
 
     if (isNaN(salePrice) || salePrice < 0) {
-      console.log("Validation failed: Sale price is invalid.");
+
       return res.status(400).json({
         success: false,
         message: "Sale price must be a valid positive number.",
@@ -363,39 +357,32 @@ const editProduct = async (req, res) => {
 
     const product = await Product.findById(productId);
     if (!product) {
-      console.log("Product not found for ID:", productId);
+ 
       return res
         .status(404)
         .json({ success: false, message: "Product not found" });
     }
-    console.log("Existing product details:", product);
 
     product.productName = updates.productName || product.productName;
     product.description = updates.description || product.description;
     product.brand = updates.brand || product.brand;
 
     if (updates.category) {
-      console.log("Category update detected. Validating category...");
+  
       const category = await Category.findById(updates.category);
       if (!category) {
-        console.log("Validation failed: Invalid category name.");
         return res
           .status(400)
           .json({ success: false, message: "Invalid category name" });
       }
 
       product.category = category._id;
-      console.log("Category updated:", category);
 
       if (category.categoryOffer >= 0) {
         const discount = Math.floor(
           (regularPrice * category.categoryOffer) / 100
         );
         product.salePrice = Math.max(regularPrice - discount, 0);
-        console.log(
-          "Sale price updated with category offer:",
-          product.salePrice
-        );
       } else {
         product.salePrice = salePrice;
       }
@@ -410,10 +397,8 @@ const editProduct = async (req, res) => {
     const uploadDir = path.join(__dirname, "../public/uploads/product-image");
 
     if (req.files && req.files.length > 0) {
-      console.log("Processing uploaded images...");
       const totalImages = images.length + req.files.length;
       if (totalImages > 4) {
-        console.log("Image upload failed: Exceeds limit of 4 images.");
         return res.status(400).json({
           success: false,
           message:
@@ -422,7 +407,6 @@ const editProduct = async (req, res) => {
       }
 
       for (let i = 0; i < req.files.length; i++) {
-        console.log("Processing image:", req.files[i].filename);
         const originalImagePath = req.files[i].path;
         const resizedImagePath = path.join(uploadDir, req.files[i].filename);
 
@@ -432,13 +416,12 @@ const editProduct = async (req, res) => {
 
         images.push(req.files[i].filename);
         fs.unlinkSync(originalImagePath);
-        console.log("Image resized and added:", req.files[i].filename);
       }
       product.productImage = images;
     }
 
     const variants = [];
-    console.log("Processing product variants...");
+    
 
     if (
       Array.isArray(updates.colors) &&
@@ -449,7 +432,7 @@ const editProduct = async (req, res) => {
         updates.colors.length !== updates.sizes.length ||
         updates.colors.length !== updates.quantities.length
       ) {
-        console.log("Validation failed: Mismatched variant arrays.");
+    
         return res.status(400).json({
           success: false,
           message: "Colors, sizes, and quantities must have the same length.",
@@ -462,7 +445,6 @@ const editProduct = async (req, res) => {
           size: updates.sizes[index] || null,
           quantity: Math.floor(Number(updates.quantities[index])) || 1,
         });
-        console.log("Variant added:", variants[variants.length - 1]);
       });
     } else {
       variants.push({
@@ -470,13 +452,11 @@ const editProduct = async (req, res) => {
         size: updates.sizes || "ONESIZE",
         quantity: Math.floor(Number(updates.quantities)) || 1,
       });
-      console.log("Default variant added:", variants[0]);
     }
 
     product.variants = variants;
 
     await product.save();
-    console.log("Product updated successfully:", product);
     return res.json({ success: true, message: "Product updated successfully" });
   } catch (error) {
     console.error("Error updating product:", error);
@@ -505,7 +485,7 @@ const deleteSingleImage = async (req, res) => {
     if (fs.existsSync(imagePath)) {
       await fs.unlinkSync(imagePath);
     } else {
-      console.log(`Image ${imageNameToServer} not found`);
+   
     }
     res.send({ status: true });
   } catch (error) {

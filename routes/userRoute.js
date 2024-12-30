@@ -37,6 +37,22 @@ function restrictLoggedInUser(req, res, next) {
   }
   next();
 }
+function allowResetPassword(req, res, next) {
+  if (req.session.resetAllowed) {
+    return next();
+  }
+  return res.status(403).send("Access denied. Please verify OTP first.");
+}
+const ensureSession = (key, redirectUrl) => {
+  return (req, res, next) => {
+    if (!req.session[key]) {
+      return res.redirect(redirectUrl);
+    }
+    next();
+  };
+};
+
+
 const preventBackToAuth = async (req, res, next) => {
   if (req.session.user) {
     if (
@@ -148,12 +164,18 @@ router.get(
   "/reset-password",
   restrictLoggedInUser,
   preventCache,
+  ensureSession("email", "/login"),
+
+  allowResetPassword,
+
   profileController.getResetPassPage
 );
 router.post(
   "/reset-password",
   restrictLoggedInUser,
   preventCache,
+  allowResetPassword,
+
   profileController.forgotNewPassword
 );
 router.get("/profile", userAuth, profileController.userProfile);
@@ -205,7 +227,7 @@ router.post("/wallet/add-money", userAuth, walletController.addMoneyToWallet);
 router.get("/wallet/balance", userAuth, walletController.getWalletBalance);
 router.post("/confirm-payment",userAuth,walletController.confirmPayment);
 
-// Get wallet balance
+
 
 //user cartManagement
 

@@ -314,7 +314,7 @@
                         const row = document.createElement('tr');
                         const orderNumberLastFour = order.orderNumber.slice(-4);
 
-                        // Create cells individually instead of using innerHTML
+                       
                         const cells = [];
                         if (index === 0) {
                             cells.push(
@@ -328,7 +328,6 @@
                             );
                         }
 
-                        // Common cells for all rows
                         cells.push(
                             createCell(item.name),
                             createCell(item.brand),
@@ -345,7 +344,7 @@
                             createCell(`₹${(item.itemTotal + item.shipping).toFixed(2)}`, 'text-end')
                         );
 
-                        // Append all cells to the row
+                 
                         cells.forEach(cell => row.appendChild(cell));
                         reportDataBody.appendChild(row);
                     });
@@ -362,7 +361,7 @@
                 updatePagination(result.pagination);
             }
 
-            // Helper function to create table cells
+      
             function createCell(content, className = '') {
                 const cell = document.createElement('td');
                 cell.textContent = content;
@@ -373,7 +372,7 @@
             }
 
             function updateTotals(totals) {
-                // Create a mapping of IDs to their values with currency formatting
+          
                 const totalsMapping = {
                     'totalQuantity': { value: totals.totalQuantity, format: false },
                     'totalRegularPrice': { value: totals.totalRegularPrice, format: true },
@@ -385,12 +384,12 @@
                     'totalOfferDiscount': { value: totals.totalItemDiscount, format: true }
                 };
 
-                // Update each total cell
+           
                 Object.entries(totalsMapping).forEach(([id, { value, format }]) => {
                     const element = document.getElementById(id);
                     if (element) {
                         element.textContent = format ? `₹${value.toFixed(2)}` : value;
-                        element.className = 'text-end'; // Align numbers to the right
+                        element.className = 'text-end'; 
                     }
                 });
 
@@ -421,7 +420,7 @@
         </nav>
     `;
 
-                // Add pagination event listeners
+             
                 paginationContainer.querySelectorAll('.page-link[data-page]').forEach(link => {
                     link.addEventListener('click', handlePaginationClick);
                 });
@@ -482,7 +481,7 @@
                 const startDate = document.getElementById('startDate').value;
                 const endDate = document.getElementById('endDate').value;
 
-                // Prepare the data to send to the server
+        
                 const data = {
                     type: reportType,
                     startDate: startDate,
@@ -499,7 +498,7 @@
                     });
 
                     if (response.ok) {
-                        // Create a blob from the response
+                    
                         const blob = await response.blob();
                         const url = window.URL.createObjectURL(blob);
                         const a = document.createElement('a');
@@ -511,7 +510,7 @@
                         window.URL.revokeObjectURL(url);
                         a.remove();
                     } else {
-                        // Handle error response without alert
+                      
                         const result = await response.json();
                         console.error('Error generating PDF:', result.message || 'An error occurred while generating the PDF.');
                     }
@@ -539,7 +538,7 @@
                         const blob = await response.blob();
                         const url = window.URL.createObjectURL(blob);
 
-                        // Create a temporary anchor to trigger download
+                  
                         const a = document.createElement('a');
                         a.href = url;
                         a.download = 'sales_report.xlsx';
@@ -576,11 +575,11 @@
 
         </script>
         <script>
-            // Handle logout action with fetch
+           
             document.getElementById('logoutLink').addEventListener('click', function (event) {
-                event.preventDefault(); // Prevent the default link behavior
+                event.preventDefault(); 
 
-                // Send fetch request to logout
+              
                 fetch('/admin/logout', {
                     method: 'POST',
                     headers: {
@@ -625,19 +624,19 @@
         </script>
 
         <script>
-            // Sample data
+          
             const ctx = document.getElementById('myChart').getContext('2d');
             let myChart;
 
-            // Function to fetch sales report data from the backend
+         
             async function fetchSalesReport(timeframe) {
                 try {
-                    const response = await fetch('/admin/sales-chart', { // Adjust the URL to your backend endpoint
+                    const response = await fetch('/admin/sales-chart', { 
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ type: timeframe }) // Send the selected timeframe
+                        body: JSON.stringify({ type: timeframe }) 
                     });
 
                     if (!response.ok) {
@@ -645,24 +644,24 @@
                     }
 
                     const data = await response.json();
-                    return data[timeframe]; // Return the data for the selected timeframe
+                    return data[timeframe]; 
                 } catch (error) {
                     console.error('Error fetching sales report:', error);
-                    return null; // Return null in case of error
+                    return null; 
                 }
             }
 
-            // Function to render the chart
+           
             async function renderChart(timeframe) {
-                const data = await fetchSalesReport(timeframe); // Fetch data from the backend
+                const data = await fetchSalesReport(timeframe); 
 
                 if (!data) {
                     console.error('No data available');
-                    return; // Exit if no data is available
+                    return;
                 }
 
                 if (myChart) {
-                    myChart.destroy(); // Destroy the previous chart instance
+                    myChart.destroy(); 
                 }
 
                 myChart = new Chart(ctx, {
@@ -706,7 +705,7 @@
                                     text: 'Number of Orders'
                                 },
                                 grid: {
-                                    drawOnChartArea: false // only want the grid lines for one axis to show up
+                                    drawOnChartArea: false
                                 }
                             }
                         }
@@ -714,12 +713,12 @@
                 });
             }
 
-            // Event listeners for buttons
+          
             document.getElementById('weeklyBtn').addEventListener('click', () => renderChart('weekly'));
             document.getElementById('monthlyBtn').addEventListener('click', () => renderChart('monthly'));
             document.getElementById('yearlyBtn').addEventListener('click', () => renderChart('yearly'));
 
-            // Initial render
+          
             renderChart('weekly');
         </script>
         <script>
@@ -727,29 +726,26 @@
                 const revenueElement = document.getElementById("total-revenue");
 
                 try {
-                    console.log("Fetching overall revenue from the backend...");
-                    // Fetch the overall revenue from the backend
-                    const response = await fetch("/admin/overall-revenue"); // Replace with your API endpoint
+                 
+                    const response = await fetch("/admin/overall-revenue"); 
 
-                    // Log the response status
-                    console.log("Response status:", response.status);
 
-                    // Check if the response is OK (status in the range 200-299)
+                
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
 
                     const data = await response.json();
-                    console.log("Data received from the server:", data);
+                 
 
                     if (data.status) {
-                        // Update the revenue details in the UI
+                 
                         revenueElement.textContent = `₹${data.revenue.totalRevenue.toFixed(2)}`;
-                        console.log("Revenue updated in the UI:", revenueElement.textContent);
+                     
                     } else {
-                        // Handle no revenue data
+                  
                         revenueElement.textContent = "No revenue data available";
-                        console.warn("No revenue data available");
+                       
                     }
                 } catch (error) {
                     console.error("Error fetching overall revenue:", error);
@@ -760,15 +756,15 @@
                 const ordersElement = document.getElementById("total-orders");
 
                 try {
-                    // Fetch total orders from the backend
-                    const response = await fetch("/admin/total-orders"); // Replace with your API endpoint
+                   
+                    const response = await fetch("/admin/total-orders"); 
                     const data = await response.json();
 
                     if (data.status) {
-                        // Update the orders count in the UI
+                      
                         ordersElement.textContent = data.totalOrders.toLocaleString();
                     } else {
-                        // Handle no data case
+                     
                         ordersElement.textContent = "No orders received";
                     }
                 } catch (error) {
@@ -781,29 +777,29 @@
                 const categoriesElement = document.getElementById("total-categories");
 
                 try {
-                    console.log("Fetching total products from the backend...");
+                  
 
-                    // Fetch total products from the backend
-                    const response = await fetch("/admin/total-products"); // Replace with your API endpoint
-                    console.log("Response received:", response);
+                 
+                    const response = await fetch("/admin/total-products"); 
+                    
 
-                    // Check if the response is OK (status in the range 200-299)
+             
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
 
                     const data = await response.json();
-                    console.log("Data received from total products API:", data);
+                   
 
                     if (data.status) {
-                        // Update the product count in the UI
+                    
                         productsElement.textContent = data.totalProducts.toLocaleString();
-                        console.log("Total products updated in UI:", data.totalProducts);
+                     
                     } else {
                         productsElement.textContent = "No products available";
-                        console.log("No products available.");
+                      
                     }
-                    const categoryResponse = await fetch("/admin/total-categories"); // Replace with your API endpoint
+                    const categoryResponse = await fetch("/admin/total-categories"); 
                     const categoryData = await categoryResponse.json();
 
                     if (categoryData.status) {
@@ -822,23 +818,23 @@
         <script>
             document.addEventListener("DOMContentLoaded", async () => {
                 try {
-                    console.log("Fetching top-selling stats...");
+                 
                     const response = await fetch("/admin/top-selling-stats");
 
                     if (!response.ok) {
-                        console.error("HTTP Error:", response.status, response.statusText);
+                      
                         return;
                     }
 
                     const result = await response.json();
-                    console.log("API Response:", result); // Log the full API response
+                   
 
                     if (result.success) {
-                        console.log("Successfully fetched data. Rendering tables...");
+                     
 
-                        // Populate Best-Selling Products
+                     
                         const productTable = document.getElementById("bestSellingProducts");
-                        console.log("Top Products:", result.data.topProducts);
+                     
                         productTable.innerHTML = result.data.topProducts
                             .map(
                                 (product, index) => `
@@ -851,9 +847,9 @@
                             )
                             .join("");
 
-                        // Populate Best-Selling Categories
+                     
                         const categoryTable = document.getElementById("bestSellingCategories");
-                        console.log("Top Categories:", result.data.topCategories);
+                       
                         categoryTable.innerHTML = result.data.topCategories
                             .map(
                                 (category, index) => `
@@ -866,9 +862,8 @@
                             )
                             .join("");
 
-                        // Populate Best-Selling Brands
                         const brandTable = document.getElementById("bestSellingBrands");
-                        console.log("Top Brands:", result.data.topBrands);
+                       
                         if (result.data.topBrands.length > 0) {
                             brandTable.innerHTML = result.data.topBrands
                                 .map(
@@ -885,9 +880,9 @@
                             brandTable.innerHTML = `<tr><td colspan="3">No brands found</td></tr>`;
                         }
 
-                        console.log("Tables rendered successfully.");
+                       
                     } else {
-                        console.error("API Error:", result.message);
+                     
                     }
                 } catch (error) {
                     console.error("Error fetching data:", error);

@@ -125,19 +125,18 @@
                             <input type="hidden" id="user-email" value="<%= userData.email %>">
 
                             <div class="timer-container">
-                                <div class="timer" id="timer">02:00 Sec</div>
+                                <div class="timer" id="timer" style="line-height: 1.6;">02:00 Sec</div>
                                 <div>Don't receive code? <span class="resend-link" id="resendOtp">Re-send</span></div>
                             </div>
 
-                            <button class="btn btn-primary w-70 mt-3 mb-3 " style="border-radius: 6px;" id="verifyOtp">Continue</button>
+                            <button class="btn btn-primary w-70 mt-3 mb-3 " style="border-radius: 6px; background-color: #10973b;" id="verifyOtp">Continue</button>
                         </div>
                         <div class="text-wrap p-4 p-lg-5 d-flex img d-flex align-items-end"
                             style="background-image: url(assets/images/otp2.webp);">
                             <div class="text w-100">
-                                <h2 class="mb-4">Welcome to signup form</h2>
-                                <p>Far far away, behind the word mountains, far from the countries Vokalia and
-                                    Consonantia,
-                                    there live the blind texts.</p>
+                            <h2 class="mb-4">Verify OTP</h2>
+                            <p style="color: white;">Enter the OTP sent to your registered email to verify your identity and reset your Crownify account
+                                password.</p>
                             </div>
                         </div>
                     </div>
@@ -146,232 +145,225 @@
         </div>
     </section>
     <%- include("../../views/partials/user/footer") %>
+    
+
+<script>
+    const timerElement = document.getElementById('timer');
+    const verifyOtpButton = document.getElementById('verifyOtp');
+    const otpInputs = document.querySelectorAll('.otp-input');
+    const resendButton = document.getElementById('resendOtp');
+    const currentEmail = document.getElementById('user-email').value;
+
+    let countdownTime = <%= countdownTime %>; 
+    let intervalId;
+
+  
+    function loadCountdownTime() {
+        const savedTime = localStorage.getItem('countdownTime');
+        const isExpired = localStorage.getItem('timerExpired') === 'true';
+
+        if (savedTime) {
+            countdownTime = parseInt(savedTime, 10);
+        }
+
+        if (isExpired || countdownTime <= 0) {
+            displayTimerExpired();
+            return true;
+        }
+        return false;
+    }
 
 
-        <script>
-            const timerElement = document.getElementById('timer');
-            const verifyOtpButton = document.getElementById('verifyOtp');
-            const otpInputs = document.querySelectorAll('.otp-input');
-            const resendButton = document.getElementById('resendOtp');
-             const currentEmail = document.getElementById('user-email').value;
-            countdownTime = <%= countdownTime %>;
-            let intervalId;
+    function saveCountdownTime() {
+        localStorage.setItem('countdownTime', countdownTime);
 
-          
-            function loadCountdownTime() {
-                const savedTime = localStorage.getItem('countdownTime');
-                if (savedTime) {
-                    countdownTime = parseInt(savedTime, 10);
-                }
-            }
+        localStorage.removeItem('timerExpired');
+    }
 
-           
-            function saveCountdownTime() {
-                localStorage.setItem('countdownTime', countdownTime);
-            }
+ 
+    function clearCountdownTime() {
+        localStorage.removeItem('countdownTime');
+        localStorage.removeItem('timerExpired');
+    }
 
-           
-            function clearCountdownTime() {
-                localStorage.removeItem('countdownTime');
-            }
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
 
-         
-            function formatTime(seconds) {
-                const minutes = Math.floor(seconds / 60);
-                const secs = seconds % 60;
-                return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            }
+    function startCountdown() {
 
-         
-            function startCountdown() {
-                updateTimerDisplay();
-                 intervalId = setInterval(() => {
-                    countdownTime--;
-                    saveCountdownTime(); 
-                    updateTimerDisplay();
+        if (loadCountdownTime()) {
+            return; 
+        }
 
-                    if (countdownTime <= 0) {
-                        clearInterval(intervalId);
-                        clearCountdownTime(); 
-                        disableOtpInputs();
-                         displayTimerExpired();
-                    }
-                }, 1000);
-            }
-
-         
-            function updateTimerDisplay() {
-                    timerElement.innerHTML = formatTime(countdownTime) + ' Sec';
-                    const resendButton = document.getElementById('resendOtp');
-                    resendButton.style.pointerEvents = countdownTime > 0 ? 'none' : 'auto';
-                }
-
-            function displayTimerExpired() {
-                timerElement.style.color = 'red';
-                timerElement.innerHTML = 'Timer Expired';
-                timerElement.style.fontSize = "20px"
-                otpInputs.forEach(input => input.disabled = true);
-            }
-            function resetOtpInputs() {
-                otpInputs.forEach(input => {
-                    input.disabled = false; 
-                    input.value = '';
-                });
-                otpInputs[0].focus();
-            }
-
-
-            function disableOtpInputs() {
-                otpInputs.forEach(input => {
-                    input.disabled = true;
-                });
-            }
-
-     
-            function enableOtpInputs() {
-                otpInputs.forEach(input => {
-                    input.disabled = false;
-                });
-            }
-              const storedEmail = localStorage.getItem('currentEmail');
-                if (storedEmail !== currentEmail) {
-            
-                    localStorage.setItem('currentEmail', currentEmail);
-                    countdownTime = 120; 
-                    clearCountdownTime(); 
-                    startCountdown(countdownTime);
-                } else {
-                  
-                    loadCountdownTime();
-                    if (isNaN(countdownTime) || countdownTime <= 0) {
-                        countdownTime = 120; 
-                    }
-                    startCountdown(countdownTime); 
-                }
-
-
-         
-          
-            function moveToNext(current, nextFieldID) {
-                if (current.value.length === 1 && !isNaN(current.value)) {
-                    document.getElementById(nextFieldID).focus();
-                } else {
-                    current.value = ''; 
-                }
-            }
-
-         
-            function moveToPrev(current, prevFieldID, event) {
-                if (event.key === 'Backspace' && current.value.length === 0) {
-                    document.getElementById(prevFieldID).focus();
-                }
-            }
-
-          
-            otpInputs.forEach(input => {
-                input.addEventListener('input', (e) => {
-                    if (!/^\d*$/.test(e.target.value)) {
-                        e.target.value = '';  
-                    }
-                });
-            });
-
-         
-            verifyOtpButton.addEventListener('click', () => {
-                let otpCode = '';
-                otpInputs.forEach(input => otpCode += input.value);
-
-                if (otpCode.length === 6) {
-                    fetch('/verify-otp-forgot', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ otp: otpCode })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'OTP Verified',
-                                    text: 'Your OTP has been verified successfully.',
-                                    confirmButtonText: 'Continue',
-                                    customClass: {
-                                        popup: 'animated bounceIn'
-                                    }
-                                }).then(() => {
-                                  
-                                    window.location.href = '/reset-password';  
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Invalid OTP',
-                                    text: 'Please check the OTP and try again.',
-                                    customClass: {
-                                        popup: 'animated shake'
-                                    }
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'An error occurred while verifying the OTP. Please try again later.',
-                            });
-                        });
-                } else {
-                    Swal.fire('Please enter the full 6-digit OTP.');
-                }
-            });
-
-           resendButton.onclick = () => {
-                if (countdownTime > 0) return; 
-
-                countdownTime = 120; 
-                timerElement.style.color = 'gray';
-                timerElement.style.fontSize = "14px"; 
+        updateTimerDisplay();
+        intervalId = setInterval(() => {
+            if (countdownTime > 0) {
+                countdownTime--;
                 saveCountdownTime();
-                resetOtpInputs();
-                startCountdown(); 
+                updateTimerDisplay();
+            }
 
-             
-                fetch('/resend-otp-forgot', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email: sessionStorage.getItem('email') }) 
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                icon: 'info',
-                                title: 'OTP Resent',
-                                text: 'A new OTP has been sent to your email.',
-                                showConfirmButton: false,
-                                timer: 1500
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: data.message || 'Failed to resend OTP. Please try again.',
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
+            if (countdownTime === 0) {
+                clearInterval(intervalId);
+                displayTimerExpired();
+      
+                localStorage.setItem('timerExpired', 'true');
+            }
+        }, 1000);
+    }
+
+
+    function updateTimerDisplay() {
+        timerElement.innerHTML = formatTime(countdownTime) + ' Sec';
+        resendButton.style.pointerEvents = countdownTime > 0 ? 'none' : 'auto';
+    }
+
+    function displayTimerExpired() {
+        timerElement.style.color = 'red';
+        timerElement.innerHTML = 'Timer Expired';
+        timerElement.style.fontSize = "20px";
+        otpInputs.forEach(input => {
+            input.value = '';
+            input.disabled = true;
+        });
+        resendButton.style.pointerEvents = 'auto';
+    }
+
+    function resetOtpInputs() {
+        otpInputs.forEach(input => {
+            input.disabled = false;
+            input.value = '';
+        });
+        otpInputs[0].focus();
+    }
+
+    function moveToNext(current, nextFieldID) {
+        if (current.value.length === 1 && !isNaN(current.value)) {
+            document.getElementById(nextFieldID).focus();
+        } else {
+            current.value = ''; 
+        }
+    }
+
+    function moveToPrev(current, prevFieldID, event) {
+        if (event.key === 'Backspace' && current.value.length === 0) {
+            document.getElementById(prevFieldID).focus();
+        }
+    }
+
+    const storedEmail = localStorage.getItem('currentEmail');
+    if (storedEmail !== currentEmail) {
+        localStorage.setItem('currentEmail', currentEmail);
+        countdownTime = 120; 
+        clearCountdownTime();
+    }
+    startCountdown();
+
+    otpInputs.forEach(input => {
+        input.addEventListener('input', (e) => {
+            if (!/^\d*$/.test(e.target.value)) {
+                e.target.value = '';
+            }
+        });
+    });
+
+    verifyOtpButton.addEventListener('click', () => {
+        let otpCode = '';
+        otpInputs.forEach(input => otpCode += input.value);
+
+        if (otpCode.length === 6) {
+            fetch('/verify-otp-forgot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ otp: otpCode })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'OTP Verified',
+                            text: 'Your OTP has been verified successfully.',
+                            confirmButtonText: 'Continue',
+                            customClass: {
+                                popup: 'animated bounceIn'
+                            }
+                        }).then(() => {
+                            window.location.href = '/reset-password';
+                        });
+                    } else {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Error',
-                            text: 'An error occurred while resending the OTP. Please try again later.',
+                            title: 'Invalid OTP',
+                            text: 'Please check the OTP and try again.',
+                            customClass: {
+                                popup: 'animated shake'
+                            }
                         });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while verifying the OTP. Please try again later.',
                     });
-            };
-        </script>
+                });
+        } else {
+            Swal.fire('Please enter the full 6-digit OTP.');
+        }
+    });
+
+ 
+    resendButton.onclick = () => {
+        if (countdownTime > 0) return; 
+
+        countdownTime = 120; 
+        timerElement.style.color = 'gray';
+        timerElement.style.fontSize = "14px";
+        clearCountdownTime();
+        saveCountdownTime();
+        resetOtpInputs();
+        startCountdown();
+
+        fetch('/resend-otp-forgot', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: sessionStorage.getItem('email') })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'OTP Resent',
+                        text: 'A new OTP has been sent to your email.',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'Failed to resend OTP. Please try again.',
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while resending the OTP. Please try again later.',
+                });
+            });
+    };
+</script>
+
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
         <script>
@@ -380,7 +372,7 @@
 
                     cartLinks.forEach(link => {
                         link.addEventListener('click', (e) => {
-                            console.log('Cart link clicked');
+              
 
                            
                             e.stopPropagation();
@@ -407,13 +399,12 @@
 
                     if (data.blocked) {
 
-                        window.location.href = "/login"; // Redirect to the login page or home page
+                        window.location.href = "/login"; 
                     }
                 } catch (error) {
                     console.error("Error checking block status:", error);
                 }
             }
 
-            // Check every 30 seconds
             setInterval(checkUserBlockStatus, 2000);
         </script>

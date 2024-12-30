@@ -8,51 +8,12 @@ const Brand=require("../models/brandSchema")
 
 
 
-// const loadwalletpage = async (req, res) => {
-//   try {
-//     const userId = req.session.user;
-//     const userData = await User.findById(userId)
-//       .populate("cart")
-//       .populate("wishlist");
-//     const cartCount =
-//       userData.cart && userData.cart.length > 0
-//         ? userData.cart[0].items.length
-//         : 0; // Assuming cart is an array of carts
-//     const wishlistCount =
-//       userData.wishlist && userData.wishlist.length > 0
-//         ? userData.wishlist[0].items.length
-//         : 0; // Assuming wishlist is an array of wishlists
+//cod eto load wallet page
 
-//     const page = parseInt(req.query.page) || 1; // Default to page 1
-//     const limit = parseInt(req.query.limit) || 5; // Default limit of 5 per page
-//     const skip = (page - 1) * limit;
-
-//     const totalTransactions = await Transaction.countDocuments({ userId });
-//     const totalPages = Math.ceil(totalTransactions / limit);
-
-//     const transactions = await Transaction.find({ userId })
-//       .sort({ date: -1 })
-//       .skip(skip)
-//       .limit(limit);
-
-//     return res.render("wallet", {
-//       user: userData,
-//       transactions,
-//       currentPage: page,
-//       totalPages,
-//       cartCount,
-//       wishlistCount,
-//     });
-//   } catch (error) {
-//     console.log("Error loading wallet page", error);
-//     res.status(500).send("Server error");
-//   }
-// };
 const loadwalletpage = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    // Fetch all required data in parallel
     const [
       listedCategories,
       unblockedBrands,
@@ -94,7 +55,6 @@ const loadwalletpage = async (req, res) => {
         .limit(parseInt(req.query.limit) || 5),
     ]);
 
-    // Create Sets for efficient lookups
     const listedCategoryIds = new Set(
       listedCategories.map((cat) => cat._id.toString())
     );
@@ -102,7 +62,6 @@ const loadwalletpage = async (req, res) => {
       unblockedBrands.map((brand) => brand.brandName)
     );
 
-    // Comprehensive product validity check
     const isValidProduct = (product) => {
       return (
         product &&
@@ -112,25 +71,21 @@ const loadwalletpage = async (req, res) => {
       );
     };
 
-    // Calculate filtered cart count
     const cartCount = userData?.cart?.[0]?.items
       ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
           .length
       : 0;
 
-    // Calculate filtered wishlist count
     const wishlistCount = userData?.wishlist?.[0]?.items
       ? userData.wishlist[0].items.filter((item) =>
           isValidProduct(item.productId)
         ).length
       : 0;
 
-    // Pagination calculations
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
     const totalPages = Math.ceil(totalTransactions / limit);
 
-    // Prepare render data
     const renderData = {
       user: userData,
       transactions,
@@ -140,7 +95,6 @@ const loadwalletpage = async (req, res) => {
       wishlistCount,
     };
 
-    // Render the wallet page
     return res.render("wallet", renderData);
   } catch (error) {
     console.error("Error loading wallet page:", error);
@@ -154,6 +108,7 @@ const razorpay = new Razorpay({
 });
 
 //code to add money in wallet
+
 
 const addMoneyToWallet = async (req, res) => {
   try {
@@ -170,24 +125,16 @@ const addMoneyToWallet = async (req, res) => {
     if (!user) {
       return res
         .status(404)
-        .json({ success: false, message: "User  not found" });
+        .json({ success: false, message: "User not found" });
     }
 
     const options = {
-      amount: amount * 100, 
+      amount: amount * 100,
       currency: "INR",
       receipt: `receipt_${new Date().getTime()}`,
     };
 
     const order = await razorpay.orders.create(options);
-  
-    const transaction = new Transaction({
-      userId,
-      amount,
-      type: "credit", 
-      description: `Added money to wallet: `,
-    });
-    await transaction.save();
 
     return res.status(200).json({
       success: true,
@@ -200,6 +147,7 @@ const addMoneyToWallet = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 //cod eto wallet balance
 
@@ -226,9 +174,10 @@ const getWalletBalance = async (req, res) => {
 
 //cod e for confirm payment
 
+
 const confirmPayment = async (req, res) => {
   try {
-    const userId = req.session.user; 
+    const userId = req.session.user;
     const { orderId, paymentId, signature, amount } = req.body;
 
     if (!orderId || !paymentId || !signature || !amount) {
@@ -244,8 +193,7 @@ const confirmPayment = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-   
-    const body = orderId + "|" + paymentId; 
+    const body = orderId + "|" + paymentId;
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(body.toString())
@@ -257,9 +205,16 @@ const confirmPayment = async (req, res) => {
         .json({ success: false, message: "Invalid payment signature" });
     }
 
-   
-    user.wallet = (user.wallet || 0) + parseFloat(amount); 
+    user.wallet = (user.wallet || 0) + parseFloat(amount);
     await user.save();
+
+    const transaction = new Transaction({
+      userId,
+      amount,
+      type: "credit",
+      description: `Added money to wallet: `,
+    });
+    await transaction.save();
 
     return res.status(200).json({
       success: true,
@@ -274,7 +229,6 @@ const confirmPayment = async (req, res) => {
     });
   }
 };
-
 module.exports = {
   loadwalletpage,
   addMoneyToWallet,

@@ -5,14 +5,7 @@
            
         </div>
         <div class="card mb-4">
-            <!-- <header class="card-header">
-                <div class="row gx-3">
-                    <div class="col-lg-4 col-md-6 me-auto">
-                        <input type="text" placeholder="Search..." class="form-control">
-                    </div>
-                   
-                </div>
-            </header> card-header end// -->
+      
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-hover">
@@ -39,7 +32,7 @@
                                                         <span
                                                             style="color: white; font-weight: bold; font-size: 1.2em;">
                                                             <%= user.name ? user.name[0].toUpperCase() : '?' %>
-                                                                <!-- Display first letter of the name -->
+                                                               
                                                         </span>
                                                         <% } %>
                                             </div>
@@ -56,12 +49,12 @@
                                     <td>
                                         <span
                                             class="badge rounded-pill alert-<%= user.isBlocked ? 'danger' : 'success' %>">
-                                            <%= user.isBlocked ? 'Disabled' : 'Active' %> <!-- Check user status -->
+                                            <%= user.isBlocked ? 'Disabled' : 'Active' %>
                                         </span>
                                     </td>
                                     <td>
                                         <% if (user.createdOn) { %>
-                                            <%= user.createdOn.toLocaleDateString() %> <!-- Format created date -->
+                                            <%= user.createdOn.toLocaleDateString() %> 
                                                 <% } else { %>
                                                     N/A
                                                     <% } %>

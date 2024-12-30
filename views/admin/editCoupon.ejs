@@ -87,7 +87,7 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <script>
-            // Function to fetch coupon data and populate the form
+ 
             function populateCouponForm(couponId) {
                 fetch(`/admin/edit-coupon/${couponId}`)
                     .then(response => {
@@ -127,12 +127,12 @@
                 let isValid = true;
                 const errors = {};
 
-                // Clear all previous error messages
+       
                 document.querySelectorAll('.text-danger').forEach((span) => {
                     span.textContent = '';
                 });
 
-                // Get form values
+       
                 const couponCode = document.getElementById('coupon-code').value.trim();
                 const discountType = document.getElementById('discount-type').value;
                 const discountAmount = parseFloat(document.getElementById('discount-amount').value);
@@ -201,7 +201,7 @@
                     const errorElement = document.getElementById(`${fieldId}-error`);
                     if (errorElement) {
                         errorElement.textContent = errors[fieldId];
-                        // Add visual feedback to the input field
+                  
                         const inputElement = document.getElementById(fieldId);
                         if (inputElement) {
                             inputElement.classList.add('is-invalid');
@@ -209,7 +209,6 @@
                     }
                 });
 
-                // Remove invalid class from fields that are now valid
                 document.querySelectorAll('.form-control').forEach(input => {
                     if (!errors[input.id]) {
                         input.classList.remove('is-invalid');
@@ -220,7 +219,7 @@
                 return isValid;
             }
 
-            // Add input event listeners to all form fields for real-time validation
+       
             form.querySelectorAll('input, select, textarea').forEach(element => {
                 element.addEventListener('input', validateForm);
                 element.addEventListener('change', validateForm);
@@ -230,7 +229,6 @@
                 window.location.href = '/admin/coupon-management';
             }
 
-            // Form submit handler with AJAX
             form.addEventListener('submit', function (event) {
                 event.preventDefault();
 
@@ -285,6 +283,6 @@
                     });
             });
 
-            // Initial validation
+        
             validateForm();
         </script>

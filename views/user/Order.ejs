@@ -25,7 +25,7 @@
                                 </tr>
                             </thead>
                             <tbody id="modalItems">
-                                <!-- Dynamic rows will be inserted here -->
+
                             </tbody>
                         </table>
 
@@ -43,6 +43,10 @@
             <div class="modal-content p-4">
                 <h4>Cancel Item</h4>
                 <p><strong>Order ID:</strong> <span id="cancelOrderId"></span></p>
+                <p
+                style="margin-bottom: 20px;">*Note: Refund amounts may vary based on the cancellation of items in your order. Shipping costs are
+                    calculated
+                    proportionately, which may affect the total refund.</p>
                 <div class="d-flex align-items-start mb-3">
                     <img id="cancelProductImage" src="" alt="Product Image" class="me-3 rounded" width="100"
                         height="100">
@@ -148,56 +152,60 @@
                                                             || 0) * item.quantity %>
                                                     </p>
                                                 </div>
-                                            <div class="order-detail col-12 col-md-4">
-                                                <h4>Status</h4>
-                                                <span class="badge <%= item.badgeClass %> <%= item.orderStatus === 'Failed' ? 'text-danger bg-light' : '' %>">
-                                                    <%= item.orderStatus || 'Pending' %>
-                                                </span>
+                                                <div class="order-detail col-12 col-md-4">
+                                                    <h4>Status</h4>
+                                                    <span
+                                                        class="badge <%= item.badgeClass %> <%= item.orderStatus === 'Failed' ? 'text-danger bg-light' : '' %>">
+                                                        <%= item.orderStatus || 'Pending' %>
+                                                    </span>
+                                                </div>
                                             </div>
-                                            </div>
-                                            <hr> <!-- Optional: Add a horizontal line between items -->
+                                            <hr>
                                             <% }); %>
                                     </div>
                                     <button class="btn btn-dark btn-outline-secondary btn w-100 mb-1 view-order"
                                         style="font-size: smaller;">
                                         View <i class="bi bi-chevron-down ms-1"></i>
                                     </button>
-<% const allDelivered=order.items.every(item=> item.orderStatus === 'Delivered');
-    const anyFailed = order.paymentStatus === 'Failed' &&
-    order.items.some(item => item.orderStatus === 'Failed' && item.orderStatus !== 'canceled');
-    const paymentCompleted = order.paymentStatus === 'Completed';
-    %>
+                                    <% const allDelivered=order.items.every(item=> item.orderStatus === 'Delivered');
+                                        const anyFailed = order.paymentStatus === 'Failed' &&
+                                        order.items.some(item => item.orderStatus === 'Failed') &&
+                                        !order.items.some(item => item.orderStatus === 'canceled');
+                                        const paymentCompleted = order.paymentStatus === 'Completed';
+                                        %>
 
-    <% if (anyFailed) { %>
-        <button class="btn btn-primary btn w-100 mb-2 pay-now-btn" data-order-id="<%= order.orderNumber %>">
-            Retry Payment
-        </button>
-        <% } %>
+                                        <% if (anyFailed) { %>
+                                            <button class="btn btn-primary btn w-100 mb-2 pay-now-btn"
+                                                data-order-id="<%= order.orderNumber %>">
+                                                Retry Payment
+                                            </button>
+                                            <% } %>
 
-            <% if (allDelivered || paymentCompleted) { %>
-                <button class="btn btn-success btn w-100 mb-2 invoice-btn" data-order-id="<%= order.orderNumber %>">
-                    Download Invoice
-                </button>
-                <% } %>
+                                                <% if (allDelivered || paymentCompleted) { %>
+                                                    <button class="btn btn-success btn w-100 mb-2 invoice-btn"
+                                                        data-order-id="<%= order.orderNumber %>">
+                                                        Download Invoice
+                                                    </button>
+                                                    <% } %>
 
-                    <div class="order-summary">
-                        <div class="summary-row">
-                            <span>Subtotal:</span>
-                            <span>₹<%= order.subtotal || 0 %></span>
-                        </div>
-                        <div class="summary-row">
-                            <span>Discount :</span>
-                            <span>-₹<%= order.discount || 0 %></span>
-                        </div>
-                        <div class="summary-row">
-                            <span>Shipping:</span>
-                            <span>₹40</span>
-                        </div>
-                        <div class="summary-row">
-                            <span>Total:</span>
-                            <span>₹<%= order.grandTotal || 0 %></span>
-                        </div>
-                    </div>
+                                                        <div class="order-summary">
+                                                            <div class="summary-row">
+                                                                <span>Subtotal:</span>
+                                                                <span>₹<%= order.subtotal || 0 %></span>
+                                                            </div>
+                                                            <div class="summary-row">
+                                                                <span>Discount :</span>
+                                                                <span>-₹<%= order.discount || 0 %></span>
+                                                            </div>
+                                                            <div class="summary-row">
+                                                                <span>Shipping:</span>
+                                                                <span>₹40</span>
+                                                            </div>
+                                                            <div class="summary-row">
+                                                                <span>Total:</span>
+                                                                <span>₹<%= order.grandTotal || 0 %></span>
+                                                            </div>
+                                                        </div>
                                 </div>
                                 <% }); %>
                                     <% } else { %>
@@ -221,12 +229,9 @@
             </div>
         </div>
         <%- include("../../views/partials/user/footerprofile") %>
+
+
             <script>
-
-
-
-
-
                 document.querySelectorAll('.view-order').forEach(button => {
                     button.addEventListener('click', function () {
                         const orderItem = this.closest('.order-item');
@@ -239,9 +244,9 @@
                         const discount = orderItem.getAttribute('data-discount');
                         const shipping = 40;
                         const grandTotal = orderItem.getAttribute('data-grandtotal');
-                        const paymentStatus = orderItem.getAttribute('data-paymentStatus')
+                        const paymentStatus = orderItem.getAttribute('data-paymentStatus');
 
-                        // Set modal details
+
                         document.getElementById('modalOrderId').textContent = orderNumber;
                         document.getElementById('modalCustomer').textContent = customerName;
                         document.getElementById('modalDate').textContent = new Date(orderDate).toLocaleDateString();
@@ -249,9 +254,9 @@
                         document.getElementById('modalDiscount').textContent = discount;
                         document.getElementById('modalShipping').textContent = shipping;
                         document.getElementById('modalGrandTotal').textContent = grandTotal;
-                        document.getElementById('modalPaymentStatus').textContent = paymentStatus
+                        document.getElementById('modalPaymentStatus').textContent = paymentStatus;
 
-                        // Clear and populate modal items
+
                         const modalItems = document.getElementById('modalItems');
                         modalItems.innerHTML = '';
 
@@ -264,7 +269,7 @@
                             const itemPrice = (productId.salePrice || productId.regularPrice || 0) * item.quantity;
 
                             // Badge class helper
-                         const getBadgeClass = (status) => {
+                            const getBadgeClass = (status) => {
                                 const badgeClasses = {
                                     'Failed': 'bg-danger',
                                     'Delivered': 'bg-success',
@@ -277,78 +282,69 @@
                                     'Confirmed': 'bg-warning',
                                     'Canceled': 'bg-danger',
                                 };
-                                return badgeClasses[status] || ''; // Return an empty string for undefined statuses
+                                return badgeClasses[status] || '';
                             };
 
-                            // Action button helper
+
                             const getActionButton = (status) => {
                                 const commonAttributes = `
-            data-order-id="${orderNumber}" 
-            data-item-index="${index}" 
-            data-product-name="${productName}" 
-            data-product-image="${productImage}"
-            data-product-color="${variant.color || 'N/A'}"
-            data-product-size="${variant.size || 'N/A'}"
-            data-product-price="${itemPrice}"
-        `;
+                                    data-order-id="${orderNumber}" 
+                                    data-item-index="${index}" 
+                                    data-product-name="${productName}" 
+                                    data-product-image="${productImage}"
+                                    data-product-color="${variant.color || 'N/A'}"
+                                    data-product-size="${variant.size || 'N/A'}"
+                                    data-product-price="${itemPrice}"
+                                `;
 
-                             switch (status) {
+                                switch (status) {
                                     case 'Delivered':
-                                        return `
-        <button class="btn btn-warning btn-sm return-item" ${commonAttributes}>
-            Return
-        </button>`;
+                                        return `<button class="btn btn-warning btn-sm return-item" ${commonAttributes}>Return</button>`;
                                     case 'Return requested':
-                                        return `
-        <button class="btn btn-danger btn-sm cancel-return" ${commonAttributes}>
-            Cancel Return
-        </button>`;
+                                        return `<button class="btn btn-danger btn-sm cancel-return" ${commonAttributes}>Cancel Return</button>`;
                                     case 'Placed':
                                     case 'Confirmed':
-                                    case 'Failed': // New case added for 'Failed'
-                                        return `
-        <button class="btn btn-danger btn-sm cancel-item" ${commonAttributes}>
-            Cancel
-        </button>`;
+                                    case 'Failed':
+                                        return `<button class="btn btn-danger btn-sm cancel-item" ${commonAttributes}>Cancel</button>`;
                                     default:
                                         return '';
                                 }
                             };
 
-                            // Insert a new table row for each item
+
                             const row = `
-        <tr>
-            <td>
-                <div class="d-flex align-items-center">
-                    <img src="/uploads/product-image/${productImage}" 
-                         alt="${productName}" 
-                         class="me-3 rounded" 
-                         width="60" height="60">
-                    <div>
-                        <div class="fw-medium">${productName}</div>
-                        <div class="text-muted">Size: ${variant.size || 'N/A'}</div>
-                        <div class="text-muted">Color: ${variant.color || 'N/A'}</div>
-                    </div>
-                </div>
-            </td>
-            <td>${item.quantity}</td>
-            <td>₹${productId.salePrice || productId.regularPrice || 0}</td>
-            <td>₹${itemPrice}</td>
-            <td>
-                <span class="badge ${getBadgeClass(itemStatus)}">${itemStatus}</span>
-            </td>
-            <td>
-                ${getActionButton(itemStatus)}
-            </td>
-        </tr>
-    `;
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="/uploads/product-image/${productImage}" 
+                                                 alt="${productName}" 
+                                                 class="me-3 rounded" 
+                                                 width="60" height="60">
+                                            <div>
+                                                <div class="fw-medium">${productName}</div>
+                                                <div class="text-muted">Size: ${variant.size || 'N/A'}</div>
+                                                <div class="text-muted">Color: ${variant.color || 'N/A'}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>${item.quantity}</td>
+                                    <td>₹${productId.salePrice || productId.regularPrice || 0}</td>
+                                    <td>₹${itemPrice}</td>
+                                    <td>
+                                        <span class="badge ${getBadgeClass(itemStatus)}">${itemStatus}</span>
+                                    </td>
+                                    <td>
+                                        ${getActionButton(itemStatus)}
+             </td>
+                                </tr>
+                            `;
                             modalItems.innerHTML += row;
                         });
 
-                        // Show the modal
+
                         document.getElementById('orderModal').style.display = 'block';
 
-                        // Initialize action buttons
+
                         setupActionButtons();
                     });
                 });
@@ -356,6 +352,7 @@
                 function setupActionButtons() {
                     document.querySelectorAll('.cancel-return').forEach(button => {
                         button.addEventListener('click', function () {
+                            console.log('Cancel return button clicked');
                             const orderId = this.getAttribute('data-order-id');
                             const itemIndex = this.getAttribute('data-item-index');
                             const productName = this.getAttribute('data-product-name');
@@ -364,7 +361,7 @@
                             const productSize = this.getAttribute('data-product-size');
                             const productPrice = this.getAttribute('data-product-price');
 
-                            handleCancelReturnRequest(orderNumber, itemIndex, productName, productSize, productColor, productPrice);
+                            handleCancelReturnRequest(orderId, itemIndex, productName, productSize, productColor, productPrice);
                         });
                     });
 
@@ -378,7 +375,6 @@
                             const productSize = this.getAttribute('data-product-size');
                             const productPrice = this.getAttribute('data-product-price');
 
-
                             document.getElementById('cancelOrderId').textContent = orderNumber;
                             document.getElementById('cancelProductName').textContent = productName;
                             document.getElementById('cancelProductImage').src = `/uploads/product-image/${productImage || 'placeholder.jpg'}`;
@@ -386,9 +382,7 @@
                             document.getElementById('cancelProductSize').textContent = productSize || 'N/A';
                             document.getElementById('cancelProductPrice').textContent = productPrice;
 
-
                             document.getElementById('cancelModal').style.display = 'block';
-
 
                             const submitCancellationButton = document.getElementById('submitCancellation');
                             submitCancellationButton.onclick = function () {
@@ -404,7 +398,6 @@
                         });
                     });
 
-
                     document.querySelectorAll('.return-item').forEach(button => {
                         button.addEventListener('click', function () {
                             const orderNumber = this.getAttribute('data-order-id');
@@ -415,7 +408,6 @@
                             const productSize = this.getAttribute('data-product-size');
                             const productPrice = this.getAttribute('data-product-price');
 
-
                             document.getElementById('returnOrderId').textContent = orderNumber;
                             document.getElementById('returnProductName').textContent = productName;
                             document.getElementById('returnProductImage').src = `/uploads/product-image/${productImage || 'placeholder.jpg'}`;
@@ -423,12 +415,9 @@
                             document.getElementById('returnProductSize').textContent = productSize || 'N/A';
                             document.getElementById('returnProductPrice').textContent = productPrice;
 
-
                             document.getElementById('returnComment').value = '';
 
-
                             document.getElementById('returnModal').style.display = 'block';
-
 
                             const submitReturnButton = document.getElementById('submitReturn');
                             submitReturnButton.onclick = function () {
@@ -438,13 +427,15 @@
                                     productName,
                                     productSize,
                                     productColor,
-                                    productPrice);
+                                    productPrice
+                                );
                             };
                         });
                     });
                 }
 
                 function handleCancelReturnRequest(orderNumber, itemIndex, productName, productSize, productColor, productPrice) {
+                    console.log('Cancel return request initiated');
                     Swal.fire({
                         title: 'Are you sure?',
                         text: 'Do you really want to cancel this return request?',
@@ -466,7 +457,7 @@
                                 }
                             });
 
-                            // Send a request to your server to cancel the return request
+
                             const data = {
                                 orderNumber,
                                 itemIndex,
@@ -476,7 +467,7 @@
                                 productPrice
                             };
 
-                            fetch('/cancel-return-request', { // Update this URL to your actual endpoint
+                            fetch('/cancel-return-request', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -485,6 +476,7 @@
                             })
                                 .then(response => response.json())
                                 .then(data => {
+                                    console.log(data);
                                     if (data.success) {
                                         Swal.fire({
                                             icon: 'success',
@@ -492,7 +484,7 @@
                                             text: 'The return request has been successfully canceled.',
                                             confirmButtonText: 'OK'
                                         }).then(() => {
-                                            // Reload the page to reflect the changes
+
                                             location.reload();
                                         });
                                     } else {
@@ -516,6 +508,7 @@
                         }
                     });
                 }
+
                 function handleReturnSubmission(orderNumber, itemIndex, productName, productSize, productColor, productPrice) {
                     const comment = document.getElementById('returnComment').value.trim();
                     if (!comment) {
@@ -528,7 +521,6 @@
                         return;
                     }
 
-
                     Swal.fire({
                         title: 'Are you sure?',
                         text: 'Do you really want to submit this return request?',
@@ -540,7 +532,6 @@
                         cancelButtonText: 'No, keep it'
                     }).then((result) => {
                         if (result.isConfirmed) {
-
                             Swal.fire({
                                 title: 'Processing...',
                                 text: 'Please wait while we process your return request.',
@@ -551,7 +542,6 @@
                                 }
                             });
 
-
                             const data = {
                                 orderNumber,
                                 productName,
@@ -560,7 +550,6 @@
                                 productPrice,
                                 returnComment: comment,
                             };
-
 
                             fetch('/return-item', {
                                 method: 'POST',
@@ -578,26 +567,7 @@
                                             text: 'Your return request has been submitted successfully.',
                                             confirmButtonText: 'OK'
                                         }).then(() => {
-
                                             window.location.reload();
-                                        }).then(() => {
-
-                                            const returnButton = document.querySelector(`.return-item[data-order-id="${orderId}"][data-item-index="${itemIndex}"]`);
-                                            returnButton.innerText = 'Cancel Return';
-                                            returnButton.classList.remove('btn-warning');
-                                            returnButton.classList.add('btn-danger');
-                                            returnButton.disabled = false;
-
-
-                                            const statusBadge = returnButton.closest('.product-item').querySelector('.badge');
-                                            if (statusBadge) {
-                                                statusBadge.innerText = 'Return Requested';
-                                                statusBadge.classList.remove('bg-success');
-                                                statusBadge.classList.add('bg-warning');
-                                            }
-
-
-                                            closeModal('returnModal');
                                         });
                                     } else {
                                         Swal.fire({
@@ -624,7 +594,6 @@
                 function handleItemCancellation(orderNumber, itemIndex, productName, productSize, productColor, productPrice) {
                     const cancelComment = document.getElementById('cancelComment').value.trim();
 
-
                     if (!cancelComment) {
                         Swal.fire({
                             icon: 'warning',
@@ -634,7 +603,6 @@
                         });
                         return;
                     }
-
 
                     Swal.fire({
                         title: 'Are you sure?',
@@ -647,7 +615,6 @@
                         cancelButtonText: 'No, keep it'
                     }).then((result) => {
                         if (result.isConfirmed) {
-
                             Swal.fire({
                                 title: 'Processing...',
                                 text: 'Please wait while we cancel your item.',
@@ -658,7 +625,6 @@
                                 }
                             });
 
-
                             const data = {
                                 orderNumber,
                                 productName,
@@ -667,7 +633,6 @@
                                 productPrice,
                                 cancelComment
                             };
-
 
                             fetch('/cancel-item', {
                                 method: 'POST',
@@ -685,7 +650,6 @@
                                             text: 'The item has been successfully canceled.',
                                             confirmButtonText: 'OK'
                                         }).then(() => {
-
                                             window.location.reload();
                                         });
                                     } else {
@@ -707,7 +671,6 @@
                                     });
                                 });
                         } else {
-
                             Swal.fire({
                                 icon: 'info',
                                 title: 'Action Cancelled',
@@ -731,7 +694,6 @@
                         });
                     }
 
-
                     if (modalId === 'orderModal') {
                         document.getElementById('modalItems').innerHTML = '';
                     } else if (modalId === 'cancelModal') {
@@ -740,7 +702,6 @@
                         document.getElementById('returnComment').value = '';
                     }
                 }
-
 
                 window.onclick = function (event) {
                     const modals = document.querySelectorAll('.modal');
@@ -752,13 +713,12 @@
                 };
             </script>
             <script>
-              
+
                 document.querySelectorAll('.pay-now-btn').forEach(button => {
                     button.addEventListener('click', function () {
-                        const orderId = this.getAttribute('data-order-id'); 
-                        console.log("DEBUG: Pay Now Button Clicked for Order ID:", orderId);
+                        const orderId = this.getAttribute('data-order-id');
 
-                        // Fetch the order details to get the items
+
                         fetch(`/get-order-details/${orderId}`)
                             .then(response => {
                                 if (!response.ok) {
@@ -767,27 +727,23 @@
                                 return response.json();
                             })
                             .then(orderData => {
-                                const items = orderData.order.items; 
-                                console.log("DEBUG: Retrieved items from order:", items);
+                                const items = orderData.order.items;
 
-                        
+
                                 fetch('/retry-payment', {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json',
                                     },
-                                    body: JSON.stringify({ orderId }), 
+                                    body: JSON.stringify({ orderId }),
                                 })
                                     .then(response => {
-                                        console.log("DEBUG: Received response from /retry-payment:", response);
                                         if (!response.ok) {
-                                            console.error("DEBUG: Retry Payment API failed with status:", response.status);
                                             throw new Error(`Retry Payment API failed: ${response.statusText}`);
                                         }
                                         return response.json();
                                     })
                                     .then(data => {
-                                        console.log("DEBUG: Response data from /retry-payment:", data);
                                         if (data.success && data.orderId) {
                                             const options = {
                                                 key: data.key,
@@ -797,42 +753,37 @@
                                                 description: 'Retry Payment',
                                                 order_id: data.orderId,
                                                 handler: function (response) {
-                                                    console.log("DEBUG: Payment Successful - Razorpay Response:", response);
 
-                                              
+
                                                     fetch('/update-order-status', {
                                                         method: 'POST',
                                                         headers: {
                                                             'Content-Type': 'application/json',
                                                         },
                                                         body: JSON.stringify({
-                                                            orderNumber: data.orderNumber, 
+                                                            orderNumber: data.orderNumber,
                                                             paymentId: response.razorpay_payment_id,
-                                                            items: items 
+                                                            items: items
                                                         }),
                                                     })
                                                         .then(updateResponse => {
-                                                            console.log("DEBUG: Received response from /update-order-status:", updateResponse);
                                                             if (!updateResponse.ok) {
-                                                                console.error("DEBUG: Failed to update order status with status:", updateResponse.status);
                                                                 throw new Error(`Failed to update order status: ${updateResponse.statusText}`);
                                                             }
                                                             return updateResponse.json();
                                                         })
                                                         .then(updateData => {
-                                                            console.log("DEBUG: Order status updated successfully:", updateData);
-                                                            // Show success message and reload the page
+
                                                             Swal.fire({
                                                                 icon: 'success',
                                                                 title: 'Payment Successful',
                                                                 text: 'Your payment has been processed successfully.',
                                                                 confirmButtonText: 'OK'
                                                             }).then(() => {
-                                                                location.reload(); // Reload the page after the payment is successful
+                                                                location.reload();
                                                             });
                                                         })
                                                         .catch(error => {
-                                                            console.error("DEBUG: Error updating order status:", error);
                                                             Swal.fire({
                                                                 icon: 'error',
                                                                 title: 'Error',
@@ -842,9 +793,9 @@
                                                         });
                                                 },
                                                 prefill: {
-                                                    name: 'Customer Name', // Replace with actual customer name
-                                                    email: 'customer@example.com', // Replace with actual customer email
-                                                    contact: '1234567890' // Replace with actual customer contact
+                                                    name: 'Customer Name',
+                                                    email: 'customer@example.com',
+                                                    contact: '1234567890'
                                                 },
                                                 theme: {
                                                     color: '#F37254'
@@ -854,7 +805,7 @@
                                             const rzp1 = new Razorpay(options);
                                             rzp1.open();
                                         } else {
-                                            console.error("DEBUG: Payment initiation failed:", data);
+            
                                             Swal.fire({
                                                 icon: 'error',
                                                 title: 'Payment Failed',
@@ -864,7 +815,7 @@
                                         }
                                     })
                                     .catch(error => {
-                                        console.error("DEBUG: Error during payment process:", error);
+                              
                                         Swal.fire({
                                             icon: 'error',
                                             title: 'Error',
@@ -874,7 +825,7 @@
                                     });
                             })
                             .catch(error => {
-                                console.error("DEBUG: Error fetching order details:", error);
+                      
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Error',
@@ -898,14 +849,14 @@
 
                         if (data.blocked) {
 
-                            window.location.href = "/login"; // Redirect to the login page or home page
+                            window.location.href = "/login";
                         }
                     } catch (error) {
                         console.error("Error checking block status:", error);
                     }
                 }
 
-                // Check every 30 seconds
+
                 setInterval(checkUserBlockStatus, 2000);
             </script>
             <script>
@@ -916,7 +867,7 @@
                         button.addEventListener("click", () => {
                             const orderId = button.getAttribute("data-order-id");
                             if (orderId) {
-                                // Redirect to the backend route to download the invoice
+
                                 window.location.href = `/invoice/${orderId}`;
                             } else {
                                 alert("Order ID is missing!");
@@ -925,4 +876,3 @@
                     });
                 });
             </script>
-            

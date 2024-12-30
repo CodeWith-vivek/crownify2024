@@ -87,7 +87,7 @@ const paymentFailure = async (req, res) => {
   try {
     const order = await Order.findById(orderId);
     if (order) {
-      // Find the user to update their cart array
+  
       const user = await User.findById(order.userId);
       if (!user) {
         return res.status(404).json({
@@ -96,10 +96,8 @@ const paymentFailure = async (req, res) => {
         });
       }
 
-      // Find the cart to get its ID before deletion
       const cart = await Cart.findOne({ userId: order.userId });
 
-      // Update order status
       order.paymentStatus = "Failed";
       order.items.forEach((item) => {
         item.orderStatus = "Failed";
@@ -115,7 +113,7 @@ const paymentFailure = async (req, res) => {
       await order.save();
 
       if (cart) {
-        // Remove cart from user's cart array
+
         user.cart = user.cart.filter((cartId) => !cartId.equals(cart._id));
         await user.save();
       }

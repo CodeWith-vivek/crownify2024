@@ -8,104 +8,7 @@
     </div>
     <div class="card mb-4">
    
-        <!-- <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Order Number</th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Email</th>
-                            <th scope="col">Product</th>
-                            <th scope="col">Total</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Date</th>
-                            <th scope="col" class="text-end"></th>
-                            <th scope="col" class="text-start">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% orders.forEach((order)=> { %>
-                            <% order.items.forEach((item)=> { %>
-                                <tr>
-                                    <td>
-                                            <%= order.orderNumber || order._id.toString().substring(20, 24) %>
-                                    </td>
-                                    <td><b>
-                                            <%= order.userId.name %>
-                                        </b></td>
-                                    <td>
-                                        <%= order.userId.email %>
-                                    </td>
-                                    <td>
-                                        <img src="/uploads/product-image/<%= item.productImage %>" alt="Product"
-                                            style="width: 50px; height: 50px; border-radius: 5px;" />
-                                        <br>
-                                        <small><b>Product:</b>
-                                            <%= item.productName %>
-                                        </small><br>
-                                        <small><b>price:</b>
-                                            <%= item.salePrice || "N/A" %>
-                                        </small><br>
-                                        <small><b>Size:</b>
-                                            <%= item.variant.size || "N/A" %>
-                                        </small><br>
-                                        <small><b>Color:</b>
-                                            <%= item.variant.color || "N/A" %>
-                                        </small><br>
-                                        <small><b>Qty:</b>
-                                            <%= item.quantity || "N/A" %>
-                                        </small>
-                                    </td>
-                                    <td>₹<%= item.totalPrice %>
-                                    </td>
-                                    <td>
-                                        <span id="oldStatus" class="badge rounded-pill status-badge alert-<%= 
-                                            item.orderStatus === " Delivered" ? "success" : item.orderStatus==="Shipped" ? "info" :
-                                            item.orderStatus==="Returned" ? "danger" : item.orderStatus==="canceled" ? "secondary" : "warning" %>" >
-                                            <%= item.orderStatus %>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <%= new Date(order.orderedAt).toLocaleDateString() %>
-                                    </td>
-                                    <td class="text-end">
-                                     
-                                            <a href="/admin/orderDetails/<%= order._id %>?itemId=<%= item._id %>" class="btn btn-md rounded font-sm"> Details</a>
-                                          
-                                        
-                                    <td>
-                                        <div class="dropdown">
-                                            <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                                                data-bs-toggle="dropdown" aria-expanded="false">
-                                                Update Status
-                                            </a>
-                                            <div class="dropdown-menu">
-                                                <form id="statusForm" action="/admin/update-status" method="POST">
-                                                    <input type="hidden" name="orderId" value="<%= order._id %>" />
-                                                    <input type="hidden" name="productSize" value="<%= item.variant.size %>" />
-                                                    <input type="hidden" name="productColor" value="<%= item.variant.color %>" />
-                                    
-                                                <% if (item.orderStatus==="Placed" ) { %>
-                                                    <button type="submit" name="newStatus" value="Shipped" class="dropdown-item">Shipped</button>
-                                                    <% } else if (item.orderStatus==="Return requested" ) { %>
-                                                        <button type="submit" name="newStatus" value="Returned" class="dropdown-item">Returned</button>
-                                                        <% } else if (item.orderStatus==="Shipped" ) { %>
-                                                            <button type="submit" name="newStatus" value="Delivered" class="dropdown-item">Delivered</button>
-                                                            <% } %>
-                                                                  
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    </td>
-                                </tr>
-                                <% }); %>
-                                    <% }); %>
-                    </tbody>
-                </table>
-            </div>
-        </div> -->
+   
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover">
@@ -114,7 +17,7 @@
                             <th>Order Number</th>
                             <th scope="col">Name</th>
                             <th scope="col">Email</th>
-                            <th scope="col" class="product-detail-column">Product</th> <!-- Add a class here -->
+                            <th scope="col" class="product-detail-column">Product</th> 
                             <th scope="col">Total</th>
                             <th scope="col">Status</th>
                             <th scope="col">Date</th>
@@ -135,7 +38,7 @@
                                     <td>
                                         <%= order.userId.email %>
                                     </td>
-                                    <td class="product-detail-column"> <!-- Add a class here -->
+                                    <td class="product-detail-column"> 
                                         <img src="/uploads/product-image/<%= item.productImage %>" alt="Product"
                                             style="width: 50px; height: 50px; border-radius: 5px;" />
                                         <br>
@@ -353,7 +256,7 @@
                             });
                         }
                     } else {
-                        console.log('Status update canceled.');
+                     
                     }
                 });
             });

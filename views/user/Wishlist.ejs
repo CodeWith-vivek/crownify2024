@@ -129,16 +129,16 @@
             const stockStatus = item.querySelector('.stock-status');
             const productId = item.dataset.productId;
 
-            // Size dropdown change event
+      
             sizeDropdown.addEventListener('change', async (event) => {
                 const selectedSize = event.target.value;
 
-                // Reset color dropdown and add to cart button
+            
                 colorDropdown.innerHTML = '<option value="">Select Color</option>';
                 colorDropdown.disabled = true;
                 addToCartBtn.disabled = true;
 
-                // Reset stock status
+            
                 stockStatus.textContent = 'Select Size & Color';
                 stockStatus.className = 'stock-status';
 
@@ -149,7 +149,7 @@
                     const data = await response.json();
 
                     if (data.colors && data.colors.length > 0) {
-                        // Populate color dropdown
+                  
                         data.colors.forEach(variant => {
                             const option = document.createElement('option');
                             option.value = variant.color;
@@ -172,7 +172,7 @@
                 }
             });
 
-            // Color dropdown change event
+       
             colorDropdown.addEventListener('change', (event) => {
                 const selectedOption = event.target.selectedOptions[0];
                 const selectedColor = event.target.value;
@@ -196,7 +196,7 @@
                 }
             });
 
-            // Add to Cart Button Event
+          
             addToCartBtn.addEventListener('click', async () => {
                 const selectedSize = sizeDropdown.value;
                 const selectedColor = colorDropdown.value;
@@ -234,7 +234,7 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    // Remove item from wishlist
+                  
                     await removeFromWishlist(productId, itemRow);
 
                     Swal.fire({
@@ -244,7 +244,7 @@
                         showConfirmButton: false,
                         timer: 1500
                     }).then(() => {
-                        // Reload the page after closing the alert
+                     
                         location.reload();
                     });
 
@@ -255,7 +255,7 @@
                         title: 'Oops...',
                         text: result.message || 'Failed to add product to cart',
                     }).then(() => {
-                        // Reload the page after closing the alert
+                    
                         location.reload();
                     });
                 }
@@ -283,7 +283,7 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Remove the item row from the DOM
+                   
                     if (itemRow) itemRow.remove();
                 } else {
                     console.error('Failed to remove item from wishlist:', data.message);
@@ -315,7 +315,7 @@
                 button.addEventListener("click", async (event) => {
                     const productId = button.getAttribute("data-product-id");
 
-                    // SweetAlert confirmation dialog
+                 
                     Swal.fire({
                         title: "Are you sure?",
                         text: "You won't be able to revert this action!",
@@ -327,7 +327,7 @@
                     }).then(async (result) => {
                         if (result.isConfirmed) {
                             try {
-                                // Make the API call to remove the product
+                             
                                 const response = await fetch("/wishlist/remove", {
                                     method: "POST",
                                     headers: {
@@ -339,17 +339,17 @@
                                 const data = await response.json();
 
                                 if (response.ok) {
-                                    // Display success alert
+                                   
                                     Swal.fire(
                                         "Removed!",
                                         data.message || "Product removed from wishlist.",
                                         "success"
                                     ).then(() => {
-                                        // Reload the page after closing the alert
+                                      
                                         location.reload();
                                     });
                                 } else {
-                                    // Handle errors
+                                    
                                     Swal.fire(
                                         "Error",
                                         data.message || "Something went wrong. Please try again.",
@@ -376,8 +376,7 @@
 
             cartLinks.forEach(link => {
                 link.addEventListener('click', (e) => {
-                    console.log('Cart link clicked');
-
+             
 
                     e.stopPropagation();
 
@@ -403,13 +402,12 @@
 
                 if (data.blocked) {
 
-                    window.location.href = "/login"; // Redirect to the login page or home page
+                    window.location.href = "/login";
                 }
             } catch (error) {
                 console.error("Error checking block status:", error);
             }
         }
 
-        // Check every 30 seconds
         setInterval(checkUserBlockStatus, 2000);
     </script>

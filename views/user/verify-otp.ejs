@@ -93,7 +93,6 @@
         font-size: 14px;
         color: gray;
     }
-    
 </style>
 
 <%- include("../../views/partials/user/headerotpsignup") %>
@@ -105,16 +104,16 @@
                         <div class="text-wrap p-4 p-lg-5 d-flex img d-flex align-items-end"
                             style="background-image: url(assets/images/otpverification.webp);">
                             <div class="text w-100">
-                                <h2 class="mb-4">Welcome to signup form</h2>
-                                <p>Far far away, behind the word mountains, far from the countries Vokalia and
-                                    Consonantia, there live the blind texts.</p>
+                            <h2 class="mb-4">Verify Your Account</h2>
+                            <p style="color: white;">Enter the OTP sent to your registered email or phone to complete your signup and start shopping
+                                with Crownify!</p>
                             </div>
                         </div>
 
                         <div class="right-side justify-content-center"
                             style="background-image: url(assets/images/logindesign4.png); background-size: cover; background-position: center; background-repeat: no-repeat;">
                             <h2>OTP Verification</h2>
-                            <p>Enter the OTP sent to <strong>
+                            <p style="line-height: 1.6;">Enter the OTP sent to <strong>
                                     <%= userData.email %>
                                 </strong></p>
                             <div class="d-flex justify-content-center mb-3">
@@ -134,7 +133,7 @@
                             <input type="hidden" id="user-email" value="<%= userData.email %>">
 
                             <div class="timer-container">
-                                <div class="timer" id="timer">02:00 Sec</div>
+                                <div class="timer" id="timer" style="line-height: 1.6;">02:00 Sec</div>
                                 <div>Don't receive code? <span class="resend-link" id="resendOtp">Re-send</span></div>
                             </div>
 
@@ -155,11 +154,11 @@
             const resendButton = document.getElementById('resendOtp');
             const currentEmail = document.getElementById('user-email').value;
 
-            
+
             countdownTime = <%= countdownTime %>;
             let intervalId;
 
-          
+
             function loadCountdownTime() {
                 const savedTime = localStorage.getItem('countdownTime');
                 if (savedTime) {
@@ -167,12 +166,12 @@
                 }
             }
 
-           
+
             function saveCountdownTime() {
                 localStorage.setItem('countdownTime', countdownTime);
             }
 
-            
+
             function clearCountdownTime() {
                 localStorage.removeItem('countdownTime');
             }
@@ -200,7 +199,7 @@
                     if (countdownTime === 0) {
                         clearInterval(intervalId);
                         displayTimerExpired();
-                        
+
                     }
                 }, 1000);
             }
@@ -249,14 +248,14 @@
                 });
             });
 
-           
+
             loadCountdownTime();
-             if (countdownTime > 0) {
-        startCountdown(); 
-    } else {
-        displayTimerExpired();
-    }
-           
+            if (countdownTime > 0) {
+                startCountdown();
+            } else {
+                displayTimerExpired();
+            }
+
             verifyOtpButton.addEventListener('click', () => {
                 let otpCode = '';
                 otpInputs.forEach(input => otpCode += input.value);
@@ -270,7 +269,7 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                
+
                                 clearCountdownTime();
                                 sessionStorage.setItem('signupComplete', 'true');
 
@@ -314,7 +313,7 @@
                 }
             });
 
-            
+
             window.addEventListener('beforeunload', function () {
                 if (window.location.pathname === '/logout') {
                     sessionStorage.removeItem('signupComplete');
@@ -322,15 +321,15 @@
             });
 
 
-           
+
             resendButton.onclick = () => {
-                if (countdownTime > 0) return; 
-                countdownTime = 120; 
+                if (countdownTime > 0) return;
+                countdownTime = 120;
                 timerElement.style.color = 'gray';
                 timerElement.style.fontSize = "14px";
                 saveCountdownTime();
                 resetOtpInputs();
-                startCountdown(); 
+                startCountdown();
 
                 fetch('/resend-otp', {
                     method: 'POST',
@@ -366,29 +365,29 @@
                     });
             };
 
-            
+
         </script>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                    const cartLinks = document.querySelectorAll('.site-header__cart');
+                const cartLinks = document.querySelectorAll('.site-header__cart');
 
-                    cartLinks.forEach(link => {
-                        link.addEventListener('click', (e) => {
-                            console.log('Cart link clicked');
+                cartLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                    
 
-                           
-                            e.stopPropagation();
 
-                          
-                            window.location.href = '/cart';
+                        e.stopPropagation();
 
-                           
-                            e.preventDefault();
-                        });
+
+                        window.location.href = '/cart';
+
+
+                        e.preventDefault();
                     });
                 });
+            });
         </script>
         <script>
             async function checkUserBlockStatus() {
@@ -403,13 +402,13 @@
 
                     if (data.blocked) {
 
-                        window.location.href = "/login"; // Redirect to the login page or home page
+                        window.location.href = "/login"; 
                     }
                 } catch (error) {
                     console.error("Error checking block status:", error);
                 }
             }
 
-            // Check every 30 seconds
+        
             setInterval(checkUserBlockStatus, 2000);
         </script>

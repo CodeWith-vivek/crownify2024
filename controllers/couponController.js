@@ -140,7 +140,6 @@ const editCoupon = async (req, res) => {
 
   
    res.render("editCoupon", { coupon });
-   console.log("Coupon passed to view:", coupon);
  } catch (error) {
    console.error("Error fetching coupon:", error.message);
    res.status(500).send("Server error");

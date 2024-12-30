@@ -35,21 +35,21 @@
             <div class="col-lg-6 col-md-6">
                 <div class="contact__text">
                     <div class="section-title">
-                        <span>Information</span>
-                        <h2>Contact Us</h2>
-                        <p>As you might expect of a company that began as a high-end interiors contractor, we pay
-                            strict attention.</p>
+                    <span>Information</span>
+                    <h2>Contact Us</h2>
+                    <p>At Crownify, we’re dedicated to providing exceptional service and support. Reach out to us for any inquiries or
+                        assistance – we’re here to help!</p>
                     </div>
-                    <ul>
-                        <li>
-                            <h4>America</h4>
-                            <p>195 E Parker Square Dr, Parker, CO 801 <br />+43 982-314-0958</p>
-                        </li>
-                        <li>
-                            <h4>France</h4>
-                            <p>109 Avenue Léon, 63 Clermont-Ferrand <br />+12 345-423-9893</p>
-                        </li>
-                    </ul>
+                <ul>
+                    <li>
+                        <h4>Kochi</h4>
+                        <p>Maradu, Ernakulam, Kochi, Kerala 682016 <br />+91 974-635-1234</p>
+                    </li>
+                    <li>
+                        <h4>Thiruvananthapuram</h4>
+                        <p>Statue Junction, Palayam, Thiruvananthapuram, Kerala 695001 <br />+91 854-712-5678</p>
+                    </li>
+                </ul>
                 </div>
             </div>
             <div class="col-lg-6 col-md-6">
@@ -221,13 +221,33 @@
 
             if (data.blocked) {
 
-                window.location.href = "/login"; // Redirect to the login page or home page
+                window.location.href = "/login";
             }
         } catch (error) {
             console.error("Error checking block status:", error);
         }
     }
 
-    // Check every 30 seconds
+   
     setInterval(checkUserBlockStatus, 2000);
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const cartLinks = document.querySelectorAll('.site-header__cart');
+
+        cartLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+
+
+
+                e.stopPropagation();
+
+
+                window.location.href = '/cart';
+
+
+                e.preventDefault();
+            });
+        });
+    });
 </script>

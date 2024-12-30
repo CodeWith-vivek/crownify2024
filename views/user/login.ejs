@@ -8,15 +8,13 @@
                         <div class="text-wrap p-4 p-lg-5 d-flex img d-flex align-items-end"
                             style="background-image: url(assets/images/loginpic.webp);">
                             <div class="text w-100">
-                                <h2 class="mb-4">Welcome to Login page</h2>
-                                <p>Far far away, behind the word mountains, far from the countries Vokalia and
-                                    Consonantia,
-                                    there live the blind texts.</p>
+                            <h2 class="mb-4">Welcome Back to Crownify</h2>
+                            <p style="line-height: 1.6; color: white;">Log in to your account to continue exploring our exclusive headwear collection and personalized offers!</p>
                             </div>
                         </div>
 
                         <div class="login-wrap p-4 p-md-5"
-                            style="background-image: url(assets/images/logindesign4.png); background-size: cover; background-position: center; background-repeat: no-repeat;">
+                            style="background-image: url(assets/images/logindesign4.png); background-size: cover; background-position: center; background-repeat: no-repeat;line-height: 1.6;">
                             <h3 class="mb-3" style="font-weight: 600;">Login</h3>
                             <% if (messages.error) { %>
                                 <div style="color: red;">
@@ -237,7 +235,7 @@
 
                     cartLinks.forEach(link => {
                         link.addEventListener('click', (e) => {
-                            console.log('Cart link clicked');
+    
 
                         
                             e.stopPropagation();

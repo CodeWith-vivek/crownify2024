@@ -51,6 +51,13 @@
                             <h4>
                                 <%= product.productName %>
                             </h4>
+                            <p>
+                                <strong>
+                                    <%= product.brand %>
+                                </strong><br>
+                                
+                               
+                            </p>
 
                             <div class="rating">
                                 <% for (let i=0; i < 5; i++) { %>
@@ -171,20 +178,14 @@
                             <div class="product__item__pic set-bg"
                                 data-setbg="/uploads/product-image/<%= product.productImage[0] %>"
                                 data-hoverbg="/uploads/product-image/<%= product.productImage[1] %>">
-                                <!-- <span class="label">New</span> -->
-                                <!-- <ul class="product__hover">
-                                    <li><a href="#" onclick="event.preventDefault(); event.stopPropagation();"><img
-                                                src="/assets/usershop/img/icon/heart.png" alt=""></a></li>
-                                </ul> -->
+                              
                             </div>
                             <div class="product__item__text">
                                 <h6>
                                     <%= product.productName %>
                                 </h6>
 
-                                <!-- <a href="#" class="add-cart"
-                                    onclick="event.preventDefault(); event.stopPropagation(); handleAddToCart('<%= product._id %>')">+
-                                    Add To Cart</a> -->
+                              
                                 <div class="rating">
                                     <% for (let i=0; i < 5; i++) { %>
                                         <i class="fa <%= i < product.rating ? 'fa-star' : 'fa-star-o' %>"></i>
@@ -276,7 +277,7 @@
                     stockDisplay.textContent = 'Please select both size and color to see stock';
                     stockDisplay.style.color = 'gray';
                     const quantityInput = document.getElementById('quantityInput');
-                    quantityInput.value = 1; // Reset quantity to 1
+                    quantityInput.value = 1; 
                     updateAddToCartButton();
                     setTimeout(() => {
                         updateStockDisplay();
@@ -583,7 +584,7 @@
                         });
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            window.location.href = data.redirectTo; // Redirect to login
+                            window.location.href = data.redirectTo; 
                         }
                     });
             }
@@ -676,13 +677,13 @@
 
                 if (data.blocked) {
 
-                    window.location.href = "/login"; // Redirect to the login page or home page
+                    window.location.href = "/login"; 
                 }
             } catch (error) {
                 console.error("Error checking block status:", error);
             }
         }
 
-        // Check every 30 seconds
+       
         setInterval(checkUserBlockStatus, 2000);
     </script>

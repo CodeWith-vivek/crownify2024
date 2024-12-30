@@ -131,13 +131,13 @@ const loadCartPage = async (req, res) => {
       isCartEmpty = cartItems.length === 0;
     }
 
-    // Calculate subtotal and total
+
     subtotal = Math.floor(
       cartItems.reduce((total, item) => total + item.itemTotal, 0)
     );
     const total = Math.floor(subtotal + shippingCharge);
 
-    // Calculate filtered counts
+ 
     const cartCount = user?.cart?.[0]?.items
       ? user.cart[0].items.filter((item) => isValidProduct(item.productId))
           .length
@@ -162,7 +162,7 @@ const loadCartPage = async (req, res) => {
     });
   } catch (error) {
     console.error("Cart page error:", error.stack || error);
-    // Since the error view isn't found, let's send a basic error response
+ 
     res.status(500).send({
       message: "Error loading cart",
       error: error.toString(),
@@ -344,7 +344,6 @@ const deleteFromCart = async (req, res) => {
   try {
     const { productId, size, color } = req.body;
 
-    // Check if the user is logged in
     if (!req.session || !req.session.user) {
       return res.status(401).json({
         success: false,
@@ -352,7 +351,7 @@ const deleteFromCart = async (req, res) => {
       });
     }
 
-    // Find the user's cart
+ 
     const cart = await Cart.findOne({ userId: req.session.user });
     if (!cart) {
       return res.status(404).json({
@@ -361,7 +360,7 @@ const deleteFromCart = async (req, res) => {
       });
     }
 
-    // Find the index of the item to remove
+   
     const itemIndex = cart.items.findIndex(
       (item) =>
         item.productId.equals(productId) &&
@@ -369,7 +368,7 @@ const deleteFromCart = async (req, res) => {
         item.variant.color === color
     );
 
-    // Check if the item exists in the cart
+ 
     if (itemIndex === -1) {
       return res.status(404).json({
         success: false,
@@ -377,38 +376,35 @@ const deleteFromCart = async (req, res) => {
       });
     }
 
-    console.log("Cart items before removal:", cart.items);
 
-    // Remove the item from the cart
+
     cart.items.splice(itemIndex, 1);
-    console.log("Cart items after removal:", cart.items);
+  
 
-    // Recalculate the total price
+ 
     const updatedSubtotal = cart.items.reduce(
       (total, item) => total + item.totalPrice,
       0
     );
-    const shippingCharge = cart.cartSummary.shippingCharge; // Assuming this is fixed
-    const discount = cart.cartSummary.discount || 0; // Set to 0 if not defined
+    const shippingCharge = cart.cartSummary.shippingCharge;
+    const discount = cart.cartSummary.discount || 0; 
 
-    // Update the cart summary
+ 
     cart.cartSummary.subtotal = updatedSubtotal;
     cart.cartSummary.total = Math.floor(
       updatedSubtotal + shippingCharge - discount
     );
 
-    // Save the updated cart
+   
     const savedCart = await cart.save();
-    console.log("Saved cart:", savedCart);
-
-    // Check if the cart is now empty
+  
     if (cart.items.length === 0) {
-      // If the cart is empty, remove it from the user's cart array
+   
       await User.updateOne(
         { _id: req.session.user },
         { $pull: { cart: cart._id } }
       );
-      console.log("Cart removed from user's cart array");
+
     }
 
     return res.status(200).json({

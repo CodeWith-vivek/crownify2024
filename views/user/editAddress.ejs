@@ -15,7 +15,9 @@
                                 style="padding-right: 10px; font-size: small; padding-left: 10px;"> ></span>
                             <a href="/profile" style="color:rgb(108, 108, 108) ;">Account</a> <span
                                 style="padding-right: 10px; font-size: small; padding-left: 10px;"> ></span>
-                            <a href="/user/addAddress" style="color: rgb(109, 109, 109);">Add New Address</a>
+                            <a href="/Address" style="color:rgb(108, 108, 108) ;">User Address</a> <span
+                                style="padding-right: 10px; font-size: small; padding-left: 10px;"> ></span>
+                            <a href="#" style="color: rgb(109, 109, 109);">Edit Address</a>
 
                         </div>
                     </div>
@@ -33,13 +35,9 @@
 
 
                         <div class="login-wrap p-4 p-md-5"
-                            style="background-image: url(/assets/images/editAddress2.png); background-size: cover; background-position: center; background-repeat: no-repeat;">
+                            style="background-image: url(/assets/images/editAddress2.png); background-size: cover; background-position: center; background-repeat: no-repeat; line-height: 1.6;">
                             <h3 class="mb-3" style="font-weight: 600;">Edit Address</h3>
-                            <!-- <% if (messages.error) { %>
-                                <div style="color: red;">
-                                    <%= messages.error %>
-                                </div>
-                                <% } %> -->
+                       
 
 
                             <form method="post" action="/update-address/<%= address._id %>" class="signup-form"
@@ -189,10 +187,8 @@
                         <div class="text-wrap p-4 p-lg-5 d-flex img d-flex align-items-end"
                             style="background-image: url(/assets/images/guitarcat.webp);">
                             <div class="text w-100">
-                                <h2 class="mb-4">Welcome to Login page</h2>
-                                <p>Far far away, behind the word mountains, far from the countries Vokalia and
-                                    Consonantia,
-                                    there live the blind texts.</p>
+                                <h2 class="mb-4">Edit Your Address</h2>
+                                <p style="line-height: 1.6;color: white;">Update your delivery details to ensure smooth and accurate delivery of your Crownify orders.</p>
                             </div>
                         </div>
 
@@ -315,7 +311,7 @@
 
                 cartLinks.forEach(link => {
                     link.addEventListener('click', (e) => {
-                        console.log('Cart link clicked');
+
 
                  
                         e.stopPropagation();
@@ -342,13 +338,12 @@
 
                     if (data.blocked) {
 
-                        window.location.href = "/login"; // Redirect to the login page or home page
+                        window.location.href = "/login"; 
                     }
                 } catch (error) {
                     console.error("Error checking block status:", error);
                 }
             }
 
-            // Check every 30 seconds
             setInterval(checkUserBlockStatus, 2000);
         </script>

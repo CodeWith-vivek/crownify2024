@@ -107,14 +107,14 @@
         <!-- SweetAlert JS -->
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        
         <script>
-            const RAZORPAY_KEY_ID = '<%= process.env.RAZORPAY_KEY_ID %>'; // Use server-side templating if applicable
+            const RAZORPAY_KEY_ID = '<%= process.env.RAZORPAY_KEY_ID %>'; 
 
             document.getElementById('add-money-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
 
                 const amount = document.getElementById('amount').value;
-                console.log("Amount to add:", amount); // Debug log
 
                 if (amount <= 0) {
                     Swal.fire("Error", "Please enter a valid amount.", "error");
@@ -122,7 +122,7 @@
                 }
 
                 try {
-                    // Step 1: Create a Razorpay order
+                 
                     const response = await fetch('/wallet/add-money', {
                         method: 'POST',
                         headers: {
@@ -130,54 +130,73 @@
                         },
                         body: JSON.stringify({ amount }),
                     });
-                    console.log("Response status:", response.status); // Debug response status
-
                     const data = await response.json();
-                    console.log("Response from server:", data); // Debug log
 
                     if (data.success) {
-
                         const options = {
-                            key: RAZORPAY_KEY_ID, // Enter the Test API Key ID
-                            amount: data.amount * 100, // Amount in paise
+                            key: RAZORPAY_KEY_ID, 
+                            amount: data.amount * 100,
                             currency: 'INR',
                             name: 'Your Company Name',
                             description: 'Add to Wallet',
-                            order_id: data.orderId, // Use the order ID created in the backend
+                            order_id: data.orderId, 
                             handler: async function (response) {
-                                // Step 3: Confirm payment and update wallet
-                                const confirmResponse = await fetch('/confirm-payment', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                        userId: '<%= user._id %>', // Replace with actual user ID
-                                        orderId: response.razorpay_order_id,
-                                        paymentId: response.razorpay_payment_id,
-                                        signature: response.razorpay_signature, // Include the signature
-                                        amount: amount,
-                                    }),
-                                });
-
-                                const confirmData = await confirmResponse.json();
-                                console.log("Payment confirmation response:", confirmData); // Debug log
-
-                                if (confirmData.success) {
-                                    Swal.fire({
-                                        title: "Success",
-                                        text: confirmData.message,
-                                        icon: "success",
-                                    }).then(() => {
-                                        location.reload(); // Reload the page to update the wallet balance
+                              
+                                try {
+                                    const confirmResponse = await fetch('/confirm-payment', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                            userId: '<%= user._id %>', 
+                                            orderId: response.razorpay_order_id,
+                                            paymentId: response.razorpay_payment_id,
+                                            signature: response.razorpay_signature, 
+                                            amount: amount,
+                                        }),
                                     });
-                                } else {
+
+                                    const confirmData = await confirmResponse.json();
+
+                                    if (confirmData.success) {
+                                        Swal.fire({
+                                            title: "Success",
+                                            text: confirmData.message,
+                                            icon: "success",
+                                        }).then(() => {
+                                            location.reload(); 
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            title: "Error",
+                                            text: confirmData.message,
+                                            icon: "error",
+                                        });
+                                    }
+                                } catch (error) {
+                                    console.error("Error during payment confirmation:", error);
                                     Swal.fire({
-                                        title: "Error",
-                                        text: confirmData.message,
+                                        title: "Payment Confirmation Error",
+                                        text: "An error occurred while confirming the payment. Please try again.",
                                         icon: "error",
                                     });
                                 }
+                            },
+                            modal: {
+                                ondismiss: async function () {
+                                 
+                                    console.log("DEBUG: Razorpay modal dismissed.");
+                                }
+                            },
+                            // Add a failure handler for payment
+                            "payment.failed": async function (response) {
+                                console.error("Payment failed:", response.error);
+                                Swal.fire({
+                                    title: "Payment Failed",
+                                    text: response.error.description || "An unknown error occurred. Please try again.",
+                                    icon: "error",
+                                });
                             },
                             prefill: {
                                 name: 'Customer Name',
@@ -205,8 +224,6 @@
                     const response = await fetch('/wallet/balance');
                     const data = await response.json();
 
-                    console.log("Balance response:", data); // Debug log
-
                     if (data.success) {
                         document.querySelector('.balance').textContent = `₹${data.balance.toFixed(2)}`;
                     } else {
@@ -220,10 +237,7 @@
 
             function quickAdd(amount) {
                 const amountInput = document.getElementById("amount");
-                amountInput.value = amount; // Set the amount
-                console.log("Quick add amount set to:", amount); // Debug log
-
-                // Submit the form programmatically
+                amountInput.value = amount;       
                 document.getElementById("add-money-form").dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
             }
         </script>
@@ -237,7 +251,7 @@
 
                 cartLinks.forEach(link => {
                     link.addEventListener('click', (e) => {
-                        console.log('Cart link clicked');
+                       
 
 
                         e.stopPropagation();
@@ -264,13 +278,13 @@
 
                     if (data.blocked) {
 
-                        window.location.href = "/login"; // Redirect to the login page or home page
+                        window.location.href = "/login"; 
                     }
                 } catch (error) {
                     console.error("Error checking block status:", error);
                 }
             }
 
-            // Check every 30 seconds
+         
             setInterval(checkUserBlockStatus, 2000);
         </script>

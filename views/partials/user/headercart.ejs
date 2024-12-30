@@ -272,6 +272,32 @@
     transform: scale(1.1);
     transition: transform 0.2s ease;
 }
+
+.product-details-fixed {
+    width: 300px; /* Adjust the width as needed */
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden; /* Hide overflow content */
+    text-overflow: ellipsis; /* Add ellipsis for long text */
+}
+
+/* Style the image to ensure it stays within the fixed column */
+.product-details-fixed .product-image {
+    max-width: 60px; /* Set a fixed width for the image */
+    height: auto; /* Maintain aspect ratio */
+    margin-right: 8px; /* Add spacing between image and text */
+}
+
+/* Product info text inside the fixed column */
+.product-details-fixed .product-info {
+    display: inline-block;
+    vertical-align: middle;
+    max-width: calc(100% - 70px); /* Account for image width + margin */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
     </style>
 
 
@@ -374,28 +400,7 @@
                                     </ul>
                                 </li>
                                 <li class="lvl1 parent dropdown"><a href="/contact">Contact<i class="anm anm-angle-down-l"></i></a></li>
-                                <!-- <li class="lvl1 parent megamenu"><a href="#">Brand<i
-                                            class="anm anm-angle-down-l"></i></a>
-
-                                </li>
-                                <li class="lvl1 parent dropdown"><a href="#">Pages <i
-                                            class="anm anm-angle-down-l"></i></a>
-                                    <ul class="dropdown">
-
-                                        <li><a href="checkout.html" class="site-nav">Checkout</a></li>
-                                        <li><a href="about-us.html" class="site-nav">About Us <span
-                                                    class="lbl nm_label1">New</span> </a></li>
-                                        <li><a href="contact-us.html" class="site-nav">Contact Us</a></li>
-                                        <li><a href="faqs.html" class="site-nav">FAQs</a></li>
-
-                                        <li><a href="404.html" class="site-nav">404</a></li>
-                                        <li><a href="coming-soon.html" class="site-nav">Coming soon <span
-                                                    class="lbl nm_label1">New</span> </a></li>
-                                    </ul>
-                                </li>
-                                <li class="lvl1 parent dropdown"><a href="#">Contact<i
-                                            class="anm anm-angle-down-l"></i></a></li> -->
-
+                               
 
                             </ul>
                         </nav>
@@ -412,15 +417,7 @@
                     </div>
                     <!--Mobile Logo-->
                     <div class="col-4 col-sm-3 col-md-3 col-lg-2 d-flex align-items-center justify-content-end">
-                        <!-- Common Elements for all users -->
-                        <!-- <div class="site-header__search">
-                            <button type="button" class="search-trigger"><i class="icon anm anm-search-l"></i></button>
-                        </div>
-                        <div class="site-header__wishlist">
-                            <button type="button" class="wishlist-trigger">
-                                <i class="icon anm anm-heart-l"></i>
-                            </button>
-                        </div> -->
+                   
                         <div class="site-header__wishlist">
                         
                             <a href="/wishlist" class="wishlist-trigger" title="Cart">
