@@ -99,28 +99,46 @@ router.get(
   "/auth/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
-
-router.get("/auth/google/callback", (req, res, next) => {
-  passport.authenticate("google", async (err, user, info) => {
-    if (err) {
-      return next(err);
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", {
+    failureRedirect:
+      "/signup?error=Google account already exists. Please use a different account or log in.",
+  }),
+  async (req, res) => {
+    try {
+      req.session.user = req.user._id;
+      return res.redirect("/?success=Login successful!");
+    } catch (error) {
+      console.log("Error during Google login:", error);
+      return res.redirect(
+        "/login?error=Something went wrong. Please try again."
+      );
     }
-    if (!user) {
-      // Return JSON response for failed login
-      return res.json({
-        success: false,
-        message: info.message || "Authentication failed. Please try again.",
-      });
-    }
+  }
+);
 
-    // Successful login
-    req.session.user = user._id;
-    return res.json({
-      success: true,
-      message: "Login successful",
-    });
-  })(req, res, next);
-});
+// router.get("/auth/google/callback", (req, res, next) => {
+//   passport.authenticate("google", async (err, user, info) => {
+//     if (err) {
+//       return next(err);
+//     }
+//     if (!user) {
+//       // Return JSON response for failed login
+//       return res.json({
+//         success: false,
+//         message: info.message || "Authentication failed. Please try again.",
+//       });
+//     }
+
+//     // Successful login
+//     req.session.user = user._id;
+//     return res.json({
+//       success: true,
+//       message: "Login successful",
+//     });
+//   })(req, res, next);
+// });
 
 // router.get("/auth/google/callback", async (req, res, next) => {
 //   passport.authenticate("google", { failureRedirect: "/signup" })(
