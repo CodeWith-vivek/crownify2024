@@ -95,22 +95,17 @@ router.get(
 );
 router.post("/verify-otp", userController.verifyOtp);
 router.post("/resend-otp", userController.resendOtp);
-router.get(
-  "/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
+// router.get(
+//   "/auth/google",
+//   passport.authenticate("google", { scope: ["profile", "email"] })
+// );
+
 
 // router.get(
 //   "/auth/google/callback",
 //   passport.authenticate("google", {
-//     failureRedirect: (req, res) => {
-//       // Check if the source is 'login' and redirect accordingly
-//       const source = req.query.source;
-//       if (source === "login") {
-//         return "/login?error=Google account already exists. Please use a different account or log in.";
-//       }
-//       return "/signup?error=Google account already exists. Please use a different account or log in.";
-//     },
+//     failureRedirect:
+//       "/signup?error=Google account already exists. Please use a different account or log in.",
 //   }),
 //   async (req, res) => {
 //     try {
@@ -124,11 +119,17 @@ router.get(
 //     }
 //   }
 // );
+
 router.get(
-  "/auth/google/callback",
+  "/auth/google/login",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+router.get(
+  "/auth/google/login/callback",
   passport.authenticate("google", {
     failureRedirect:
-      "/signup?error=Google account already exists. Please use a different account or log in.",
+      "/login?error=No account found with this Google account. Please sign up first.",
   }),
   async (req, res) => {
     try {
@@ -143,122 +144,30 @@ router.get(
   }
 );
 
-// router.get("/auth/google/callback", (req, res, next) => {
-//   passport.authenticate("google", async (err, user, info) => {
-//     if (err) {
-//       return next(err);
-//     }
-//     if (!user) {
-//       // Return JSON response for failed login
-//       return res.json({
-//         success: false,
-//         message: info.message || "Authentication failed. Please try again.",
-//       });
-//     }
+// Signup route
+router.get(
+  "/auth/google/signup",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
 
-//     // Successful login
-//     req.session.user = user._id;
-//     return res.json({
-//       success: true,
-//       message: "Login successful",
-//     });
-//   })(req, res, next);
-// });
-
-// router.get("/auth/google/callback", async (req, res, next) => {
-//   passport.authenticate("google", { failureRedirect: "/signup" })(
-//     req,
-//     res,
-//     async (err) => {
-//       if (err || !req.user) {
-//         // If there is an error or user is not authenticated
-//         if (
-//           err &&
-//           err.message ===
-//             "This email is already associated with a local account. Please log in with that account."
-//         ) {
-//           return res.status(400).json({ success: false, message: err.message });
-//         }
-//         return res.redirect("/signup"); // Redirect to signup on general errors
-//       }
-
-//       try {
-//         req.session.user = req.user._id;
-//         return res.redirect("/"); // Redirect to the home page on successful login
-//       } catch (error) {
-//         console.log("Error during Google login:", error);
-//         return res
-//           .status(500)
-//           .json({
-//             success: false,
-//             message: "Something went wrong. Please try again.",
-//           });
-//       }
-//     }
-//   );
-// });
-
-// router.get(
-//   "/auth/google/callback",
-//   passport.authenticate("google", {
-//     failureRedirect: "/signup",
-//     failureFlash:
-//       "Google account already exists. Please use a different account or log in.",
-//   }),
-//   async (req, res) => {
-//     try {
-//       req.session.user = req.user._id;
-//       return res.redirect("/");
-//     } catch (error) {
-//       console.log("Error during Google login:", error);
-//       req.flash("error", "Something went wrong. Please try again.");
-//       return res.redirect("/login");
-//     }
-//   }
-// );
-
-// router.get(
-//   "/auth/google",
-//   passport.authenticate("google", { scope: ["profile", "email"] })
-// );
-
-// router.get(
-//   "/auth/google/callback",
-//   passport.authenticate("google", {
-//     failureRedirect: "/signup",
-//     failureMessage: true,
-//     failureFlash: true,
-//   }),
-//   async (req, res) => {
-//     try {
-//       // Check for existing user with email
-//       const existingUser = await User.findOne({ email: req.user.email });
-
-//       if (existingUser) {
-//         if (!existingUser.googleId) {
-//           // User exists but registered with normal signup
-//           return res.redirect("/signup?errorType=normal_signup");
-//         } else if (existingUser.googleId !== req.user.googleId) {
-//           // User exists with different Google account
-//           return res.redirect("/signup?errorType=google_exists");
-//         }
-//       }
-
-//       // If all checks pass, set up session and redirect
-//       req.session.user = {
-//         _id: req.user._id,
-//         name: req.user.name,
-//         email: req.user.email,
-      
-//       };
-
-//       return res.redirect("/?success=true");
-//     } catch (error) {
-//       console.log("Error during Google login:", error);
-//       return res.redirect("/signup?errorType=error");
-//     }
-//   }
-// );
+router.get(
+  "/auth/google/signup/callback",
+  passport.authenticate("google", {
+    failureRedirect:
+      "/signup?error=Google account already exists. Please use a different account or log in.",
+  }),
+  async (req, res) => {
+    try {
+      req.session.user = req.user._id;
+      return res.redirect("/?success=Signup successful!");
+    } catch (error) {
+      console.log("Error during Google signup:", error);
+      return res.redirect(
+        "/signup?error=Something went wrong. Please try again."
+      );
+    }
+  }
+);
 
 
 
