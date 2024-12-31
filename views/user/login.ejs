@@ -8,8 +8,9 @@
                         <div class="text-wrap p-4 p-lg-5 d-flex img d-flex align-items-end"
                             style="background-image: url(assets/images/loginpic.webp);">
                             <div class="text w-100">
-                            <h2 class="mb-4">Welcome Back to Crownify</h2>
-                            <p style="line-height: 1.6; color: white;">Log in to your account to continue exploring our exclusive headwear collection and personalized offers!</p>
+                                <h2 class="mb-4">Welcome Back to Crownify</h2>
+                                <p style="line-height: 1.6; color: white;">Log in to your account to continue exploring
+                                    our exclusive headwear collection and personalized offers!</p>
                             </div>
                         </div>
 
@@ -74,20 +75,22 @@
 
                                     </form>
                                     <div class="social-wrap">
-    <p class="or">
-        <span>or</span>
-    </p>
-  
-    <p class="mb-3 text-center">Sign in with Google</p>
-    <p class="social-media d-flex justify-content-center">
-        <a href="#" class="social-icon google d-flex align-items-center justify-content-center" id="googleSignInButton">
-            <span class="fa fa-google"></span>
-        </a>
-    </p>
-</div>
-<div class="w-100 text-center">
-    <p class="mt-4">Don't have an account? <a href="/signup">Sign up here</a></p>
-</div>
+                                        <p class="or">
+                                            <span>or</span>
+                                        </p>
+
+                                        <p class="mb-3 text-center">Sign in with Google</p>
+                                        <p class="social-media d-flex justify-content-center">
+                                            <a href="#"
+                                                class="social-icon google d-flex align-items-center justify-content-center"
+                                                id="googleSignInButton">
+                                                <span class="fa fa-google"></span>
+                                            </a>
+                                        </p>
+                                    </div>
+                                    <div class="w-100 text-center">
+                                        <p class="mt-4">Don't have an account? <a href="/signup">Sign up here</a></p>
+                                    </div>
                         </div>
 
                     </div>
@@ -139,12 +142,12 @@
 
             document.getElementById('signform').addEventListener('submit', function (event) {
                 event.preventDefault();
-              
+
                 emailValidateChecking();
                 passValidationChecking();
 
                 if (emailValid && passValid) {
-                  
+
                     const email = document.getElementById('email').value;
                     const password = document.getElementById('password').value;
 
@@ -162,9 +165,9 @@
                                     icon: 'success',
                                     title: 'Login Successful',
                                     text: 'You have successfully logged in.',
-                                    showConfirmButton: false, 
-                                    timer: 1000, 
-                                   
+                                    showConfirmButton: false,
+                                    timer: 1000,
+
                                 }).then(() => {
                                     window.location.href = data.redirectUrl;
                                 });
@@ -186,7 +189,7 @@
                             });
                         });
                 } else {
-                  
+
                     Swal.fire({
                         icon: 'warning',
                         title: 'Blank Input',
@@ -214,62 +217,94 @@
             });
         </script>
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-       
+
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                    const cartLinks = document.querySelectorAll('.site-header__cart');
+                const cartLinks = document.querySelectorAll('.site-header__cart');
 
-                    cartLinks.forEach(link => {
-                        link.addEventListener('click', (e) => {
-    
+                cartLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
 
-                        
-                            e.stopPropagation();
 
-                          
-                            window.location.href = '/cart';
 
-                           
-                            e.preventDefault();
-                        });
+                        e.stopPropagation();
+
+
+                        window.location.href = '/cart';
+
+
+                        e.preventDefault();
                     });
                 });
+            });
         </script>
-        <script>
+        <!-- <script>
             document.getElementById("googleSignInButton").addEventListener("click", function (event) {
-                event.preventDefault(); 
+                event.preventDefault();
 
-            
+
                 window.location.href = '/auth/google';
             });
 
-        
+
             window.onload = async function () {
-          
+
                 const urlParams = new URLSearchParams(window.location.search);
                 if (urlParams.has('error')) {
-                  
+
                     const errorMessage = urlParams.get('error');
-              
+
                     swal({
                         title: "Error",
                         text: errorMessage,
                         icon: "error",
-                       
+
                     });
                 }
 
-           
+
                 if (urlParams.has('success')) {
                     const successMessage = urlParams.get('success');
-                
+
                     swal({
                         title: "Success",
                         text: successMessage || "Login successful!",
                         icon: "success",
                         button: "Okay",
                     }).then(() => {
-                        window.location.href = '/'; 
+                        window.location.href = '/';
+                    });
+                }
+            };
+        </script> -->
+
+        <script>
+            document.getElementById("googleSignInButton").addEventListener("click", function (event) {
+                event.preventDefault();
+                // Add the from=login parameter when clicking from login page
+                window.location.href = '/auth/google?from=login';
+            });
+
+            window.onload = async function () {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('error')) {
+                    const errorMessage = urlParams.get('error');
+                    swal({
+                        title: "Error",
+                        text: errorMessage,
+                        icon: "error",
+                    });
+                }
+
+                if (urlParams.has('success')) {
+                    const successMessage = urlParams.get('success');
+                    swal({
+                        title: "Success",
+                        text: successMessage || "Login successful!",
+                        icon: "success",
+                        button: "Okay",
+                    }).then(() => {
+                        window.location.href = '/';
                     });
                 }
             };

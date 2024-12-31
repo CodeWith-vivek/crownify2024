@@ -500,7 +500,7 @@
         };
     </script> -->
 
-    <script>
+    <!-- <script>
         document.getElementById("googleSignInButton").addEventListener("click", function (event) {
             event.preventDefault(); // Prevent default anchor click behavior
 
@@ -535,6 +535,38 @@
                     button: "Okay",
                 }).then(() => {
                     window.location.href = '/'; // Redirect to home after acknowledging
+                });
+            }
+        };
+    </script> -->
+
+    <script>
+        document.getElementById("googleSignInButton").addEventListener("click", function (event) {
+            event.preventDefault();
+            // Add the from=signup parameter when clicking from signup page
+            window.location.href = '/auth/google?from=signup';
+        });
+
+        window.onload = async function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('error')) {
+                const errorMessage = urlParams.get('error');
+                swal({
+                    title: "Error",
+                    text: errorMessage,
+                    icon: "error",
+                });
+            }
+
+            if (urlParams.has('success')) {
+                const successMessage = urlParams.get('success');
+                swal({
+                    title: "Success",
+                    text: successMessage || "Sign up successful!",
+                    icon: "success",
+                    button: "Okay",
+                }).then(() => {
+                    window.location.href = '/';
                 });
             }
         };

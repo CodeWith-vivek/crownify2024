@@ -95,26 +95,64 @@ router.get(
 );
 router.post("/verify-otp", userController.verifyOtp);
 router.post("/resend-otp", userController.resendOtp);
-router.get(
-  "/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
+// router.get(
+//   "/auth/google",
+//   passport.authenticate("google", { scope: ["profile", "email"] })
+// );
 
 
+// router.get(
+//   "/auth/google/callback",
+//   passport.authenticate("google", {
+//     failureRedirect:
+//       "/signup?error=Google account already exists. Please use a different account or log in.",
+//   }),
+//   async (req, res) => {
+//     try {
+//       req.session.user = req.user._id;
+//       return res.redirect("/?success=Login successful!");
+//     } catch (error) {
+//       console.log("Error during Google login:", error);
+//       return res.redirect(
+//         "/login?error=Something went wrong. Please try again."
+//       );
+//     }
+//   }
+// );
+
+router.get("/auth/google", (req, res, next) => {
+  // Store which page (login/signup) the request came from
+  req.session.authOrigin = req.query.from || "signup";
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })(req, res, next);
+});
+
+// Handle the callback with different redirects based on origin
 router.get(
   "/auth/google/callback",
-  passport.authenticate("google", {
-    failureRedirect:
-      "/signup?error=Google account already exists. Please use a different account or log in.",
-  }),
+  (req, res, next) => {
+    passport.authenticate("google", {
+      failureRedirect:
+        req.session.authOrigin === "login"
+          ? "/login?error=This email is already associated with a local account. Please log in with that account."
+          : "/signup?error=This email is already associated with a local account. Please log in with that account.",
+    })(req, res, next);
+  },
   async (req, res) => {
     try {
       req.session.user = req.user._id;
+      // Clear the stored origin
+      delete req.session.authOrigin;
       return res.redirect("/?success=Login successful!");
     } catch (error) {
-      console.log("Error during Google login:", error);
+      console.log("Error during Google authentication:", error);
+      // If error occurs, redirect based on stored origin
+      const errorPath =
+        req.session.authOrigin === "login" ? "/login" : "/signup";
+      delete req.session.authOrigin;
       return res.redirect(
-        "/login?error=Something went wrong. Please try again."
+        `${errorPath}?error=Something went wrong. Please try again.`
       );
     }
   }
