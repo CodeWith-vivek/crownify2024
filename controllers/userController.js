@@ -813,6 +813,63 @@ const loadLogin = async (req, res) => {
 
 //code to login user
 
+// const login = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     const existingUser = await User.findOne({ email });
+
+//     if (!existingUser) {
+//       return res.json({
+//         success: false,
+//         message: "User not registered",
+//       });
+//     }
+
+//     if (existingUser.isBlocked) {
+//       return res.json({
+//         success: false,
+//         message: "User is blocked by admin",
+//       });
+//     }
+
+//     const passwordMatch = await bcrypt.compare(password, existingUser.password);
+
+//     if (!passwordMatch) {
+//       return res.json({
+//         success: false,
+//         message: "Password Incorrect",
+//       });
+//     }
+
+//     const sixMonthsAgo = new Date();
+//     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+//     existingUser.status =
+//       existingUser.lastLogin >= sixMonthsAgo ? "Active" : "Inactive";
+//     await existingUser.save();
+
+//     req.session.user = existingUser._id;
+//     req.session.isLoggedIn = true;
+//     req.session.userOtp = null;
+//     req.session.email = null;
+//     req.session.countdownTime = null;
+
+//     return res.json({
+//       success: true,
+//       message: "Login Successful",
+//       redirectUrl: "/",
+//     });
+//   } catch (error) {
+//     console.error("Login error:", error);
+//     return res.json({
+//       success: false,
+//       message: "An error occurred during login",
+//     });
+//   }
+// };
+
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -830,6 +887,15 @@ const login = async (req, res) => {
       return res.json({
         success: false,
         message: "User is blocked by admin",
+      });
+    }
+
+    // Check if the user has logged in with Google
+    if (existingUser.googleId) {
+      return res.json({
+        success: false,
+        message:
+          "This email is associated with a Google account. Please log in using Google.",
       });
     }
 

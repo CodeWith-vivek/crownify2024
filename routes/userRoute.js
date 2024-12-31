@@ -100,24 +100,124 @@ router.get(
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-router.get(
-  "/auth/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "/signup",
-    failureFlash:
-      "Google account already exists. Please use a different account or log in.",
-  }),
-  async (req, res) => {
-    try {
-      req.session.user = req.user._id;
-      return res.redirect("/");
-    } catch (error) {
-      console.log("Error during Google login:", error);
-      req.flash("error", "Something went wrong. Please try again.");
-      return res.redirect("/login");
+router.get("/auth/google/callback", (req, res, next) => {
+  passport.authenticate("google", async (err, user, info) => {
+    if (err) {
+      return next(err);
     }
-  }
-);
+    if (!user) {
+      // Return JSON response for failed login
+      return res.json({
+        success: false,
+        message: info.message || "Authentication failed. Please try again.",
+      });
+    }
+
+    // Successful login
+    req.session.user = user._id;
+    return res.json({
+      success: true,
+      message: "Login successful",
+    });
+  })(req, res, next);
+});
+
+// router.get("/auth/google/callback", async (req, res, next) => {
+//   passport.authenticate("google", { failureRedirect: "/signup" })(
+//     req,
+//     res,
+//     async (err) => {
+//       if (err || !req.user) {
+//         // If there is an error or user is not authenticated
+//         if (
+//           err &&
+//           err.message ===
+//             "This email is already associated with a local account. Please log in with that account."
+//         ) {
+//           return res.status(400).json({ success: false, message: err.message });
+//         }
+//         return res.redirect("/signup"); // Redirect to signup on general errors
+//       }
+
+//       try {
+//         req.session.user = req.user._id;
+//         return res.redirect("/"); // Redirect to the home page on successful login
+//       } catch (error) {
+//         console.log("Error during Google login:", error);
+//         return res
+//           .status(500)
+//           .json({
+//             success: false,
+//             message: "Something went wrong. Please try again.",
+//           });
+//       }
+//     }
+//   );
+// });
+
+// router.get(
+//   "/auth/google/callback",
+//   passport.authenticate("google", {
+//     failureRedirect: "/signup",
+//     failureFlash:
+//       "Google account already exists. Please use a different account or log in.",
+//   }),
+//   async (req, res) => {
+//     try {
+//       req.session.user = req.user._id;
+//       return res.redirect("/");
+//     } catch (error) {
+//       console.log("Error during Google login:", error);
+//       req.flash("error", "Something went wrong. Please try again.");
+//       return res.redirect("/login");
+//     }
+//   }
+// );
+
+// router.get(
+//   "/auth/google",
+//   passport.authenticate("google", { scope: ["profile", "email"] })
+// );
+
+// router.get(
+//   "/auth/google/callback",
+//   passport.authenticate("google", {
+//     failureRedirect: "/signup",
+//     failureMessage: true,
+//     failureFlash: true,
+//   }),
+//   async (req, res) => {
+//     try {
+//       // Check for existing user with email
+//       const existingUser = await User.findOne({ email: req.user.email });
+
+//       if (existingUser) {
+//         if (!existingUser.googleId) {
+//           // User exists but registered with normal signup
+//           return res.redirect("/signup?errorType=normal_signup");
+//         } else if (existingUser.googleId !== req.user.googleId) {
+//           // User exists with different Google account
+//           return res.redirect("/signup?errorType=google_exists");
+//         }
+//       }
+
+//       // If all checks pass, set up session and redirect
+//       req.session.user = {
+//         _id: req.user._id,
+//         name: req.user.name,
+//         email: req.user.email,
+      
+//       };
+
+//       return res.redirect("/?success=true");
+//     } catch (error) {
+//       console.log("Error during Google login:", error);
+//       return res.redirect("/signup?errorType=error");
+//     }
+//   }
+// );
+
+
 
 //user login managing
 
