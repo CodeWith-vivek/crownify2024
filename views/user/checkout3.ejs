@@ -79,10 +79,14 @@
                                         <% }); %>
                                             <% } %>
                                                 <!-- Common Add Address Button -->
-                                                <a class="btn btn-primary"
-                                                    style="width: 150px; background-color: black; margin-left: 20px; color: rgb(251, 251, 251);"
-                                                    data-bs-toggle="modal" data-bs-target="#addressModal">Add
-                                                    Address</a>
+                                           
+                                                    <% if (addresses.length < 4) { %>
+                                                        <a class="btn btn-primary"
+                                                            style="width: 150px; background-color: black; margin-left: 20px; color: rgb(251, 251, 251);"
+                                                            data-bs-toggle="modal" data-bs-target="#addressModal">
+                                                            Add Address
+                                                        </a>
+                                                        <% } %>
                         </div>
                         <div class="col-lg-5 col-md-7">
                             <div style="    margin-left: 20px;
@@ -91,12 +95,23 @@
                                                                                             padding-bottom: 28px;">
                                 <div class="cart__discount" style="margin-bottom: 20px;">
                                     <h6>Discount codes</h6>
-                                    <form id="couponForm" class="form-stacked">
+                                    <!-- <form id="couponForm" class="form-stacked">
                                         <input type="text" placeholder="Coupon code" id="couponCodeInput">
                                         <button type="button" id="applyCouponButton"
                                             style="font-size: 14px; margin-top: 15px; color: #ffffff; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: #111111; padding: 0 30px; width: 100%; border: none; height: 50px;">Apply</button>
                                         <button type="button" id="removeCouponButton"
                                             style="font-size: 14px; margin-top: 15px; color: #ffffff; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: #111111; padding: 0 30px; border: none; height: 50px; width: 100%;">Remove</button>
+                                    </form> -->
+                                    <form id="couponForm" class="form-stacked">
+                                        <input type="text" placeholder="Coupon code" id="couponCodeInput">
+                                        <button type="button" id="applyCouponButton"
+                                            style="font-size: 14px; margin-top: 15px; color: #ffffff; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: #111111; padding: 0 30px; width: 100%; border: none; height: 50px;">
+                                            Apply
+                                        </button>
+                                        <button type="button" id="removeCouponButton" disabled
+                                            style="font-size: 14px; margin-top: 15px; color: #ffffff; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: #111111; padding: 0 30px; border: none; height: 50px; width: 100%;">
+                                            Remove
+                                        </button>
                                     </form>
                                 </div>
 
@@ -1593,5 +1608,36 @@
                         console.error("Fetch Error:", error);
                     });
             }
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                    const couponCodeInput = document.getElementById('couponCodeInput');
+                    const applyCouponButton = document.getElementById('applyCouponButton');
+                    const removeCouponButton = document.getElementById('removeCouponButton');
+
+                    
+                    removeCouponButton.disabled = true;
+
+                
+                    applyCouponButton.addEventListener('click', () => {
+                        if (couponCodeInput.value.trim() !== '') {
+                            removeCouponButton.disabled = false;
+                        } else {
+                            alert('Please enter a coupon code to apply.');
+                        }
+                    });
+
+                    removeCouponButton.addEventListener('click', () => {
+                        couponCodeInput.value = ''; 
+                        removeCouponButton.disabled = true; 
+                    });
+
+               
+                    couponCodeInput.addEventListener('input', () => {
+                        if (couponCodeInput.value.trim() === '') {
+                            removeCouponButton.disabled = true;
+                        }
+                    });
+                });
         </script>
         
