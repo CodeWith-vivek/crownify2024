@@ -77,11 +77,17 @@
     <p class="or">
         <span>or</span>
     </p>
-    <p class="mb-3 text-center">Sign in with this Google</p>
+    <!-- <p class="mb-3 text-center">Sign in with this Google</p>
     <p class="social-media d-flex justify-content-center">
         <a href="/auth/google" class="social-icon google d-flex align-items-center justify-content-center"
             onclick="showLoginAlert(event)">
             <span class="fa fa-google"></span>
+        </a>
+    </p> -->
+    <p class="mb-3 text-center">Sign in with Google</p>
+    <p class="social-media d-flex justify-content-center">
+        <a href="#" class="social-icon google d-flex align-items-center justify-content-center" id="googleSignInButton">
+            <span class="fab fa-google"></span>
         </a>
     </p>
 </div>
@@ -214,21 +220,7 @@
             });
         </script>
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-        <script>
-            function showLoginAlert(event) {
-                event.preventDefault(); 
-                swal({
-                    title: "Logging In",
-                    text: "Successfully logging  in using with Google.",
-                    icon: "success",
-                    buttons: false,
-                    timer: 1200,
-                }).then(() => {
-                   
-                    window.location.href = "/auth/google";
-                });
-            }
-        </script>
+       
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                     const cartLinks = document.querySelectorAll('.site-header__cart');
@@ -248,4 +240,43 @@
                         });
                     });
                 });
+        </script>
+        <script>
+            document.getElementById("googleSignInButton").addEventListener("click", function (event) {
+                event.preventDefault(); // Prevent default anchor click behavior
+
+                // Redirect to Google authentication page
+                window.location.href = '/auth/google';
+            });
+
+            // If you want to handle responses after the redirect from Google
+            window.onload = async function () {
+                // Check if there is an error in the URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('error')) {
+                    // Get the error message from the URL parameters
+                    const errorMessage = urlParams.get('error');
+                    // Show SweetAlert for specific error messages
+                    swal({
+                        title: "Error",
+                        text: errorMessage,
+                        icon: "error",
+                       
+                    });
+                }
+
+                // Check if we received a response from Google authentication
+                if (urlParams.has('success')) {
+                    const successMessage = urlParams.get('success');
+                    // Handle successful login with a SweetAlert message (if needed)
+                    swal({
+                        title: "Success",
+                        text: successMessage || "Login successful!",
+                        icon: "success",
+                        button: "Okay",
+                    }).then(() => {
+                        window.location.href = '/'; // Redirect to home after acknowledging
+                    });
+                }
+            };
         </script>
