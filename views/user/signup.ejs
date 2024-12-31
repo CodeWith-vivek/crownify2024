@@ -358,7 +358,12 @@
                         title: 'swal-title',
                         content: 'swal-content',
                         confirmButton: 'swal-button'
-                    }
+                    },
+                     allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: false  
+                }).then(() => {
+                    window.location.href = '/signup';
                 });
             }
 
