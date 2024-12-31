@@ -238,50 +238,12 @@
                 });
             });
         </script>
-        <!-- <script>
-            document.getElementById("googleSignInButton").addEventListener("click", function (event) {
-                event.preventDefault();
-
-
-                window.location.href = '/auth/google';
-            });
-
-
-            window.onload = async function () {
-
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.has('error')) {
-
-                    const errorMessage = urlParams.get('error');
-
-                    swal({
-                        title: "Error",
-                        text: errorMessage,
-                        icon: "error",
-
-                    });
-                }
-
-
-                if (urlParams.has('success')) {
-                    const successMessage = urlParams.get('success');
-
-                    swal({
-                        title: "Success",
-                        text: successMessage || "Login successful!",
-                        icon: "success",
-                        button: "Okay",
-                    }).then(() => {
-                        window.location.href = '/';
-                    });
-                }
-            };
-        </script> -->
+    
 
         <script>
             document.getElementById("googleSignInButton").addEventListener("click", function (event) {
                 event.preventDefault();
-                // Add the from=login parameter when clicking from login page
+ 
                 window.location.href = '/auth/google?from=login';
             });
 
