@@ -100,35 +100,17 @@ router.get(
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-router.get(
-  "/auth/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: (req, res) => {
-      // Check if the source is 'login' and redirect accordingly
-      const source = req.query.source;
-      if (source === "login") {
-        return "/login?error=Google account already exists. Please use a different account or log in.";
-      }
-      return "/signup?error=Google account already exists. Please use a different account or log in.";
-    },
-  }),
-  async (req, res) => {
-    try {
-      req.session.user = req.user._id;
-      return res.redirect("/?success=Login successful!");
-    } catch (error) {
-      console.log("Error during Google login:", error);
-      return res.redirect(
-        "/login?error=Something went wrong. Please try again."
-      );
-    }
-  }
-);
 // router.get(
 //   "/auth/google/callback",
 //   passport.authenticate("google", {
-//     failureRedirect:
-//       "/signup?error=Google account already exists. Please use a different account or log in.",
+//     failureRedirect: (req, res) => {
+//       // Check if the source is 'login' and redirect accordingly
+//       const source = req.query.source;
+//       if (source === "login") {
+//         return "/login?error=Google account already exists. Please use a different account or log in.";
+//       }
+//       return "/signup?error=Google account already exists. Please use a different account or log in.";
+//     },
 //   }),
 //   async (req, res) => {
 //     try {
@@ -142,6 +124,24 @@ router.get(
 //     }
 //   }
 // );
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", {
+    failureRedirect:
+      "/signup?error=Google account already exists. Please use a different account or log in.",
+  }),
+  async (req, res) => {
+    try {
+      req.session.user = req.user._id;
+      return res.redirect("/?success=Login successful!");
+    } catch (error) {
+      console.log("Error during Google login:", error);
+      return res.redirect(
+        "/login?error=Something went wrong. Please try again."
+      );
+    }
+  }
+);
 
 // router.get("/auth/google/callback", (req, res, next) => {
 //   passport.authenticate("google", async (err, user, info) => {
