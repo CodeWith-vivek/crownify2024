@@ -345,22 +345,50 @@
 
         window.onload = async function () {
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('error')) {
+            // if (urlParams.has('error')) {
+            //     const errorMessage = urlParams.get('error');
+            //     swal({
+            //         title: "Error",
+            //         text: errorMessage,
+            //         icon: "error",
+            //     });
+            // }
+
+            // if (urlParams.has('success')) {
+            //     const successMessage = urlParams.get('success');
+            //     swal({
+            //         title: "Success",
+            //         text: successMessage || "Sign up successful!",
+            //         icon: "success",
+            //         button: "Okay",
+            //     }).then(() => {
+            //         window.location.href = '/';
+            //     });
+            // }
+
+             if (urlParams.has('error')) {
                 const errorMessage = urlParams.get('error');
-                swal({
+                Swal.fire({
                     title: "Error",
                     text: errorMessage,
                     icon: "error",
+                    confirmButtonText: "Okay",
+                    customClass: {
+                        title: 'swal-title',
+                        content: 'swal-content',
+                        confirmButton: 'swal-button'
+                    }
                 });
             }
 
+            // Success Message
             if (urlParams.has('success')) {
                 const successMessage = urlParams.get('success');
-                swal({
+                Swal.fire({
                     title: "Success",
                     text: successMessage || "Sign up successful!",
                     icon: "success",
-                    button: "Okay",
+                    confirmButtonText: "Okay",
                 }).then(() => {
                     window.location.href = '/';
                 });
