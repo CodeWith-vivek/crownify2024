@@ -65,7 +65,7 @@
                                 </div>
                             </div>
 
-              
+
                             <div class="mb-4">
                                 <button type="button" id="addSizeColorBtn" class="btn btn-sm btn-primary">Add More
                                     Size/Color</button>
@@ -334,7 +334,7 @@
                 }
             }
 
-          function validateForm() {
+            function validateForm() {
                 clearErrorMessages();
                 const name = document.getElementsByName('productName')[0].value;
                 const description = document.getElementById('descriptionid').value;
@@ -344,7 +344,7 @@
                 const category = document.getElementsByName('category')[0].value;
                 let isValid = true;
 
-             
+
                 if (name.trim() === "") {
                     displayErrorMessage('productName-error', 'Please enter a product name.');
                     isValid = false;
@@ -380,7 +380,7 @@
                     isValid = false;
                 }
 
-          
+
                 const sizeColorGroups = document.querySelectorAll('.size-color-group');
                 sizeColorGroups.forEach((group, index) => {
                     const size = group.querySelector('select[name="sizes[]"]').value;
@@ -401,7 +401,7 @@
                     }
                 });
 
-                
+
                 const imageInputs = [
                     document.getElementById('input1'),
                     document.getElementById('input2'),
@@ -445,41 +445,42 @@
                 const errorElements = document.getElementsByClassName('error-message');
                 Array.from(errorElements).forEach(element => {
                     element.innerText = '';
-                    element.style.display = "none"; 
+                    element.style.display = "none";
                 });
             }
-          document.getElementById('productForm').addEventListener('submit', async (e) => {
-                e.preventDefault(); 
+            document.getElementById('productForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
 
-               
+
                 if (!validateForm()) {
                     return;
                 }
 
                 const formData = new FormData(e.target);
+                 const formDataObject = Object.fromEntries(formData.entries());
 
                 try {
                     const response = await fetch('/admin/addProducts', {
                         method: 'POST',
-                        body: formData
+                         body: JSON.stringify(formDataObject)
                     });
 
-            
+
                     const result = await response.json();
 
                     if (response.ok && result.success) {
-               
+
                         Swal.fire({
                             icon: 'success',
                             title: 'Success!',
                             text: result.message || 'Product added successfully',
                             confirmButtonText: 'OK'
                         }).then(() => {
-                       
+
                             window.location.href = '/admin/products';
                         });
                     } else {
-               
+
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
@@ -488,7 +489,7 @@
                         });
                     }
                 } catch (error) {
-            
+
                     console.error('Submission Error:', error);
 
                     Swal.fire({
@@ -499,10 +500,10 @@
                     });
                 }
             });
-  
+
             document.getElementById('logoutLink').addEventListener('click', function (event) {
                 event.preventDefault();
-       
+
                 fetch('/admin/logout', {
                     method: 'POST',
                     headers: {
@@ -513,19 +514,19 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                     
+
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Logged Out',
                                 text: data.message,
-                                timer: 2000, 
-                                showConfirmButton: false 
+                                timer: 2000,
+                                showConfirmButton: false
                             }).then(() => {
-                      
+
                                 window.location.replace('/admin/login');
                             });
                         } else {
-                         
+
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Logout Failed',
@@ -535,7 +536,7 @@
                         }
                     })
                     .catch(error => {
-                   
+
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
@@ -545,5 +546,3 @@
                     });
             });
         </script>
-
- 
