@@ -345,26 +345,7 @@
 
         window.onload = async function () {
             const urlParams = new URLSearchParams(window.location.search);
-            // if (urlParams.has('error')) {
-            //     const errorMessage = urlParams.get('error');
-            //     swal({
-            //         title: "Error",
-            //         text: errorMessage,
-            //         icon: "error",
-            //     });
-            // }
-
-            // if (urlParams.has('success')) {
-            //     const successMessage = urlParams.get('success');
-            //     swal({
-            //         title: "Success",
-            //         text: successMessage || "Sign up successful!",
-            //         icon: "success",
-            //         button: "Okay",
-            //     }).then(() => {
-            //         window.location.href = '/';
-            //     });
-            // }
+    
 
              if (urlParams.has('error')) {
                 const errorMessage = urlParams.get('error');
@@ -381,7 +362,7 @@
                 });
             }
 
-            // Success Message
+      
             if (urlParams.has('success')) {
                 const successMessage = urlParams.get('success');
                 Swal.fire({
