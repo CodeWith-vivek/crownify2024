@@ -95,41 +95,17 @@ router.get(
 );
 router.post("/verify-otp", userController.verifyOtp);
 router.post("/resend-otp", userController.resendOtp);
-// router.get(
-//   "/auth/google",
-//   passport.authenticate("google", { scope: ["profile", "email"] })
-// );
-
-
-// router.get(
-//   "/auth/google/callback",
-//   passport.authenticate("google", {
-//     failureRedirect:
-//       "/signup?error=Google account already exists. Please use a different account or log in.",
-//   }),
-//   async (req, res) => {
-//     try {
-//       req.session.user = req.user._id;
-//       return res.redirect("/?success=Login successful!");
-//     } catch (error) {
-//       console.log("Error during Google login:", error);
-//       return res.redirect(
-//         "/login?error=Something went wrong. Please try again."
-//       );
-//     }
-//   }
-// );
-
 router.get(
-  "/auth/google/login",
+  "/auth/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
+
 router.get(
-  "/auth/google/login/callback",
+  "/auth/google/callback",
   passport.authenticate("google", {
     failureRedirect:
-      "/login?error=No account found with this Google account. Please sign up first.",
+      "/signup?error=Google account already exists. Please use a different account or log in.",
   }),
   async (req, res) => {
     try {
@@ -139,31 +115,6 @@ router.get(
       console.log("Error during Google login:", error);
       return res.redirect(
         "/login?error=Something went wrong. Please try again."
-      );
-    }
-  }
-);
-
-// Signup route
-router.get(
-  "/auth/google/signup",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
-
-router.get(
-  "/auth/google/signup/callback",
-  passport.authenticate("google", {
-    failureRedirect:
-      "/signup?error=Google account already exists. Please use a different account or log in.",
-  }),
-  async (req, res) => {
-    try {
-      req.session.user = req.user._id;
-      return res.redirect("/?success=Signup successful!");
-    } catch (error) {
-      console.log("Error during Google signup:", error);
-      return res.redirect(
-        "/signup?error=Something went wrong. Please try again."
       );
     }
   }
