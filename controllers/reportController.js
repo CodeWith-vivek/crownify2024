@@ -90,24 +90,35 @@ const downloadExcel = async (req, res) => {
     const processedData = orders
       .map((order) => {
         const orderItems = order.items.map((item) => {
-          const product = item.productId;
-          const variant = product.variants[0];
+          
+          const product = item.productId || {};
+          const variant =
+            product.variants && product.variants.length > 0
+              ? product.variants[0]
+              : null;
 
           return {
-            orderNumber: order.orderNumber,
-            date: order.orderedAt.toISOString().split("T")[0],
-            productName: product.productName,
-            brand: product.brand,
+            orderNumber: order.orderNumber || "N/A",
+            date: order.orderedAt
+              ? order.orderedAt.toISOString().split("T")[0]
+              : "N/A",
+            productName: product.productName || "N/A",
+            brand: product.brand || "N/A",
             category: product.category ? product.category.name : "N/A",
             color: variant ? variant.color : "N/A",
             size: variant ? variant.size : "N/A",
-            quantity: item.quantity,
-            regularPrice: item.regularPrice,
-            salePrice: item.salePrice,
-            itemDiscount: (item.regularPrice - item.salePrice) * item.quantity,
-            couponDiscount: order.discount / order.items.length,
-            shipping: order.shipping / order.items.length,
-            itemTotal: item.salePrice * item.quantity,
+            quantity: item.quantity || 0,
+            regularPrice: item.regularPrice || 0,
+            salePrice: item.salePrice || 0,
+            itemDiscount:
+              item.regularPrice && item.salePrice
+                ? (item.regularPrice - item.salePrice) * item.quantity
+                : 0,
+            couponDiscount: order.discount
+              ? order.discount / order.items.length
+              : 0,
+            shipping: order.shipping ? order.shipping / order.items.length : 0,
+            itemTotal: item.salePrice ? item.salePrice * item.quantity : 0,
           };
         });
 
