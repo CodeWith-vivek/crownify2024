@@ -168,7 +168,12 @@
             return { x: x, y: y };
         }
     }
-
+    setTimeout(() => {
+        initMagnifier();
+        document.querySelectorAll('.zoomable-image').forEach((img, index) => {
+            magnify(`myimage-${index}`, 2);
+        });
+    }, 100);
       
         <% product.productImage.forEach((img, index) => { %>
         magnify("myimage-<%= index %>", 2); 
