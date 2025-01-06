@@ -1,301 +1,287 @@
-
 <%- include("../../views/partials/user/headerprofile") %>
-<div class="col-md-9">
-<div class="tab-pane " id="account-detail">
-    <div class="card">
-        <div class="card-header">
-            <h5>Account Details</h5>
-        </div>
-        <div class="card-body">
-            <div class="avatar-section">
-                <div class="avatar" id="avatar" style="background-image: url('<%= user.avatar || "" %>');">
-                    <% if (!user.avatar) { %>
-                        <%= user.name.charAt(0).toUpperCase() %>
-                            <% } %>
+    <div class="col-md-9">
+        <div class="tab-pane " id="account-detail">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Account Details</h5>
                 </div>
+                <div class="card-body">
+                    <div class="avatar-section">
+                        <div class="avatar" id="avatar" style="background-image: url('<%= user.avatar || "" %>');">
+                            <% if (!user.avatar) { %>
+                                <%= user.name.charAt(0).toUpperCase() %>
+                                    <% } %>
+                        </div>
 
-                <input type="file" id="avatar-upload" style="display: none;" accept="image/*">
+                        <input type="file" id="avatar-upload" style="display: none;" accept="image/*">
+                    </div>
+
+
+
+                    <form method="post" id="updateForm">
+                        <div class="row">
+                            <div class="form-group col-md-12">
+                                <label>Full Name </label>
+                                <input type="text" name="name" class="form-control" id="name" value="<%= user.name %>"
+                                    placeholder="Enter full name">
+                                <div id="nameError" class="error-message"></div>
+                            </div>
+
+
+                            <div class="form-group col-md-12">
+                                <label>Email Address </label>
+                                <input class="form-control" name="email" type="email" id="email"
+                                    value="<%= user.email %>" readonly>
+                            </div>
+                            <div class="form-group col-md-12">
+                                <label>Mobile Number</label>
+                                <input class="form-control" name="phone" type="text" id="phone"
+                                    value="<%= user.phone %>" placeholder="Enter mobile number">
+                                <div id="phoneError" class="error-message" style="color: red;"></div>
+                            </div>
+                            <div class="form-group col-md-12">
+                                <label>Current Password</label>
+                                <div class="input-group">
+                                    <input class="form-control" name="password" type="password" id="password"
+                                        placeholder="Enter your current password">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="toggleCurrentPassword"
+                                            style="cursor: pointer;">
+                                            <i class="fas fa-eye" id="currentPasswordEye"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div id="passwordError" class="error-message"></div>
+                            </div>
+
+                            <div class="form-group col-md-12">
+                                <label>New Password</label>
+                                <div class="input-group">
+                                    <input class="form-control" name="npassword" type="password" id="npassword"
+                                        placeholder="Enter your new password" disabled>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="toggleNewPassword" style="cursor: pointer;">
+                                            <i class="fas fa-eye" id="newPasswordEye"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div id="newPasswordError" class="error-message"></div>
+                            </div>
+                            <div class="form-group col-md-12">
+                                <label>Confirm Password</label>
+                                <div class="input-group">
+                                    <input class="form-control" name="cpassword" type="password" id="cpassword"
+                                        placeholder="Confirm your new password" disabled>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="toggleConfirmPassword"
+                                            style="cursor: pointer;">
+                                            <i class="fas fa-eye" id="confirmPasswordEye"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div id="confirmPasswordError" class="error-message"></div>
+                            </div>
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-fill-out submit" name="submit" value="Submit"
+                                    style="background-color: brown;" id="saveButton">Save</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-
-
-            <form method="post" id="updateForm">
-                <div class="row">
-                    <div class="form-group col-md-12">
-                        <label>Full Name </label>
-                        <input type="text" name="name" class="form-control" id="name" value="<%= user.name %>"
-                            placeholder="Enter full name">
-                        <div id="nameError" class="error-message"></div>
-                    </div>
-
-
-                    <div class="form-group col-md-12">
-                        <label>Email Address </label>
-                        <input class="form-control" name="email" type="email" id="email" value="<%= user.email %>"
-                            readonly>
-                    </div>
-                    <div class="form-group col-md-12">
-                        <label>Mobile Number</label>
-                        <input class="form-control" name="phone" type="text" id="phone" value="<%= user.phone %>"
-                            placeholder="Enter mobile number">
-                        <div id="phoneError" class="error-message" style="color: red;"></div>
-                    </div>
-                    <div class="form-group col-md-12">
-                        <label>Current Password</label>
-                        <div class="input-group">
-                            <input class="form-control" name="password" type="password" id="password"
-                                placeholder="Enter your current password">
-                            <div class="input-group-append">
-                                <span class="input-group-text" id="toggleCurrentPassword" style="cursor: pointer;">
-                                    <i class="fas fa-eye" id="currentPasswordEye"></i>
-                                </span>
-                            </div>
-                        </div>
-                        <div id="passwordError" class="error-message"></div>
-                    </div>
-
-                    <div class="form-group col-md-12">
-                        <label>New Password</label>
-                        <div class="input-group">
-                            <input class="form-control" name="npassword" type="password" id="npassword"
-                                placeholder="Enter your new password" disabled>
-                            <div class="input-group-append">
-                                <span class="input-group-text" id="toggleNewPassword" style="cursor: pointer;">
-                                    <i class="fas fa-eye" id="newPasswordEye"></i>
-                                </span>
-                            </div>
-                        </div>
-                        <div id="newPasswordError" class="error-message"></div>
-                    </div>
-                    <div class="form-group col-md-12">
-                        <label>Confirm Password</label>
-                        <div class="input-group">
-                            <input class="form-control" name="cpassword" type="password" id="cpassword"
-                                placeholder="Confirm your new password" disabled>
-                            <div class="input-group-append">
-                                <span class="input-group-text" id="toggleConfirmPassword" style="cursor: pointer;">
-                                    <i class="fas fa-eye" id="confirmPasswordEye"></i>
-                                </span>
-                            </div>
-                        </div>
-                        <div id="confirmPasswordError" class="error-message"></div>
-                    </div>
-                    <div class="col-md-12">
-                        <button type="submit" class="btn btn-fill-out submit" name="submit" value="Submit"
-                            style="background-color: brown;" id="saveButton">Save</button>
-                    </div>
-                </div>
-            </form>
         </div>
     </div>
-</div>
-</div>
 
-<%- include("../../views/partials/user/footerprofile") %>
-<script>
-    document.getElementById('name').addEventListener('input', function () {
-        const name = this.value.trim();
-        const nameError = document.getElementById('nameError');
-        const regex = /^[A-Za-z\s]+$/;
+    <%- include("../../views/partials/user/footerprofile") %>
+        <script>
+            document.getElementById('name').addEventListener('input', function () {
+                const name = this.value.trim();
+                const nameError = document.getElementById('nameError');
+                const regex = /^[A-Za-z\s]+$/;
 
-        if (name === '') {
-            nameError.textContent = 'Name cannot be blank';
-        } else if (name.length < 3) {
-            nameError.textContent = 'Name must be at least 3 characters long';
-        } else if (!regex.test(name)) {
-            nameError.textContent = 'Name must only contain letters and spaces';
-        } else {
-            nameError.textContent = '';
-        }
-    });
-
-   
-    document.getElementById('phone').addEventListener('input', function () {
-        const phone = this.value.trim();
-        const phoneError = document.getElementById('phoneError');
-
-        if (!/^\d{10}$/.test(phone)) {
-            phoneError.textContent = 'Please enter a valid 10-digit phone number';
-        } else {
-            phoneError.textContent = '';
-        }
-    });
-
-   
-    document.getElementById('password').addEventListener('input', async function () {
-        const password = this.value;
-        const passwordError = document.getElementById('passwordError');
-        const npasswordField = document.getElementById('npassword');
-        const cpasswordField = document.getElementById('cpassword');
-
-        if (password.length < 8) {
-            passwordError.textContent = 'Current password must be at least 8 characters long';
-            npasswordField.disabled = true; 
-            cpasswordField.disabled = true;
-        } else {
-            passwordError.textContent = '';
-
-           
-            try {
-                const response = await fetch('/validate-current-password', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password }) 
-                });
-                const result = await response.json();
-                if (result.valid) {
-                    npasswordField.disabled = false;
-                    cpasswordField.disabled = false;
+                if (name === '') {
+                    nameError.textContent = 'Name cannot be blank';
+                } else if (name.length < 3) {
+                    nameError.textContent = 'Name must be at least 3 characters long';
+                } else if (!regex.test(name)) {
+                    nameError.textContent = 'Name must only contain letters and spaces';
                 } else {
-                    npasswordField.disabled = true; 
-                    cpasswordField.disabled = true;
-                    passwordError.textContent = 'Incorrect current password'; 
+                    nameError.textContent = '';
                 }
-            } catch (error) {
-                console.error('Error validating password:', error);
-                passwordError.textContent = 'Error validating password. Please try again.';
-            }
-        }
-    });
-
-  
-    document.getElementById('npassword').addEventListener('input', function () {
-        const npassword = this.value;
-        const cpassword = document.getElementById('cpassword').value;
-        const newPasswordError = document.getElementById('newPasswordError');
-
-        if (npassword.length < 8) {
-            newPasswordError.textContent = 'New password must be at least 8 characters long';
-        } else if (npassword !== cpassword) {
-            newPasswordError.textContent = 'Passwords do not match';
-        } else {
-            newPasswordError.textContent = '';
-        }
-    });
-
-  
-    document.getElementById('cpassword').addEventListener('input', function () {
-        const cpassword = this.value;
-        const npassword = document.getElementById('npassword').value;
-        const confirmPasswordError = document.getElementById('confirmPasswordError');
-
-        if (cpassword !== npassword) {
-            confirmPasswordError.textContent = 'Passwords do not match';
-        } else {
-            confirmPasswordError.textContent = '';
-        }
-    });
-
- 
-    document.getElementById('updateForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
-
-     
-        const errors = document.querySelectorAll('.error-message');
-        let hasErrors = false;
-
-        errors.forEach(error => {
-            if (error.textContent !== '') {
-                hasErrors = true;
-            }
-        });
-
-        if (hasErrors) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Validation Error',
-                text: 'Please fix the errors before submitting.',
-            });
-            return;
-        }
-
-       
-        const name = document.getElementById('name').value.trim();
-        const phone = document.getElementById('phone').value.trim();
-        const password = document.getElementById('password').value;
-        const npassword = document.getElementById('npassword').value;
-
-        try {
-            const response = await fetch('/update-user', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, phone, password, npassword }),
             });
 
-            const result = await response.json();
-            if (result.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'User  details updated successfully!',
-                }).then(() => window.location.href = '/AccountDetails');
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: result.error || 'Error updating user details.',
+
+            document.getElementById('phone').addEventListener('input', function () {
+                const phone = this.value.trim();
+                const phoneError = document.getElementById('phoneError');
+
+                if (!/^\d{10}$/.test(phone)) {
+                    phoneError.textContent = 'Please enter a valid 10-digit phone number';
+                } else {
+                    phoneError.textContent = '';
+                }
+            });
+
+
+            document.getElementById('password').addEventListener('input', async function () {
+                const password = this.value;
+                const passwordError = document.getElementById('passwordError');
+                const npasswordField = document.getElementById('npassword');
+                const cpasswordField = document.getElementById('cpassword');
+
+                if (password.length < 8) {
+                    passwordError.textContent = 'Current password must be at least 8 characters long';
+                    npasswordField.disabled = true;
+                    cpasswordField.disabled = true;
+                } else {
+                    passwordError.textContent = '';
+
+
+                    try {
+                        const response = await fetch('/validate-current-password', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ password })
+                        });
+                        const result = await response.json();
+                        if (result.valid) {
+                            npasswordField.disabled = false;
+                            cpasswordField.disabled = false;
+                        } else {
+                            npasswordField.disabled = true;
+                            cpasswordField.disabled = true;
+                            passwordError.textContent = 'Incorrect current password';
+                        }
+                    } catch (error) {
+                        console.error('Error validating password:', error);
+                        passwordError.textContent = 'Error validating password. Please try again.';
+                    }
+                }
+            });
+
+
+            document.getElementById('npassword').addEventListener('input', function () {
+                const npassword = this.value;
+                const cpassword = document.getElementById('cpassword').value;
+                const newPasswordError = document.getElementById('newPasswordError');
+                const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+                if (npassword.length < 8) {
+                    newPasswordError.textContent = 'New password must be at least 8 characters long';
+                } else {
+                    newPasswordError.textContent = '';
+
+                    if (cpassword) {
+                        if (npassword !== cpassword) {
+                            confirmPasswordError.textContent = 'Passwords do not match';
+                        } else {
+                            confirmPasswordError.textContent = '';
+                        }
+                    }
+                }
+            });
+
+
+            document.getElementById('cpassword').addEventListener('input', function () {
+                const cpassword = this.value;
+                const npassword = document.getElementById('npassword').value;
+                const confirmPasswordError = document.getElementById('confirmPasswordError');
+                const newPasswordError = document.getElementById('newPasswordError');
+
+                if (npassword.length < 8) {
+                    newPasswordError.textContent = 'New password must be at least 8 characters long';
+                } else {
+                    newPasswordError.textContent = '';
+                    if (cpassword !== npassword) {
+                        confirmPasswordError.textContent = 'Passwords do not match';
+                    } else {
+                        confirmPasswordError.textContent = '';
+                    }
+                }
+            });
+
+            document.getElementById('updateForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+
+                const errors = document.querySelectorAll('.error-message');
+                let hasErrors = false;
+
+                errors.forEach(error => {
+                    if (error.textContent !== '') {
+                        hasErrors = true;
+                    }
                 });
-            }
-        } catch (error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Something went wrong. Please try again later.',
+
+                if (hasErrors) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        text: 'Please fix the errors before submitting.',
+                    });
+                    return;
+                }
+
+
+                const name = document.getElementById('name').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const password = document.getElementById('password').value;
+                const npassword = document.getElementById('npassword').value;
+
+                try {
+                    const response = await fetch('/update-user', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, phone, password, npassword }),
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: 'User  details updated successfully!',
+                        }).then(() => window.location.href = '/AccountDetails');
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: result.error || 'Error updating user details.',
+                        });
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong. Please try again later.',
+                    });
+                }
             });
-        }
-    });
-</script>
-<script>
-    async function checkUserBlockStatus() {
-        try {
-            const response = await fetch("/check-block-status", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            const data = await response.json();
+        </script>
+        <script>
+            async function checkUserBlockStatus() {
+                try {
+                    const response = await fetch("/check-block-status", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    });
+                    const data = await response.json();
 
-            if (data.blocked) {
+                    if (data.blocked) {
 
-                window.location.href = "/login"; 
+                        window.location.href = "/login";
+                    }
+                } catch (error) {
+                    console.error("Error checking block status:", error);
+                }
             }
-        } catch (error) {
-            console.error("Error checking block status:", error);
-        }
-    }
 
-    setInterval(checkUserBlockStatus, 2000);
-</script>
-<script>
-    document.getElementById('toggleNewPassword').addEventListener('click', function () {
-            const passwordInput = document.getElementById('npassword');
-            const passwordEye = document.getElementById('newPasswordEye');
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                passwordEye.classList.remove('fa-eye');
-                passwordEye.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                passwordEye.classList.remove('fa-eye-slash');
-                passwordEye.classList.add('fa-eye');
-            }
-        });
-
-        document.getElementById('toggleConfirmPassword').addEventListener('click', function () {
-            const confirmPasswordInput = document.getElementById('cpassword');
-            const confirmPasswordEye = document.getElementById('confirmPasswordEye');
-            if (confirmPasswordInput.type === 'password') {
-                confirmPasswordInput.type = 'text';
-                confirmPasswordEye.classList.remove('fa-eye');
-                confirmPasswordEye.classList.add('fa-eye-slash');
-            } else {
-                confirmPasswordInput.type = 'password';
-                confirmPasswordEye.classList.remove('fa-eye-slash');
-                confirmPasswordEye.classList.add('fa-eye');
-            }
-        });
-        document.getElementById('toggleCurrentPassword').addEventListener('click', function () {
+            setInterval(checkUserBlockStatus, 2000);
+        </script>
+        <script>
+            document.getElementById('toggleCurrentPassword').addEventListener('click', function () {
                 const currentPasswordInput = document.getElementById('password');
                 const currentPasswordEye = document.getElementById('currentPasswordEye');
                 if (currentPasswordInput.type === 'password') {
@@ -308,4 +294,32 @@
                     currentPasswordEye.classList.add('fa-eye');
                 }
             });
-</script>
+            document.getElementById('toggleNewPassword').addEventListener('click', function () {
+                const passwordInput = document.getElementById('npassword');
+                const passwordEye = document.getElementById('newPasswordEye');
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    passwordEye.classList.remove('fa-eye');
+                    passwordEye.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    passwordEye.classList.remove('fa-eye-slash');
+                    passwordEye.classList.add('fa-eye');
+                }
+            });
+
+            document.getElementById('toggleConfirmPassword').addEventListener('click', function () {
+                const confirmPasswordInput = document.getElementById('cpassword');
+                const confirmPasswordEye = document.getElementById('confirmPasswordEye');
+                if (confirmPasswordInput.type === 'password') {
+                    confirmPasswordInput.type = 'text';
+                    confirmPasswordEye.classList.remove('fa-eye');
+                    confirmPasswordEye.classList.add('fa-eye-slash');
+                } else {
+                    confirmPasswordInput.type = 'password';
+                    confirmPasswordEye.classList.remove('fa-eye-slash');
+                    confirmPasswordEye.classList.add('fa-eye');
+                }
+            });
+
+        </script>
