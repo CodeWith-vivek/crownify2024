@@ -1,3 +1,4 @@
+const env = require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const flash = require("connect-flash");
@@ -11,7 +12,6 @@ const userRoute = require("./routes/userRoute");
 const adminRoute=require("./routes/adminRoute")
 
 const app = express();
-const env = require("dotenv").config();
 
 
 db();
