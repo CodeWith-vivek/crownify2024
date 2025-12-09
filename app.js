@@ -51,4 +51,6 @@ const PORT = process.env.PORT || 3000;
 app.use((req,res)=>{
   res.status(404).render("page-404")
 })
-app.listen(PORT, () => console.log(`server running on ${PORT}`));
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`server running on ${PORT}`);
+});
