@@ -1,0 +1,164 @@
+document.getElementById("name").addEventListener("input", function () {
+  const name = this.value.trim();
+  const nameError = document.getElementById("nameError");
+  const regex = /^[A-Za-z\s]+$/;
+
+  if (name === "") {
+    nameError.textContent = "Name cannot be blank";
+  } else if (name.length < 3) {
+    nameError.textContent = "Name must be at least 3 characters long";
+  } else if (!regex.test(name)) {
+    nameError.textContent = "Name must only contain letters and spaces";
+  } else {
+    nameError.textContent = "";
+  }
+});
+
+document.getElementById("phone").addEventListener("input", function () {
+  const phone = this.value.trim();
+  const phoneError = document.getElementById("phoneError");
+
+  if (!/^\d{10}$/.test(phone)) {
+    phoneError.textContent = "Please enter a valid 10-digit phone number";
+  } else {
+    phoneError.textContent = "";
+  }
+});
+
+document
+  .getElementById("password")
+  .addEventListener("input", async function () {
+    const password = this.value;
+    const passwordError = document.getElementById("passwordError");
+    const npasswordField = document.getElementById("npassword");
+    const cpasswordField = document.getElementById("cpassword");
+
+    if (password.length < 8) {
+      passwordError.textContent =
+        "Current password must be at least 8 characters long";
+      npasswordField.disabled = true;
+      cpasswordField.disabled = true;
+    } else {
+      passwordError.textContent = "";
+
+      try {
+        const response = await fetch("/validate-current-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password }),
+        });
+        const result = await response.json();
+        if (result.valid) {
+          npasswordField.disabled = false;
+          cpasswordField.disabled = false;
+        } else {
+          npasswordField.disabled = true;
+          cpasswordField.disabled = true;
+          passwordError.textContent = "Incorrect current password";
+        }
+      } catch (error) {
+        console.error("Error validating password:", error);
+        passwordError.textContent =
+          "Error validating password. Please try again.";
+      }
+    }
+  });
+
+document.getElementById("npassword").addEventListener("input", function () {
+  const npassword = this.value;
+  const cpassword = document.getElementById("cpassword").value;
+  const newPasswordError = document.getElementById("newPasswordError");
+  const confirmPasswordError = document.getElementById("confirmPasswordError");
+
+  if (npassword.length < 8) {
+    newPasswordError.textContent =
+      "New password must be at least 8 characters long";
+  } else {
+    newPasswordError.textContent = "";
+
+    if (cpassword) {
+      if (npassword !== cpassword) {
+        confirmPasswordError.textContent = "Passwords do not match";
+      } else {
+        confirmPasswordError.textContent = "";
+      }
+    }
+  }
+});
+
+document.getElementById("cpassword").addEventListener("input", function () {
+  const cpassword = this.value;
+  const npassword = document.getElementById("npassword").value;
+  const confirmPasswordError = document.getElementById("confirmPasswordError");
+  const newPasswordError = document.getElementById("newPasswordError");
+
+  if (npassword.length < 8) {
+    newPasswordError.textContent =
+      "New password must be at least 8 characters long";
+  } else {
+    newPasswordError.textContent = "";
+    if (cpassword !== npassword) {
+      confirmPasswordError.textContent = "Passwords do not match";
+    } else {
+      confirmPasswordError.textContent = "";
+    }
+  }
+});
+
+document
+  .getElementById("updateForm")
+  .addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const errors = document.querySelectorAll(".error-message");
+    let hasErrors = false;
+
+    errors.forEach((error) => {
+      if (error.textContent !== "") {
+        hasErrors = true;
+      }
+    });
+
+    if (hasErrors) {
+      Swal.fire({
+        icon: "error",
+        title: "Validation Error",
+        text: "Please fix the errors before submitting.",
+      });
+      return;
+    }
+
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const password = document.getElementById("password").value;
+    const npassword = document.getElementById("npassword").value;
+
+    try {
+      const response = await fetch("/update-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, password, npassword }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "User  details updated successfully!",
+        }).then(() => (window.location.href = "/AccountDetails"));
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: result.error || "Error updating user details.",
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Something went wrong. Please try again later.",
+      });
+    }
+  });

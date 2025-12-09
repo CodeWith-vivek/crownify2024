@@ -14,6 +14,7 @@ const User = require("../models/userSchema");
 //code to download sales report in excel format
 
 
+
 const downloadExcel = async (req, res) => {
   const { type, startDate, endDate } = req.body;
 
@@ -69,7 +70,11 @@ const downloadExcel = async (req, res) => {
           .json({ status: false, message: "Invalid report type" });
     }
 
-    const orders = await Order.find(query)
+    // Fetch orders that have at least one delivered item
+    const orders = await Order.find({
+      ...query,
+      "items.orderStatus": "Delivered", // Ensure at least one item is delivered
+    })
       .populate({
         path: "items.productId",
         select: "productName brand regularPrice salePrice variants category",
@@ -89,8 +94,12 @@ const downloadExcel = async (req, res) => {
 
     const processedData = orders
       .map((order) => {
-        const orderItems = order.items.map((item) => {
-          
+        // Filter only delivered items
+        const deliveredItems = order.items.filter(
+          (item) => item.orderStatus === "Delivered"
+        );
+
+        return deliveredItems.map((item) => {
           const product = item.productId || {};
           const variant =
             product.variants && product.variants.length > 0
@@ -115,14 +124,14 @@ const downloadExcel = async (req, res) => {
                 ? (item.regularPrice - item.salePrice) * item.quantity
                 : 0,
             couponDiscount: order.discount
-              ? order.discount / order.items.length
+              ? order.discount / deliveredItems.length
               : 0,
-            shipping: order.shipping ? order.shipping / order.items.length : 0,
+            shipping: order.shipping
+              ? order.shipping / deliveredItems.length
+              : 0,
             itemTotal: item.salePrice ? item.salePrice * item.quantity : 0,
           };
         });
-
-        return orderItems;
       })
       .flat();
 
@@ -195,20 +204,20 @@ const downloadExcel = async (req, res) => {
     }
 
     detailsWorksheet["!cols"] = [
-      { wch: 12 }, 
-      { wch: 12 }, 
-      { wch: 30 }, 
-      { wch: 15 }, 
-      { wch: 15 }, 
-      { wch: 10 }, 
-      { wch: 10 }, 
-      { wch: 10 }, 
-      { wch: 12 }, 
-      { wch: 12 }, 
-      { wch: 12 }, 
       { wch: 12 },
-      { wch: 12 }, 
-      { wch: 12 }, 
+      { wch: 12 },
+      { wch: 30 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 10 },
+      { wch: 10 },
+      { wch: 10 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 12 },
     ];
 
     xlsx.utils.book_append_sheet(workbook, detailsWorksheet, "Order Details");
@@ -239,8 +248,7 @@ const downloadExcel = async (req, res) => {
   }
 };
 
-// code for to get report period period
-
+// Helper function to get the report period
 const getReportPeriod = (type, startDate, endDate) => {
   const today = new Date();
   switch (type) {
@@ -325,7 +333,11 @@ const generateSalesReport = async (req, res) => {
           .json({ status: false, message: "Invalid report type" });
     }
 
-    const totalOrders = await Order.countDocuments(query);
+    const totalOrders = await Order.countDocuments({
+      ...query,
+      "items.orderStatus": "Delivered", 
+    });
+
     if (totalOrders === 0) {
       return res.status(404).json({
         status: false,
@@ -344,7 +356,10 @@ const generateSalesReport = async (req, res) => {
 
     const totalPages = Math.ceil(totalOrders / limit);
 
-    const orders = await Order.find(query)
+    const orders = await Order.find({
+      ...query,
+      "items.orderStatus": "Delivered", 
+    })
       .populate({
         path: "items.productId",
         select: "productName brand regularPrice salePrice variants category",
@@ -359,30 +374,35 @@ const generateSalesReport = async (req, res) => {
 
     let totalQuantity = 0;
     let totalRegularPrice = 0;
-    let totalSalePrice = 0; 
+    let totalSalePrice = 0;
     let totalItemDiscount = 0;
-    let totalCouponDiscount = 0; 
+    let totalCouponDiscount = 0;
     let totalItemTotal = 0;
     let totalShipping = 0;
     let totalOrderTotal = 0;
 
     const report = orders.map((order) => {
-      const orderItemTotals = order.items.map((item) => {
+
+      const deliveredItems = order.items.filter(
+        (item) => item.orderStatus === "Delivered"
+      );
+
+      const orderItemTotals = deliveredItems.map((item) => {
         const product = item.productId;
         const variant = product.variants[0];
 
         const itemTotal = item.salePrice * item.quantity;
-        const shipping = order.shipping / order.items.length;
+        const shipping = order.shipping / deliveredItems.length; 
 
         totalQuantity += item.quantity;
-        totalRegularPrice += item.regularPrice * item.quantity; 
-        totalSalePrice += item.salePrice * item.quantity; 
+        totalRegularPrice += item.regularPrice * item.quantity;
+        totalSalePrice += item.salePrice * item.quantity;
         totalItemDiscount +=
-          (item.regularPrice - item.salePrice) * item.quantity; 
-        totalCouponDiscount += order.discount / order.items.length; 
-        totalItemTotal += itemTotal; 
-        totalShipping += shipping; 
-        totalOrderTotal += itemTotal + shipping; 
+          (item.regularPrice - item.salePrice) * item.quantity;
+        totalCouponDiscount += order.discount / deliveredItems.length; 
+        totalItemTotal += itemTotal;
+        totalShipping += shipping;
+        totalOrderTotal += itemTotal + shipping;
 
         return {
           name: product.productName,
@@ -394,7 +414,7 @@ const generateSalesReport = async (req, res) => {
           regularPrice: item.regularPrice,
           salePrice: item.salePrice,
           itemDiscount: item.regularPrice - item.salePrice,
-          couponDiscount: order.discount / order.items.length,
+          couponDiscount: order.discount / deliveredItems.length,
           itemTotal: itemTotal,
           shipping: shipping,
         };
@@ -412,9 +432,9 @@ const generateSalesReport = async (req, res) => {
       report,
       totals: {
         totalQuantity,
-        totalRegularPrice, 
-        totalSalePrice, 
-        totalItemDiscount, 
+        totalRegularPrice,
+        totalSalePrice,
+        totalItemDiscount,
         totalCouponDiscount,
         totalItemTotal,
         totalShipping,
@@ -437,21 +457,33 @@ const generateSalesReport = async (req, res) => {
 };
 
 
+
 //code to get overall revenue
+
+
 
 const getOverallRevenue = async (req, res) => {
   try {
-
     const overallRevenue = await Order.aggregate([
+      
+      { $unwind: "$items" },
+  
+      { $match: { "items.orderStatus": "Delivered" } },
+      {
+        $group: {
+          _id: "$_id", 
+          orderTotal: { $sum: "$items.salePrice" },
+          orderDiscount: { $first: "$discount" },
+        },
+      },
       {
         $group: {
           _id: null, 
-          totalRevenue: { $sum: "$grandTotal" }, 
-          totalDiscount: { $sum: "$discount" },
+          totalRevenue: { $sum: "$orderTotal" },
+          totalDiscount: { $sum: "$orderDiscount" }, 
         },
       },
     ]);
-
 
     if (overallRevenue.length === 0) {
       console.warn("No revenue data available.");
@@ -468,7 +500,6 @@ const getOverallRevenue = async (req, res) => {
 
     const { totalRevenue, totalDiscount } = overallRevenue[0];
     const netRevenue = totalRevenue - totalDiscount;
-
 
     return res.json({
       status: true,
@@ -487,6 +518,7 @@ const getOverallRevenue = async (req, res) => {
 };
 
 //code for sales chart
+
 
 const salesChart = async (req, res) => {
   const { type, startDate, endDate } = req.body;
@@ -541,7 +573,10 @@ const salesChart = async (req, res) => {
           .json({ status: false, message: "Invalid report type" });
     }
 
-    const orders = await Order.find(query);
+    const orders = await Order.find({
+      ...query,
+      "items.orderStatus": "Delivered", 
+    });
 
     const labels = []; 
     const revenue = []; 
@@ -549,10 +584,13 @@ const salesChart = async (req, res) => {
 
     if (type === "daily") {
       labels.push(today.toLocaleDateString());
-      revenue.push(
-        orders.reduce((total, order) => total + order.grandTotal, 0)
+      const deliveredOrders = orders.filter((order) =>
+        order.items.some((item) => item.orderStatus === "Delivered")
       );
-      orderCounts.push(orders.length);
+      revenue.push(
+        deliveredOrders.reduce((total, order) => total + order.grandTotal, 0)
+      );
+      orderCounts.push(deliveredOrders.length);
     } else if (type === "weekly") {
       for (let i = 0; i < 7; i++) {
         const day = new Date();
@@ -560,7 +598,10 @@ const salesChart = async (req, res) => {
         labels.push(day.toLocaleDateString());
         const dailyOrders = orders.filter((order) => {
           const orderDate = new Date(order.orderedAt);
-          return orderDate.toDateString() === day.toDateString();
+          return (
+            orderDate.toDateString() === day.toDateString() &&
+            order.items.some((item) => item.orderStatus === "Delivered")
+          );
         });
         revenue.push(
           dailyOrders.reduce((total, order) => total + order.grandTotal, 0)
@@ -580,7 +621,8 @@ const salesChart = async (req, res) => {
           return (
             orderDate.getDate() === i &&
             orderDate.getMonth() === today.getMonth() &&
-            orderDate.getFullYear() === today.getFullYear()
+            orderDate.getFullYear() === today.getFullYear() &&
+            order.items.some((item) => item.orderStatus === "Delivered")
           );
         });
         revenue.push(
@@ -596,7 +638,8 @@ const salesChart = async (req, res) => {
           const orderDate = new Date(order.orderedAt);
           return (
             orderDate.getFullYear() === today.getFullYear() &&
-            orderDate.getMonth() === i
+            orderDate.getMonth() === i &&
+            order.items.some((item) => item.orderStatus === "Delivered")
           );
         });
         revenue.push(

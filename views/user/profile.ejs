@@ -11,7 +11,7 @@
                     </div>
                     <div class="card-body">
                         <p>From your account dashboard, you can easily check &amp; view your
-                           <b> <a href="/orders">recent orders</a></b>, manage your
+                            <b> <a href="/orders">recent orders</a></b>, manage your
                             <a href="/Address">shipping and billing addresses</a>, and
                             <a href="/AccountDetails">edit your password and account details</a>.
                         </p>
@@ -28,29 +28,8 @@
 
         </div>
     </div>
- 
+
 
     <%- include("../../views/partials/user/footerprofile") %>
-        
-        <script>
-            async function checkUserBlockStatus() {
-                try {
-                    const response = await fetch("/check-block-status", {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    });
-                    const data = await response.json();
 
-                    if (data.blocked) {
-
-                        window.location.href = "/login"; 
-                    }
-                } catch (error) {
-                    console.error("Error checking block status:", error);
-                }
-            }
-
-            setInterval(checkUserBlockStatus, 2000);
-        </script>
+        <script src="/js/userBlockCheck.js"></script>

@@ -33,9 +33,9 @@
                         <div class="shop__sidebar__search">
                             <form action="/shop" method="GET">
                                 <input type="hidden" name="sort" value="<%= sort || '' %>">
-                              
+
                                 <input type="hidden" name="page" value="<%= currentPage || 1 %>">
-                            
+
                                 <input type="text" id="searchInput" name="search" placeholder="Search..."
                                     value="<%= search || '' %>">
                                 <button type="submit"><span class="icon_search"></span></button>
@@ -58,12 +58,14 @@
                                                     <ul class="nice-scroll">
                                                         <% categories.forEach(category=> { %>
                                                             <li>
-                                                            <label style="cursor: pointer;"
-                                                                onclick="document.getElementById('checkbox_<%= category._id %>').click(); document.getElementById('filterForm').submit();">
-                                                                <%= category.name %> (<%= category.productCount || 0 %>)
-                                                            </label>
-                                                            <input type="checkbox" id="checkbox_<%= category._id %>" name="categories" value="<%= category._id %>"
-                                                                style="display: none;">
+                                                                <label style="cursor: pointer;"
+                                                                    onclick="document.getElementById('checkbox_<%= category._id %>').click(); document.getElementById('filterForm').submit();">
+                                                                    <%= category.name %> (<%= category.productCount || 0
+                                                                            %>)
+                                                                </label>
+                                                                <input type="checkbox" id="checkbox_<%= category._id %>"
+                                                                    name="categories" value="<%= category._id %>"
+                                                                    style="display: none;">
                                                             </li>
                                                             <% }); %>
                                                     </ul>
@@ -71,7 +73,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                 
+
                                     <div class="card" style="background: transparent;">
                                         <div class="card-heading">
                                             <a data-toggle="collapse" data-target="#collapseThree">Filter Price</a>
@@ -93,7 +95,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                   
+
                                     <div class="card" style="background: transparent;">
                                         <div class="card-heading">
                                             <a data-toggle="collapse" data-target="#collapseFive">Colors</a>
@@ -212,11 +214,13 @@
                                             </h6>
                                             <p>
                                                 <strong>
-                                                <%= product.brand %></strong><br>
-                                                    <strong>
-                                                    <%= product.category.name %></strong>
+                                                    <%= product.brand %>
+                                                </strong><br>
+                                                <strong>
+                                                    <%= product.category.name %>
+                                                </strong>
                                             </p>
-                                            
+
                                             <a href="#" class="add-cart"
                                                 onclick="event.preventDefault(); event.stopPropagation(); handleAddToCart('<%= product._id %>')"></a>
                                             <div class="rating-container">
@@ -367,107 +371,7 @@
 
     <%- include("../../views/partials/user/footershop") %>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-
-        <script>
-            function filterByPrice(min, max) {
-                const filterForm = document.getElementById('filterForm');
-                const priceInput = document.createElement('input');
-                priceInput.type = 'hidden';
-                priceInput.name = 'priceRange';
-                priceInput.value = `${min}-${max}`;
-                filterForm.appendChild(priceInput);
-                filterForm.submit();
-            }
-        </script>
-        <script>
-
-
-
-
-            document.addEventListener('DOMContentLoaded', () => {
-                const cartLinks = document.querySelectorAll('.site-header__cart');
-
-                cartLinks.forEach(link => {
-                    link.addEventListener('click', (e) => {
-                     
-
-
-                        e.stopPropagation();
-
-
-                        window.location.href = '/cart';
-
-
-                        e.preventDefault();
-                    });
-                });
-            });
-        </script>
-        <script>
-
-            async function addToWishlist(productId) {
-                try {
-                    const response = await fetch("/wishlist/add", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ productId }),
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        Swal.fire({
-                            icon: "success",
-                            title: "Added to Wishlist!",
-                            text: result.message,
-                            timer: 1500,
-                            showConfirmButton: false,
-                        }).then(() => {
-                        
-                            window.location.reload();
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Failed to Add to Wishlist",
-                            text: result.message,
-                        }).then(() => {
-                            
-                            window.location.reload();
-                        });
-                    }
-                } catch (error) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "An Error Occurred",
-                        text: "Unable to add to wishlist. Please try again.",
-                    });
-                    console.error("Add to Wishlist Error:", error);
-                }
-            }
-        </script>
-        <script>
-            async function checkUserBlockStatus() {
-                try {
-                    const response = await fetch("/check-block-status", {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    });
-                    const data = await response.json();
-
-                    if (data.blocked) {
-
-                        window.location.href = "/login"; 
-                    }
-                } catch (error) {
-                    console.error("Error checking block status:", error);
-                }
-            }
-
-            
-            setInterval(checkUserBlockStatus, 2000);
-        </script>
+        <script src="/js/cartNav.js"></script>
+        <script src="/js/userBlockCheck.js"></script>
+        <script src="/js/priceFilter.js"></script>
+        <script src="/js/addWishList.js"></script>

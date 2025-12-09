@@ -1,102 +1,81 @@
 <%- include("../../views/partials/user/headerprofile") %>
-<div class="col-md-9">
-<div class="tab-pane " id="address"  >
-    <div class="row">
-        <% if (user.addresses && user.addresses.length> 0) { %>
-            <% user.addresses.forEach((addr)=> { %>
-                <div class="col-lg-6">
-                    <div class="card mb-3 mb-lg-0">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Address</h5>
-                            <% if (addr.isPrimary) { %>
-                                <span class="badge bg-success" style="margin-right: 23px;
+    <div class="col-md-9">
+        <div class="tab-pane " id="address">
+            <div class="row">
+                <% if (user.addresses && user.addresses.length> 0) { %>
+                    <% user.addresses.forEach((addr)=> { %>
+                        <div class="col-lg-6">
+                            <div class="card mb-3 mb-lg-0">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Address</h5>
+                                    <% if (addr.isPrimary) { %>
+                                        <span class="badge bg-success" style="margin-right: 23px;
     background-color: black !important;">Primary</span>
-                                <% } %>
-                        </div>
-                        <div class="card-body">
-                            <address>
-                                <%= addr.fullName %><br>
-                                    <%= addr.flatHouseCompany %>, <%= addr.areaStreet %><br>
-                                            <%= addr.city %>, <%= addr.state %> -
-                                                    <%= addr.postalCode %><br>
-                                                        <%= addr.country %><br>
-                                                            Phone: <%= addr.mobileNumber %>
-                                                                <br>
-                                                                <% if (addr.additionalInfo) { %>
-                                                                    Additional Info:
-                                                                    <%= addr.additionalInfo %><br>
-                                                                        <% } %>
-                            </address>
-                            <div class="d-flex justify-content-between">
-                                <% if (!addr.isPrimary) { %>
-                                    <a href="#" class="btn-small btn-link"
-                                        onclick="confirmPrimaryAddress(event, '<%= addr._id.toString() %>')">
-                                        Set as Primary
-                                    </a>
-                                    <% } %>
-
-                                        <a href="/edit-address/<%= addr._id %>" class="btn-small btn-link">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </a>
-
-                                        <a href="#" class="btn-small btn-link text-danger"
-                                            onclick="confirmDeleteAddress(event, '<%= addr._id %>')">
-                                            <i class="fas fa-trash"></i> Delete
-                                        </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <% }) %>
-                    <% } else { %>
-                        <div class="col-12">
-                            <h3 class="text-center">No addresses found. Add a new
-                                address!</h3>
-                        </div>
-                        <% } %>
-<% if (addressCount < 4) { %>
-
-                            <div class="col-lg-6 mt-4">
-                                <div class="card address-card">
-                                    <div class="card-body text-center">
-                                        <h5 class="add-address-title" style="color: red;">Add Address</h5>
-                                        <div class="plus-button">
-                                            <a href="/user/addAddress" class="btn">
-                                                <span style="font-size: 1.5rem; font-weight: bold; color: red;">+</span>
+                                        <% } %>
+                                </div>
+                                <div class="card-body">
+                                    <address>
+                                        <%= addr.fullName %><br>
+                                            <%= addr.flatHouseCompany %>, <%= addr.areaStreet %><br>
+                                                    <%= addr.city %>, <%= addr.state %> -
+                                                            <%= addr.postalCode %><br>
+                                                                <%= addr.country %><br>
+                                                                    Phone: <%= addr.mobileNumber %>
+                                                                        <br>
+                                                                        <% if (addr.additionalInfo) { %>
+                                                                            Additional Info:
+                                                                            <%= addr.additionalInfo %><br>
+                                                                                <% } %>
+                                    </address>
+                                    <div class="d-flex justify-content-between">
+                                        <% if (!addr.isPrimary) { %>
+                                            <a href="#" class="btn-small btn-link"
+                                                onclick="confirmPrimaryAddress(event, '<%= addr._id.toString() %>')">
+                                                Set as Primary
                                             </a>
-                                        </div>
+                                            <% } %>
+
+                                                <a href="/edit-address/<%= addr._id %>" class="btn-small btn-link">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </a>
+
+                                                <a href="#" class="btn-small btn-link text-danger"
+                                                    onclick="confirmDeleteAddress(event, '<%= addr._id %>')">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </a>
                                     </div>
                                 </div>
                             </div>
-                            <% } %>
+                        </div>
+                        <% }) %>
+                            <% } else { %>
+                                <div class="col-12">
+                                    <h3 class="text-center">No addresses found. Add a new
+                                        address!</h3>
+                                </div>
+                                <% } %>
+                                    <% if (addressCount < 4) { %>
+
+                                        <div class="col-lg-6 mt-4">
+                                            <div class="card address-card">
+                                                <div class="card-body text-center">
+                                                    <h5 class="add-address-title" style="color: red;">Add Address</h5>
+                                                    <div class="plus-button">
+                                                        <a href="/user/addAddress" class="btn">
+                                                            <span
+                                                                style="font-size: 1.5rem; font-weight: bold; color: red;">+</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <% } %>
+            </div>
+        </div>
     </div>
-</div>
-</div>
 
 
 
 
-<%- include("../../views/partials/user/footerprofile") %>
-<script>
-    async function checkUserBlockStatus() {
-        try {
-            const response = await fetch("/check-block-status", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            const data = await response.json();
-
-            if (data.blocked) {
-
-                window.location.href = "/login"; 
-            }
-        } catch (error) {
-            console.error("Error checking block status:", error);
-        }
-    }
-
-   
-    setInterval(checkUserBlockStatus, 2000);
-</script>
+    <%- include("../../views/partials/user/footerprofile") %>
+        <script src="/js/userBlockCheck.js"></script>

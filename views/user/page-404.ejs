@@ -26,47 +26,5 @@
     </div>
     <%- include("../../views/partials/user/footer404") %>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const cartLinks = document.querySelectorAll('.site-header__cart');
 
-                cartLinks.forEach(link => {
-                    link.addEventListener('click', (e) => {
-                    
-
-                     
-                        e.stopPropagation();
-
-                      
-                        window.location.href = '/cart';
-
-                        e.preventDefault();
-                    });
-                });
-            });
-        </script>
-        <script>
-            async function checkUserBlockStatus() {
-                try {
-                    const response = await fetch("/check-block-status", {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    });
-                    const data = await response.json();
-
-                    if (data.blocked) {
-
-                        window.location.href = "/login"; 
-                    }
-                } catch (error) {
-                    console.error("Error checking block status:", error);
-                }
-            }
-
-      
-            setInterval(checkUserBlockStatus, 2000);
-        </script>
-
-      
+        <script src="/js/userBlockCheck.js"></script>

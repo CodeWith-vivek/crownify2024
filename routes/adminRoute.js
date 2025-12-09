@@ -33,7 +33,7 @@ router.post("/removeCategoryOffer",adminAuth,categoryController.removeCategoryOf
 router.get("/listCategory",adminAuth,categoryController.getListCategory)
 router.get("/unlistCategory",adminAuth,categoryController.getUnlistCategory)
 router.get("/editCategory",adminAuth,categoryController.getEditCategory)
-router.post("/editCategory/:id",adminAuth,categoryController.editCategory)
+router.put("/editCategory/:id",adminAuth,categoryController.editCategory)
 
 //brand management
 router.get("/brands",adminAuth,brandController.getBrandPage)

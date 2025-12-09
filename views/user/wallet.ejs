@@ -35,10 +35,9 @@
                             </div>
                         </div>
                     </div>
-                  
-   
                     <div class="transaction-history" style="border: 1px solid #ddd;">
-                        <h3 class="mb-4" style="font-size: 1.25rem; position: sticky; top: 0; background: white; z-index: 1; padding: 8px;">
+                        <h3 class="mb-4"
+                            style="font-size: 1.25rem; position: sticky; top: 0; background: white; z-index: 1; padding: 8px;">
                             Recent Transactions
                         </h3>
                         <div class="transaction-list">
@@ -56,9 +55,11 @@
                                             </h4>
                                         </div>
                                         <div class="text-end">
-                                            <span class="fs-5 fw-bold <%= transaction.type === 'credit' ? 'text-success' : 'text-danger' %>"
+                                            <span
+                                                class="fs-5 fw-bold <%= transaction.type === 'credit' ? 'text-success' : 'text-danger' %>"
                                                 style="font-size: 0.75rem;">
-                                                <%= transaction.type==='credit' ? '+' : '-' %>₹<%= transaction.amount.toFixed(2) %>
+                                                <%= transaction.type==='credit' ? '+' : '-' %>₹<%=
+                                                        transaction.amount.toFixed(2) %>
                                             </span>
                                             <p class="text-muted mb-0" style="font-size: 0.75rem;">
                                                 <%= transaction.date.toISOString().split('T')[0] %>
@@ -70,14 +71,15 @@
                                             <p class="text-center">No transactions found.</p>
                                             <% } %>
                         </div>
-                    
-                  
+
+
                         <div class="pagination-controls mt-4 d-flex justify-content-center align-items-center">
                             <% if (currentPage> 1) { %>
                                 <a href="?page=1&limit=5" class="btn btn-outline-primary me-2" title="First Page">
                                     <i class="bi bi-chevron-double-left"></i>
                                 </a>
-                                <a href="?page=<%= currentPage - 1 %>&limit=5" class="btn btn-outline-primary me-2" title="Previous Page">
+                                <a href="?page=<%= currentPage - 1 %>&limit=5" class="btn btn-outline-primary me-2"
+                                    title="Previous Page">
                                     <i class="bi bi-chevron-left"></i>
                                 </a>
                                 <% } %>
@@ -87,10 +89,12 @@
                                         </span>
                                     </div>
                                     <% if (currentPage < totalPages) { %>
-                                        <a href="?page=<%= currentPage + 1 %>&limit=5" class="btn btn-outline-primary ms-2" title="Next Page">
+                                        <a href="?page=<%= currentPage + 1 %>&limit=5"
+                                            class="btn btn-outline-primary ms-2" title="Next Page">
                                             <i class="bi bi-chevron-right"></i>
                                         </a>
-                                        <a href="?page=<%= totalPages %>&limit=5" class="btn btn-outline-primary ms-2" title="Last Page">
+                                        <a href="?page=<%= totalPages %>&limit=5" class="btn btn-outline-primary ms-2"
+                                            title="Last Page">
                                             <i class="bi bi-chevron-double-right"></i>
                                         </a>
                                         <% } %>
@@ -107,184 +111,10 @@
         <!-- SweetAlert JS -->
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        
         <script>
-            const RAZORPAY_KEY_ID = '<%= process.env.RAZORPAY_KEY_ID %>'; 
-
-            document.getElementById('add-money-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const amount = document.getElementById('amount').value;
-
-                if (amount <= 0) {
-                    Swal.fire("Error", "Please enter a valid amount.", "error");
-                    return;
-                }
-
-                try {
-                 
-                    const response = await fetch('/wallet/add-money', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ amount }),
-                    });
-                    const data = await response.json();
-
-                    if (data.success) {
-                        const options = {
-                            key: RAZORPAY_KEY_ID, 
-                            amount: data.amount * 100,
-                            currency: 'INR',
-                            name: 'Your Company Name',
-                            description: 'Add to Wallet',
-                            order_id: data.orderId, 
-                            handler: async function (response) {
-                              
-                                try {
-                                    const confirmResponse = await fetch('/confirm-payment', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                        },
-                                        body: JSON.stringify({
-                                            userId: '<%= user._id %>', 
-                                            orderId: response.razorpay_order_id,
-                                            paymentId: response.razorpay_payment_id,
-                                            signature: response.razorpay_signature, 
-                                            amount: amount,
-                                        }),
-                                    });
-
-                                    const confirmData = await confirmResponse.json();
-
-                                    if (confirmData.success) {
-                                        Swal.fire({
-                                            title: "Success",
-                                            text: confirmData.message,
-                                            icon: "success",
-                                        }).then(() => {
-                                            location.reload(); 
-                                        });
-                                    } else {
-                                        Swal.fire({
-                                            title: "Error",
-                                            text: confirmData.message,
-                                            icon: "error",
-                                        });
-                                    }
-                                } catch (error) {
-                                    console.error("Error during payment confirmation:", error);
-                                    Swal.fire({
-                                        title: "Payment Confirmation Error",
-                                        text: "An error occurred while confirming the payment. Please try again.",
-                                        icon: "error",
-                                    });
-                                }
-                            },
-                            modal: {
-                                ondismiss: async function () {
-                                 
-                                    console.log("DEBUG: Razorpay modal dismissed.");
-                                }
-                            },
-                            // Add a failure handler for payment
-                            "payment.failed": async function (response) {
-                                console.error("Payment failed:", response.error);
-                                Swal.fire({
-                                    title: "Payment Failed",
-                                    text: response.error.description || "An unknown error occurred. Please try again.",
-                                    icon: "error",
-                                });
-                            },
-                            prefill: {
-                                name: 'Customer Name',
-                                email: 'customer@example.com',
-                                contact: '9999999999',
-                            },
-                            theme: {
-                                color: '#F37254',
-                            },
-                        };
-
-                        const rzp = new Razorpay(options);
-                        rzp.open();
-                    } else {
-                        Swal.fire("Error", data.message, "error");
-                    }
-                } catch (error) {
-                    console.error("Error during payment process:", error);
-                    Swal.fire("Error", "Something went wrong. Please try again.", "error");
-                }
-            });
-
-            window.addEventListener('DOMContentLoaded', async () => {
-                try {
-                    const response = await fetch('/wallet/balance');
-                    const data = await response.json();
-
-                    if (data.success) {
-                        document.querySelector('.balance').textContent = `₹${data.balance.toFixed(2)}`;
-                    } else {
-                        Swal.fire("Error", data.message, "error");
-                    }
-                } catch (error) {
-                    console.error('Error fetching balance:', error);
-                    Swal.fire("Error", "An error occurred while fetching the balance.", "error");
-                }
-            });
-
-            function quickAdd(amount) {
-                const amountInput = document.getElementById("amount");
-                amountInput.value = amount;       
-                document.getElementById("add-money-form").dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-            }
+            const RAZORPAY_KEY_ID = "<%= process.env.RAZORPAY_KEY_ID %>";
+            const USER_ID = "<%= user._id %>";
         </script>
-        <script>
-
-
-
-
-            document.addEventListener('DOMContentLoaded', () => {
-                const cartLinks = document.querySelectorAll('.site-header__cart');
-
-                cartLinks.forEach(link => {
-                    link.addEventListener('click', (e) => {
-                       
-
-
-                        e.stopPropagation();
-
-
-                        window.location.href = '/cart';
-
-
-                        e.preventDefault();
-                    });
-                });
-            });
-        </script>
-        <script>
-            async function checkUserBlockStatus() {
-                try {
-                    const response = await fetch("/check-block-status", {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    });
-                    const data = await response.json();
-
-                    if (data.blocked) {
-
-                        window.location.href = "/login"; 
-                    }
-                } catch (error) {
-                    console.error("Error checking block status:", error);
-                }
-            }
-
-         
-            setInterval(checkUserBlockStatus, 2000);
-        </script>
+        <script src="/js/cartNav.js"></script>
+        <script src="/js/userBlockCheck.js"></script>
+        <script src="/js/walletHandler.js"></script>
