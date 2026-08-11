@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const Transaction=require("../payment/transactionSchema")
 const Category=require("../category/categorySchema")
 const Brand=require("../brand/brandSchema")
+const { wantsJson } = require("../../shared/utils/wantsJson");
 
 
 
@@ -95,9 +96,11 @@ const loadwalletpage = async (req, res) => {
       wishlistCount,
     };
 
+    if (wantsJson(req)) return res.json({ success: true, ...renderData });
     return res.render("wallet", renderData);
   } catch (error) {
     console.error("Error loading wallet page:", error);
+    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Server error" });
     res.status(500).send("Server error");
   }
 };
@@ -141,6 +144,7 @@ const addMoneyToWallet = async (req, res) => {
       message: "Order created successfully.",
       orderId: order.id,
       amount: amount,
+      key: process.env.RAZORPAY_KEY_ID,
     });
   } catch (error) {
     console.error("Error adding money to wallet:", error);

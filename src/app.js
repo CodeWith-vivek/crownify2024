@@ -92,6 +92,7 @@ app.use("/api", nocache(), orderRoutes);
 app.use("/", nocache(), wishlistRoutes);
 app.use("/api", nocache(), wishlistRoutes);
 app.use("/", nocache(), walletRoutes);
+app.use("/api", nocache(), walletRoutes);
 app.use("/", nocache(), cartRoutes);
 app.use("/api", nocache(), cartRoutes);
 app.use("/", nocache(), checkoutRoutes);

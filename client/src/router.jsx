@@ -15,6 +15,11 @@ import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { CheckoutPage } from "@/features/checkout/CheckoutPage";
 import { PaymentSuccessPage } from "@/features/payment/PaymentSuccessPage";
 import { PaymentFailurePage } from "@/features/payment/PaymentFailurePage";
+import { ProfilePage } from "@/features/profile/ProfilePage";
+import { AccountDetailsPage } from "@/features/profile/AccountDetailsPage";
+import { OrdersPage } from "@/features/order/OrdersPage";
+import { AddressPage } from "@/features/address/AddressPage";
+import { WalletPage } from "@/features/wallet/WalletPage";
 
 // Each ComingSoon stub below is replaced with its real feature page in a
 // later chunk (see the SPA conversion plan) — this route tree exists now so
@@ -39,11 +44,11 @@ export function AppRouter() {
         <Route element={<ProtectedRoute />}>
           <Route path="/cart" element={<CartPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
-          <Route path="/profile" element={<ComingSoon title="Profile" />} />
-          <Route path="/orders" element={<ComingSoon title="Orders" />} />
-          <Route path="/Address" element={<ComingSoon title="Addresses" />} />
-          <Route path="/AccountDetails" element={<ComingSoon title="Account Details" />} />
-          <Route path="/wallet" element={<ComingSoon title="Wallet" />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/Address" element={<AddressPage />} />
+          <Route path="/AccountDetails" element={<AccountDetailsPage />} />
+          <Route path="/wallet" element={<WalletPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
         </Route>
 

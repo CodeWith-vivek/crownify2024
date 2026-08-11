@@ -223,6 +223,15 @@ export function CheckoutPage() {
                   {addresses.length === 0 ? "Add a shipping address" : "Add another address"}
                 </summary>
                 <form onSubmit={handleAddAddress} className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <select
+                    className="rounded-md border bg-background px-3 py-2 text-sm sm:col-span-2"
+                    value={addressForm.addressType}
+                    onChange={(e) => setAddressForm({ ...addressForm, addressType: e.target.value })}
+                  >
+                    <option value="Home">Home</option>
+                    <option value="Office">Office</option>
+                    <option value="Other">Other</option>
+                  </select>
                   <Input placeholder="Full name" required value={addressForm.name} onChange={(e) => setAddressForm({ ...addressForm, name: e.target.value })} />
                   <Input placeholder="Phone" required value={addressForm.phone} onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })} />
                   <Input placeholder="Flat / House / Company" required value={addressForm.home} onChange={(e) => setAddressForm({ ...addressForm, home: e.target.value })} />
