@@ -938,7 +938,7 @@ const login = async (req, res) => {
     const { email: rawEmail, password } = req.body;
     const email = asString(rawEmail);
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email }).select("+password");
 
     if (!existingUser) {
       return res.json({

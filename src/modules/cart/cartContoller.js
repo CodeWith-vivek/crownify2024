@@ -6,6 +6,7 @@ const User = require("../user/userSchema");
 const Coupon = require("../coupon/couponSchema");
 const Category = require("../category/categorySchema");
 const Brand = require("../brand/brandSchema");
+const { wantsJson } = require("../../shared/utils/wantsJson");
 
 // code to lad cart page 
 
@@ -18,7 +19,7 @@ const loadCartPage = async (req, res) => {
     let isCartEmpty = true;
 
     if (!req.session || !req.session.user) {
-      return res.render("cart", {
+      const emptyCart = {
         user: null,
         cartItems: [],
         subtotal: 0,
@@ -29,7 +30,10 @@ const loadCartPage = async (req, res) => {
         coupons: [],
         cartCount: 0,
         wishlistCount: 0,
-      });
+      };
+      return wantsJson(req)
+        ? res.json({ success: true, ...emptyCart })
+        : res.render("cart", emptyCart);
     }
 
   
@@ -148,7 +152,7 @@ const loadCartPage = async (req, res) => {
           .length
       : 0;
 
-    return res.render("cart", {
+    const cartData = {
       user,
       cartItems,
       subtotal,
@@ -159,7 +163,10 @@ const loadCartPage = async (req, res) => {
       coupons,
       cartCount,
       wishlistCount,
-    });
+    };
+    return wantsJson(req)
+      ? res.json({ success: true, ...cartData })
+      : res.render("cart", cartData);
   } catch (error) {
     console.error("Cart page error:", error.stack || error);
  

@@ -39,6 +39,7 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: false,
+      select: false,
     },
     isBlocked: {
       type: Boolean,

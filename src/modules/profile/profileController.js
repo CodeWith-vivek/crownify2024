@@ -909,9 +909,9 @@ const updateProfileDetails = async (req, res) => {
   const userId = req.session.user;
 
   try {
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select("+password");
 
-    
+
     if (password) {
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
@@ -942,7 +942,7 @@ const validatCurrentPassword = async (req, res) => {
 
   try {
  
-    const user = await User.findById(userId); 
+    const user = await User.findById(userId).select("+password");
 
     if (!user) {
       return res.status(404).json({ valid: false, message: "User  not found" });

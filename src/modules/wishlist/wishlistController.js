@@ -3,6 +3,7 @@ const Product = require("../product/productSchema");
 const Wishlist=require("./wishlistSchema")
 const Category=require("../category/categorySchema")
 const Brand=require("../brand/brandSchema")
+const { wantsJson } = require("../../shared/utils/wantsJson");
 
 
 //code to load wishlist page
@@ -53,12 +54,10 @@ const loadWishlistpage = async (req, res) => {
         : 0;
 
     if (!user) {
-      return res.render("Wishlist", {
-        user: null,
-        wishlistItems: [],
-        isWishlistEmpty: true,
-        isGuest: true,
-      });
+      const guestData = { user: null, wishlistItems: [], isWishlistEmpty: true, isGuest: true };
+      return wantsJson(req)
+        ? res.json({ success: true, ...guestData })
+        : res.render("Wishlist", guestData);
     }
 
     const wishlist = await Wishlist.findOne({ userId })
@@ -73,13 +72,10 @@ const loadWishlistpage = async (req, res) => {
       .lean();
 
     if (!wishlist || wishlist.items.length === 0) {
-      return res.render("Wishlist", {
-        user,
-        wishlistItems: [],
-        isWishlistEmpty: true,
-        isGuest: false,
-        cartCount,
-      });
+      const emptyData = { user, wishlistItems: [], isWishlistEmpty: true, isGuest: false, cartCount };
+      return wantsJson(req)
+        ? res.json({ success: true, ...emptyData })
+        : res.render("Wishlist", emptyData);
     }
 
     const wishlistItems = wishlist.items
@@ -125,20 +121,22 @@ const loadWishlistpage = async (req, res) => {
       })
       .filter((item) => item !== null);
 
-    res.render("Wishlist", {
+    const pageData = {
       user,
       wishlistItems,
       isWishlistEmpty: wishlistItems.length === 0,
       isGuest: false,
       cartCount,
       wishlistCount: wishlistItems.length,
-    });
+    };
+    if (wantsJson(req)) return res.json({ success: true, ...pageData });
+    res.render("Wishlist", pageData);
   } catch (error) {
     console.error("Wishlist page error:", error);
-    res.status(500).render("error", {
-      message: "Error loading wishlist",
-      error: error.toString(),
-    });
+    if (wantsJson(req)) {
+      return res.status(500).json({ success: false, message: "Error loading wishlist" });
+    }
+    res.status(500).send("Error loading wishlist");
   }
 };
 
