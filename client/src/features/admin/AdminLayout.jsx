@@ -10,12 +10,14 @@ import {
   Ticket,
   Mail,
   LogOut,
+  BarChart3,
 } from "lucide-react";
 import { useAdminAuth } from "@/store/AdminAuthContext";
 import { adminApi } from "./adminApi";
 
 const navItems = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/admin/sales-report", label: "Sales Report", icon: BarChart3 },
   { to: "/admin/orderlist", label: "Orders", icon: ShoppingBag },
   { to: "/admin/users", label: "Customers", icon: Users },
   { to: "/admin/category", label: "Categories", icon: FolderTree },

@@ -102,6 +102,7 @@ app.use("/api", nocache(), paymentRoutes);
 app.use("/", nocache(), couponRoutes);
 app.use("/api", nocache(), couponRoutes);
 app.use("/", nocache(), reportRoutes);
+app.use("/api", nocache(), reportRoutes);
 app.use("/", nocache(), contactRoutes);
 app.use("/api", nocache(), contactRoutes);
 
@@ -124,7 +125,9 @@ app.use("/api/admin", nocache(), contactAdminRoutes);
 app.use("/admin", nocache(), couponAdminRoutes);
 app.use("/api/admin", nocache(), couponAdminRoutes);
 app.use("/admin", nocache(), reportAdminRoutes);
+app.use("/api/admin", nocache(), reportAdminRoutes);
 app.use("/admin", nocache(), topsellingRoutes);
+app.use("/api/admin", nocache(), topsellingRoutes);
 
 app.use((req,res)=>{
   res.status(404).render("page-404")

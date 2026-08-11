@@ -35,6 +35,7 @@ import { ProductListPage } from "@/features/admin/products/ProductListPage";
 import { ProductFormPage } from "@/features/admin/products/ProductFormPage";
 import { CouponManagementPage } from "@/features/admin/coupons/CouponManagementPage";
 import { ContactMessagesPage } from "@/features/admin/contact/ContactMessagesPage";
+import { SalesReportPage } from "@/features/admin/report/SalesReportPage";
 
 // Each ComingSoon stub below is replaced with its real feature page in a
 // later chunk (see the SPA conversion plan) — this route tree exists now so
@@ -79,6 +80,7 @@ export function AppRouter() {
         <Route element={<AdminProtectedRoute />}>
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<DashboardPage />} />
+            <Route path="/admin/sales-report" element={<SalesReportPage />} />
             <Route path="/admin/orderlist" element={<OrderListPage />} />
             <Route path="/admin/orderDetails/:id" element={<OrderDetailsPage />} />
             <Route path="/admin/users" element={<CustomersPage />} />

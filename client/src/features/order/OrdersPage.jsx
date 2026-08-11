@@ -96,7 +96,16 @@ export function OrdersPage() {
                   {new Date(order.createdAt).toLocaleDateString()}
                 </p>
               </div>
-              <p className="font-semibold text-primary">₹{order.grandTotal}</p>
+              <div className="flex items-center gap-3">
+                <p className="font-semibold text-primary">₹{order.grandTotal}</p>
+                {order.items.some((i) => i.orderStatus === "Delivered") && (
+                  <Button asChild size="sm" variant="outline">
+                    <a href={`/api/invoice/${order.orderNumber}`} target="_blank" rel="noreferrer">
+                      Invoice
+                    </a>
+                  </Button>
+                )}
+              </div>
             </div>
 
             <div className="mt-3 space-y-3">
