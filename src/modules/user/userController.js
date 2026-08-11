@@ -7,6 +7,14 @@ const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const Coupon = require("../coupon/couponSchema");
 const { asString } = require("../../shared/utils/sanitize");
+const { wantsJson } = require("../../shared/utils/wantsJson");
+
+// Serves both the EJS page-load route ("/", "/shop", ...) and its /api
+// counterpart, which are the same mounted router during the SPA-conversion
+// transition (see src/app.js) — render HTML for normal navigation, JSON for
+// the React client or any XHR/Accept:json caller.
+const respond = (req, res, view, data) =>
+  wantsJson(req) ? res.json({ success: true, ...data }) : res.render(view, data);
 
 // code for secure password
 
@@ -33,7 +41,7 @@ const loadHomepage = async (req, res) => {
         Coupon.find({}),
       ]);
 
-      return res.render("Home", {
+      return respond(req, res, "Home", {
         products,
         coupons,
         cartCount: 0,
@@ -104,7 +112,7 @@ const loadHomepage = async (req, res) => {
         ).length
       : 0;
 
-    return res.render("Home", {
+    return respond(req, res, "Home", {
       user: userData,
       products: filteredProducts,
       coupons,
@@ -113,6 +121,7 @@ const loadHomepage = async (req, res) => {
     });
   } catch (error) {
     console.error("Error loading home page:", error);
+    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Server error" });
     res.status(500).send("Server error");
   }
 };
@@ -502,14 +511,14 @@ const loadBrandpage = async (req, res) => {
           ).length
         : 0;
 
-      return res.render("Brand", {
+      return respond(req, res, "Brand", {
         user: userData,
         products,
         cartCount,
         wishlistCount,
       });
     } else {
-      return res.render("Brand", {
+      return respond(req, res, "Brand", {
         products,
         cartCount: 0,
         wishlistCount: 0,
@@ -517,6 +526,7 @@ const loadBrandpage = async (req, res) => {
     }
   } catch (error) {
     console.error("Error loading brand page:", error);
+    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Server error" });
     res.status(500).send("Server error");
   }
 };
@@ -1179,17 +1189,23 @@ const loadShopPage = async (req, res) => {
           ).length
         : 0;
 
-      return res.render("Shop", {
+      return respond(req, res, "Shop", {
         user: userData,
         ...renderData,
         cartCount,
         wishlistCount,
       });
     } else {
-      return res.render("Shop", renderData);
+      return respond(req, res, "Shop", renderData);
     }
   } catch (error) {
     console.error("Error in loadShopPage:", error.message, error.stack);
+    if (wantsJson(req)) {
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred while loading the shop page",
+      });
+    }
     return res.status(500).render("error", {
       message: "An error occurred while loading the shop page",
       error: process.env.NODE_ENV === "development" ? error : null,
@@ -1242,6 +1258,9 @@ const loadProductDetails = async (req, res) => {
     };
 
     if (!product || !isValidProduct(product)) {
+      if (wantsJson(req)) {
+        return res.status(404).json({ success: false, message: "Product not found or unavailable" });
+      }
       return res.status(404).send("Product not found or unavailable");
     }
 
@@ -1333,6 +1352,10 @@ const loadProductDetails = async (req, res) => {
       templateData.wishlistCount = 0;
     }
 
+    if (wantsJson(req)) {
+      return res.json({ success: true, ...templateData });
+    }
+
     const productScript = `
       <script>
         const product = ${JSON.stringify(templateData.product)};
@@ -1340,13 +1363,11 @@ const loadProductDetails = async (req, res) => {
       </script>
     `;
 
-    return res.render("ProductDetails", {
-      ...templateData,
-      productScript,
-    });
+    return res.render("ProductDetails", { ...templateData, productScript });
   } catch (error) {
     console.error("Error loading product details:", error);
     console.error("Error stack:", error.stack);
+    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Server error" });
     res.status(500).send("Server error");
   }
 };

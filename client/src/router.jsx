@@ -5,6 +5,10 @@ import { LoginPage } from "@/features/auth/LoginPage";
 import { SignupPage } from "@/features/auth/SignupPage";
 import { VerifyOtpPage } from "@/features/auth/VerifyOtpPage";
 import { ForgotPasswordPage } from "@/features/auth/ForgotPasswordPage";
+import { HomePage } from "@/features/product/HomePage";
+import { ShopPage } from "@/features/product/ShopPage";
+import { ProductDetailsPage } from "@/features/product/ProductDetailsPage";
+import { BrandPage } from "@/features/brand/BrandPage";
 
 // Each ComingSoon stub below is replaced with its real feature page in a
 // later chunk (see the SPA conversion plan) — this route tree exists now so
@@ -13,10 +17,10 @@ export function AppRouter() {
   return (
     <Routes>
       <Route element={<MainLayout />}>
-        <Route path="/" element={<ComingSoon title="Home" />} />
-        <Route path="/shop" element={<ComingSoon title="Shop" />} />
-        <Route path="/brand" element={<ComingSoon title="Brand" />} />
-        <Route path="/product/:id" element={<ComingSoon title="Product Details" />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/shop" element={<ShopPage />} />
+        <Route path="/brand" element={<BrandPage />} />
+        <Route path="/product/:id" element={<ProductDetailsPage />} />
         <Route path="/About" element={<ComingSoon title="About" />} />
         <Route path="/contact" element={<ComingSoon title="Contact" />} />
         <Route path="/faq" element={<ComingSoon title="FAQ" />} />
