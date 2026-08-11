@@ -69,69 +69,51 @@ app.use(passport.initialize())
 app.use(passport.session())
 app.use(csrf.issueToken);
 app.use(csrf.verifyToken);
-app.set("view engine", "ejs");
-app.set("views", [
-  path.join(__dirname, "views/user"),
-  path.join(__dirname, "views/admin"),
-  path.join(__dirname, "views/partials"),
-]);
+
+// Static assets (product/brand images, invoices, and anything else under
+// public/) — served at the same unprefixed paths the client has always used
+// (e.g. /uploads/product-image/...), same as before the SPA cutover.
 app.use(express.static(path.join(__dirname, "..", "public")));
 
-// user-facing routes, all mounted at "/" (paths were already absolute in the
-// original single userRoute.js, so each module router is mounted at root)
-app.use("/", nocache(), userRoutes);
-// Also mounted under /api for the React client (Chunk 2+ of the SPA
-// conversion) — same router, same controllers, reachable at both prefixes
-// during the transition so the EJS app keeps working unmodified until the
-// final cutover (see the SPA conversion plan) removes the bare-path mount.
+// JSON API — the entire app surface now lives under /api (and /api/admin).
+// This used to be dual-mounted at both a bare path (for the EJS app) and
+// /api (for the React client) during the SPA conversion; the bare mounts
+// are gone now that the EJS frontend has been fully retired.
 app.use("/api", nocache(), userRoutes);
-app.use("/", nocache(), profileRoutes);
 app.use("/api", nocache(), profileRoutes);
-app.use("/", nocache(), orderRoutes);
 app.use("/api", nocache(), orderRoutes);
-app.use("/", nocache(), wishlistRoutes);
 app.use("/api", nocache(), wishlistRoutes);
-app.use("/", nocache(), walletRoutes);
 app.use("/api", nocache(), walletRoutes);
-app.use("/", nocache(), cartRoutes);
 app.use("/api", nocache(), cartRoutes);
-app.use("/", nocache(), checkoutRoutes);
 app.use("/api", nocache(), checkoutRoutes);
-app.use("/", nocache(), paymentRoutes);
 app.use("/api", nocache(), paymentRoutes);
-app.use("/", nocache(), couponRoutes);
 app.use("/api", nocache(), couponRoutes);
-app.use("/", nocache(), reportRoutes);
 app.use("/api", nocache(), reportRoutes);
-app.use("/", nocache(), contactRoutes);
 app.use("/api", nocache(), contactRoutes);
 
-// admin routes, all mounted at "/admin" (matching the original
-// app.use("/admin", nocache(), adminRoute) prefix). Also dual-mounted at
-// /api/admin for the React admin panel (Chunk 7+ of the SPA conversion),
-// same reasoning as the user-facing dual mounts above.
-app.use("/admin", nocache(), adminRoutes);
 app.use("/api/admin", nocache(), adminRoutes);
-app.use("/admin", nocache(), customerRoutes);
 app.use("/api/admin", nocache(), customerRoutes);
-app.use("/admin", nocache(), categoryRoutes);
 app.use("/api/admin", nocache(), categoryRoutes);
-app.use("/admin", nocache(), brandRoutes);
 app.use("/api/admin", nocache(), brandRoutes);
-app.use("/admin", nocache(), productRoutes);
 app.use("/api/admin", nocache(), productRoutes);
-app.use("/admin", nocache(), contactAdminRoutes);
 app.use("/api/admin", nocache(), contactAdminRoutes);
-app.use("/admin", nocache(), couponAdminRoutes);
 app.use("/api/admin", nocache(), couponAdminRoutes);
-app.use("/admin", nocache(), reportAdminRoutes);
 app.use("/api/admin", nocache(), reportAdminRoutes);
-app.use("/admin", nocache(), topsellingRoutes);
 app.use("/api/admin", nocache(), topsellingRoutes);
 
-app.use((req,res)=>{
-  res.status(404).render("page-404")
-})
+// The built React app (client/dist) — served as static files, with a
+// catch-all so client-side routes (React Router) resolve correctly on a
+// full page load/refresh. Must come after the /api mounts and the public/
+// static mount above so neither is shadowed by this fallback.
+app.use(express.static(path.join(__dirname, "..", "client", "dist")));
+app.get(/^\/(?!api\/).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "client", "dist", "index.html"));
+});
+
+// Anything left unmatched at this point is an unknown /api/* route.
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: "Not found" });
+});
 
 app.use((err, req, res, next) => {
   console.error(err);
@@ -141,14 +123,7 @@ app.use((err, req, res, next) => {
     err.message && err.message.length < 200
       ? err.message
       : "Something went wrong. Please try again.";
-
-  if (req.xhr || req.is("json") || req.accepts(["html", "json"]) === "json") {
-    return res.status(status).json({ success: false, message: safeMessage });
-  }
-  if (req.path.startsWith("/admin")) {
-    return res.status(status).render("admin-error");
-  }
-  return res.status(status).render("page-404");
+  res.status(status).json({ success: false, message: safeMessage });
 });
 
 module.exports = app;
