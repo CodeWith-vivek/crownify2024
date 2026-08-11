@@ -5,6 +5,7 @@ const User = require("../user/userSchema");
 const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
+const { wantsJson } = require("../../shared/utils/wantsJson");
 
 //code to load product add page
 
@@ -12,8 +13,10 @@ const getProductAddPage = async (req, res) => {
   try {
     const category = await Category.find({ isListed: true });
     const brand = await Brand.find({ isBlocked: false });
+    if (wantsJson(req)) return res.json({ success: true, cat: category, brand: brand });
     res.render("product-add", { cat: category, brand: brand });
   } catch (error) {
+    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading page" });
     res.redirect("/admin/pageerror");
   }
 };
@@ -155,20 +158,24 @@ const getAllProducts = async (req, res) => {
     const brand = await Brand.find({ isBlocked: false });
 
     if (category && brand) {
-      res.render("products", {
-        data: productData, 
+      const productsPageData = {
+        data: productData,
         currentPage: page,
         totalPages: Math.ceil(count / limit),
         cat: category,
         brand: brand,
-      });
+      };
+      if (wantsJson(req)) return res.json({ success: true, ...productsPageData });
+      res.render("products", productsPageData);
     } else {
+      if (wantsJson(req)) return res.status(404).json({ success: false, message: "Not found" });
       res.render("page-404");
     }
   } catch (error) {
+    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading products" });
     res.redirect("/admin/pageerror");
   }
-}; 
+};
 
 //code to add product offer
 
@@ -229,7 +236,6 @@ const addProductOffer = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ status: false, message: "Internal server error" });
-    res.redirect("/admin/pageerror");
   }
 };
 
@@ -282,8 +288,10 @@ const blockProduct = async (req, res) => {
   try {
     let id = req.query.id;
     await Product.updateOne({ _id: id }, { $set: { isBlocked: true } });
+    if (wantsJson(req)) return res.json({ success: true, message: "Product blocked" });
     res.redirect("/admin/products");
   } catch (error) {
+    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Could not block product" });
     res.redirect("/admin/pageerror");
   }
 };
@@ -295,8 +303,10 @@ const unblockProduct = async (req, res) => {
   try {
     let id = req.query.id;
     await Product.updateOne({ _id: id }, { $set: { isBlocked: false } });
+    if (wantsJson(req)) return res.json({ success: true, message: "Product unblocked" });
     res.redirect("/admin/products");
   } catch (error) {
+    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Could not unblock product" });
     res.redirect("/admin/pageerror");
   }
 };
@@ -309,12 +319,11 @@ const getEditProduct = async (req, res) => {
     const product = await Product.findOne({ _id: id });
     const category = await Category.find({});
     const brand = await Brand.find({});
-    res.render("edit-product", {
-      product: product,
-      cat: category,
-      brand: brand,
-    });
+    const editData = { product: product, cat: category, brand: brand };
+    if (wantsJson(req)) return res.json({ success: true, ...editData });
+    res.render("edit-product", editData);
   } catch (error) {
+    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading product" });
     res.redirect("/admin/pageerror");
   }
 };
@@ -487,9 +496,9 @@ const deleteSingleImage = async (req, res) => {
     } else {
    
     }
-    res.send({ status: true });
+    res.json({ status: true, success: true });
   } catch (error) {
-    res.redirect("/admin/pageerror");
+    res.status(500).json({ status: false, success: false, message: "Could not delete image" });
   }
 };
 

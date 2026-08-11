@@ -103,16 +103,26 @@ app.use("/", nocache(), couponRoutes);
 app.use("/api", nocache(), couponRoutes);
 app.use("/", nocache(), reportRoutes);
 app.use("/", nocache(), contactRoutes);
+app.use("/api", nocache(), contactRoutes);
 
 // admin routes, all mounted at "/admin" (matching the original
-// app.use("/admin", nocache(), adminRoute) prefix)
+// app.use("/admin", nocache(), adminRoute) prefix). Also dual-mounted at
+// /api/admin for the React admin panel (Chunk 7+ of the SPA conversion),
+// same reasoning as the user-facing dual mounts above.
 app.use("/admin", nocache(), adminRoutes);
+app.use("/api/admin", nocache(), adminRoutes);
 app.use("/admin", nocache(), customerRoutes);
+app.use("/api/admin", nocache(), customerRoutes);
 app.use("/admin", nocache(), categoryRoutes);
+app.use("/api/admin", nocache(), categoryRoutes);
 app.use("/admin", nocache(), brandRoutes);
+app.use("/api/admin", nocache(), brandRoutes);
 app.use("/admin", nocache(), productRoutes);
+app.use("/api/admin", nocache(), productRoutes);
 app.use("/admin", nocache(), contactAdminRoutes);
+app.use("/api/admin", nocache(), contactAdminRoutes);
 app.use("/admin", nocache(), couponAdminRoutes);
+app.use("/api/admin", nocache(), couponAdminRoutes);
 app.use("/admin", nocache(), reportAdminRoutes);
 app.use("/admin", nocache(), topsellingRoutes);
 

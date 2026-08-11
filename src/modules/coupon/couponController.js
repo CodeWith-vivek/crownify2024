@@ -1,4 +1,5 @@
 const Coupon = require("./couponSchema");
+const { wantsJson } = require("../../shared/utils/wantsJson");
 
 
 //code to load coupon management page
@@ -7,12 +8,15 @@ const loadCouponManagement = async (req, res) => {
   if (req.session.admin) {
     try {
       const coupons = await Coupon.find({}).sort({ createdAt: -1 });
+      if (wantsJson(req)) return res.json({ success: true, coupons });
       res.render("couponManagement", { coupons });
     } catch (error) {
       console.error("Error loading coupon management page:", error.message);
+      if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading coupons" });
       res.redirect("/admin/pageerror");
     }
   } else {
+    if (wantsJson(req)) return res.status(401).json({ success: false, message: "Not authenticated as admin" });
     res.redirect("/admin/login");
   }
 };
@@ -135,13 +139,16 @@ const editCoupon = async (req, res) => {
    const coupon = await Coupon.findById(couponId);
 
    if (!coupon) {
+     if (wantsJson(req)) return res.status(404).json({ success: false, message: "Coupon not found" });
      return res.status(404).send("Coupon not found");
    }
 
-  
+
+   if (wantsJson(req)) return res.json({ success: true, coupon });
    res.render("editCoupon", { coupon });
  } catch (error) {
    console.error("Error fetching coupon:", error.message);
+   if (wantsJson(req)) return res.status(500).json({ success: false, message: "Server error" });
    res.status(500).send("Server error");
  }
 };

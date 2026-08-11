@@ -1,5 +1,6 @@
 const Category = require("./categorySchema");
 const Product = require("../product/productSchema");
+const { wantsJson } = require("../../shared/utils/wantsJson");
 
 // code to load category in admin side
 
@@ -14,14 +15,12 @@ const categoryInfo = async (req, res) => {
 
     const totalCategories = await Category.countDocuments();
     const totalPages = Math.ceil(totalCategories / limit);
-    res.render("category", {
-      cat: categoryData,
-      currentPage: page,
-      totalPages,
-      totalCategories,
-    });
+    const categoryPageData = { cat: categoryData, currentPage: page, totalPages, totalCategories };
+    if (wantsJson(req)) return res.json({ success: true, ...categoryPageData });
+    res.render("category", categoryPageData);
   } catch (error) {
     console.log("Error fetching category data", error);
+    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading categories" });
     res.redirect("/admin/pageerror");
   }
 };
@@ -197,23 +196,27 @@ const getListCategory=async(req,res)=>{
   try {
     let id=req.query.id
     await Category.updateOne({_id:id},{$set:{isListed:false}})
+    if (wantsJson(req)) return res.json({ success: true, message: "Category unlisted" });
     res.redirect("/admin/category")
-    
+
   } catch (error) {
+    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Could not unlist category" });
     res.redirect("/pageerror")
-    
+
   }
 }
 
 
-//code to unlist category 
+//code to unlist category
 
 const getUnlistCategory=async(req,res)=>{
   try {
     let id = req.query.id;
     await Category.updateOne({ _id: id }, { $set: { isListed: true } });
+    if (wantsJson(req)) return res.json({ success: true, message: "Category listed" });
     res.redirect("/admin/category");
   } catch (error) {
+    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Could not list category" });
     res.redirect("/pageerror");
   }
 
@@ -225,11 +228,13 @@ const getEditCategory =async(req,res)=>{
   try {
     const id =req.query.id
     const category=await Category.findOne({_id:id})
+    if (wantsJson(req)) return res.json({ success: true, category });
     res.render("edit-category",{category:category})
-    
+
   } catch (error) {
+    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading category" });
     res.redirect("/pageerror")
-    
+
   }
 
 }
@@ -260,7 +265,7 @@ const editCategory = async (req, res) => {
     );
 
     if (updateCategory) {
-      res.redirect("/admin/category");
+      res.json({ success: true, message: "Category updated successfully", category: updateCategory });
     } else {
       res.status(400).json({ error: "Category not found" });
     }

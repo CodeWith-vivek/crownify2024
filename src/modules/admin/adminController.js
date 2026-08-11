@@ -6,6 +6,7 @@ const Product = require("../product/productSchema");
 const { session } = require("passport");
 const Transaction = require("../payment/transactionSchema");
 const { asString } = require("../../shared/utils/sanitize");
+const { wantsJson } = require("../../shared/utils/wantsJson");
 
 
 //admin side page error
@@ -18,9 +19,15 @@ const pageerror = async (req, res) => {
 
 const loadLogin = (req, res) => {
   if (req.session.admin) {
+    if (wantsJson(req)) return res.json({ success: true, redirect: "/admin/dashboard" });
     return res.redirect("/admin/dashboard");
   }
+  if (wantsJson(req)) return res.json({ success: true, admin: false });
   res.render("admin-login", { message: null });
+};
+
+const getCurrentAdmin = (req, res) => {
+  res.json({ success: true, admin: !!req.session.admin });
 };
 
 
@@ -58,12 +65,15 @@ const login = async (req, res) => {
 const loadDashboard = async (req, res) => {
   if (req.session.admin) {
     try {
-      res.render("dashboard"); 
+      if (wantsJson(req)) return res.json({ success: true });
+      res.render("dashboard");
     } catch (error) {
+      if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading dashboard" });
       res.redirect("/admin/pageerror");
     }
   } else {
-    res.redirect("/admin/login"); 
+    if (wantsJson(req)) return res.status(401).json({ success: false, message: "Not authenticated as admin" });
+    res.redirect("/admin/login");
   }
 };
 
@@ -118,14 +128,12 @@ const loadOrderlist = async (req, res) => {
     
     const totalPages = Math.ceil(totalOrders / limit);
 
-    res.render("orderlist", {
-      orders,
-      currentPage: page,
-      totalPages,
-      search,
-    });
+    const orderlistData = { orders, currentPage: page, totalPages, search };
+    if (wantsJson(req)) return res.json({ success: true, ...orderlistData });
+    res.render("orderlist", orderlistData);
   } catch (error) {
     console.error("Error loading orders:", error);
+    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Server error" });
     res.status(500).send("Server Error");
   }
 };
@@ -297,32 +305,38 @@ const loadOrderDetails = async (req, res) => {
         .populate("shippingAddress");
 
       if (!order) {
+        if (wantsJson(req)) return res.status(404).json({ success: false, message: "Order not found" });
         return res.redirect("/admin/pageerror");
       }
 
-     
+
       const orderItem = order.items.find(
         (item) => item._id.toString() === itemId
       );
 
       if (!orderItem) {
+        if (wantsJson(req)) return res.status(404).json({ success: false, message: "Order item not found" });
         return res.redirect("/admin/pageerror");
       }
 
+      if (wantsJson(req)) return res.json({ success: true, order, orderItem });
       res.render("orderDetails", {
         order,
-        orderItem, 
+        orderItem,
       });
     } catch (error) {
       console.error("Error loading order details:", error);
+      if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading order details" });
       res.redirect("/admin/pageerror");
     }
   } else {
+    if (wantsJson(req)) return res.status(401).json({ success: false, message: "Not authenticated as admin" });
     res.redirect("/admin/login");
   }
 };
 module.exports = {
   loadLogin,
+  getCurrentAdmin,
   login,
   loadDashboard,
   pageerror,

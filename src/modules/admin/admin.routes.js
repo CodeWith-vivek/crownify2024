@@ -6,6 +6,7 @@ const { authLimiter } = require("../../shared/middlewares/rateLimiters");
 
 router.get("/pageerror", adminController.pageerror);
 router.get("/login", adminController.loadLogin);
+router.get("/me", adminController.getCurrentAdmin);
 router.post("/login", authLimiter, adminController.login);
 router.get("/dashboard", adminAuth, adminController.loadDashboard);
 router.post("/logout", adminAuth, adminController.logout);

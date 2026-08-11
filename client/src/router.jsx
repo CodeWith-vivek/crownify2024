@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { ComingSoon } from "@/components/layout/ComingSoon";
 import { LoginPage } from "@/features/auth/LoginPage";
@@ -20,6 +20,21 @@ import { AccountDetailsPage } from "@/features/profile/AccountDetailsPage";
 import { OrdersPage } from "@/features/order/OrdersPage";
 import { AddressPage } from "@/features/address/AddressPage";
 import { WalletPage } from "@/features/wallet/WalletPage";
+
+import { AdminAuthProvider } from "@/store/AdminAuthContext";
+import { AdminProtectedRoute } from "@/features/admin/AdminProtectedRoute";
+import { AdminLayout } from "@/features/admin/AdminLayout";
+import { AdminLoginPage } from "@/features/admin/AdminLoginPage";
+import { DashboardPage } from "@/features/admin/DashboardPage";
+import { OrderListPage } from "@/features/admin/orders/OrderListPage";
+import { OrderDetailsPage } from "@/features/admin/orders/OrderDetailsPage";
+import { CustomersPage } from "@/features/admin/customers/CustomersPage";
+import { CategoryPage } from "@/features/admin/category/CategoryPage";
+import { BrandPage as AdminBrandPage } from "@/features/admin/brand/BrandPage";
+import { ProductListPage } from "@/features/admin/products/ProductListPage";
+import { ProductFormPage } from "@/features/admin/products/ProductFormPage";
+import { CouponManagementPage } from "@/features/admin/coupons/CouponManagementPage";
+import { ContactMessagesPage } from "@/features/admin/contact/ContactMessagesPage";
 
 // Each ComingSoon stub below is replaced with its real feature page in a
 // later chunk (see the SPA conversion plan) — this route tree exists now so
@@ -58,7 +73,32 @@ export function AppRouter() {
         <Route path="*" element={<ComingSoon title="404 — Not Found" />} />
       </Route>
 
-      <Route path="/admin/*" element={<ComingSoon title="Admin (Chunk 7/8)" />} />
+      <Route element={<AdminAuthProvider><AdminAuthOutlet /></AdminAuthProvider>}>
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+
+        <Route element={<AdminProtectedRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<DashboardPage />} />
+            <Route path="/admin/orderlist" element={<OrderListPage />} />
+            <Route path="/admin/orderDetails/:id" element={<OrderDetailsPage />} />
+            <Route path="/admin/users" element={<CustomersPage />} />
+            <Route path="/admin/category" element={<CategoryPage />} />
+            <Route path="/admin/brands" element={<AdminBrandPage />} />
+            <Route path="/admin/products" element={<ProductListPage />} />
+            <Route path="/admin/addProducts" element={<ProductFormPage />} />
+            <Route path="/admin/editProduct/:id" element={<ProductFormPage />} />
+            <Route path="/admin/coupon-management" element={<CouponManagementPage />} />
+            <Route path="/admin/contactMessages" element={<ContactMessagesPage />} />
+          </Route>
+        </Route>
+      </Route>
     </Routes>
   );
+}
+
+// Thin pass-through so AdminAuthProvider (a component, not usable directly as
+// a route element with children) can wrap this whole route subtree via a
+// parent <Route element={...}> the way React Router expects.
+function AdminAuthOutlet() {
+  return <Outlet />;
 }
