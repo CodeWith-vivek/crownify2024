@@ -1,4 +1,4 @@
-<%- include("../../views/partials/user/headershop") %>
+<%- include("../../views/partials/user/header", { headProfile: 'headershop', styleProfile: 'headershop' }) %>
     <section class="breadcrumb-option">
         <div class="container">
             <div class="row">
@@ -90,7 +90,7 @@
 
 
 
-    <%- include("../../views/partials/user/footershop") %>
+    <%- include("../../views/partials/user/footer", { aboutUsParaStyle: '', scriptsExtraPartial: '_data/extra/footershop-usershop' }) %>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="/js/contactInfo.js"></script>
         <script src="/js/userBlockCheck.js"></script>

@@ -1,4 +1,4 @@
-<%- include("../../views/partials/user/headercheckout") %>
+<%- include("../../views/partials/user/header", { headProfile: 'headercheckout', styleProfile: 'headercheckout' }) %>
 
     <section class="breadcrumb-option">
         <div class="container">
@@ -474,7 +474,7 @@
             </div>
         </div>
     </div>
-    <%- include("../../views/partials/user/footershop") %>
+    <%- include("../../views/partials/user/footer", { aboutUsParaStyle: '', scriptsExtraPartial: '_data/extra/footershop-usershop' }) %>
         <script src="/js/checkoutUpdateAddress.js"></script>
         <script src="/js/checkoutAddAddress.js"></script>
         <script src="/js/checkoutPaymentAndPAddress.js"></script>

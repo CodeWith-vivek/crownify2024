@@ -1,0 +1,249 @@
+
+        .pagination .page-item .page-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            margin: 0 5px;
+            font-weight: bold;
+            color: #333;
+            border: 1px solid #ddd;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .pagination .page-item .page-link:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #ccc;
+            cursor: not-allowed;
+            border-color: #ddd;
+        }
+
+        .pagination .page-link.rounded-circle {
+            border-radius: 50%;
+        }
+
+        .empty-cart-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Center vertically if needed */
+            min-height: 50vh;
+            /* Ensure it takes the full height of the screen */
+            text-align: center;
+            /* Center the text and content */
+        }
+
+        .empty-cart-content {
+            max-width: 500px;
+            /* Optional: Control the width of the content */
+            margin: auto;
+            /* Ensure centering in non-flex environments */
+        }
+
+        .empty-cart-actions {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* Center the items horizontally */
+            gap: 10px;
+            /* Add space between buttons */
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+           font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+            background-color: #9b8178;
+            color: #000;
+            line-height: 1;
+        }
+
+        .form-stacked {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            /* Adds spacing between elements */
+        }
+
+        .form-stacked input {
+            width: 100%;
+            margin-bottom: 10px;
+            /* Adds space below the input */
+        }
+
+        .form-stacked button {
+            width: 100%;
+            /* Ensures buttons are the same width as the input field */
+            padding: 10px;
+            /* Adds padding for better appearance */
+            text-align: center;
+            /* Centers text within the buttons */
+        }
+
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1;
+            /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgba(84, 79, 79, 0.147);
+            /* Fallback color */
+            background-color: rgba(165, 154, 154, 0.172);
+            /* Black w/ opacity */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+           
+            padding: 20px;
+            border: 1px solid #888;
+            width: 124%;
+        
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            margin: 0;
+        }
+
+        .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal {
+            z-index: 1050;
+          
+        }
+
+        .modal-backdrop {
+            z-index: 1040;
+          
+        }
+
+        .img-fluid {
+            max-width: 44%;
+            height: 44px;
+        }
+        @media (min-width: 992px) {
+    .col-lg-9 {
+        -ms-flex: 0 0 75%;
+        flex: 0 0 75%;
+        max-width: 86%;
+    }
+}
+@media (min-width: 992px) {
+    .col-lg-2 {
+        -ms-flex: 0 0 16.666667%;
+        flex: 3 0 16.666667%;
+        max-width: 78.666667%;
+    }
+}
+     .site-cart,
+.site-header__wishlist {
+    position: relative;
+}
+
+/* Cart badge styling */
+.cart-count {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: #dc0909;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Wishlist badge styling */
+.wishlist-count {
+    position: absolute;
+    top: -10px;
+    right: 7px;
+    background-color: #291616;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    
+}
+
+/* Hover effects */
+.site-cart:hover .cart-count {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+.site-header__wishlist:hover .wishlist-count {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+.product-details-fixed {
+    width: 300px; /* Adjust the width as needed */
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden; /* Hide overflow content */
+    text-overflow: ellipsis; /* Add ellipsis for long text */
+}
+
+/* Style the image to ensure it stays within the fixed column */
+.product-details-fixed .product-image {
+    max-width: 60px; /* Set a fixed width for the image */
+    height: auto; /* Maintain aspect ratio */
+    margin-right: 8px; /* Add spacing between image and text */
+}
+
+/* Product info text inside the fixed column */
+.product-details-fixed .product-info {
+    display: inline-block;
+    vertical-align: middle;
+    max-width: calc(100% - 70px); /* Account for image width + margin */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+    

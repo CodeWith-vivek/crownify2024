@@ -1,4 +1,4 @@
-<%- include("../../views/partials/user/headershopdetails") %>
+<%- include("../../views/partials/user/header", { headProfile: 'headershopdetails', styleProfile: 'headershopdetails', assetPrefix: '/' }) %>
     <section class="shop-details">
         <div id="product-details" data-product-id="<%= product._id %>" style="display: none;"></div>
         <div class="product__details__pic" style="background-color: #e2e0c8;">
@@ -251,7 +251,7 @@
         </div>
     </section>
 
-    <%- include("../../views/partials/user/footershopdetails") %>
+    <%- include("../../views/partials/user/footer", { assetPrefix: '/', aboutUsParaStyle: '', includeSiteScroll: false, scriptsBlockOverridePartial: '_data/extra/footershopdetails-scriptsblock', extraScriptsPartial: '_data/extra/footershopdetails-scripts' }) %>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="/js/cartNav.js"></script>
         <script src="/js/userBlockCheck.js"></script>

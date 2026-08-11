@@ -1,4 +1,4 @@
-<%- include("../../views/partials/user/headerAbout") %>
+<%- include("../../views/partials/user/header", { headProfile: 'headerAbout', styleProfile: 'headerAbout', ordersLiClose: false }) %>
 
 
 
@@ -57,6 +57,6 @@
     </div>
 
 
-    <%- include("../../views/partials/user/footershop") %>
+    <%- include("../../views/partials/user/footer", { aboutUsParaStyle: '', scriptsExtraPartial: '_data/extra/footershop-usershop' }) %>
         <script src="/js/cartNav.js"></script>
         <script src="/js/userBlockCheck.js"></script>

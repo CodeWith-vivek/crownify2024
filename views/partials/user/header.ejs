@@ -1,5 +1,16 @@
-<!DOCTYPE html>
-<html class="no-js" lang="en">
+<%
+  const layout = locals.layout || 'full';
+  const assetPrefix = locals.assetPrefix || '';
+  const preloaderPrefix = locals.preloaderPrefix !== undefined ? locals.preloaderPrefix : assetPrefix;
+  const headProfile = locals.headProfile || 'header';
+  const styleProfile = locals.styleProfile || 'header';
+  const wishlistLinkStyle = locals.wishlistLinkStyle || '';
+  const faqsHref = locals.faqsHref || '/faq';
+  const aboutMobileHref = locals.aboutMobileHref || '/About';
+  const includeBootstrapBundle = locals.includeBootstrapBundle !== false;
+  const bodyExtraPartial = locals.bodyExtraPartial || null;
+%><!DOCTYPE html>
+<html<%- locals.htmlClass !== undefined ? locals.htmlClass : ' class="no-js"' %> lang="en">
 
 
 
@@ -10,297 +21,16 @@
     <meta name="description" content="description">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Favicon -->
-    <link rel="shortcut icon" href="assets/images/logoCrownify.png" />
-    <!-- Plugins CSS -->
-    <link rel="stylesheet" href="assets/css/plugins.css">
-    <!-- Bootstap CSS -->
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-    <!-- Main Style CSS -->
-    <link rel="stylesheet" href="assets/css/style.css">
-    
-    <link rel="stylesheet" href="assets/css/responsive.css">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap">
-
-    <link rel="stylesheet" href="assets/css/style2.css">
-    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
-        rel="stylesheet">
-
-
+    <%- include("_data/head/" + headProfile) %>
 <style>
-    .breadcrumb-option {
-    background: #291616;;
-    padding: 40px 0;
-}
-body{
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1;
-    color: #212529;
-    text-align: left;
-    background-color: #fff;
-}
-.breadcrumb__text h4 {
-    color: #ffffff;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-.breadcrumb__links a {
-    font-size: 15px;
-    color: #ffffff;
-    margin-right: 18px;
-    display: inline-block;
-    position: relative;
-}
-.breadcrumb__links span {
-    font-size: 15px;
-    color: #b7b7b7;
-    display: inline-block;
-}
-p{
-    color: #fff;
-}
-body, html {
-            margin: 0;
-            padding: 0;
-            font-family: "Inter", sans-serif;
-  font-optical-sizing: auto;
-            background-color: #9b8178;
-            color: #000;
-            line-height: 1;
-        }
- .form-select {
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  color: #333; 
-  background-color: #f80000; 
-  border: 1px solid #ed0000;
-  border-radius: 8px; 
-  transition: all 0.3s ease; 
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.form-select:hover {
-  background-color: #f1f1f1; 
-  border-color: #ccc; 
-}
-
-.form-select:focus {
-  background-color: #fff; 
-  border-color: #007bff;
-  outline: none; 
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); 
-}
-
-.form-select option {
-  padding: 10px;
-  background-color: #fff;
-  color: #333; 
-}
-.stock-status {
-    font-weight: bold;
-}
-.stock-status-out {
-    color: red;
-}
-.stock-status-low {
-    color: orange;
-}
-.stock-status-available {
-    color: green;
-}
- .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-           
-            padding: 20px;
-            border: 1px solid #888;
-            width: 124%;
-        
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            margin: 0;
-        }
-
-        .list-group-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal {
-            z-index: 1050;
-          
-        }
-
-        .modal-backdrop {
-            z-index: 1040;
-          
-        }
-  
-    .wishlist-table .product-name h4,
-    .wishlist-table .product-name h5,
-    .wishlist-table .product-name h6,
-    .wishlist-table .product-price,
-    .wishlist-table .stock-status,
-    .wishlist-table .product-size,
-    .wishlist-table .product-color {
-        font-size: 0.85rem; 
-    }
-
-  
-    .btn-small {
-        font-size: 0.75rem; 
-    }
-
-  
-    .wishlist-table th {
-        font-size: 0.85rem;
-    }
-
-    .form-control {
-        font-size: 0.85rem; 
-       
-    }
-
-   
-    .product-size,
-    .product-color {
-        width: 150px; 
-    }
-
-   
-    .wishlist-table td {
-        padding: 10px;
-    }
-  @media (max-width: 576px) {
-    .modal-dialog {
-        max-width: 90%; 
-        margin: 10px auto; 
-    }
-
-    .modal-body .list-group-item .row div {
-        font-size: 12px; 
-    }
-
-    .modal-title {
-        font-size: 16px; 
-    }
-
-    .btn-danger {
-        font-size: 14px;
-    }
-    .modal-content{
-        width:  100%;
-    }
-}
-.site-cart,
-.site-header__wishlist {
-    position: relative;
-}
-
-/* Cart badge styling */
-.cart-count {
-    position: absolute;
-    top: -10px;
-    right: -10px;
-    background-color: #dc0909;
-    color: white;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    font-size: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Wishlist badge styling */
-.wishlist-count {
-    position: absolute;
-    top: -10px;
-    right: 7px;
-    background-color: #291616;
-    color: white;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    font-size: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-    
-}
-
-/* Hover effects */
-.site-cart:hover .cart-count {
-    transform: scale(1.1);
-    transition: transform 0.2s ease;
-}
-
-.site-header__wishlist:hover .wishlist-count {
-    transform: scale(1.1);
-    transition: transform 0.2s ease;
-}
-.product-size, .product-color {
-    white-space: nowrap; /* Prevent text wrapping */
-    min-width: 100px; /* Ensure a minimum width */
-}
- .swal-title {
-        font-size: 1.5rem; /* Customize title font size */
-        color: #333; /* Customize title color */
-    }
-
-    .swal-content {
-        font-size: 1.2rem; /* Customize content font size */
-        color: #555; /* Customize content color */
-    }
-
-    .swal-button {
-        background-color: #268919; /* Customize button color */
-        border: none; /* Remove border */
-        color: #fff; /* Customize button text color */
-    }
-
-    .swal-button:hover {
-        background-color: #357ABD; /* Change color on hover */
-    }
-
-/* Adjust table layout */
-
+<%- include("_data/style/" + styleProfile) %>
 </style>
 </head>
 
+<% if (layout === 'full') { %>
 <body class="template-index belle home12-category">
     <div id="pre-loader">
-        <img src="assets/images/loader.gif" alt="Loading..." />
+        <img src="<%= preloaderPrefix %>assets/images/loader.gif" alt="Loading..." />
     </div>
     <div class="pageWrapper" style="background-color: white;">
         <!--Search Form Drawer-->
@@ -319,16 +49,16 @@ body, html {
         <div class="top-header">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-sm-4 col-md-4 col-lg-4 d-none d-lg-none d-md-block d-lg-block">
+                    <div class="<%= locals.topHeaderCol1Class || 'col-sm-4 col-md-4 col-lg-4 d-none d-lg-none d-md-block d-lg-block' %>">
                         <div class="text-center">
                             <p class="top-header_middle-text"> Worldwide Express Shipping</p>
                         </div>
                     </div>
-                    <div class="col-10 col-sm-8 col-md-5 col-lg-4">
-                      
+                    <div class="<%= locals.topHeaderCol2Class || 'col-10 col-sm-8 col-md-5 col-lg-4' %>">
+
                     </div>
 
-                    <div class="col-2 col-sm-4 col-md-3 col-lg-4 text-right ">
+                    <div class="<%= locals.topHeaderCol3Class || 'col-2 col-sm-4 col-md-3 col-lg-4 text-right' %> ">
                         <span class="user-menu d-block d-lg-none"><i class="anm anm-user-al"
                                 aria-hidden="true"></i></span>
                         <ul class="customer-links list-inline">
@@ -339,7 +69,7 @@ body, html {
                             <span>/</span>
                             <li><a href="/signup">SIGN UP</a></li>
                                 <%}%>
-                            <li style="padding-right: 61px;"><a href="/faq">FAQS</a></li>
+                            <li style="padding-right: 61px;"><a href="<%= faqsHref %>">FAQS</a></li>
                         </ul>
                     </div>
                 </div>
@@ -353,7 +83,7 @@ body, html {
                     <!--Desktop Logo-->
                     <div class="logo col-md-2 col-lg-2 d-none d-lg-block">
                         <a href="/">
-                            <img class="logo1" src="assets/images/logoCrownify.png"
+                            <img class="logo1" src="<%= assetPrefix %>assets/images/logoCrownify.png"
                                 alt="Belle Multipurpose Html Template" title="CROWNIFY" />
                         </a>
                     </div>
@@ -374,14 +104,14 @@ body, html {
 
                                 </li>
                                 <li class="lvl1 parent megamenu"><a href="/brand">Brand <i class="anm anm-angle-down-l"></i></a>
-                                
+
                                 </li>
                                 <li class="lvl1 parent megamenu"><a href="/shop">Shop <i
                                             class="anm anm-angle-down-l"></i></a>
 
                                 </li>
-                              
-                
+
+
                                 <li class="lvl1 parent dropdown"><a href="#">Pages <i
                                             class="anm anm-angle-down-l"></i></a>
                                     <ul class="dropdown">
@@ -390,7 +120,7 @@ body, html {
                                         <li><a href="/contact" class="site-nav">Contact Us</a></li>
                                         <li><a href="/faq" class="site-nav">FAQs</a></li>
 
-                                       
+
                                     </ul>
                                 </li>
                                 <li class="lvl1 parent dropdown"><a href="/contact">Contact<i
@@ -405,23 +135,23 @@ body, html {
                     <div class="col-6 col-sm-6 col-md-6 col-lg-2 d-block d-lg-none mobile-logo">
                         <div class="logo">
                             <a href="/">
-                                <img src="assets/images/logoCrownify.png" class="logo2"
+                                <img src="<%= assetPrefix %>assets/images/logoCrownify.png" class="logo2"
                                     alt="Belle Multipurpose Html Template" title="CROWNIFY" />
                             </a>
                         </div>
                     </div>
                     <!--Mobile Logo-->
                     <div class="col-4 col-sm-3 col-md-3 col-lg-2 d-flex align-items-center justify-content-end" >
-                    
+
                         <div class="site-header__wishlist">
-                          
-                                <a href="/wishlist" class="wishlist-trigger" title="Cart" style="padding: 0px 20px 0px 0px">
+
+                                <a href="/wishlist" class="wishlist-trigger" title="Cart"<%- wishlistLinkStyle %>>
                                 <i class="icon anm anm-heart-l"></i>
                             <span class="wishlist-count">
                                 <%= locals.wishlistCount ? (wishlistCount> 9 ? '10+' : wishlistCount) : '0' %>
                             </span>
                                 </a>
-                      
+
                         </div>
                         <div class="site-cart mr-3">
                             <a href="/cart" class="site-header__cart" title="Cart">
@@ -429,7 +159,7 @@ body, html {
                                 <span class="cart-count">
                                     <%= locals.cartCount ? (cartCount> 9 ? '10+' : cartCount) : '0' %>
                                 </span>
-                                
+
                             </a>
                         </div>
 
@@ -437,8 +167,8 @@ body, html {
                         <% if (locals.user) { %>
                             <div class="dropdown" style="display: inline-block;">
                                 <button class="btn dropdown-toggle" type="button" id="userDropdown"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fa-solid fa-user" style="color: #e14141;"></i>
+                                    data-bs-toggle="dropdown" aria-expanded="false"<%- locals.userDropdownButtonStyle || '' %>>
+                                    <i class="fa-solid fa-user" style="<%= locals.userIconStyle || 'color: #e14141;' %>"></i>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-start" aria-labelledby="userDropdown">
                                     <li><a class="dropdown-item" href="/profile"><i class="fa-solid fa-user"></i> Profile</a>
@@ -446,7 +176,8 @@ body, html {
                                     <li><a class="dropdown-item" href="/wallet"><i class="fa-solid fa-wallet"></i> Wallet</a>
                                     </li>
                                     <li><a class="dropdown-item" href="/orders"><i class="fa-solid fa-box"></i> Orders</a>
-                             
+<% if (locals.ordersLiClose !== false) { %>                                    </li>
+<% } %>
                                     <li><a class="dropdown-item" href="/logout"><i class="fa-solid fa-sign-out-alt"></i>
                                             Logout</a></li>
                                 </ul>
@@ -464,31 +195,52 @@ body, html {
                 <li class="lvl1 parent megamenu"><a href="/">Home <i class="anm anm-plus-l"></i></a>
 
                 </li>
-                <li class="lvl1 parent megamenu"><a href="/brand">Brand <i class="anm anm-plus-l"></i></a>
-                
+<% if (locals.mobileNavSwapBrandShop) { %>                <li class="lvl1 parent megamenu"><a href="/shop">Shop <i class="anm anm-plus-l"></i></a>
+
+                </li>
+                <li class="lvl1 parent megamenu"><a href="/brand"><%= locals.mobileBrandLabel || 'Brand' %> <i class="anm anm-plus-l"></i></a>
+
+                </li>
+<% } else { %>                <li class="lvl1 parent megamenu"><a href="/brand"><%= locals.mobileBrandLabel || 'Brand' %> <i class="anm anm-plus-l"></i></a>
+
                 </li>
                 <li class="lvl1 parent megamenu"><a href="/shop">Shop <i class="anm anm-plus-l"></i></a>
 
                 </li>
+<% } %>
                 <li class="lvl1 parent megamenu"><a href="#">Pages <i class="anm anm-plus-l"></i></a>
                     <ul>
-                
-                    
-                        <li><a href="/About" class="site-nav">About Us</a>
+
+
+                        <li><a href="<%= aboutMobileHref %>" class="site-nav">About Us</a>
                         </li>
                         <li><a href="/contact" class="site-nav">Contact Us</a></li>
                         <li><a href="/faq" class="site-nav">FAQs</a></li>
                     </ul>
                 </li>
-                
-             
+
+
             </ul>
         </div>
         <!--End Mobile Menu-->
 
-
+<% if (bodyExtraPartial) { %>
+        <%- include(bodyExtraPartial) %>
+<% } else { %>
         <div class="container-fluid crownify d-flex justify-content-center align-items-center">
-            <img src="assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+            <img src="<%= assetPrefix %>assets/images/logo/Crownify_logo_text.png" class="custom-logo">
 
         </div>
+<% if (includeBootstrapBundle) { %>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<% } %>
+<% } %>
+<% } else if (layout === 'minimal') { %>
+<body class="template-index belle home12-category">
+    <div class="pageWrapper" style="background-color: white;">
+        <div class="container-fluid crownify4 d-flex justify-content-center align-items-center">
+            <img src="<%= assetPrefix %>assets/images/logo/Crownify_logo_text.png" class="custom-logo">
+
+        </div>
+<% } %>
+<%# layout === 'bare': head only, the page itself opens <body> %>

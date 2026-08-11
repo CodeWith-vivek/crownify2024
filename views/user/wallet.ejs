@@ -1,4 +1,4 @@
-<%- include("../../views/partials/user/headerwallet") %>
+<%- include("../../views/partials/user/header", { headProfile: 'headerwallet', styleProfile: 'headerwallet', mobileNavSwapBrandShop: true, userDropdownButtonStyle: ' style="background: transparent;"', userIconStyle: 'color: #e14141; background:transparent; width: 30px;' }) %>
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6">
@@ -106,7 +106,7 @@
     </div>
     </div>
     </div>
-    <%- include("../../views/partials/user/footershop") %>
+    <%- include("../../views/partials/user/footer", { aboutUsParaStyle: '', scriptsExtraPartial: '_data/extra/footershop-usershop' }) %>
 
         <!-- SweetAlert JS -->
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>

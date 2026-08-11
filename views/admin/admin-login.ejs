@@ -1,5 +1,5 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<%- include("../../views/partials/admin/header") %>
+<%- include("../../views/partials/admin/header", { layout: 'minimal' }) %>
     <section class="ftco-section">
         <div class="container">
 
@@ -67,7 +67,7 @@
             </div>
         </div>
     </section>
-    <%- include("../../views/partials/admin/footer") %>
+    <%- include("../../views/partials/admin/footer", { layout: 'minimal' }) %>
         <script>
         
             const emailid = document.getElementById("email");

@@ -1,4 +1,4 @@
-<%- include("../../views/partials/user/headerpaymentSuccess") %>
+<%- include("../../views/partials/user/header", { layout: 'bare', headProfile: 'headerpaymentSuccess', styleProfile: 'headerpaymentSuccess', htmlClass: '' }) %>
 
     <body>
         <div class="container-fluid crownify4 d-flex justify-content-center align-items-center">
@@ -105,5 +105,5 @@
         </div>
     </body>
 
-    <%- include("../../views/partials/user/footerpaymentSuccess") %>
+    <%- include("../../views/partials/user/footer", { layout: 'bare', rawContentPartial: '_data/extra/footerpaymentSuccess-raw' }) %>
         <script src="/js/userBlockCheck.js"></script>

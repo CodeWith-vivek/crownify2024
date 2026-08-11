@@ -1,5 +1,5 @@
 <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-<%- include("../../views/partials/user/header404") %>
+<%- include("../../views/partials/user/header", { layout: 'minimal', headProfile: 'header404', styleProfile: 'header404', assetPrefix: '/' }) %>
     <div id="page-content">
         <!-- Lookbook Start -->
         <div class="container">
@@ -24,7 +24,7 @@
         </div>
         <!-- Lookbook Start -->
     </div>
-    <%- include("../../views/partials/user/footer404") %>
+    <%- include("../../views/partials/user/footer", { logoImagePrefix: '/', logoSliderComment: false, includeFooterBlock: false, includeSiteScroll: false, extraScriptsPartial: '_data/extra/footer404-scripts' }) %>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 
         <script src="/js/userBlockCheck.js"></script>

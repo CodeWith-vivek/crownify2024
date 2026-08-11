@@ -1,4 +1,4 @@
-<%- include("../../views/partials/user/headerprofile") %>
+<%- include("../../views/partials/user/header", { headProfile: 'headerprofile', styleProfile: 'headerprofile', bodyExtraPartial: '_data/bodyExtra/profileSidebar', preloaderPrefix: '/', topHeaderCol1Class: 'col-6 col-sm-5 col-md-5 col-lg-4', topHeaderCol2Class: 'col-2 col-sm-3 col-md-3 col-lg-4', topHeaderCol3Class: 'col-4 col-sm-4 col-md-4 col-lg-4 text-right' }) %>
     <div class="tab-pane fade active show" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
         <div class="card">
             <div class="card-header">
@@ -18,5 +18,5 @@
             </div>
         </div>
     </div>
-    <%- include("../../views/partials/user/footerprofile") %>
+    <%- include("../../views/partials/user/footer", { bodyExtraClosePartial: '_data/bodyExtra/profileSidebarClose', aboutUsParaStyle: ' style="line-height: 1.6;"', newsletterParaStyle: ' style="line-height: 1.6;"', extraScriptsPartial: '_data/extra/footerprofile-scripts', extraScriptsBeforeStandard: true }) %>
         <script src="/js/userBlockCheck.js"></script>

@@ -1,4 +1,4 @@
-<%- include("../../views/partials/user/headeraddressedit") %>
+<%- include("../../views/partials/user/header", { headProfile: 'headeraddressedit', styleProfile: 'headeraddressedit', assetPrefix: '/', topHeaderCol1Class: 'col-6 col-sm-5 col-md-5 col-lg-4', topHeaderCol2Class: 'col-2 col-sm-3 col-md-3 col-lg-4', topHeaderCol3Class: 'col-4 col-sm-4 col-md-4 col-lg-4 text-right' }) %>
     <section class="breadcrumb-option" style="    height: 140px;
     background-color: #291616;
     padding-top: 58px;
@@ -198,7 +198,7 @@
             </div>
         </div>
     </section>
-    <%- include("../../views/partials/user/footereditAddress") %>
+    <%- include("../../views/partials/user/footer", { assetPrefix: '/', aboutUsParaStyle: ' style="line-height: 1.6;"' }) %>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="/js/cartNav.js"></script>
         <script src="/js/userBlockCheck.js"></script>

@@ -1,4 +1,4 @@
-<%- include("../../views/partials/user/headercart") %>
+<%- include("../../views/partials/user/header", { headProfile: 'headercart', styleProfile: 'headercart', mobileNavSwapBrandShop: true, userDropdownButtonStyle: ' style="background: transparent;"', userIconStyle: 'color: #e14141; background:transparent; width: 30px;' }) %>
     <section class="breadcrumb-option">
         <div class="container">
             <div class="row">
@@ -186,7 +186,7 @@
     </section>
 
 
-    <%- include("../../views/partials/user/footershop") %>
+    <%- include("../../views/partials/user/footer", { aboutUsParaStyle: '', scriptsExtraPartial: '_data/extra/footershop-usershop' }) %>
         <script src="/js/cartNav.js"></script>
         <script src="/js/userBlockCheck.js"></script>
         <script src="/js/cartUpdation.js"></script>

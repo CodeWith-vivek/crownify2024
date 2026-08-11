@@ -1,4 +1,8 @@
-<!DOCTYPE html>
+<%
+  const layout = locals.layout || 'dashboard';
+  const styleProfile = locals.styleProfile || 'header2';
+  const extraHeadPartial = locals.extraHeadPartial || null;
+%><% if (layout === 'minimal') { %><!DOCTYPE html>
 <html class="no-js" lang="en">
 
 
@@ -52,16 +56,146 @@
             </div>
         </div>
         <!--End Search Form Drawer-->
-       
+
         <!--End Top Header-->
         <!--Header-->
-        
+
         <!--End Header-->
         <!--Mobile Menu-->
-        
+
         <!--End Mobile Menu-->
         <div class="container-fluid crownify d-flex justify-content-center align-items-center " style="margin-top: 0;">
             <img src="/assets/admin/images/logo/Crownify_logo_text.png" class="custom-logo">
 
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<% } else { %><!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>CROWNIFY</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="/assets/admin2/imgs/theme/logoCrownify.png">
+    <!-- Template CSS -->
+    <link href="/assets/admin2/css/main.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+
+    <!-- SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<% if (extraHeadPartial) { %>    <%- include(extraHeadPartial) %>
+<% } %>
+
+    <style>
+<%- include("_data/style/" + styleProfile) %>
+    </style>
+
+</head>
+
+<body >
+    <div class="screen-overlay"></div>
+    <aside class="navbar-aside" id="offcanvas_aside">
+        <div class="aside-top">
+            <a href="/admin/dashboard" class="brand-wrap">
+                <img src="/assets/admin2/imgs/theme/logoCrownify.png" class="logo" alt="Crownify" style=" width: 40px;   height: auto">
+            </a>
+            <div>
+                <button class="btn btn-icon btn-aside-minimize"><i class="material-icons">menu_open</i>
+                </button>
+            </div>
+        </div>
+        <nav>
+            <ul class="menu-aside">
+                <li class="menu-item active">
+                    <a class="menu-link" href="/admin/dashboard">
+                        <i class="material-icons">home</i>
+                        <span class="text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/addProducts">
+                        <i class="material-icons">add_business</i>
+                        <span class="text">Add Products</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/orderlist">
+                        <i class="material-icons">shopping_cart</i>
+                        <span class="text">Orders</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/products">
+                        <i class="material-icons">shopping_bag</i>
+                        <span class="text">Products</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/users">
+                        <i class="material-icons">people</i>
+                        <span class="text">Customers</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/category">
+                        <i class="material-icons">category</i>
+                        <span class="text">Category</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/brands">
+                        <i class="material-icons">star</i>
+                        <span class="text">Brands</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/coupon-management">
+                        <i class="material-icons">local_offer</i>
+                        <span class="text">Coupon Management</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/contactMessages">
+                        <i class="material-icons">question_answer</i>
+                        <span class="text">Enqiry </span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+    <main class="main-wrap">
+        <header class="main-header navbar">
+            <div class="col-8">
+
+            </div>
+            <div class="col-nav">
+                <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i
+                        class="material-icons md-apps"></i> </button>
+                <ul class="nav">
+
+
+
+                    <li class="dropdown nav-item">
+                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount"
+                            aria-expanded="false"> <img class="img-xs rounded-circle"
+                                src="/assets/admin2/imgs/theme/logoCrownify.png" alt="User"></a>
+                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
+                        <a class="dropdown-item text-danger" id="logoutLink" href="/admin/logout">
+                            <i class="material-icons text-danger" style="font-size: 24px;">exit_to_app</i>
+                            Logout
+                        </a>
+                    </div>
+                    </li>
+                </ul>
+            </div>
+        </header>
+<% } %>
