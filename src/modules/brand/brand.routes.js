@@ -3,8 +3,8 @@ const router = express.Router();
 const brandController = require("./brandController");
 const { adminAuth } = require("../../shared/middlewares/auth");
 const multer = require("multer");
-const storage = require("../../shared/utils/multer");
-const uploads = multer({ storage: storage });
+const multerOptions = require("../../shared/utils/multer");
+const uploads = multer(multerOptions);
 
 router.get("/brands", adminAuth, brandController.getBrandPage);
 router.post(

@@ -3,8 +3,8 @@ const router = express.Router();
 const productController = require("./productController");
 const { adminAuth } = require("../../shared/middlewares/auth");
 const multer = require("multer");
-const storage = require("../../shared/utils/multer");
-const uploads = multer({ storage: storage });
+const multerOptions = require("../../shared/utils/multer");
+const uploads = multer(multerOptions);
 
 router.get("/addProducts", adminAuth, productController.getProductAddPage);
 router.post(

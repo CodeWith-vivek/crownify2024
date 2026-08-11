@@ -3,9 +3,13 @@ const express = require("express");
 const path = require("path");
 const flash = require("connect-flash");
 const session=require("express-session")
+const { MongoStore } = require("connect-mongo");
+const cookieParser = require("cookie-parser");
+const helmet = require("helmet");
 const passport=require("./shared/config/passport")
 const db = require("./shared/config/db");
 const nocache=require("nocache")
+const csrf = require("./shared/middlewares/csrf");
 
 
 const userRoutes = require("./modules/user/user.routes");
@@ -34,13 +38,19 @@ const app = express();
 
 
 db();
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+}));
 app.use(session({
   secret:process.env.SESSION_SECRET,
   resave:false,
   saveUninitialized:true,
+  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
   cookie:{
-    secure:false,
+    secure: process.env.NODE_ENV === "production",
     httpOnly:true,
+    sameSite: "lax",
     maxAge:72*60*60*1000
   }
 }))
@@ -50,12 +60,15 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(cookieParser());
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 app.use(passport.initialize())
 app.use(passport.session())
+app.use(csrf.issueToken);
+app.use(csrf.verifyToken);
 app.set("view engine", "ejs");
 app.set("views", [
   path.join(__dirname, "views/user"),
@@ -93,5 +106,23 @@ app.use("/admin", nocache(), topsellingRoutes);
 app.use((req,res)=>{
   res.status(404).render("page-404")
 })
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  if (res.headersSent) return next(err);
+  const status = err.status || 500;
+  const safeMessage =
+    err.message && err.message.length < 200
+      ? err.message
+      : "Something went wrong. Please try again.";
+
+  if (req.xhr || req.is("json") || req.accepts(["html", "json"]) === "json") {
+    return res.status(status).json({ success: false, message: safeMessage });
+  }
+  if (req.path.startsWith("/admin")) {
+    return res.status(status).render("admin-error");
+  }
+  return res.status(status).render("page-404");
+});
 
 module.exports = app;

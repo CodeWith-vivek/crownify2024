@@ -9,13 +9,24 @@ const sharp = require("sharp");
 const Order = require("../order/orderSchema");
 const Category = require("../category/categorySchema");
 const Brand = require("../brand/brandSchema");
+const { asString } = require("../../shared/utils/sanitize");
 
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs").promises;
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const ALLOWED_AVATAR_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!ALLOWED_AVATAR_MIME_TYPES.has(file.mimetype)) {
+      return cb(new Error("Only image files (jpeg, png, webp, gif) are allowed"));
+    }
+    cb(null, true);
+  },
+});
 
 //code for secure password
 
@@ -167,7 +178,7 @@ const forgotEmailValid = async (req, res) => {
       });
     }
 
-    const { email } = req.body;
+    const email = asString(req.body.email);
     const findUser = await User.findOne({ email });
 
     if (findUser) {
@@ -649,8 +660,8 @@ const setPrimaryAddress = async (req, res) => {
     );
 
   
-    const updatedAddress = await Address.findByIdAndUpdate(
-      addressId,
+    const updatedAddress = await Address.findOneAndUpdate(
+      { _id: addressId, userId: userId },
       { $set: { isPrimary: true } },
       { new: true }
     );

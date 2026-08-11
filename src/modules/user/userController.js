@@ -6,6 +6,7 @@ const env = require("dotenv").config();
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const Coupon = require("../coupon/couponSchema");
+const { asString } = require("../../shared/utils/sanitize");
 
 // code for secure password
 
@@ -618,7 +619,8 @@ async function sendVerificationEmail(email, otp) {
 
 const signup = async (req, res) => {
   try {
-    const { name, phone, email, password, cPassword } = req.body;
+    const { name, phone, email: rawEmail, password, cPassword } = req.body;
+    const email = asString(rawEmail);
 
     if (password !== cPassword) {
       return res.json({
@@ -703,7 +705,18 @@ const verifyOtp = async (req, res) => {
       });
     }
 
+    req.session.otpAttempts = (req.session.otpAttempts || 0) + 1;
+    if (req.session.otpAttempts > 5) {
+      req.session.userOtp = null;
+      req.session.otpAttempts = 0;
+      return res.json({
+        success: false,
+        message: "Too many incorrect attempts. Please request a new OTP.",
+      });
+    }
+
     if (otp.toString() === sessionOtp.toString()) {
+      req.session.otpAttempts = 0;
       const user = req.session.userData;
 
       
@@ -872,7 +885,8 @@ const loadLogin = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email: rawEmail, password } = req.body;
+    const email = asString(rawEmail);
 
     const existingUser = await User.findOne({ email });
 

@@ -45,6 +45,8 @@ document.querySelectorAll(".pay-now-btn").forEach((button) => {
                     body: JSON.stringify({
                       orderNumber: data.orderNumber,
                       paymentId: response.razorpay_payment_id,
+                      razorpayOrderId: response.razorpay_order_id,
+                      razorpaySignature: response.razorpay_signature,
                       items: items,
                     }),
                   })

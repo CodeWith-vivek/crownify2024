@@ -8,6 +8,7 @@ const {
   restrictLoggedInUser,
   preventBackToAuth,
 } = require("../../shared/middlewares/authGuards");
+const { authLimiter, otpLimiter } = require("../../shared/middlewares/rateLimiters");
 
 router.get("/pageNotFound", userController.pageNotFound);
 
@@ -24,15 +25,15 @@ router.get(
   preventBackToAuth,
   userController.loadSignup
 );
-router.post("/signup", userController.signup);
+router.post("/signup", authLimiter, userController.signup);
 router.get(
   "/verify-otp",
   preventCache,
   preventBackToAuth,
   userController.loadOtpverify
 );
-router.post("/verify-otp", userController.verifyOtp);
-router.post("/resend-otp", userController.resendOtp);
+router.post("/verify-otp", otpLimiter, userController.verifyOtp);
+router.post("/resend-otp", otpLimiter, userController.resendOtp);
 
 router.get("/auth/google", (req, res, next) => {
   req.session.authOrigin = req.query.from || "signup";
@@ -81,6 +82,7 @@ router.get(
 );
 router.post(
   "/login",
+  authLimiter,
   preventCache,
   restrictLoggedInUser,
   userController.login

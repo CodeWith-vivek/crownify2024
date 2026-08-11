@@ -5,6 +5,7 @@ const Product=require("../product/productSchema")
 const Order = require("../order/orderSchema");
 const Cart=require("../cart/cartSchema")
 const Razorpay = require("razorpay");
+const crypto = require("crypto");
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -228,16 +229,37 @@ const retryPayment = async (req, res) => {
 
 const updateOrderStatus = async (req, res) => {
   try {
-    const { orderNumber, paymentId, items } = req.body; 
+    const {
+      orderNumber,
+      paymentId,
+      razorpayOrderId,
+      razorpaySignature,
+      items,
+    } = req.body;
 
-    if (!orderNumber || !paymentId || !items) {
+    if (!orderNumber || !paymentId || !items || !razorpayOrderId || !razorpaySignature) {
       return res.status(400).json({
         success: false,
-        message: "orderNumber, paymentId, and items are required",
+        message: "orderNumber, paymentId, razorpayOrderId, razorpaySignature, and items are required",
       });
     }
 
-    const existingOrder = await Order.findOne({ orderNumber: orderNumber });
+    const generatedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpayOrderId}|${paymentId}`)
+      .digest("hex");
+
+    if (generatedSignature !== razorpaySignature) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid payment signature. Payment not verified.",
+      });
+    }
+
+    const existingOrder = await Order.findOne({
+      orderNumber: orderNumber,
+      userId: req.session.user,
+    });
     if (!existingOrder) {
       return res
         .status(404)

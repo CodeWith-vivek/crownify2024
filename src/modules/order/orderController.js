@@ -610,7 +610,7 @@ const deletepremilinaryOrder = async (req, res) => {
   }
 
   try {
-    const order = await Order.findById(orderId);
+    const order = await Order.findOne({ _id: orderId, userId: req.session.user });
 
     if (!order) {
       return res.status(404).json({

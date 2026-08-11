@@ -5,6 +5,7 @@ const Order = require("../order/orderSchema");
 const Product = require("../product/productSchema");
 const { session } = require("passport");
 const Transaction = require("../payment/transactionSchema");
+const { asString } = require("../../shared/utils/sanitize");
 
 
 //admin side page error
@@ -28,7 +29,7 @@ const loadLogin = (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const admin = await User.findOne({ email, isAdmin: true });
+    const admin = await User.findOne({ email: asString(email), isAdmin: true });
 
     if (admin) {
       const passwordMatch = await bcrypt.compare(password, admin.password);
