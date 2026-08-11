@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route, Outlet } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { ComingSoon } from "@/components/layout/ComingSoon";
@@ -21,25 +22,51 @@ import { OrdersPage } from "@/features/order/OrdersPage";
 import { AddressPage } from "@/features/address/AddressPage";
 import { WalletPage } from "@/features/wallet/WalletPage";
 
-import { AdminAuthProvider } from "@/store/AdminAuthContext";
-import { AdminProtectedRoute } from "@/features/admin/AdminProtectedRoute";
-import { AdminLayout } from "@/features/admin/AdminLayout";
-import { AdminLoginPage } from "@/features/admin/AdminLoginPage";
-import { DashboardPage } from "@/features/admin/DashboardPage";
-import { OrderListPage } from "@/features/admin/orders/OrderListPage";
-import { OrderDetailsPage } from "@/features/admin/orders/OrderDetailsPage";
-import { CustomersPage } from "@/features/admin/customers/CustomersPage";
-import { CategoryPage } from "@/features/admin/category/CategoryPage";
-import { BrandPage as AdminBrandPage } from "@/features/admin/brand/BrandPage";
-import { ProductListPage } from "@/features/admin/products/ProductListPage";
-import { ProductFormPage } from "@/features/admin/products/ProductFormPage";
-import { CouponManagementPage } from "@/features/admin/coupons/CouponManagementPage";
-import { ContactMessagesPage } from "@/features/admin/contact/ContactMessagesPage";
-import { SalesReportPage } from "@/features/admin/report/SalesReportPage";
+// Admin panel (recharts, tables, upload forms) is only ever needed by
+// admins, not shoppers — lazy-loaded so the shop-facing bundle doesn't carry
+// its weight (this is what fixed the >500kB Vite build warning).
+const AdminAuthProvider = lazy(() =>
+  import("@/store/AdminAuthContext").then((m) => ({ default: m.AdminAuthProvider }))
+);
+const AdminProtectedRoute = lazy(() =>
+  import("@/features/admin/AdminProtectedRoute").then((m) => ({ default: m.AdminProtectedRoute }))
+);
+const AdminLayout = lazy(() => import("@/features/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
+const AdminLoginPage = lazy(() =>
+  import("@/features/admin/AdminLoginPage").then((m) => ({ default: m.AdminLoginPage }))
+);
+const DashboardPage = lazy(() => import("@/features/admin/DashboardPage").then((m) => ({ default: m.DashboardPage })));
+const OrderListPage = lazy(() =>
+  import("@/features/admin/orders/OrderListPage").then((m) => ({ default: m.OrderListPage }))
+);
+const OrderDetailsPage = lazy(() =>
+  import("@/features/admin/orders/OrderDetailsPage").then((m) => ({ default: m.OrderDetailsPage }))
+);
+const CustomersPage = lazy(() =>
+  import("@/features/admin/customers/CustomersPage").then((m) => ({ default: m.CustomersPage }))
+);
+const CategoryPage = lazy(() =>
+  import("@/features/admin/category/CategoryPage").then((m) => ({ default: m.CategoryPage }))
+);
+const AdminBrandPage = lazy(() =>
+  import("@/features/admin/brand/BrandPage").then((m) => ({ default: m.BrandPage }))
+);
+const ProductListPage = lazy(() =>
+  import("@/features/admin/products/ProductListPage").then((m) => ({ default: m.ProductListPage }))
+);
+const ProductFormPage = lazy(() =>
+  import("@/features/admin/products/ProductFormPage").then((m) => ({ default: m.ProductFormPage }))
+);
+const CouponManagementPage = lazy(() =>
+  import("@/features/admin/coupons/CouponManagementPage").then((m) => ({ default: m.CouponManagementPage }))
+);
+const ContactMessagesPage = lazy(() =>
+  import("@/features/admin/contact/ContactMessagesPage").then((m) => ({ default: m.ContactMessagesPage }))
+);
+const SalesReportPage = lazy(() =>
+  import("@/features/admin/report/SalesReportPage").then((m) => ({ default: m.SalesReportPage }))
+);
 
-// Each ComingSoon stub below is replaced with its real feature page in a
-// later chunk (see the SPA conversion plan) — this route tree exists now so
-// URL structure mirrors the current EJS app 1:1 from day one.
 export function AppRouter() {
   return (
     <Routes>
@@ -74,7 +101,15 @@ export function AppRouter() {
         <Route path="*" element={<ComingSoon title="404 — Not Found" />} />
       </Route>
 
-      <Route element={<AdminAuthProvider><AdminAuthOutlet /></AdminAuthProvider>}>
+      <Route
+        element={
+          <Suspense fallback={<AdminLoadingFallback />}>
+            <AdminAuthProvider>
+              <Outlet />
+            </AdminAuthProvider>
+          </Suspense>
+        }
+      >
         <Route path="/admin/login" element={<AdminLoginPage />} />
 
         <Route element={<AdminProtectedRoute />}>
@@ -98,9 +133,6 @@ export function AppRouter() {
   );
 }
 
-// Thin pass-through so AdminAuthProvider (a component, not usable directly as
-// a route element with children) can wrap this whole route subtree via a
-// parent <Route element={...}> the way React Router expects.
-function AdminAuthOutlet() {
-  return <Outlet />;
+function AdminLoadingFallback() {
+  return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
 }
