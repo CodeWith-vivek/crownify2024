@@ -12,6 +12,9 @@ import { BrandPage } from "@/features/brand/BrandPage";
 import { CartPage } from "@/features/cart/CartPage";
 import { WishlistPage } from "@/features/wishlist/WishlistPage";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+import { CheckoutPage } from "@/features/checkout/CheckoutPage";
+import { PaymentSuccessPage } from "@/features/payment/PaymentSuccessPage";
+import { PaymentFailurePage } from "@/features/payment/PaymentFailurePage";
 
 // Each ComingSoon stub below is replaced with its real feature page in a
 // later chunk (see the SPA conversion plan) — this route tree exists now so
@@ -41,11 +44,11 @@ export function AppRouter() {
           <Route path="/Address" element={<ComingSoon title="Addresses" />} />
           <Route path="/AccountDetails" element={<ComingSoon title="Account Details" />} />
           <Route path="/wallet" element={<ComingSoon title="Wallet" />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
         </Route>
 
-        <Route path="/checkout" element={<ComingSoon title="Checkout" />} />
-        <Route path="/payment-Success" element={<ComingSoon title="Payment Success" />} />
-        <Route path="/payment-Failure" element={<ComingSoon title="Payment Failure" />} />
+        <Route path="/payment-Success" element={<PaymentSuccessPage />} />
+        <Route path="/payment-Failure" element={<PaymentFailurePage />} />
 
         <Route path="*" element={<ComingSoon title="404 — Not Found" />} />
       </Route>

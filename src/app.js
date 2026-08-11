@@ -88,14 +88,18 @@ app.use("/api", nocache(), userRoutes);
 app.use("/", nocache(), profileRoutes);
 app.use("/api", nocache(), profileRoutes);
 app.use("/", nocache(), orderRoutes);
+app.use("/api", nocache(), orderRoutes);
 app.use("/", nocache(), wishlistRoutes);
 app.use("/api", nocache(), wishlistRoutes);
 app.use("/", nocache(), walletRoutes);
 app.use("/", nocache(), cartRoutes);
 app.use("/api", nocache(), cartRoutes);
 app.use("/", nocache(), checkoutRoutes);
+app.use("/api", nocache(), checkoutRoutes);
 app.use("/", nocache(), paymentRoutes);
+app.use("/api", nocache(), paymentRoutes);
 app.use("/", nocache(), couponRoutes);
+app.use("/api", nocache(), couponRoutes);
 app.use("/", nocache(), reportRoutes);
 app.use("/", nocache(), contactRoutes);
 
