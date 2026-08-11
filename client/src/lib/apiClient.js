@@ -12,7 +12,7 @@ export class ApiError extends Error {
 }
 
 async function request(path, { method = "GET", body, headers, isFormData } = {}) {
-  const finalHeaders = { ...headers };
+  const finalHeaders = { Accept: "application/json", ...headers };
   let finalBody = body;
 
   if (!isFormData) {
@@ -38,8 +38,8 @@ async function request(path, { method = "GET", body, headers, isFormData } = {})
     parsed = await response.json().catch(() => null);
   }
 
-  if (!response.ok) {
-    const message = parsed?.message || `Request failed with status ${response.status}`;
+  if (!response.ok || response.redirected || !contentType.includes("application/json")) {
+    const message = parsed?.message || `Unexpected response (status ${response.status})`;
     throw new ApiError(message, response.status, parsed);
   }
 

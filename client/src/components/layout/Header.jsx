@@ -1,10 +1,32 @@
-import { Link } from "react-router-dom";
-import { ShoppingBag, Heart, User } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ShoppingBag, Heart, User, LogOut, Package, Wallet } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@/store/AuthContext";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { authApi } from "@/features/auth/authApi";
 
 export function Header() {
-  const { user, cartCount, wishlistCount } = useAuth();
+  const { user, cartCount, wishlistCount, refreshMe } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // logout endpoint may redirect instead of returning JSON; ignore
+    } finally {
+      await refreshMe();
+      toast.success("Logged out");
+      navigate("/");
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
@@ -39,9 +61,34 @@ export function Header() {
             )}
           </Link>
           {user ? (
-            <Link to="/profile">
-              <User className="h-5 w-5" />
-            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button aria-label="Account menu">
+                  <User className="h-5 w-5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/profile">
+                    <User className="mr-2 h-4 w-4" /> Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/wallet">
+                    <Wallet className="mr-2 h-4 w-4" /> Wallet
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/orders">
+                    <Package className="mr-2 h-4 w-4" /> Orders
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" /> Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button asChild size="sm">
               <Link to="/login">Sign in</Link>

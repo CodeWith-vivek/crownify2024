@@ -1,6 +1,10 @@
 import { Routes, Route } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { ComingSoon } from "@/components/layout/ComingSoon";
+import { LoginPage } from "@/features/auth/LoginPage";
+import { SignupPage } from "@/features/auth/SignupPage";
+import { VerifyOtpPage } from "@/features/auth/VerifyOtpPage";
+import { ForgotPasswordPage } from "@/features/auth/ForgotPasswordPage";
 
 // Each ComingSoon stub below is replaced with its real feature page in a
 // later chunk (see the SPA conversion plan) — this route tree exists now so
@@ -17,11 +21,10 @@ export function AppRouter() {
         <Route path="/contact" element={<ComingSoon title="Contact" />} />
         <Route path="/faq" element={<ComingSoon title="FAQ" />} />
 
-        <Route path="/login" element={<ComingSoon title="Login" />} />
-        <Route path="/signup" element={<ComingSoon title="Signup" />} />
-        <Route path="/verify-otp" element={<ComingSoon title="Verify OTP" />} />
-        <Route path="/forget-password" element={<ComingSoon title="Forgot Password" />} />
-        <Route path="/reset-password" element={<ComingSoon title="Reset Password" />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/verify-otp" element={<VerifyOtpPage />} />
+        <Route path="/forget-password" element={<ForgotPasswordPage />} />
 
         <Route path="/cart" element={<ComingSoon title="Cart" />} />
         <Route path="/wishlist" element={<ComingSoon title="Wishlist" />} />

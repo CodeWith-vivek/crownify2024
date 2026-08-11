@@ -11,6 +11,7 @@ const {
 const { authLimiter, otpLimiter } = require("../../shared/middlewares/rateLimiters");
 
 router.get("/pageNotFound", userController.pageNotFound);
+router.get("/auth/me", userController.getCurrentUser);
 
 //user signup managing
 router.get("/check-block-status", userCheckController.userCheck);

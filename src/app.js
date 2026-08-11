@@ -80,7 +80,13 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 // user-facing routes, all mounted at "/" (paths were already absolute in the
 // original single userRoute.js, so each module router is mounted at root)
 app.use("/", nocache(), userRoutes);
+// Also mounted under /api for the React client (Chunk 2+ of the SPA
+// conversion) — same router, same controllers, reachable at both prefixes
+// during the transition so the EJS app keeps working unmodified until the
+// final cutover (see the SPA conversion plan) removes the bare-path mount.
+app.use("/api", nocache(), userRoutes);
 app.use("/", nocache(), profileRoutes);
+app.use("/api", nocache(), profileRoutes);
 app.use("/", nocache(), orderRoutes);
 app.use("/", nocache(), wishlistRoutes);
 app.use("/", nocache(), walletRoutes);

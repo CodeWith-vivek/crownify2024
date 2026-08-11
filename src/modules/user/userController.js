@@ -117,6 +117,46 @@ const loadHomepage = async (req, res) => {
   }
 };
 
+//code for the SPA to hydrate auth state on load (GET /api/auth/me)
+
+const getCurrentUser = async (req, res) => {
+  try {
+    const userId = req.session.user;
+
+    if (!userId) {
+      return res.json({ success: true, user: null, cartCount: 0, wishlistCount: 0 });
+    }
+
+    const userData = await User.findById(userId)
+      .populate({ path: "cart", populate: { path: "items.productId" } })
+      .populate({ path: "wishlist", populate: { path: "items.productId" } });
+
+    if (!userData || userData.isBlocked) {
+      req.session.destroy(() => {});
+      return res.json({ success: true, user: null, cartCount: 0, wishlistCount: 0 });
+    }
+
+    const cartCount = userData.cart?.[0]?.items?.length || 0;
+    const wishlistCount = userData.wishlist?.[0]?.items?.length || 0;
+
+    return res.json({
+      success: true,
+      user: {
+        _id: userData._id,
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        avatar: userData.avatar,
+      },
+      cartCount,
+      wishlistCount,
+    });
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 //code to load contact page
 
 
@@ -952,16 +992,20 @@ const login = async (req, res) => {
 //code to logout the user
 
 const logout = async (req, res) => {
+  const wantsJson = req.originalUrl.startsWith("/api") || req.xhr;
   try {
     req.session.destroy((err) => {
       if (err) {
         console.log("session logout error", err);
+        if (wantsJson) return res.status(500).json({ success: false, message: "Logout failed" });
         return res.redirect("/pageNotFound");
       }
+      if (wantsJson) return res.json({ success: true });
       return res.redirect("/");
     });
   } catch (error) {
     console.log("logout error", error);
+    if (wantsJson) return res.status(500).json({ success: false, message: "Logout failed" });
     res.redirect("/pageNotFound");
   }
 };
@@ -1308,6 +1352,7 @@ const loadProductDetails = async (req, res) => {
 };
 module.exports = {
   loadHomepage,
+  getCurrentUser,
   pageNotFound,
   loadSignup,
   signup,
