@@ -37,6 +37,16 @@ const app = express();
 
 
 db();
+
+// Render (and most PaaS hosts) terminate HTTPS at the edge and forward
+// plain HTTP internally. Without this, Express never sees the connection
+// as secure, so express-session — which checks req.secure before setting
+// a cookie.secure:true cookie — silently drops the session cookie in
+// production: login would appear to succeed but nothing would persist.
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
