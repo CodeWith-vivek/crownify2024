@@ -71,8 +71,6 @@ function HeroSlideshow() {
               src={slide.src}
               alt={slide.alt}
               title={slide.alt}
-              width={1920}
-              height={821}
               fetchPriority={i === 0 ? "high" : "auto"}
               onLoad={(e) => e.currentTarget.parentElement.classList.add("lazyloaded")}
             />
@@ -131,7 +129,7 @@ export function HomePage() {
       </div>
 
       <div className="container-fluid crownify2 d-flex justify-content-center align-items-center">
-        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" width={564} height={155} />
+        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" />
       </div>
 
       <div className="section feature-content" style={{ backgroundColor: "antiquewhite" }}>
@@ -139,7 +137,7 @@ export function HomePage() {
           <div className="row">
             <div className="feature-row">
               <div className="col-12 col-sm-12 col-md-6 feature-row__item text-center">
-                <img src="/assets/images/collection/nikecap.webp" alt="Hot hoodies jackets" title="Hot hoodies jackets" width={1350} height={900} style={{ marginTop: 20, borderRadius: 5 }} />
+                <img src="/assets/images/collection/nikecap.webp" alt="Hot hoodies jackets" title="Hot hoodies jackets" style={{ marginTop: 20, borderRadius: 5 }} />
               </div>
               <div className="col-12 col-sm-12 col-md-6 feature-row__item feature-row__text feature-row__text--left text-left">
                 <div className="row-text" style={{ paddingTop: 15, paddingLeft: 15, borderRadius: 7, backgroundColor: "#ff00309c" }}>
@@ -169,7 +167,7 @@ export function HomePage() {
                 </div>
               </div>
               <div className="col-12 col-sm-12 col-md-6 feature-row__item text-center">
-                <img src="/assets/images/collection/cap4.webp" alt="Shoes Collection" title="Shoes Collection" width={1350} height={900} style={{ marginTop: 20 }} />
+                <img src="/assets/images/collection/cap4.webp" alt="Shoes Collection" title="Shoes Collection" style={{ marginTop: 20 }} />
               </div>
             </div>
           </div>
@@ -177,7 +175,7 @@ export function HomePage() {
       </div>
 
       <div className="container-fluid crownify d-flex justify-content-center align-items-center" style={{ marginTop: 0 }}>
-        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" width={564} height={155} />
+        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" />
       </div>
 
       <div
@@ -201,7 +199,7 @@ export function HomePage() {
       </div>
 
       <div className="container-fluid crownify4 d-flex justify-content-center align-items-center">
-        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" width={564} height={155} />
+        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" />
       </div>
 
       <div className="section" style={{ backgroundColor: "#ed143d" }}>
@@ -264,7 +262,7 @@ export function HomePage() {
       </div>
 
       <div className="container-fluid crownify4 d-flex justify-content-center align-items-center">
-        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" width={564} height={155} />
+        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" />
       </div>
 
       <div className="section feature-content" style={{ backgroundColor: "black" }}>
@@ -272,7 +270,7 @@ export function HomePage() {
           <div className="row">
             <div className="feature-row">
               <div className="col-12 col-sm-12 col-md-6 feature-row__item text-center">
-                <img src="/assets/images/collection/post1.webp" alt="Nuke New Arrivals" title="Nuke New Arrivals" width={1350} height={2003} style={{ marginTop: 15 }} />
+                <img src="/assets/images/collection/post1.webp" alt="Nuke New Arrivals" title="Nuke New Arrivals" style={{ marginTop: 15 }} />
               </div>
               <div className="col-12 col-sm-12 col-md-6 feature-row__item feature-row__text feature-row__text--left text-left">
                 <div className="row-text" style={{ borderRadius: 21, backgroundColor: "#ccccccab", paddingLeft: 15, paddingTop: 15 }}>
@@ -289,7 +287,7 @@ export function HomePage() {
       </div>
 
       <div className="container-fluid crownify4 d-flex justify-content-center align-items-center">
-        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" width={564} height={155} />
+        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" />
       </div>
 
       <div className="section logo-section">
