@@ -8,6 +8,7 @@ export function Header() {
   const navigate = useNavigate();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [mobilePagesOpen, setMobilePagesOpen] = useState(false);
+  const [mobileUserMenuOpen, setMobileUserMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
@@ -54,27 +55,39 @@ export function Header() {
             </div>
             <div className="col-10 col-sm-8 col-md-5 col-lg-4"></div>
             <div className="col-2 col-sm-4 col-md-3 col-lg-4 text-right">
-              <span className="user-menu d-block d-lg-none">
+              <span
+                className="user-menu d-block d-lg-none"
+                onClick={() => setMobileUserMenuOpen((o) => !o)}
+                style={{ cursor: "pointer" }}
+              >
                 <i className="anm anm-user-al" aria-hidden="true"></i>
               </span>
-              <ul className="customer-links list-inline">
+              <ul className="customer-links list-inline" style={{ display: mobileUserMenuOpen ? "block" : undefined }}>
                 {user ? (
                   <li>
-                    <Link to="/">{user.name.split(" ")[0]}</Link>
+                    <Link to="/" onClick={() => setMobileUserMenuOpen(false)}>
+                      {user.name.split(" ")[0]}
+                    </Link>
                   </li>
                 ) : (
                   <>
                     <li>
-                      <Link to="/login">SIGN IN</Link>
+                      <Link to="/login" onClick={() => setMobileUserMenuOpen(false)}>
+                        SIGN IN
+                      </Link>
                     </li>
                     <span>/</span>
                     <li>
-                      <Link to="/signup">SIGN UP</Link>
+                      <Link to="/signup" onClick={() => setMobileUserMenuOpen(false)}>
+                        SIGN UP
+                      </Link>
                     </li>
                   </>
                 )}
                 <li style={{ paddingRight: 61 }}>
-                  <Link to="/faq">FAQS</Link>
+                  <Link to="/faq" onClick={() => setMobileUserMenuOpen(false)}>
+                    FAQS
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -217,7 +230,11 @@ export function Header() {
       </div>
 
       {/* Mobile Menu */}
-      <div className={`mobile-nav-wrapper${mobileNavOpen ? " active" : ""}`} role="navigation">
+      <div
+        className={`mobile-nav-wrapper${mobileNavOpen ? " active" : ""}`}
+        role="navigation"
+        style={{ width: "100%", left: mobileNavOpen ? 0 : "-100%" }}
+      >
         <div className="closemobileMenu" onClick={() => setMobileNavOpen(false)}>
           <i className="icon anm anm-times-l pull-right"></i> Close Menu
         </div>
