@@ -178,7 +178,7 @@ export function WishlistPage() {
             {wishlistItems.length === 0 ? (
               <div className="empty-cart-section text-center">
                 <div className="empty-cart-content">
-                  <img src="/assets/images/empty-wishlist.png" alt="Empty Wishlist" className="empty-cart-image mb-4" />
+                  <img src="/assets/images/empty-wishlist.webp" alt="Empty Wishlist" className="empty-cart-image mb-4" />
                   <div className="empty-cart-actions" style={{ marginBottom: 40 }}>
                     <Link to="/" className="btn btn-primary" style={{ backgroundColor: "black" }}>
                       Continue Shopping

@@ -26,7 +26,7 @@ export function AboutPage() {
         <h1 style={{ textAlign: "center", color: "rgb(0, 0, 0)" }}>About Us</h1>
         <div className="content" style={{ display: "flex", alignItems: "center" }}>
           <div className="logo-section" style={{ flex: 1, textAlign: "center", color: "white" }}>
-            <img src="/assets/images/logoCrownify.png" alt="Crownify Logo" style={{ width: 296, height: "auto", maxWidth: "100%", aspectRatio: "1", borderRadius: "50%", objectFit: "cover" }} />
+            <img src="/assets/images/logoCrownify.webp" alt="Crownify Logo" style={{ width: 296, height: "auto", maxWidth: "100%", aspectRatio: "1", borderRadius: "50%", objectFit: "cover" }} />
           </div>
           <div className="col-lg-8 text-section mt-5 mb-5" style={{ flex: 2, padding: "0 20px", color: "white" }}>
             <p className="bold" style={{ fontWeight: "bold" }}>

@@ -34,7 +34,7 @@ export function PaymentSuccessPage() {
     <>
       {showPreloader && <Preloader />}
       <div className="container-fluid crownify4 d-flex justify-content-center align-items-center">
-        <img src="/assets/admin/images/logo/Crownify_logo_text.png" className="custom-logo" />
+        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" />
       </div>
       <div className="wrapper" style={{ position: "relative", overflow: "hidden" }}>
         <div
@@ -124,7 +124,7 @@ export function PaymentSuccessPage() {
         </div>
       </div>
       <div className="container-fluid crownify4 d-flex justify-content-center align-items-center">
-        <img src="/assets/admin/images/logo/Crownify_logo_text.png" className="custom-logo" />
+        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" />
       </div>
     </>
   );

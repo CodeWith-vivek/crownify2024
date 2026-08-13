@@ -21,7 +21,7 @@ export function NotFoundPage() {
             <div className="empty-page-content text-center" style={{ paddingTop: 40, minHeight: "90vh" }}>
               <div className="empty-cart-content">
                 <img
-                  src="/assets/images/404.jpg"
+                  src="/assets/images/404.webp"
                   alt="Page not found"
                   className="empty-cart-image mb-4"
                   style={{ width: "50%", height: "auto" }}

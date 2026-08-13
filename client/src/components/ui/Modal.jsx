@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 const DEFAULT_CONTENT_STYLE = {
-  backgroundImage: "url('/assets/images/editAddress2.png')",
+  backgroundImage: "url('/assets/images/editAddress2.webp')",
   backgroundSize: "cover",
   backgroundPosition: "center",
   backgroundRepeat: "no-repeat",

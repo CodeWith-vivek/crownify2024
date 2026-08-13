@@ -19,10 +19,10 @@ const PRODUCT_SLIDER_BREAKPOINTS = [
 // so it only ever matches unlisted categories) — replicated as-is to match
 // current behavior exactly, not "fixed", since that's what's live today.
 const BRAND_SECTIONS = [
-  { name: "URBAN MONKEY", banner: "/assets/images/urbanWhite.png" },
-  { name: "ADDIDAS", banner: "/assets/images/addidasWhite.png" },
-  { name: "NIKE", banner: "/assets/images/nikeWhite.png" },
-  { name: "PUMA", banner: "/assets/images/pumaWhite.png" },
+  { name: "URBAN MONKEY", banner: "/assets/images/urbanWhite.webp" },
+  { name: "ADDIDAS", banner: "/assets/images/addidasWhite.webp" },
+  { name: "NIKE", banner: "/assets/images/nikeWhite.webp" },
+  { name: "PUMA", banner: "/assets/images/pumaWhite.webp" },
 ];
 
 function filterForBrand(products, brandName) {
@@ -114,7 +114,7 @@ export function BrandPage() {
         </div>
       </section>
       <div className="container-fluid crownify d-flex justify-content-center align-items-center" style={{ marginTop: 0 }}>
-        <img src="/assets/images/logo/Crownify_logo_text.png" className="custom-logo" alt="" />
+        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" />
       </div>
 
       <div id="page-content">
@@ -123,7 +123,7 @@ export function BrandPage() {
             <div className="slide slideshow--medium">
               <div className="blur-up lazyload">
                 <img
-                  src="/assets/images/brand.png"
+                  src="/assets/images/brand.webp"
                   alt="Outfit of Today"
                   title="Outfit of Today"
                   onLoad={(e) => e.currentTarget.parentElement.classList.add("lazyloaded")}
@@ -136,9 +136,9 @@ export function BrandPage() {
         {BRAND_SECTIONS.map((section) => (
           <div key={section.name}>
             <div className="container-fluid crownify2 d-flex justify-content-around align-items-center">
-              <img src="/assets/images/logo/Crownify_logo_text.png" className="custom-logo" alt="" />
+              <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" />
               <img src={section.banner} className="custom-logo" alt="" style={{ maxHeight: "90%", width: "auto", height: "auto", objectFit: "contain" }} />
-              <img src="/assets/images/logo/Crownify_logo_text.png" className="custom-logo" alt="" />
+              <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" />
             </div>
 
             <div className="section" style={{ backgroundColor: "white" }}>

@@ -79,7 +79,7 @@ function AddressForm({ title, form, setForm, onSubmit, submitting, onCancel, ban
       <div
         className="login-wrap p-4 p-md-5 address-modal-scroll"
         style={{
-          backgroundImage: "url(/assets/images/addressDesign.png)",
+          backgroundImage: "url(/assets/images/addressDesign.webp)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",

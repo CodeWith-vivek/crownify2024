@@ -4,7 +4,7 @@ export function Footer() {
   return (
     <>
       <div className="container-fluid crownify4 d-flex justify-content-center align-items-center">
-        <img src="/assets/images/logo/Crownify_logo_text.png" className="custom-logo" alt="" />
+        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" />
       </div>
 
       <footer id="footer" className="footer-5">
@@ -95,7 +95,7 @@ export function Footer() {
               <div className="row">
                 <div className="col-12 col-sm-12 col-md-6 col-lg-6 order-1 order-md-0 order-lg-0 order-sm-1 copyright text-sm-center text-md-left text-lg-left"></div>
                 <div className="col-12 col-sm-12 col-md-6 col-lg-6 order-0 order-md-1 order-lg-1 order-sm-0 payment-icons text-right text-md-center">
-                  <img src="/assets/images/safepayment.png" alt="Payment" />
+                  <img src="/assets/images/safepayment.webp" alt="Payment" />
                 </div>
               </div>
             </div>

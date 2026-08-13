@@ -159,7 +159,7 @@ export function ForgotPasswordPage() {
           <div className="row justify-content-center">
             <div className="col-lg-10">
               <div className="wrap d-md-flex">
-                <div className="login-wrap p-4 p-md-5" style={{ backgroundImage: "url(/assets/images/forgetPass2.png)", backgroundSize: "cover", backgroundPosition: "center" }}>
+                <div className="login-wrap p-4 p-md-5" style={{ backgroundImage: "url(/assets/images/forgetPass2.webp)", backgroundSize: "cover", backgroundPosition: "center" }}>
                   <h3 className="mb-3" style={{ fontWeight: 600, paddingBottom: 24 }}>
                     Forget Password ?
                   </h3>
@@ -209,7 +209,7 @@ export function ForgotPasswordPage() {
                 <div className="wrap d-md-flex">
                   <div
                     className="right-side justify-content-center"
-                    style={{ backgroundImage: "url(/assets/images/forgetPass2.png)", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }}
+                    style={{ backgroundImage: "url(/assets/images/forgetPass2.webp)", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }}
                   >
                     <h2 className="mt-4">OTP for Password Reset</h2>
                     <p>
@@ -276,7 +276,7 @@ export function ForgotPasswordPage() {
               </div>
               <div
                 className="login-wrap p-4 p-md-5"
-                style={{ backgroundImage: "url(/assets/images/newpassDesign.png)", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", height: 612 }}
+                style={{ backgroundImage: "url(/assets/images/newpassDesign.webp)", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", height: 612 }}
               >
                 <h3 className="mb-3" style={{ fontWeight: 600, paddingBottom: 40, marginTop: 30 }}>
                   New Password

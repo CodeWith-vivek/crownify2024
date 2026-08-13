@@ -205,7 +205,7 @@ export function ShopPage() {
       </section>
 
       <div className="container-fluid crownify4 d-flex justify-content-center align-items-center">
-        <img src="/assets/images/logo/Crownify_logo_text.png" className="custom-logo" alt="" />
+        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" />
       </div>
 
       <section className="shop spad" style={{ backgroundColor: "white" }}>

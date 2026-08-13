@@ -77,7 +77,7 @@ export function SignupPage() {
             <div className="wrap d-md-flex">
               <div
                 className="login-wrap p-4 p-md-5"
-                style={{ backgroundImage: "url(/assets/images/signup2.png)", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }}
+                style={{ backgroundImage: "url(/assets/images/signup2.webp)", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }}
               >
                 <h3 className="mb-3" style={{ fontWeight: 600 }}>
                   Sign Up

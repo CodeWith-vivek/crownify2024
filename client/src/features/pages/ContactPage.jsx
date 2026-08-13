@@ -104,7 +104,7 @@ export function ContactPage() {
         </div>
       </section>
       <div className="container-fluid crownify d-flex justify-content-center align-items-center" style={{ marginTop: 0 }}>
-        <img src="/assets/images/logo/Crownify_logo_text.png" className="custom-logo" alt="" />
+        <img src="/assets/images/logo/Crownify_logo_text.webp" className="custom-logo" alt="" />
       </div>
 
       <div className="map">

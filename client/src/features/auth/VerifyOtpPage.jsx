@@ -110,7 +110,7 @@ export function VerifyOtpPage() {
 
                 <div
                   className="right-side justify-content-center"
-                  style={{ backgroundImage: "url(/assets/images/logindesign4.png)", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }}
+                  style={{ backgroundImage: "url(/assets/images/logindesign4.webp)", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }}
                 >
                   <h2>OTP Verification</h2>
                   <p style={{ lineHeight: 1.6 }}>Enter the OTP sent to your email{user?.email ? <strong> {user.email}</strong> : null}</p>

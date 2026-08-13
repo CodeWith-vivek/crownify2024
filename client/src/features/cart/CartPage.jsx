@@ -109,7 +109,7 @@ export function CartPage() {
               {isCartEmpty ? (
                 <div className="empty-cart-section">
                   <div className="empty-cart-content">
-                    <img src="/assets/images/Empty_Cart.png" alt="Empty Cart" className="empty-cart-image mb-4" />
+                    <img src="/assets/images/Empty_Cart.webp" alt="Empty Cart" className="empty-cart-image mb-4" />
                     <h2>Your Cart is Empty</h2>
                     {!isGuest ? (
                       <p>Looks like you haven't added any items to your cart yet.</p>

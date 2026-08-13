@@ -70,7 +70,7 @@ export function LoginPage() {
               <div
                 className="login-wrap p-4 p-md-5"
                 style={{
-                  backgroundImage: "url(/assets/images/logindesign4.png)",
+                  backgroundImage: "url(/assets/images/logindesign4.webp)",
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                   backgroundRepeat: "no-repeat",
