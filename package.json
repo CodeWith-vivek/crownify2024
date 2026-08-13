@@ -4,7 +4,7 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "build": "cd client && npm install && npm run build",
+    "build": "cd client && npm install --include=dev && npm run build",
     "dev:server": "nodemon src/server.js",
     "dev:client": "cd client && npm run dev",
     "test": "jest --runInBand"
