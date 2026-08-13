@@ -121,7 +121,7 @@ function AddressForm({ title, form, setForm, onSubmit, submitting, onCancel, ban
 
             <div className="col-md-12">
               <div className="form-group">
-                <label className="label" style={{ width: 300 }} htmlFor="name">
+                <label className="label" style={{ width: 300, maxWidth: "100%" }} htmlFor="name">
                   Full Name ( First and Last Name )
                 </label>
                 <input type="text" className="form-control" name="name" id="name" placeholder="Enter name" value={form.name} onChange={(e) => setField("name", e.target.value)} />
@@ -182,7 +182,7 @@ function AddressForm({ title, form, setForm, onSubmit, submitting, onCancel, ban
 
             <div className="col-md-12">
               <div className="form-group">
-                <label className="label" style={{ width: 300 }} htmlFor="home">
+                <label className="label" style={{ width: 300, maxWidth: "100%" }} htmlFor="home">
                   Flat, House no.,Company
                 </label>
                 <div className="input-group">

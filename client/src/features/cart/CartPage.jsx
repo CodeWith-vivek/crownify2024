@@ -131,7 +131,8 @@ export function CartPage() {
               ) : (
                 <>
                   <div className="shopping__cart__table">
-                    <table className="table table-responsive cart-table">
+                    <div className="table-responsive">
+                    <table className="table cart-table">
                       <thead>
                         <tr>
                           <th style={{ width: 200 }}>Product</th>
@@ -198,6 +199,7 @@ export function CartPage() {
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                   <div className="row">
                     <div className="col-lg-6 col-md-6 col-sm-6">

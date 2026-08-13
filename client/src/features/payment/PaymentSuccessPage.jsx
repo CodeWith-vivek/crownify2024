@@ -115,10 +115,10 @@ export function PaymentSuccessPage() {
             </div>
           </div>
 
-          <Link to="/orders" className="button" style={{ width: 320 }}>
+          <Link to="/orders" className="button" style={{ width: 320, maxWidth: "100%" }}>
             View Order Details
           </Link>
-          <Link to="/" style={{ width: 320 }} className="button">
+          <Link to="/" style={{ width: 320, maxWidth: "100%" }} className="button">
             Continue Shopping
           </Link>
         </div>
