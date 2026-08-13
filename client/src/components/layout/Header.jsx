@@ -7,6 +7,7 @@ export function Header() {
   const { user, cartCount, wishlistCount, logout } = useAuth();
   const navigate = useNavigate();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [mobilePagesOpen, setMobilePagesOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
@@ -94,8 +95,9 @@ export function Header() {
               <div className="d-block d-lg-none">
                 <button
                   type="button"
-                  className="btn--link site-header__menu js-mobile-nav-toggle mobile-nav--open"
-                  onClick={() => setMobileNavOpen(true)}
+                  className={`btn--link site-header__menu js-mobile-nav-toggle${mobileNavOpen ? " mobile-nav--close" : " mobile-nav--open"}`}
+                  aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
+                  onClick={() => setMobileNavOpen((o) => !o)}
                 >
                   <i className="icon anm anm-times-l"></i>
                   <i className="anm anm-bars-r"></i>
@@ -215,43 +217,49 @@ export function Header() {
       </div>
 
       {/* Mobile Menu */}
-      <div className={`mobile-nav-wrapper${mobileNavOpen ? " mobile-nav--open" : ""}`} role="navigation">
+      <div className={`mobile-nav-wrapper${mobileNavOpen ? " active" : ""}`} role="navigation">
         <div className="closemobileMenu" onClick={() => setMobileNavOpen(false)}>
           <i className="icon anm anm-times-l pull-right"></i> Close Menu
         </div>
         <ul id="MobileNav" className="mobile-nav">
           <li className="lvl1 parent megamenu">
-            <Link to="/">
-              Home <i className="anm anm-plus-l"></i>
+            <Link to="/" onClick={() => setMobileNavOpen(false)}>
+              Home
             </Link>
           </li>
           <li className="lvl1 parent megamenu">
-            <Link to="/brand">
-              Brand <i className="anm anm-plus-l"></i>
+            <Link to="/brand" onClick={() => setMobileNavOpen(false)}>
+              Brand
             </Link>
           </li>
           <li className="lvl1 parent megamenu">
-            <Link to="/shop">
-              Shop <i className="anm anm-plus-l"></i>
+            <Link to="/shop" onClick={() => setMobileNavOpen(false)}>
+              Shop
             </Link>
           </li>
           <li className="lvl1 parent megamenu">
-            <a href="#">
-              Pages <i className="anm anm-plus-l"></i>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setMobilePagesOpen((o) => !o);
+              }}
+            >
+              Pages <i className={mobilePagesOpen ? "anm anm-minus-l" : "anm anm-plus-l"}></i>
             </a>
-            <ul>
+            <ul style={{ display: mobilePagesOpen ? "block" : "none" }}>
               <li>
-                <Link to="/About" className="site-nav">
+                <Link to="/About" className="site-nav" onClick={() => setMobileNavOpen(false)}>
                   About Us
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="site-nav">
+                <Link to="/contact" className="site-nav" onClick={() => setMobileNavOpen(false)}>
                   Contact Us
                 </Link>
               </li>
               <li>
-                <Link to="/faq" className="site-nav">
+                <Link to="/faq" className="site-nav" onClick={() => setMobileNavOpen(false)}>
                   FAQs
                 </Link>
               </li>
