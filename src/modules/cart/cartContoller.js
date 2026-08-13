@@ -6,7 +6,6 @@ const User = require("../user/userSchema");
 const Coupon = require("../coupon/couponSchema");
 const Category = require("../category/categorySchema");
 const Brand = require("../brand/brandSchema");
-const { wantsJson } = require("../../shared/utils/wantsJson");
 
 // code to lad cart page 
 
@@ -31,9 +30,7 @@ const loadCartPage = async (req, res) => {
         cartCount: 0,
         wishlistCount: 0,
       };
-      return wantsJson(req)
-        ? res.json({ success: true, ...emptyCart })
-        : res.render("cart", emptyCart);
+      return res.json({ success: true, ...emptyCart });
     }
 
   
@@ -164,9 +161,7 @@ const loadCartPage = async (req, res) => {
       cartCount,
       wishlistCount,
     };
-    return wantsJson(req)
-      ? res.json({ success: true, ...cartData })
-      : res.render("cart", cartData);
+    return res.json({ success: true, ...cartData });
   } catch (error) {
     console.error("Cart page error:", error.stack || error);
  

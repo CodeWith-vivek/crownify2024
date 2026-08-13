@@ -1,0 +1,139 @@
+
+        .shopping-cart {
+  padding: 2rem;
+  background-color: #f3f4f6;
+}
+
+.cart-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.empty-cart-section {
+  text-align: center;
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.empty-cart-image {
+  width: 150px;
+  margin-bottom: 1.5rem;
+}
+
+.empty-cart-content h2 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.empty-cart-content p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.empty-cart-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 0.375rem;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  color: #3b82f6;
+  border: 1px solid #3b82f6;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .empty-cart-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .empty-cart-image {
+    width: 120px;
+  }
+}
+body, html {
+            margin: 0;
+            padding: 0;
+           font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+            background-color: #9b8178;
+            color: #000;
+            line-height: 1;
+        }
+          .site-cart,
+.site-header__wishlist {
+    position: relative;
+}
+
+/* Cart badge styling */
+.cart-count {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: #dc0909;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Wishlist badge styling */
+.wishlist-count {
+    position: absolute;
+    top: -10px;
+    right: 7px;
+    background-color: #291616;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    
+}
+
+/* Hover effects */
+.site-cart:hover .cart-count {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+.site-header__wishlist:hover .wishlist-count {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+    

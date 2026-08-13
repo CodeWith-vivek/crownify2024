@@ -1,6 +1,5 @@
 const Brand=require("./brandSchema")
 const Product=require("../product/productSchema")
-const { wantsJson } = require("../../shared/utils/wantsJson");
 
 
 //code to load brand page admin side
@@ -20,16 +19,10 @@ const getBrandPage=async(req,res)=>{
             totalPages:totalPages,
             totalBrands:totalBrands,
         };
-        if (wantsJson(req)) return res.json({ success: true, ...brandPageData });
-        res.render("brands", brandPageData)
+        res.json({ success: true, ...brandPageData });
     } catch (error) {
-        if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading brands" });
-        res.redirect("/admin/pageerror")
-
-
+        res.status(500).json({ success: false, message: "Error loading brands" });
     }
-
-
 }
 
 //code to add new brand
@@ -50,16 +43,13 @@ const addBrand = async (req, res) => {
         brandImage: image,
       });
       await newBrand.save();
-      if (wantsJson(req)) return res.status(201).json({ success: true, message: "Brand added successfully", brand: newBrand });
-      res.redirect("/admin/brands");
+      res.status(201).json({ success: true, message: "Brand added successfully", brand: newBrand });
     } else {
-      if (wantsJson(req)) return res.status(409).json({ success: false, message: "Brand already exists" });
-      res.redirect("/admin/brands?error=Brand already exists");
+      res.status(409).json({ success: false, message: "Brand already exists" });
     }
   } catch (error) {
     console.error(error);
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error adding brand" });
-    res.redirect("/admin/pageerror");
+    res.status(500).json({ success: false, message: "Error adding brand" });
   }
 };
 
@@ -69,15 +59,10 @@ const blockBrand =async(req,res)=>{
     try {
         const id=req.query.id
         await Brand.updateOne({_id:id},{$set:{isBlocked:true}})
-        if (wantsJson(req)) return res.json({ success: true, message: "Brand blocked" });
-        res.redirect("/admin/brands")
-
+        res.json({ success: true, message: "Brand blocked" });
     } catch (error) {
-        if (wantsJson(req)) return res.status(500).json({ success: false, message: "Could not block brand" });
-        res.redirect("/admin/pageerror")
-
+        res.status(500).json({ success: false, message: "Could not block brand" });
     }
-
 }
 
 
@@ -87,15 +72,10 @@ const unBlockBrand =async(req,res)=>{
     try{
         const id = req.query.id;
         await Brand.updateOne({ _id: id }, { $set: { isBlocked: false } });
-        if (wantsJson(req)) return res.json({ success: true, message: "Brand unblocked" });
-        res.redirect("/admin/brands");
-
+        res.json({ success: true, message: "Brand unblocked" });
     }catch(error){
-        if (wantsJson(req)) return res.status(500).json({ success: false, message: "Could not unblock brand" });
-        res.redirect("/admin/pageerror")
-
+        res.status(500).json({ success: false, message: "Could not unblock brand" });
     }
-
 }
 
 // code to delete brand
@@ -105,19 +85,13 @@ const deleteBrand=async(req,res)=>{
     try {
         const {id} =req.query;
         if(!id){
-            if (wantsJson(req)) return res.status(400).json({ success: false, message: "Brand id required" });
-            return res.status(400).redirect("/pageerror")
+            return res.status(400).json({ success: false, message: "Brand id required" });
         }
         await Brand.deleteOne({_id:id})
-        if (wantsJson(req)) return res.json({ success: true, message: "Brand deleted" });
-        res.redirect("/admin/brands")
-
+        res.json({ success: true, message: "Brand deleted" });
     } catch (error) {
         console.error("Error deleting brand",error);
-        if (wantsJson(req)) return res.status(500).json({ success: false, message: "Could not delete brand" });
-        res.status(500).redirect("/admin/pageerror")
-
-
+        res.status(500).json({ success: false, message: "Could not delete brand" });
     }
 }
 

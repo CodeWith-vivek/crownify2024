@@ -6,7 +6,6 @@ const Order = require("../order/orderSchema");
 const Cart=require("../cart/cartSchema")
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
-const { wantsJson } = require("../../shared/utils/wantsJson");
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -31,21 +30,15 @@ const loadPayment = async (req, res) => {
       .exec();
 
     if (!order) {
-      if (wantsJson(req)) return res.status(404).json({ success: false, message: "Order not found" });
-      return res.status(404).send("Order not found");
+      return res.status(404).json({ success: false, message: "Order not found" });
     }
 
     const userData = user ? await User.findById(user) : null;
 
-    if (wantsJson(req)) return res.json({ success: true, user: userData, order });
-    return res.render("paymentSuccess", {
-      user: userData,
-      order,
-    });
+    return res.json({ success: true, user: userData, order });
   } catch (error) {
     console.error("Error loading payment success page:", error);
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Server error" });
-    res.status(500).send("Server error");
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -68,21 +61,15 @@ const loadFailure = async (req, res) => {
       .exec();
 
     if (!order) {
-      if (wantsJson(req)) return res.status(404).json({ success: false, message: "Order not found" });
-      return res.status(404).send("Order not found");
+      return res.status(404).json({ success: false, message: "Order not found" });
     }
 
     const userData = user ? await User.findById(user) : null;
 
-    if (wantsJson(req)) return res.json({ success: true, user: userData, order });
-    return res.render("paymentFailure", {
-      user: userData,
-      order,
-    });
+    return res.json({ success: true, user: userData, order });
   } catch (error) {
     console.error("Error loading payment success page:", error);
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Server error" });
-    res.status(500).send("Server error");
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 

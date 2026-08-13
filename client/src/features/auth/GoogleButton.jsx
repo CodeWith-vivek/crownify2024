@@ -1,10 +1,9 @@
-import { Button } from "@/components/ui/button";
 import { googleLoginUrl } from "./authApi";
 
 export function GoogleButton({ from = "login" }) {
   return (
-    <Button asChild variant="outline" className="w-full">
-      <a href={googleLoginUrl(from)}>Continue with Google</a>
-    </Button>
+    <a href={googleLoginUrl(from)} className="social-icon google d-flex align-items-center justify-content-center">
+      <span className="fa fa-google"></span>
+    </a>
   );
 }

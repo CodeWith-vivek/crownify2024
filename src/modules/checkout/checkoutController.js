@@ -4,7 +4,6 @@ const Product = require("../product/productSchema");
 const Coupon=require("../coupon/couponSchema")
 const Brand = require("../brand/brandSchema");
 const Category=require("../category/categorySchema")
-const { wantsJson } = require("../../shared/utils/wantsJson");
 
 //code to load checkout page
 
@@ -15,10 +14,7 @@ const loadCheckout = async (req, res) => {
 
 
     if (!userId) {
-      if (wantsJson(req)) {
-        return res.status(401).json({ success: false, message: "Please log in", redirect: "/login" });
-      }
-      return res.redirect("/login");
+      return res.status(401).json({ success: false, message: "Please log in", redirect: "/login" });
     }
 
     const [listedCategories, unblockedBrands, userData] = await Promise.all([
@@ -54,10 +50,7 @@ const loadCheckout = async (req, res) => {
 
 
     if (!userData) {
-      if (wantsJson(req)) {
-        return res.status(401).json({ success: false, message: "Please log in", redirect: "/login" });
-      }
-      return res.redirect("/login");
+      return res.status(401).json({ success: false, message: "Please log in", redirect: "/login" });
     }
 
     const listedCategoryIds = new Set(
@@ -97,10 +90,7 @@ const loadCheckout = async (req, res) => {
     });
 
     if (!cartItems || !cartItems.items || cartItems.items.length === 0) {
-      if (wantsJson(req)) {
-        return res.status(400).json({ success: false, message: "Your cart is empty", redirect: "/cart" });
-      }
-      return res.redirect("/cart");
+      return res.status(400).json({ success: false, message: "Your cart is empty", redirect: "/cart" });
     }
 
     const validCartItems = cartItems.items.filter(
@@ -108,10 +98,7 @@ const loadCheckout = async (req, res) => {
     );
 
     if (validCartItems.length === 0) {
-      if (wantsJson(req)) {
-        return res.status(400).json({ success: false, message: "Your cart is empty", redirect: "/cart" });
-      }
-      return res.redirect("/cart");
+      return res.status(400).json({ success: false, message: "Your cart is empty", redirect: "/cart" });
     }
 
     const subtotal = validCartItems.reduce((total, item) => {
@@ -172,19 +159,12 @@ const loadCheckout = async (req, res) => {
       wishlistCount,
     };
 
-    if (wantsJson(req)) {
-      res.json({ success: true, ...checkoutData });
-    } else {
-      res.render("checkout3", checkoutData);
-    }
+    res.json({ success: true, ...checkoutData });
 
     req.session.coupon = null;
   } catch (error) {
     console.error("Error on loading checkout:", error);
-    if (wantsJson(req)) {
-      return res.status(500).json({ success: false, message: "Error loading checkout" });
-    }
-    res.redirect("/pageNotFound");
+    res.status(500).json({ success: false, message: "Error loading checkout" });
   }
 };
 

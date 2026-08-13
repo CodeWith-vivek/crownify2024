@@ -1,6 +1,4 @@
-const { query } = require("express");
 const User=require("../user/userSchema")
-const { wantsJson } = require("../../shared/utils/wantsJson");
 
 //code to load users list
 
@@ -35,15 +33,11 @@ const customerInfo=async(req,res)=>{
           currentPage: page,
           totalPages: Math.ceil(count / limit),
         };
-        if (wantsJson(req)) return res.json({ success: true, ...customerData });
-        res.render("customers", customerData);
+        res.json({ success: true, ...customerData });
 
     }catch(error){
       console.log("error in loading customer info",error);
-      if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading customers" });
-       res.redirect("/admin/pageerror");
-
-
+      res.status(500).json({ success: false, message: "Error loading customers" });
     }
 }
 
@@ -53,11 +47,9 @@ const customerBlocked=async(req,res)=>{
      try {
        let id = req.query.id;
        await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
-       if (wantsJson(req)) return res.json({ success: true, message: "Customer blocked" });
-       res.redirect("/admin/users");
+       res.json({ success: true, message: "Customer blocked" });
      } catch (error) {
-       if (wantsJson(req)) return res.status(500).json({ success: false, message: "Could not block customer" });
-       res.redirect("/admin/pageerror");
+       res.status(500).json({ success: false, message: "Could not block customer" });
      }
 
 }
@@ -68,15 +60,10 @@ const customerUnblocked=async(req,res)=>{
       try {
         let id = req.query.id;
         await User.updateOne({ _id: id }, { $set: { isBlocked: false } });
-        if (wantsJson(req)) return res.json({ success: true, message: "Customer unblocked" });
-        res.redirect("/admin/users");
+        res.json({ success: true, message: "Customer unblocked" });
       } catch (error) {
-        if (wantsJson(req)) return res.status(500).json({ success: false, message: "Could not unblock customer" });
-        res.redirect("/admin/pageerror");
+        res.status(500).json({ success: false, message: "Could not unblock customer" });
       }
-
-
-
 }
 
 

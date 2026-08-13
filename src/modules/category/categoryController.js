@@ -1,6 +1,5 @@
 const Category = require("./categorySchema");
 const Product = require("../product/productSchema");
-const { wantsJson } = require("../../shared/utils/wantsJson");
 
 // code to load category in admin side
 
@@ -16,12 +15,10 @@ const categoryInfo = async (req, res) => {
     const totalCategories = await Category.countDocuments();
     const totalPages = Math.ceil(totalCategories / limit);
     const categoryPageData = { cat: categoryData, currentPage: page, totalPages, totalCategories };
-    if (wantsJson(req)) return res.json({ success: true, ...categoryPageData });
-    res.render("category", categoryPageData);
+    res.json({ success: true, ...categoryPageData });
   } catch (error) {
     console.log("Error fetching category data", error);
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading categories" });
-    res.redirect("/admin/pageerror");
+    res.status(500).json({ success: false, message: "Error loading categories" });
   }
 };
 
@@ -196,13 +193,9 @@ const getListCategory=async(req,res)=>{
   try {
     let id=req.query.id
     await Category.updateOne({_id:id},{$set:{isListed:false}})
-    if (wantsJson(req)) return res.json({ success: true, message: "Category unlisted" });
-    res.redirect("/admin/category")
-
+    res.json({ success: true, message: "Category unlisted" });
   } catch (error) {
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Could not unlist category" });
-    res.redirect("/pageerror")
-
+    res.status(500).json({ success: false, message: "Could not unlist category" });
   }
 }
 
@@ -213,11 +206,9 @@ const getUnlistCategory=async(req,res)=>{
   try {
     let id = req.query.id;
     await Category.updateOne({ _id: id }, { $set: { isListed: true } });
-    if (wantsJson(req)) return res.json({ success: true, message: "Category listed" });
-    res.redirect("/admin/category");
+    res.json({ success: true, message: "Category listed" });
   } catch (error) {
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Could not list category" });
-    res.redirect("/pageerror");
+    res.status(500).json({ success: false, message: "Could not list category" });
   }
 
 }
@@ -228,13 +219,9 @@ const getEditCategory =async(req,res)=>{
   try {
     const id =req.query.id
     const category=await Category.findOne({_id:id})
-    if (wantsJson(req)) return res.json({ success: true, category });
-    res.render("edit-category",{category:category})
-
+    res.json({ success: true, category });
   } catch (error) {
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading category" });
-    res.redirect("/pageerror")
-
+    res.status(500).json({ success: false, message: "Error loading category" });
   }
 
 }

@@ -1,29 +1,69 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { IndianRupee, ShoppingBag, Package, FolderTree } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { reportApi } from "./report/reportApi";
+import { usePageAssets } from "@/lib/usePageAssets";
+import { adminProfiles } from "@/styles/adminProfiles";
+import { AdminError } from "@/components/admin/AdminError";
 
-function StatCard({ icon: Icon, label, value, loading }) {
+function StatCard({ icon, tone, label, value, loading }) {
   return (
-    <Card>
-      <CardContent className="flex items-center gap-4 p-6">
-        <div className="rounded-full bg-primary/10 p-3">
-          <Icon className="h-6 w-6 text-primary" />
-        </div>
-        <div>
-          <p className="text-sm text-muted-foreground">{label}</p>
-          {loading ? <Skeleton className="mt-1 h-6 w-20" /> : <p className="text-2xl font-bold text-primary">{value}</p>}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="adm-stat">
+      <span className={`adm-stat__icon${tone ? ` adm-stat__icon--${tone}` : ""}`}>
+        <i className="material-icons">{icon}</i>
+      </span>
+      <div>
+        <p className="adm-stat__label">{label}</p>
+        <p className="adm-stat__value">{loading ? "—" : value}</p>
+      </div>
+    </div>
+  );
+}
+
+function TopList({ title, rows, nameKey, loading }) {
+  return (
+    <div className="adm-card">
+      <div className="adm-card__head">{title}</div>
+      <div className="adm-card__body" style={{ paddingTop: 6, paddingBottom: 6 }}>
+        {loading ? (
+          <p style={{ color: "var(--adm-text-muted)", fontSize: 14, margin: "12px 0" }}>Loading…</p>
+        ) : rows?.length ? (
+          rows.slice(0, 5).map((row, i) => (
+            <div className="adm-list-row" key={row._id || i}>
+              <span style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                <span
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 6,
+                    background: "var(--adm-surface-2)",
+                    color: "var(--adm-text-muted)",
+                    fontSize: 11.5,
+                    fontWeight: 600,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flex: "0 0 auto",
+                  }}
+                >
+                  {i + 1}
+                </span>
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row[nameKey]}</span>
+              </span>
+              <span className="adm-list-row__value">{row.salesCount}</span>
+            </div>
+          ))
+        ) : (
+          <p style={{ color: "var(--adm-text-muted)", fontSize: 14, margin: "12px 0" }}>No data yet.</p>
+        )}
+      </div>
+    </div>
   );
 }
 
 export function DashboardPage() {
+  usePageAssets("admin", "headerdashboard", adminProfiles);
+
   const revenueQuery = useQuery({ queryKey: ["admin-overall-revenue"], queryFn: reportApi.overallRevenue });
   const ordersQuery = useQuery({ queryKey: ["admin-total-orders"], queryFn: reportApi.totalOrders });
   const productsQuery = useQuery({ queryKey: ["admin-total-products"], queryFn: reportApi.totalProducts });
@@ -42,110 +82,90 @@ export function DashboardPage() {
       }))
     : [];
 
+  const inr = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
+
+  // Every stat here falls back to 0 when its request fails, so an
+  // unreachable server renders a dashboard reporting ₹0 revenue and 0
+  // orders — indistinguishable from a real quiet period. When all of them
+  // fail (i.e. the API is down, not one flaky widget) say so instead.
+  // Partial failures still surface via the global query-error toast.
+  const statQueries = [revenueQuery, ordersQuery, productsQuery, categoriesQuery, topSellingQuery, chartQuery];
+  if (statQueries.every((q) => q.isError)) {
+    return (
+      <AdminError
+        title="Couldn't load dashboard data"
+        message="We couldn't reach the server, so these figures would all read as zero. Nothing has changed — please try again."
+        onRetry={() => statQueries.forEach((q) => q.refetch())}
+      />
+    );
+  }
+
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="font-heading text-3xl font-bold text-primary">Dashboard</h1>
-        <Button asChild variant="outline">
-          <Link to="/admin/sales-report">Sales Report</Link>
-        </Button>
+    <>
+      <div className="adm-page-head">
+        <div>
+          <h1>Dashboard</h1>
+          <p>Store performance at a glance.</p>
+        </div>
+        <div className="adm-page-head__actions">
+          <Link to="/admin/sales-report" className="btn btn-secondary">
+            <i className="material-icons">description</i>
+            Sales Report
+          </Link>
+          <Link to="/admin/addProducts" className="btn btn-primary">
+            <i className="material-icons">add</i>
+            Add Product
+          </Link>
+        </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          icon={IndianRupee}
-          label="Net Revenue"
-          loading={revenueQuery.isLoading}
-          value={`₹${revenueQuery.data?.revenue?.netRevenue ?? 0}`}
-        />
-        <StatCard icon={ShoppingBag} label="Total Orders" loading={ordersQuery.isLoading} value={ordersQuery.data?.totalOrders ?? 0} />
-        <StatCard icon={Package} label="Total Products" loading={productsQuery.isLoading} value={productsQuery.data?.totalProducts ?? 0} />
-        <StatCard
-          icon={FolderTree}
-          label="Total Categories"
-          loading={categoriesQuery.isLoading}
-          value={categoriesQuery.data?.totalCategories ?? 0}
-        />
+      <div className="adm-stats">
+        <StatCard icon="payments" tone="success" label="Net Revenue" loading={revenueQuery.isLoading} value={inr(revenueQuery.data?.revenue?.netRevenue)} />
+        <StatCard icon="receipt_long" tone="info" label="Total Orders" loading={ordersQuery.isLoading} value={ordersQuery.data?.totalOrders ?? 0} />
+        <StatCard icon="inventory_2" label="Total Products" loading={productsQuery.isLoading} value={productsQuery.data?.totalProducts ?? 0} />
+        <StatCard icon="category" tone="warning" label="Categories" loading={categoriesQuery.isLoading} value={categoriesQuery.data?.totalCategories ?? 0} />
       </div>
 
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="text-lg">Revenue This Month</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="adm-card" style={{ marginBottom: 22 }}>
+        <div className="adm-card__head">
+          <span>Revenue this month</span>
+        </div>
+        <div className="adm-card__body">
           {chartQuery.isLoading ? (
-            <Skeleton className="h-64 w-full" />
+            <p style={{ color: "var(--adm-text-muted)", fontSize: 14 }}>Loading chart…</p>
           ) : chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="label" hide />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="revenue" stroke="#291616" strokeWidth={2} dot={false} />
-              </LineChart>
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="admRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#dc0909" stopOpacity={0.22} />
+                    <stop offset="100%" stopColor="#dc0909" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#eceef2" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#98a2b3" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: "#98a2b3" }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  contentStyle={{ borderRadius: 10, border: "1px solid #e5e7eb", boxShadow: "0 8px 16px rgba(16,24,40,.08)", fontSize: 13 }}
+                  formatter={(value, name) => (name === "revenue" ? [inr(value), "Revenue"] : [value, "Orders"])}
+                />
+                <Area type="monotone" dataKey="revenue" stroke="#dc0909" strokeWidth={2} fill="url(#admRevenue)" />
+              </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-sm text-muted-foreground">No sales data for this month yet.</p>
+            <div className="adm-empty">
+              <i className="material-icons">show_chart</i>
+              <p style={{ margin: 0 }}>No sales data for this month yet.</p>
+            </div>
           )}
-        </CardContent>
-      </Card>
-
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Top Products</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {topSellingQuery.isLoading ? (
-              <Skeleton className="h-40 w-full" />
-            ) : (
-              topSellingQuery.data?.data?.topProducts?.slice(0, 5).map((p) => (
-                <div key={p._id} className="flex items-center justify-between text-sm">
-                  <span className="truncate">{p.productName}</span>
-                  <span className="font-medium text-primary">{p.salesCount}</span>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Top Categories</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {topSellingQuery.isLoading ? (
-              <Skeleton className="h-40 w-full" />
-            ) : (
-              topSellingQuery.data?.data?.topCategories?.slice(0, 5).map((c) => (
-                <div key={c._id} className="flex items-center justify-between text-sm">
-                  <span className="truncate">{c.categoryName}</span>
-                  <span className="font-medium text-primary">{c.salesCount}</span>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Top Brands</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {topSellingQuery.isLoading ? (
-              <Skeleton className="h-40 w-full" />
-            ) : (
-              topSellingQuery.data?.data?.topBrands?.slice(0, 5).map((b, i) => (
-                <div key={i} className="flex items-center justify-between text-sm">
-                  <span className="truncate">{b.brandName}</span>
-                  <span className="font-medium text-primary">{b.salesCount}</span>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
+        </div>
       </div>
-    </div>
+
+      <div className="adm-grid-2">
+        <TopList title="Top products" rows={topSellingQuery.data?.data?.topProducts} nameKey="productName" loading={topSellingQuery.isLoading} />
+        <TopList title="Top categories" rows={topSellingQuery.data?.data?.topCategories} nameKey="categoryName" loading={topSellingQuery.isLoading} />
+        <TopList title="Top brands" rows={topSellingQuery.data?.data?.topBrands} nameKey="brandName" loading={topSellingQuery.isLoading} />
+      </div>
+    </>
   );
 }

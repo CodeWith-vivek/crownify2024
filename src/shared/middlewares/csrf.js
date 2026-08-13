@@ -20,22 +20,24 @@ const issueToken = (req, res, next) => {
 
 const verifyToken = (req, res, next) => {
   if (!UNSAFE_METHODS.has(req.method)) return next();
-  // multipart/form-data uploads (admin product/brand image forms) submit via
-  // native form.submit() calls, which bypass both the submit-event listener
-  // and fetch/XHR in csrf.js, and multer parses the body after this
-  // middleware runs — so the token can never arrive here for those routes.
-  // Those endpoints are already gated by adminAuth session middleware.
-  if (req.is("multipart/form-data")) return next();
+
+  // NOTE: multipart/form-data used to be exempt here, because the EJS admin
+  // upload forms submitted via native form.submit() (bypassing the fetch/XHR
+  // interception that attached the token) and multer parses the body after
+  // this middleware, so req.body._csrf was never populated in time.
+  //
+  // The React client sends every upload through apiClient.uploadForm(), which
+  // sets the X-CSRF-Token *header* — and headers are readable here regardless
+  // of multer. There is no native form submission left in the app, so the
+  // exemption is no longer needed and is enforced like any other unsafe
+  // request. This closes a CSRF hole on the three admin upload endpoints
+  // (addBrand, addProducts, editProduct).
 
   const cookieToken = req.cookies[COOKIE_NAME];
   const suppliedToken = req.headers["x-csrf-token"] || (req.body && req.body._csrf);
 
   if (!cookieToken || !suppliedToken || cookieToken !== suppliedToken) {
-    if (req.xhr || req.headers.accept?.includes("application/json")) {
-      return res.status(403).json({ success: false, message: "Invalid or missing CSRF token" });
-    }
-    req.flash("error", "Your session expired, please try again.");
-    return res.redirect(req.get("Referrer") || "/");
+    return res.status(403).json({ success: false, message: "Invalid or missing CSRF token" });
   }
   next();
 };

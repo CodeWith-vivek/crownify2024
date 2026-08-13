@@ -1,7 +1,6 @@
 const env = require("dotenv").config();
 const express = require("express");
 const path = require("path");
-const flash = require("connect-flash");
 const session=require("express-session")
 const { MongoStore } = require("connect-mongo");
 const cookieParser = require("cookie-parser");
@@ -54,11 +53,6 @@ app.use(session({
     maxAge:72*60*60*1000
   }
 }))
-app.use(flash())
-app.use((req, res, next) => {
-  res.locals.messages = { error: req.flash("error") };
-  next();
-});
 
 app.use(cookieParser());
 

@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route, Outlet } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { ComingSoon } from "@/components/layout/ComingSoon";
+import { Preloader } from "@/components/layout/Preloader";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { SignupPage } from "@/features/auth/SignupPage";
 import { VerifyOtpPage } from "@/features/auth/VerifyOtpPage";
@@ -10,9 +10,14 @@ import { HomePage } from "@/features/product/HomePage";
 import { ShopPage } from "@/features/product/ShopPage";
 import { ProductDetailsPage } from "@/features/product/ProductDetailsPage";
 import { BrandPage } from "@/features/brand/BrandPage";
+import { AboutPage } from "@/features/pages/AboutPage";
+import { ContactPage } from "@/features/pages/ContactPage";
+import { FaqPage } from "@/features/pages/FaqPage";
+import { NotFoundPage } from "@/features/pages/NotFoundPage";
 import { CartPage } from "@/features/cart/CartPage";
 import { WishlistPage } from "@/features/wishlist/WishlistPage";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+import { ProfileLayout } from "@/components/layout/ProfileLayout";
 import { CheckoutPage } from "@/features/checkout/CheckoutPage";
 import { PaymentSuccessPage } from "@/features/payment/PaymentSuccessPage";
 import { PaymentFailurePage } from "@/features/payment/PaymentFailurePage";
@@ -48,6 +53,9 @@ const CustomersPage = lazy(() =>
 const CategoryPage = lazy(() =>
   import("@/features/admin/category/CategoryPage").then((m) => ({ default: m.CategoryPage }))
 );
+const EditCategoryPage = lazy(() =>
+  import("@/features/admin/category/EditCategoryPage").then((m) => ({ default: m.EditCategoryPage }))
+);
 const AdminBrandPage = lazy(() =>
   import("@/features/admin/brand/BrandPage").then((m) => ({ default: m.BrandPage }))
 );
@@ -60,11 +68,17 @@ const ProductFormPage = lazy(() =>
 const CouponManagementPage = lazy(() =>
   import("@/features/admin/coupons/CouponManagementPage").then((m) => ({ default: m.CouponManagementPage }))
 );
+const EditCouponPage = lazy(() =>
+  import("@/features/admin/coupons/EditCouponPage").then((m) => ({ default: m.EditCouponPage }))
+);
 const ContactMessagesPage = lazy(() =>
   import("@/features/admin/contact/ContactMessagesPage").then((m) => ({ default: m.ContactMessagesPage }))
 );
 const SalesReportPage = lazy(() =>
   import("@/features/admin/report/SalesReportPage").then((m) => ({ default: m.SalesReportPage }))
+);
+const AdminNotFoundPage = lazy(() =>
+  import("@/features/admin/AdminNotFoundPage").then((m) => ({ default: m.AdminNotFoundPage }))
 );
 
 export function AppRouter() {
@@ -75,9 +89,9 @@ export function AppRouter() {
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/brand" element={<BrandPage />} />
         <Route path="/product/:id" element={<ProductDetailsPage />} />
-        <Route path="/About" element={<ComingSoon title="About" />} />
-        <Route path="/contact" element={<ComingSoon title="Contact" />} />
-        <Route path="/faq" element={<ComingSoon title="FAQ" />} />
+        <Route path="/About" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/faq" element={<FaqPage />} />
 
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
@@ -87,19 +101,26 @@ export function AppRouter() {
         <Route element={<ProtectedRoute />}>
           <Route path="/cart" element={<CartPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/Address" element={<AddressPage />} />
-          <Route path="/AccountDetails" element={<AccountDetailsPage />} />
+          {/* Nested under one ProfileLayout instance so switching tabs doesn't
+              unmount/remount the shared shell — that used to force its CSS
+              to unload and reload on every click, flashing the preloader. */}
+          <Route element={<ProfileLayout />}>
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/Address" element={<AddressPage />} />
+            <Route path="/AccountDetails" element={<AccountDetailsPage />} />
+          </Route>
           <Route path="/wallet" element={<WalletPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
         </Route>
 
-        <Route path="/payment-Success" element={<PaymentSuccessPage />} />
-        <Route path="/payment-Failure" element={<PaymentFailurePage />} />
-
-        <Route path="*" element={<ComingSoon title="404 — Not Found" />} />
+        {/* Storefront catch-all. Must stay LAST inside MainLayout, and must
+            not swallow /admin/* — the admin tree below has its own 404. */}
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
+
+      <Route path="/payment-Success" element={<PaymentSuccessPage />} />
+      <Route path="/payment-Failure" element={<PaymentFailurePage />} />
 
       <Route
         element={
@@ -120,12 +141,18 @@ export function AppRouter() {
             <Route path="/admin/orderDetails/:id" element={<OrderDetailsPage />} />
             <Route path="/admin/users" element={<CustomersPage />} />
             <Route path="/admin/category" element={<CategoryPage />} />
+            <Route path="/admin/editCategory/:id" element={<EditCategoryPage />} />
             <Route path="/admin/brands" element={<AdminBrandPage />} />
             <Route path="/admin/products" element={<ProductListPage />} />
             <Route path="/admin/addProducts" element={<ProductFormPage />} />
             <Route path="/admin/editProduct/:id" element={<ProductFormPage />} />
             <Route path="/admin/coupon-management" element={<CouponManagementPage />} />
+            <Route path="/admin/edit-coupon/:id" element={<EditCouponPage />} />
             <Route path="/admin/contactMessages" element={<ContactMessagesPage />} />
+            {/* Without this, an unknown /admin/* URL fell through to the
+                storefront catch-all and rendered the shop's 404 page —
+                shop header, nav and footer and all — inside the admin area. */}
+            <Route path="/admin/*" element={<AdminNotFoundPage />} />
           </Route>
         </Route>
       </Route>
@@ -133,6 +160,11 @@ export function AppRouter() {
   );
 }
 
+// The admin bundle is lazy-loaded, so on a refresh of any /admin route this
+// fallback is what's on screen until the chunk arrives. It used to be a bare
+// <div> whose utility classes aren't in the admin stylesheet at all, which
+// read as an unstyled flash; the shared Preloader is fully inline-styled and
+// matches what the rest of the app shows.
 function AdminLoadingFallback() {
-  return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
+  return <Preloader />;
 }

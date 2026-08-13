@@ -1,12 +1,6 @@
-const wantsJson = (req) =>
-  req.originalUrl.startsWith("/api") || req.xhr || req.get("accept")?.includes("json");
-
 function restrictLoggedInUser(req, res, next) {
   if (req.isAuthenticated && req.isAuthenticated()) {
-    if (wantsJson(req)) {
-      return res.status(409).json({ success: false, message: "Already logged in", redirect: "/profile" });
-    }
-    return res.redirect("/profile");
+    return res.status(409).json({ success: false, message: "Already logged in", redirect: "/profile" });
   }
   next();
 }
@@ -14,19 +8,12 @@ function allowResetPassword(req, res, next) {
   if (req.session.resetAllowed) {
     return next();
   }
-  const message = "Access denied. Please verify OTP first.";
-  if (wantsJson(req)) {
-    return res.status(403).json({ success: false, message });
-  }
-  return res.status(403).send(message);
+  return res.status(403).json({ success: false, message: "Access denied. Please verify OTP first." });
 }
 const ensureSession = (key, redirectUrl) => {
   return (req, res, next) => {
     if (!req.session[key]) {
-      if (wantsJson(req)) {
-        return res.status(401).json({ success: false, message: "Session expired", redirect: redirectUrl });
-      }
-      return res.redirect(redirectUrl);
+      return res.status(401).json({ success: false, message: "Session expired", redirect: redirectUrl });
     }
     next();
   };
@@ -39,17 +26,11 @@ const preventBackToAuth = async (req, res, next) => {
       req.path === "/signup" ||
       req.path === "/login"
     ) {
-      if (wantsJson(req)) {
-        return res.status(409).json({ success: false, message: "Already logged in", redirect: "/" });
-      }
-      return res.redirect("/");
+      return res.status(409).json({ success: false, message: "Already logged in", redirect: "/" });
     }
   } else {
     if (req.path === "/verify-otp" && !req.session.userData) {
-      if (wantsJson(req)) {
-        return res.status(400).json({ success: false, message: "No signup in progress", redirect: "/signup" });
-      }
-      return res.redirect("/signup");
+      return res.status(400).json({ success: false, message: "No signup in progress", redirect: "/signup" });
     }
   }
   next();

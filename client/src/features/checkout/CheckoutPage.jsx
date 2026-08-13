@@ -1,22 +1,23 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { usePageAssets } from "@/lib/usePageAssets";
+import { userProfiles } from "@/styles/userProfiles";
 import { checkoutApi } from "./checkoutApi";
 import { couponApi } from "@/features/coupon/couponApi";
+import { addressApi } from "@/features/address/addressApi";
 import { orderApi } from "@/features/order/orderApi";
 import { useRazorpayScript } from "@/lib/useRazorpayScript";
 import { useAuth } from "@/store/AuthContext";
+import { AddressFormFields, validateAddressForm } from "@/features/address/AddressFormFields";
+import { Modal } from "@/components/ui/Modal";
+import { confirm } from "@/components/ui/ConfirmDialog";
 
 const emptyAddress = {
-  addressType: "Home",
+  addressType: "",
   name: "",
-  country: "India",
+  country: "",
   phone: "",
   pincode: "",
   home: "",
@@ -26,7 +27,25 @@ const emptyAddress = {
   state: "",
 };
 
+function addressToForm(address) {
+  return {
+    addressType: address.addressType || "",
+    name: address.fullName || "",
+    country: address.country || "",
+    phone: address.mobileNumber || "",
+    pincode: address.postalCode || "",
+    home: address.flatHouseCompany || "",
+    area: address.areaStreet || "",
+    landmark: address.landmark || "",
+    town: address.city || "",
+    state: address.state || "",
+  };
+}
+
+
 export function CheckoutPage() {
+  usePageAssets("user", "headercheckout", userProfiles);
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const razorpayReady = useRazorpayScript();
@@ -37,26 +56,42 @@ export function CheckoutPage() {
     queryFn: checkoutApi.get,
   });
 
-  const [selectedAddressId, setSelectedAddressId] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState("COD");
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [couponCode, setCouponCode] = useState("");
   const [placing, setPlacing] = useState(false);
-  const [addressForm, setAddressForm] = useState(emptyAddress);
+  const [addAddressOpen, setAddAddressOpen] = useState(false);
+  const [addForm, setAddForm] = useState(emptyAddress);
+  const [addErrors, setAddErrors] = useState({});
   const [savingAddress, setSavingAddress] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState(emptyAddress);
+  const [editErrors, setEditErrors] = useState({});
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [couponsOpen, setCouponsOpen] = useState(false);
 
   const addresses = data?.addresses || [];
-  const primaryAddressId = selectedAddressId || addresses.find((a) => a.isPrimary)?._id || addresses[0]?._id;
+  const products = data?.products || [];
+  const primaryAddress = addresses.find((a) => a.isPrimary);
 
   const refreshCheckout = () => queryClient.invalidateQueries({ queryKey: ["checkout"] });
 
   const handleAddAddress = async (e) => {
     e.preventDefault();
+    const nextErrors = validateAddressForm(addForm);
+    setAddErrors(nextErrors);
+    if (Object.values(nextErrors).some(Boolean)) return;
     setSavingAddress(true);
     try {
-      await checkoutApi.addAddress(addressForm);
-      toast.success("Address added");
-      setAddressForm(emptyAddress);
-      await refreshCheckout();
+      const res = await checkoutApi.addAddress(addForm);
+      if (res?.success === false) {
+        toast.error(res.message || "Could not add address");
+      } else {
+        toast.success("Address added");
+        setAddForm(emptyAddress);
+        setAddErrors({});
+        setAddAddressOpen(false);
+        await refreshCheckout();
+      }
     } catch (err) {
       toast.error(err.message || "Could not add address");
     } finally {
@@ -64,36 +99,105 @@ export function CheckoutPage() {
     }
   };
 
-  const handleApplyCoupon = async () => {
-    if (!couponCode) return;
+  const openEdit = (address) => {
+    setEditingId(address._id);
+    setEditForm(addressToForm(address));
+    setEditErrors({});
+  };
+
+  const handleUpdateAddress = async (e) => {
+    e.preventDefault();
+    const nextErrors = validateAddressForm(editForm);
+    setEditErrors(nextErrors);
+    if (Object.values(nextErrors).some(Boolean)) return;
+    setSavingEdit(true);
     try {
-      const res = await couponApi.apply(couponCode, data.subtotal);
-      if (res?.success) {
-        toast.success("Coupon applied");
-        await refreshCheckout();
+      const res = await addressApi.update(editingId, editForm);
+      if (res?.success === false) {
+        toast.error(res.message || "Could not update address");
       } else {
-        toast.error(res?.message || "Invalid coupon");
+        toast.success("Address updated");
+        setEditingId(null);
+        await refreshCheckout();
       }
     } catch (err) {
-      toast.error(err.message || "Invalid coupon");
+      toast.error(err.message || "Could not update address");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleDeleteAddress = async (id) => {
+    if (!await confirm("You won't be able to revert this action!")) return;
+    try {
+      await addressApi.delete(id);
+      toast.success("Address removed");
+      await refreshCheckout();
+    } catch (err) {
+      toast.error(err.message || "Could not delete address");
+    }
+  };
+
+  const handleSetPrimary = async (id) => {
+    if (!await confirm("Do you want to set this as your primary address?", { danger: false })) return;
+    try {
+      const res = await addressApi.setPrimary(id);
+      if (res?.success === false) {
+        toast.error(res.message || "Failed to update primary address.");
+      } else {
+        toast.success("Primary address updated successfully.");
+        await refreshCheckout();
+      }
+    } catch (err) {
+      toast.error("An error occurred while updating primary address. Please try again.");
+    }
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode) {
+      toast.error("Please enter a coupon code.");
+      return;
+    }
+    try {
+      const res = await couponApi.apply(couponCode, data.subtotal + data.shipping);
+      if (res?.success) {
+        toast.success("Coupon applied successfully!");
+        await refreshCheckout();
+      } else {
+        toast.error(res?.message || "Failed to apply coupon.");
+      }
+    } catch (err) {
+      toast.error(err.message || "An error occurred. Try again.");
     }
   };
 
   const handleRemoveCoupon = async () => {
     try {
-      await couponApi.remove(data.subtotal);
+      await couponApi.remove(data.subtotal + data.shipping);
       setCouponCode("");
+      toast.success("Coupon removed successfully.");
       await refreshCheckout();
     } catch (err) {
       toast.error(err.message || "Could not remove coupon");
     }
   };
 
-  const handlePlaceOrder = async () => {
-    if (!primaryAddressId) {
-      toast.error("Please select or add a shipping address");
+  const handlePlaceOrder = async (e) => {
+    e.preventDefault();
+    if (!paymentMethod) {
+      toast.error("Please select a payment method (Wallet, Cash on Delivery, or Razor Pay).");
       return;
     }
+    if (!primaryAddress) {
+      toast.error("Please add and select a primary shipping address.");
+      return;
+    }
+    if (paymentMethod === "COD" && data.total > 1000) {
+      toast.error("Cash on Delivery is not available for orders above ₹1000. Please choose another payment method.");
+      return;
+    }
+    if (!await confirm(`Place this order? Payment: ${paymentMethod}, Total: ₹${data.total}`)) return;
+
     setPlacing(true);
     try {
       const validation = await checkoutApi.validate();
@@ -104,7 +208,7 @@ export function CheckoutPage() {
       }
 
       const payload = {
-        primaryAddressId,
+        primaryAddressId: primaryAddress._id,
         subtotal: data.subtotal,
         shipping: data.shipping,
         paymentMethod,
@@ -149,10 +253,10 @@ export function CheckoutPage() {
           modal: {
             ondismiss: async () => {
               await orderApi.deletePreliminaryOrder(res.orderId);
-              toast.info("Payment cancelled");
+              await refreshCheckout();
             },
           },
-          theme: { color: "#291616" },
+          theme: { color: "#3399cc" },
         });
         rzp.open();
       } else {
@@ -161,160 +265,354 @@ export function CheckoutPage() {
         navigate(`/payment-Success?orderId=${res.orderId}`);
       }
     } catch (err) {
-      toast.error(err.message || "Could not place order");
+      toast.error(err.message || "Unable to process your order. Please try again.");
     } finally {
       setPlacing(false);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="mx-auto max-w-5xl px-4 py-8 space-y-4">
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-40 w-full" />
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="mx-auto max-w-4xl px-4 py-16 text-center text-muted-foreground">
-        Could not load checkout. Your cart may be empty.
-      </div>
-    );
-  }
+  if (isLoading) return <div className="container" style={{ padding: 60 }}>Loading...</div>;
+  if (isError || !data) return <div className="container" style={{ padding: 60 }}>Your cart is empty.</div>;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="font-heading text-3xl font-bold text-primary">Checkout</h1>
+    <>
+      <section className="breadcrumb-option">
+        <div className="container">
+          <div className="row">
+            <div className="col-lg-12">
+              <div className="breadcrumb__text">
+                <h4>Check Out</h4>
+                <div className="breadcrumb__links">
+                  <Link to="/">Home</Link>
+                  <Link to="/shop">Shop</Link>
+                  <span>Check Out</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Shipping Address</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {addresses.map((addr) => (
-                <label
-                  key={addr._id}
-                  className={`block cursor-pointer rounded-md border p-3 text-sm ${
-                    primaryAddressId === addr._id ? "border-primary ring-1 ring-primary" : ""
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="address"
-                    className="mr-2"
-                    checked={primaryAddressId === addr._id}
-                    onChange={() => setSelectedAddressId(addr._id)}
-                  />
-                  <span className="font-medium">{addr.fullName}</span> — {addr.flatHouseCompany}, {addr.areaStreet},{" "}
-                  {addr.city}, {addr.state} - {addr.postalCode} ({addr.mobileNumber})
-                </label>
-              ))}
+      <section className="checkout spad">
+        <div className="container">
+          <form className="checkout__form" onSubmit={handlePlaceOrder}>
+            <div className="row">
+              <div className="col-lg-7 col-md-5">
+                {addresses.length === 0 ? (
+                  <h2>No address added yet.</h2>
+                ) : (
+                  addresses.map((address) => (
+                    <div className="card mb-3 mb-lg-3" key={address._id}>
+                      <div className="card-header d-flex justify-content-between align-items-center" style={{ backgroundColor: "#db1717" }}>
+                        <h5 className="mb-0">Address</h5>
+                        {address.isPrimary && (
+                          <span className="badge bg-success" style={{ marginRight: 23, color: "white", backgroundColor: "black" }}>
+                            Primary
+                          </span>
+                        )}
+                      </div>
+                      <div className="card-body">
+                        <address>
+                          {address.fullName}
+                          <br />
+                          {address.flatHouseCompany}, {address.areaStreet}
+                          <br />
+                          {address.city}, {address.state} - {address.postalCode}
+                          <br />
+                          {address.mobileNumber}
+                          <br />
+                        </address>
+                        <div className="d-flex justify-content-between">
+                          {!address.isPrimary && (
+                            <a href="#" className="btn-small btn-link" onClick={(e) => { e.preventDefault(); handleSetPrimary(address._id); }}>
+                              Set as Primary
+                            </a>
+                          )}
+                          <a href="#" className="btn-small btn-link" onClick={(e) => { e.preventDefault(); openEdit(address); }}>
+                            <i className="fas fa-edit"></i> Edit
+                          </a>
+                          <a href="#" className="btn-small btn-link text-danger" onClick={(e) => { e.preventDefault(); handleDeleteAddress(address._id); }}>
+                            <i className="fas fa-trash"></i> Delete
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
 
-              {addresses.length === 0 && (
-                <p className="text-sm text-muted-foreground">No saved addresses. Add one below.</p>
-              )}
-
-              <details className="pt-2">
-                <summary className="cursor-pointer text-sm font-medium text-accent">
-                  {addresses.length === 0 ? "Add a shipping address" : "Add another address"}
-                </summary>
-                <form onSubmit={handleAddAddress} className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <select
-                    className="rounded-md border bg-background px-3 py-2 text-sm sm:col-span-2"
-                    value={addressForm.addressType}
-                    onChange={(e) => setAddressForm({ ...addressForm, addressType: e.target.value })}
+                {addresses.length < 4 && (
+                  <a
+                    href="#"
+                    className="btn btn-primary"
+                    style={{ width: 150, backgroundColor: "black", marginLeft: 20, color: "rgb(251, 251, 251)" }}
+                    onClick={(e) => { e.preventDefault(); setAddAddressOpen(true); }}
                   >
-                    <option value="Home">Home</option>
-                    <option value="Office">Office</option>
-                    <option value="Other">Other</option>
-                  </select>
-                  <Input placeholder="Full name" required value={addressForm.name} onChange={(e) => setAddressForm({ ...addressForm, name: e.target.value })} />
-                  <Input placeholder="Phone" required value={addressForm.phone} onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })} />
-                  <Input placeholder="Flat / House / Company" required value={addressForm.home} onChange={(e) => setAddressForm({ ...addressForm, home: e.target.value })} />
-                  <Input placeholder="Area / Street" required value={addressForm.area} onChange={(e) => setAddressForm({ ...addressForm, area: e.target.value })} />
-                  <Input placeholder="Landmark" value={addressForm.landmark} onChange={(e) => setAddressForm({ ...addressForm, landmark: e.target.value })} />
-                  <Input placeholder="Town / City" required value={addressForm.town} onChange={(e) => setAddressForm({ ...addressForm, town: e.target.value })} />
-                  <Input placeholder="State" required value={addressForm.state} onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })} />
-                  <Input placeholder="Pincode" required value={addressForm.pincode} onChange={(e) => setAddressForm({ ...addressForm, pincode: e.target.value })} />
-                  <Button type="submit" disabled={savingAddress} className="sm:col-span-2">
-                    {savingAddress ? "Saving..." : "Save Address"}
-                  </Button>
-                </form>
-              </details>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Method</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {["COD", "Wallet", "RazorPay"].map((method) => (
-                <label key={method} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    checked={paymentMethod === method}
-                    onChange={() => setPaymentMethod(method)}
-                  />
-                  {method === "COD" ? "Cash on Delivery" : method === "Wallet" ? "Wallet" : "Razorpay (Card/UPI/Netbanking)"}
-                </label>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="h-fit space-y-4 rounded-lg border p-6">
-          <h2 className="font-heading text-lg font-semibold text-primary">Order Summary</h2>
-
-          <div className="space-y-1">
-            {data.products.map((p) => (
-              <div key={`${p.productId}-${p.size}-${p.color}`} className="flex justify-between text-sm">
-                <span className="truncate">{p.productName} x{p.quantity}</span>
-                <span>₹{p.itemTotal}</span>
+                    Add Address
+                  </a>
+                )}
               </div>
-            ))}
-          </div>
 
-          <div className="flex gap-2">
-            <Input placeholder="Coupon code" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} />
-            {data.coupon ? (
-              <Button variant="outline" onClick={handleRemoveCoupon}>Remove</Button>
-            ) : (
-              <Button variant="outline" onClick={handleApplyCoupon}>Apply</Button>
-            )}
-          </div>
+              <div className="col-lg-5 col-md-7">
+                <div style={{ marginLeft: 20, paddingTop: 28, paddingBottom: 28 }}>
+                  <div className="cart__discount" style={{ marginBottom: 20 }}>
+                    <h6>Discount codes</h6>
+                    <div className="form-stacked">
+                      <input type="text" placeholder="Coupon code" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} />
+                      <button
+                        type="button"
+                        style={{
+                          fontSize: 14,
+                          marginTop: 15,
+                          color: "#ffffff",
+                          fontWeight: 700,
+                          letterSpacing: 2,
+                          textTransform: "uppercase",
+                          background: "#111111",
+                          padding: "0 30px",
+                          width: "100%",
+                          border: "none",
+                          height: 50,
+                        }}
+                        onClick={handleApplyCoupon}
+                      >
+                        Apply
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!data.coupon}
+                        style={{
+                          fontSize: 14,
+                          marginTop: 15,
+                          color: "#ffffff",
+                          fontWeight: 700,
+                          letterSpacing: 2,
+                          textTransform: "uppercase",
+                          background: "#111111",
+                          padding: "0 30px",
+                          border: "none",
+                          height: 50,
+                          width: "100%",
+                        }}
+                        onClick={handleRemoveCoupon}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
 
-          <div className="space-y-2 border-t pt-4 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span>₹{data.subtotal}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Shipping</span>
-              <span>₹{data.shipping}</span>
-            </div>
-            {data.discountAmount > 0 && (
-              <div className="flex justify-between text-accent">
-                <span>Discount</span>
-                <span>-₹{data.discountAmount}</span>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setCouponsOpen(true)}
+                    style={{
+                      marginTop: 20,
+                      fontSize: 14,
+                      color: "#ffffff",
+                      fontWeight: 700,
+                      letterSpacing: 2,
+                      textTransform: "uppercase",
+                      background: "#db1717",
+                      padding: "0 30px",
+                      border: "none",
+                      borderRadius: 30,
+                      height: 60,
+                      width: "100%",
+                    }}
+                  >
+                    View Coupons
+                  </button>
+                </div>
+
+                <div className="checkout__order">
+                  <h4 className="order__title">Your order</h4>
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {products.map((product) => (
+                        <tr key={`${product.productId}-${product.size}-${product.color}`}>
+                          <td>
+                            <div className="product-info">
+                              <div className="product-image">
+                                <img src={`/uploads/product-image/${product.productImage}`} style={{ width: 50, height: 50, marginRight: 10 }} />
+                              </div>
+                              <div className="product-details product-details-small">
+                                <p>
+                                  <b>{product.productName}</b>
+                                </p>
+                                <p>{product.productBrand}</p>
+                                <p>{product.size}</p>
+                                <p>{product.color}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <input type="text" value={product.quantity} readOnly style={{ width: 50, border: "none", background: "transparent" }} />
+                          </td>
+                          <td>₹{product.itemTotal}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <ul className="checkout__total__all">
+                    <li>
+                      {" "}
+                      Sale Price Subtotal <span>₹{data.subtotal.toFixed(2)}</span>
+                    </li>
+                    <li>
+                      Coupon Discount <span style={{ color: "green", fontSize: 14 }}>₹{data.discountAmount.toFixed(2)}</span>
+                    </li>
+                    <li>
+                      Shipping <span style={{ color: "gray", fontSize: 14 }}>₹{data.shipping.toFixed(2)}</span>
+                    </li>
+                    <li>
+                      Grand Total <span>₹{data.total.toFixed(2)}</span>
+                    </li>
+                  </ul>
+                  <h4 className="order__title">Payment Method</h4>
+                  <div className="checkout__input__checkbox">
+                    <label htmlFor="cod-payment">
+                      <input type="radio" id="cod-payment" name="paymentMethod" value="COD" checked={paymentMethod === "COD"} onChange={(e) => setPaymentMethod(e.target.value)} />
+                      Cash On Delivery
+                      <span className="checkmark"></span>
+                    </label>
+                  </div>
+                  <div className="checkout__input__checkbox">
+                    <label htmlFor="razorpay-payment">
+                      <input
+                        type="radio"
+                        id="razorpay-payment"
+                        name="paymentMethod"
+                        value="RazorPay"
+                        checked={paymentMethod === "RazorPay"}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                      />
+                      Razor Pay
+                      <span className="checkmark"></span>
+                    </label>
+                  </div>
+                  <div className="checkout__input__checkbox">
+                    <label htmlFor="wallet-payment">
+                      <input type="radio" id="wallet-payment" name="paymentMethod" value="Wallet" checked={paymentMethod === "Wallet"} onChange={(e) => setPaymentMethod(e.target.value)} />
+                      Wallet
+                      <span className="checkmark"></span>
+                    </label>
+                  </div>
+                  <button type="submit" className="site-btn" disabled={placing}>
+                    {placing ? "Processing..." : "Proceed to Checkout"}
+                  </button>
+                </div>
               </div>
-            )}
-            <div className="flex justify-between border-t pt-2 font-semibold">
-              <span>Total</span>
-              <span>₹{data.total}</span>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <Modal open={addAddressOpen} onClose={() => setAddAddressOpen(false)} title="Add New Address">
+        <form onSubmit={handleAddAddress} className="signup-form">
+          <AddressFormFields form={addForm} setForm={setAddForm} errors={addErrors} setErrors={setAddErrors} idPrefix="add-" />
+          <div className="text-center">
+            <button type="submit" className="btn btn-secondary" disabled={savingAddress}>
+              {savingAddress ? "Adding..." : "Add Address"}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal open={!!editingId} onClose={() => setEditingId(null)} title="Edit Address">
+        <form onSubmit={handleUpdateAddress} className="editAddress-form">
+          <AddressFormFields form={editForm} setForm={setEditForm} errors={editErrors} setErrors={setEditErrors} idPrefix="edit-" />
+          <div className="col-md-12 text-center">
+            <button type="submit" className="btn btn-secondary submit" disabled={savingEdit}>
+              {savingEdit ? "Updating..." : "Update Address"}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {couponsOpen && (
+        <>
+          <div className="modal fade show" style={{ display: "block" }} tabIndex="-1" role="dialog">
+            <div className="modal-dialog modal-lg" role="document">
+              <div className="modal-content">
+                <div className="modal-header bg-primary text-white">
+                  <h5 className="modal-title">
+                    <i className="fas fa-tags"></i> Available Coupons
+                  </h5>
+                  <button type="button" className="close text-white" aria-label="Close" onClick={() => setCouponsOpen(false)}>
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div className="modal-body p-4">
+                  {data.coupons && data.coupons.length > 0 ? (
+                    <div className="table-responsive">
+                      <table className="table table-hover align-middle">
+                        <thead className="bg-light">
+                          <tr>
+                            <th className="text-center" style={{ width: "20%" }}>
+                              Coupon Code
+                            </th>
+                            <th>Description</th>
+                            <th className="text-center" style={{ width: "20%" }}>
+                              Expiry Date
+                            </th>
+                            <th className="text-center" style={{ width: "20%" }}>
+                              Action
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {data.coupons.map((coupon) => (
+                            <tr key={coupon._id}>
+                              <td className="text-center">
+                                <span className="badge badge-success" style={{ fontSize: "1rem" }}>
+                                  {coupon.code}
+                                </span>
+                              </td>
+                              <td>
+                                <span className="text-success font-weight-bold">{coupon.description}</span>
+                              </td>
+                              <td className="text-center text-danger font-weight-bold">
+                                {new Date(coupon.expiryDate).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+                              </td>
+                              <td className="text-center">
+                                <button
+                                  className="btn btn-primary btn-sm px-4"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(coupon.code);
+                                    toast.success(`Coupon code copied to clipboard: ${coupon.code}`);
+                                  }}
+                                >
+                                  Copy Code
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="alert alert-info text-center">
+                      <i className="fas fa-info-circle"></i> No coupons available at the moment.
+                    </div>
+                  )}
+                </div>
+                <div className="modal-footer bg-light">
+                  <button type="button" className="btn btn-secondary" onClick={() => setCouponsOpen(false)}>
+                    <i className="fas fa-times"></i> Close
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-
-          <Button className="w-full" disabled={placing} onClick={handlePlaceOrder}>
-            {placing ? "Placing order..." : "Place Order"}
-          </Button>
-        </div>
-      </div>
-    </div>
+          <div className="modal-backdrop fade show" onClick={() => setCouponsOpen(false)}></div>
+        </>
+      )}
+    </>
   );
 }

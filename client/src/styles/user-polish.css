@@ -1,0 +1,241 @@
+/* ==========================================================================
+   Crownify storefront — 2026 control polish
+   --------------------------------------------------------------------------
+   Deliberately additive and non-structural. The original EJS/Bootstrap theme
+   still owns every layout decision: no widths, margins, paddings, grids,
+   font families, or brand colours are changed here. This layer only
+   modernises the FEEL of interactive controls — corner radius, easing,
+   hover/active response, focus rings, and disabled states — so the storefront
+   keeps its pixel-for-pixel layout while buttons and inputs stop feeling like
+   2015 Bootstrap.
+
+   Scoped to .pageWrapper so it cannot reach the admin panel, which runs its
+   own separate design system (admin-modern.css).
+   ========================================================================== */
+
+/* ---------- Buttons ---------- */
+
+.pageWrapper .btn,
+.pageWrapper .site-btn,
+.pageWrapper button.primary-btn,
+.pageWrapper a.primary-btn {
+  border-radius: 8px;
+  transition: transform 0.14s ease, box-shadow 0.18s ease, filter 0.18s ease, background-color 0.18s ease;
+  will-change: transform;
+}
+
+.pageWrapper .btn:hover,
+.pageWrapper .site-btn:hover,
+.pageWrapper .primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 24, 40, 0.14);
+  filter: brightness(1.04);
+}
+
+.pageWrapper .btn:active,
+.pageWrapper .site-btn:active,
+.pageWrapper .primary-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(16, 24, 40, 0.12);
+  filter: brightness(0.97);
+}
+
+.pageWrapper .btn:focus-visible,
+.pageWrapper .site-btn:focus-visible,
+.pageWrapper .primary-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(220, 9, 9, 0.28);
+}
+
+.pageWrapper .btn:disabled,
+.pageWrapper .site-btn:disabled,
+.pageWrapper button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
+
+/* Keep square-by-design CTAs square — the theme sets these intentionally. */
+.pageWrapper .slideshow .btn {
+  border-radius: 0;
+}
+
+/* Hero "SHOP NOW" — rounded, and pinned solid on hover. The theme's global
+   .btn:hover rule fades background-color to transparent (#ffffff00) and drops
+   opacity to 0.8, which reads as the button/text disappearing. Override with
+   higher specificity so it stays solid black/cornsilk at all times. */
+.pageWrapper .slideshow .hero-shop-btn,
+.pageWrapper .hero-shop-btn,
+.pageWrapper .hero-shop-btn:hover,
+.pageWrapper .hero-shop-btn:focus {
+  background-color: #000;
+  color: #fffff0;
+  border-radius: 10px;
+  opacity: 1;
+}
+
+/* ---------- Form controls ---------- */
+
+.pageWrapper .form-control,
+.pageWrapper input[type="text"],
+.pageWrapper input[type="email"],
+.pageWrapper input[type="password"],
+.pageWrapper input[type="number"],
+.pageWrapper input[type="search"],
+.pageWrapper input[type="date"],
+.pageWrapper textarea,
+.pageWrapper select {
+  border-radius: 8px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+
+.pageWrapper .form-control:focus,
+.pageWrapper input[type="text"]:focus,
+.pageWrapper input[type="email"]:focus,
+.pageWrapper input[type="password"]:focus,
+.pageWrapper input[type="number"]:focus,
+.pageWrapper input[type="search"]:focus,
+.pageWrapper input[type="date"]:focus,
+.pageWrapper textarea:focus,
+.pageWrapper select:focus {
+  outline: none;
+  border-color: #291616;
+  box-shadow: 0 0 0 3px rgba(41, 22, 22, 0.1);
+}
+
+/* ---------- Product cards ---------- */
+
+.pageWrapper .grid-products .item .product-image {
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.pageWrapper .grid-products .item .product-image img {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+}
+
+.pageWrapper .grid-products .item:hover .product-image img.primary {
+  transform: scale(1.04);
+}
+
+.pageWrapper .grid-products .item .product-name a {
+  transition: color 0.16s ease;
+}
+
+/* ---------- Tables ---------- */
+
+.pageWrapper .cart-table tbody tr,
+.pageWrapper .wishlist-table tbody tr {
+  transition: background-color 0.16s ease;
+}
+
+.pageWrapper .cart-table tbody tr:hover,
+.pageWrapper .wishlist-table tbody tr:hover {
+  background-color: rgba(41, 22, 22, 0.025);
+}
+
+/* ---------- Modals ---------- */
+
+.pageWrapper .modal-content {
+  border-radius: 14px;
+  border: none;
+  box-shadow: 0 20px 44px rgba(16, 24, 40, 0.18);
+}
+
+/* ---------- Links & icons ---------- */
+
+.pageWrapper a {
+  transition: color 0.16s ease, opacity 0.16s ease;
+}
+
+.pageWrapper .site-header__wishlist,
+.pageWrapper .site-cart {
+  transition: transform 0.16s ease;
+}
+
+.pageWrapper .site-header__wishlist:hover,
+.pageWrapper .site-cart:hover {
+  transform: translateY(-1px);
+}
+
+/* Some pages (headercart/headerwallet profiles) load ~20 stylesheets
+   including several jQuery-plugin CSS files that all reuse the generic
+   ".icon" class name for their own unrelated UI — one of them was winning
+   the cascade and hiding the header cart/wishlist icons until :hover
+   flipped some other rule back on. Forcing the real color so it can't be
+   silently overridden regardless of which plugin CSS is at fault. */
+.pageWrapper .site-header__cart .icon,
+.pageWrapper .site-header__wishlist .icon {
+  color: #000 !important;
+  opacity: 1 !important;
+}
+
+/* Cart/wishlist count badges. In the original site this lived in each
+   page's own per-page inline <style> block (header.ejs, header2.ejs,
+   headerAbout.ejs, ...) rather than a shared stylesheet — and a few pages
+   (404 among them) never got that block written for them, so their counts
+   rendered as plain unstyled "0" text next to the icon instead of the small
+   circular badge every other page shows. Defined once here so it's
+   consistent on every page regardless of which per-page profile is loaded. */
+.pageWrapper .site-cart,
+.pageWrapper .site-header__wishlist {
+  position: relative;
+}
+
+.pageWrapper .cart-count {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #dc0909;
+  color: #fff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.pageWrapper .wishlist-count {
+  position: absolute;
+  top: -10px;
+  right: 7px;
+  background-color: #291616;
+  color: #fff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.pageWrapper .site-cart:hover .cart-count,
+.pageWrapper .site-header__wishlist:hover .wishlist-count {
+  transform: scale(1.1);
+}
+
+/* ---------- Motion safety ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .pageWrapper *,
+  .pageWrapper *::before,
+  .pageWrapper *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .pageWrapper .btn:hover,
+  .pageWrapper .site-btn:hover,
+  .pageWrapper .primary-btn:hover {
+    transform: none;
+  }
+}

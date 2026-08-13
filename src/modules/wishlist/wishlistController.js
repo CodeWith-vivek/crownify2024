@@ -3,7 +3,6 @@ const Product = require("../product/productSchema");
 const Wishlist=require("./wishlistSchema")
 const Category=require("../category/categorySchema")
 const Brand=require("../brand/brandSchema")
-const { wantsJson } = require("../../shared/utils/wantsJson");
 
 
 //code to load wishlist page
@@ -55,9 +54,7 @@ const loadWishlistpage = async (req, res) => {
 
     if (!user) {
       const guestData = { user: null, wishlistItems: [], isWishlistEmpty: true, isGuest: true };
-      return wantsJson(req)
-        ? res.json({ success: true, ...guestData })
-        : res.render("Wishlist", guestData);
+      return res.json({ success: true, ...guestData });
     }
 
     const wishlist = await Wishlist.findOne({ userId })
@@ -73,9 +70,7 @@ const loadWishlistpage = async (req, res) => {
 
     if (!wishlist || wishlist.items.length === 0) {
       const emptyData = { user, wishlistItems: [], isWishlistEmpty: true, isGuest: false, cartCount };
-      return wantsJson(req)
-        ? res.json({ success: true, ...emptyData })
-        : res.render("Wishlist", emptyData);
+      return res.json({ success: true, ...emptyData });
     }
 
     const wishlistItems = wishlist.items
@@ -129,14 +124,10 @@ const loadWishlistpage = async (req, res) => {
       cartCount,
       wishlistCount: wishlistItems.length,
     };
-    if (wantsJson(req)) return res.json({ success: true, ...pageData });
-    res.render("Wishlist", pageData);
+    res.json({ success: true, ...pageData });
   } catch (error) {
     console.error("Wishlist page error:", error);
-    if (wantsJson(req)) {
-      return res.status(500).json({ success: false, message: "Error loading wishlist" });
-    }
-    res.status(500).send("Error loading wishlist");
+    res.status(500).json({ success: false, message: "Error loading wishlist" });
   }
 };
 

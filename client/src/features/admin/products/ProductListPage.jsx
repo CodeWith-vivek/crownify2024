@@ -1,34 +1,37 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { adminApi } from "../adminApi";
+import { AdminPagination } from "@/components/admin/AdminPagination";
+import { AdminError } from "@/components/admin/AdminError";
+import { confirm } from "@/components/ui/ConfirmDialog";
 
 export function ProductListPage() {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [offerProductId, setOfferProductId] = useState(null);
-  const [offerPercentage, setOfferPercentage] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = parseInt(searchParams.get("page") || "1", 10);
+  const search = searchParams.get("search") || "";
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["admin-products", page, search],
     queryFn: () => adminApi.products(page, search),
   });
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["admin-products"] });
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const value = new FormData(e.target).get("search") || "";
+    setSearchParams({ search: value, page: "1" });
+  };
+
   const toggleBlock = async (product) => {
+    const msg = product.isBlocked ? "Unblock this product?" : "Block this product? It will be hidden from the storefront.";
+    if (!await confirm(msg)) return;
     try {
       const res = product.isBlocked ? await adminApi.unblockProduct(product._id) : await adminApi.blockProduct(product._id);
-      if (res?.success) {
-        toast.success(res.message);
+      if (res?.success !== false) {
+        toast.success(product.isBlocked ? "Product unblocked" : "Product blocked");
         await refresh();
       }
     } catch (err) {
@@ -36,140 +39,159 @@ export function ProductListPage() {
     }
   };
 
-  const handleApplyOffer = async () => {
+  const handleAddOffer = async (productId) => {
+    const amount = window.prompt("Offer percentage (0–100):");
+    if (amount === null) return;
+    if (amount === "" || isNaN(amount) || amount < 0 || amount > 100) {
+      toast.error("Enter a valid percentage between 0 and 100.");
+      return;
+    }
     try {
-      const res = await adminApi.addProductOffer({ productId: offerProductId, percentage: Number(offerPercentage) });
+      const res = await adminApi.addProductOffer({ productId, percentage: Number(amount) });
       if (res?.status) {
-        toast.success("Offer applied");
-        setOfferProductId(null);
-        setOfferPercentage("");
+        toast.success("Offer added");
         await refresh();
       } else {
-        toast.error(res?.message || "Could not apply offer");
+        toast.error(res?.message || "Unable to add offer");
       }
-    } catch (err) {
-      toast.error(err.message || "Could not apply offer");
+    } catch {
+      toast.error("An error occurred while adding the offer");
     }
   };
 
   const handleRemoveOffer = async (productId) => {
+    if (!await confirm("Remove this offer?")) return;
     try {
       const res = await adminApi.removeProductOffer(productId);
       if (res?.status) {
         toast.success("Offer removed");
         await refresh();
+      } else {
+        toast.error("Failed to remove offer");
       }
-    } catch (err) {
-      toast.error(err.message || "Could not remove offer");
+    } catch {
+      toast.error("Failed to remove offer");
     }
   };
 
+  const products = data?.data ? [...data.data].reverse() : [];
+  const currentPage = data?.currentPage || page;
+  const totalPages = data?.totalPages || 1;
+
+  if (isError) return <AdminError onRetry={refetch} />;
+
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="font-heading text-3xl font-bold text-primary">Products</h1>
-        <div className="flex gap-3">
-          <Input
-            placeholder="Search products..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-          />
-          <Button asChild>
-            <Link to="/admin/addProducts">Add Product</Link>
-          </Button>
+    <>
+      <div className="adm-page-head">
+        <div>
+          <h1>Products</h1>
+          <p>Manage catalog, pricing, stock, and offers.</p>
+        </div>
+        <div className="adm-page-head__actions">
+          <form onSubmit={handleSearch}>
+            <div className="adm-searchbar">
+              <i className="material-icons">search</i>
+              <input type="text" className="form-control" placeholder="Search products or brands" name="search" defaultValue={search} />
+            </div>
+          </form>
+          <Link to="/admin/addProducts" className="btn btn-primary">
+            <i className="material-icons">add</i>
+            Add Product
+          </Link>
         </div>
       </div>
 
-      {isLoading ? (
-        <Skeleton className="mt-6 h-96 w-full" />
-      ) : (
-        <div className="mt-6 overflow-x-auto rounded-lg border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead>Offer</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data?.data?.map((product) => (
-                <TableRow key={product._id}>
-                  <TableCell className="flex items-center gap-2">
-                    {product.productImage?.[0] && (
-                      <img
-                        src={`/uploads/product-image/${product.productImage[0]}`}
-                        alt={product.productName}
-                        className="h-10 w-10 rounded object-cover"
-                      />
-                    )}
-                    {product.productName}
-                  </TableCell>
-                  <TableCell>{product.category?.name}</TableCell>
-                  <TableCell>₹{product.salePrice}</TableCell>
-                  <TableCell>{product.totalQuantity}</TableCell>
-                  <TableCell>
-                    {product.productOffer > 0 ? (
-                      <div className="flex items-center gap-2">
-                        <Badge>{product.productOffer}%</Badge>
-                        <Button size="sm" variant="ghost" onClick={() => handleRemoveOffer(product._id)}>
-                          Remove
-                        </Button>
+      <div className="adm-card">
+        <div className="adm-tablewrap">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Offer</th>
+                <th>Stock</th>
+                <th>Status</th>
+                <th style={{ textAlign: "right" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="adm-empty">
+                    Loading products…
+                  </td>
+                </tr>
+              ) : products.length === 0 ? (
+                <tr>
+                  <td colSpan={7}>
+                    <div className="adm-empty">
+                      <i className="material-icons">inventory_2</i>
+                      <p style={{ margin: 0 }}>No products found.</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                products.map((product) => (
+                  <tr key={product._id}>
+                    <td>
+                      <div className="adm-cell-media">
+                        {product.productImage?.[0] && <img className="adm-thumb" src={`/uploads/product-image/${product.productImage[0]}`} alt="" />}
+                        <div style={{ minWidth: 0 }}>
+                          <div className="adm-cell-title">{product.productName}</div>
+                          <div className="adm-cell-sub">{product.brand}</div>
+                        </div>
                       </div>
-                    ) : (
-                      <Button size="sm" variant="outline" onClick={() => setOfferProductId(product._id)}>
-                        Add Offer
-                      </Button>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={product.isBlocked ? "destructive" : "outline"}>
-                      {product.isBlocked ? "Blocked" : "Active"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="space-x-2">
-                    <Button asChild size="sm" variant="outline">
-                      <Link to={`/admin/editProduct/${product._id}`}>Edit</Link>
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => toggleBlock(product)}>
-                      {product.isBlocked ? "Unblock" : "Block"}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    </td>
+                    <td>
+                      <span className="adm-cell-sub">{product.category ? product.category.name : "No category"}</span>
+                    </td>
+                    <td>
+                      <span className="adm-cell-title">₹{product.salePrice}</span>
+                    </td>
+                    <td>
+                      {product.productOffer ? (
+                        <span className="adm-badge adm-badge--success">{product.productOffer}%</span>
+                      ) : (
+                        <span className="adm-cell-sub">—</span>
+                      )}
+                    </td>
+                    <td>
+                      <span className={`adm-badge ${product.totalQuantity > 10 ? "adm-badge--success" : product.totalQuantity > 0 ? "adm-badge--warning" : "adm-badge--danger"}`}>
+                        {product.totalQuantity}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`adm-badge ${product.isBlocked ? "adm-badge--danger" : "adm-badge--success"}`}>{product.isBlocked ? "Blocked" : "Active"}</span>
+                    </td>
+                    <td>
+                      <div className="adm-btn-group" style={{ justifyContent: "flex-end" }}>
+                        {product.productOffer ? (
+                          <button className="btn btn-secondary btn-sm" onClick={() => handleRemoveOffer(product._id)}>
+                            Remove Offer
+                          </button>
+                        ) : (
+                          <button className="btn btn-secondary btn-sm" onClick={() => handleAddOffer(product._id)}>
+                            Add Offer
+                          </button>
+                        )}
+                        <button className={`btn btn-sm ${product.isBlocked ? "btn-success" : "btn-danger"}`} onClick={() => toggleBlock(product)}>
+                          {product.isBlocked ? "Unblock" : "Block"}
+                        </button>
+                        <Link to={`/admin/editProduct/${product._id}`} className="btn btn-primary btn-sm">
+                          Edit
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
 
-      {data?.totalPages > 1 && (
-        <div className="mt-6 flex justify-center gap-2">
-          {Array.from({ length: data.totalPages }).map((_, i) => (
-            <Button key={i} size="sm" variant={data.currentPage === i + 1 ? "default" : "outline"} onClick={() => setPage(i + 1)}>
-              {i + 1}
-            </Button>
-          ))}
-        </div>
-      )}
-
-      <Dialog open={!!offerProductId} onOpenChange={(open) => !open && setOfferProductId(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Product Offer</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <Input type="number" placeholder="Percentage (max 80)" value={offerPercentage} onChange={(e) => setOfferPercentage(e.target.value)} />
-            <Button onClick={handleApplyOffer}>Apply</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+      <AdminPagination currentPage={currentPage} totalPages={totalPages} onChange={(p) => setSearchParams({ search, page: String(p) })} />
+    </>
   );
 }

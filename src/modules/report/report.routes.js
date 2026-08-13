@@ -9,4 +9,10 @@ router.get(
   reportController.generateInvoicePDF
 );
 
+router.get(
+  "/credit-note/:orderId",
+  userAuth,
+  reportController.generateCreditNotePDF
+);
+
 module.exports = router;

@@ -1,112 +1,148 @@
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { adminApi } from "../adminApi";
+import { AdminError } from "@/components/admin/AdminError";
+
+function InfoCard({ icon, title, children }) {
+  return (
+    <div className="adm-card">
+      <div className="adm-card__body" style={{ display: "flex", gap: 14 }}>
+        <span className="adm-stat__icon" style={{ width: 40, height: 40 }}>
+          <i className="material-icons" style={{ fontSize: 20 }}>
+            {icon}
+          </i>
+        </span>
+        <div style={{ minWidth: 0 }}>
+          <p className="adm-stat__label" style={{ marginBottom: 6 }}>
+            {title}
+          </p>
+          <div style={{ fontSize: 14, lineHeight: 1.6 }}>{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function OrderDetailsPage() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const itemId = searchParams.get("itemId");
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["admin-order-details", id, itemId],
     queryFn: () => adminApi.orderDetails(id, itemId),
   });
 
-  if (isLoading) {
-    return (
-      <div className="p-8">
-        <Skeleton className="h-64 w-full" />
-      </div>
-    );
-  }
+  // isError first — on a failed request data is undefined, so the
+  // "not found" branch would otherwise claim the order doesn't exist.
+  if (isError) return <AdminError onRetry={refetch} />;
+  if (isLoading) return <p style={{ color: "var(--adm-text-muted)" }}>Loading order…</p>;
 
-  if (isError || !data?.order) {
-    return (
-      <div className="p-8 text-muted-foreground">Order not found.</div>
-    );
-  }
-
-  const { order, orderItem } = data;
+  const order = data?.order;
+  const orderItem = data?.orderItem;
+  const financials = data?.financials;
+  if (!order || !orderItem) return <p style={{ color: "var(--adm-text-muted)" }}>Order not found.</p>;
 
   return (
-    <div className="p-8">
-      <Button asChild variant="outline" size="sm" className="mb-4">
-        <Link to="/admin/orderlist">Back to Orders</Link>
-      </Button>
-
-      <h1 className="font-heading text-2xl font-bold text-primary">Order #{order.orderNumber}</h1>
-
-      <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="rounded-lg border bg-card p-4">
-          <h2 className="font-medium">Customer</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{order.userId?.name}</p>
-          <p className="text-sm text-muted-foreground">{order.userId?.email}</p>
+    <>
+      <div className="adm-page-head">
+        <div>
+          <h1>Order #{order.orderNumber}</h1>
+          <p>Placed {new Date(order.orderedAt).toLocaleString()}</p>
         </div>
-
-        <div className="rounded-lg border bg-card p-4">
-          <h2 className="font-medium">Shipping Address</h2>
-          {order.shippingAddress ? (
-            <p className="mt-1 text-sm text-muted-foreground">
-              {order.shippingAddress.flatHouseCompany}, {order.shippingAddress.areaStreet},{" "}
-              {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.postalCode}
-            </p>
-          ) : (
-            <p className="mt-1 text-sm text-muted-foreground">No address on file</p>
-          )}
+        <div className="adm-page-head__actions">
+          <Link to="/admin/orderlist" className="btn btn-secondary">
+            <i className="material-icons">arrow_back</i>
+            Back to orders
+          </Link>
         </div>
       </div>
 
-      <div className="mt-6 rounded-lg border bg-card p-4">
-        <h2 className="font-medium">Item</h2>
-        <div className="mt-2 flex items-center gap-4">
-          <div className="h-20 w-20 overflow-hidden rounded-md bg-muted">
-            {orderItem.productImage && (
-              <img
-                src={`/uploads/product-image/${orderItem.productImage}`}
-                alt={orderItem.productName}
-                className="h-full w-full object-cover"
-              />
-            )}
+      <div className="adm-grid-2" style={{ marginBottom: 20 }}>
+        <InfoCard icon="person" title="Customer">
+          <div className="adm-cell-title">{order.userId?.name}</div>
+          <div className="adm-cell-sub">{order.userId?.email}</div>
+        </InfoCard>
+
+        <InfoCard icon="payments" title="Payment">
+          <div className="adm-cell-title">{order.paymentMethod}</div>
+          <div className="adm-cell-sub">{order.paymentStatus}</div>
+        </InfoCard>
+
+        <InfoCard icon="local_shipping" title="Deliver to">
+          <div className="adm-cell-sub">
+            {order.shippingAddress?.flatHouseCompany || "N/A"}
+            <br />
+            {order.shippingAddress?.city || "N/A"} — {order.shippingAddress?.postalCode || "N/A"}
           </div>
-          <div>
-            <p className="font-medium">{orderItem.productName}</p>
-            <p className="text-sm text-muted-foreground">
-              {orderItem.variant?.color} / {orderItem.variant?.size} × {orderItem.quantity}
-            </p>
-            <Badge variant="outline" className="mt-1">
-              {orderItem.orderStatus}
-            </Badge>
-          </div>
-          <p className="ml-auto font-semibold text-primary">₹{orderItem.totalPrice}</p>
-        </div>
+        </InfoCard>
       </div>
 
-      <div className="mt-6 rounded-lg border bg-card p-4">
-        <h2 className="font-medium">Order Summary</h2>
-        <div className="mt-2 space-y-1 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Subtotal</span>
-            <span>₹{order.subtotal}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Shipping</span>
-            <span>₹{order.shipping}</span>
-          </div>
-          {order.discount > 0 && (
-            <div className="flex justify-between text-accent">
-              <span>Discount</span>
-              <span>-₹{order.discount}</span>
+      <div className="adm-card">
+        <div className="adm-card__head">Item</div>
+        <div className="adm-tablewrap">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Unit price</th>
+                <th>Quantity</th>
+                <th style={{ textAlign: "right" }}>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div className="adm-cell-media">
+                    <img className="adm-thumb adm-thumb--lg" src={`/uploads/product-image/${orderItem.productImage}`} alt="" />
+                    <div style={{ minWidth: 0 }}>
+                      <div className="adm-cell-title">{orderItem.productName}</div>
+                      {orderItem.variant && (
+                        <div className="adm-cell-sub">
+                          {orderItem.variant.size} · {orderItem.variant.color}
+                        </div>
+                      )}
+                      <span className="adm-badge" style={{ marginTop: 6 }}>
+                        {orderItem.orderStatus}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+                <td>₹{orderItem.salePrice}</td>
+                <td>{orderItem.quantity}</td>
+                <td style={{ textAlign: "right" }}>
+                  <span className="adm-cell-title">₹{orderItem.totalPrice}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="adm-card__body" style={{ borderTop: "1px solid var(--adm-border)", display: "flex", justifyContent: "flex-end" }}>
+          <div style={{ minWidth: 260 }}>
+            <div className="adm-list-row">
+              <span style={{ color: "var(--adm-text-muted)" }}>Item total</span>
+              <span className="adm-list-row__value">₹{orderItem.totalPrice}</span>
             </div>
-          )}
-          <div className="flex justify-between border-t pt-1 font-semibold">
-            <span>Total</span>
-            <span>₹{order.grandTotal}</span>
+            {financials?.hasVoidedItems && (
+              <>
+                <div className="adm-list-row">
+                  <span style={{ color: "var(--adm-text-muted)" }}>Order total (original)</span>
+                  <span className="adm-list-row__value">₹{financials.orderTotal}</span>
+                </div>
+                <div className="adm-list-row">
+                  <span style={{ color: "var(--adm-text-muted)" }}>Amount payable now</span>
+                  <span className="adm-list-row__value">₹{financials.amountPayable}</span>
+                </div>
+              </>
+            )}
+            <p className="adm-help" style={{ marginTop: 10 }}>
+              Shipping charged separately. Coupon discounts apply at order level.
+              {financials?.hasVoidedItems &&
+                " Other items on this order have been cancelled/returned, so the order's original total no longer matches what's payable."}
+            </p>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

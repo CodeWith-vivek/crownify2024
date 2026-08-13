@@ -1,5 +1,4 @@
 const Contact = require("./contactSchema");
-const { wantsJson } = require("../../shared/utils/wantsJson");
 
 //code to submit contact form
 
@@ -63,12 +62,10 @@ const customerMessages = async (req, res) => {
 
    
     const messagesData = { messages, search, currentPage: page, totalPages: Math.ceil(count / limit) };
-    if (wantsJson(req)) return res.json({ success: true, ...messagesData });
-    res.render("contactMessages", messagesData);
+    res.json({ success: true, ...messagesData });
   } catch (error) {
     console.error("Error fetching customer messages:", error);
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading messages" });
-    res.redirect("/admin/pageerror");
+    res.status(500).json({ success: false, message: "Error loading messages" });
   }
 };
 

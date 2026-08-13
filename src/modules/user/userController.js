@@ -7,14 +7,8 @@ const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const Coupon = require("../coupon/couponSchema");
 const { asString } = require("../../shared/utils/sanitize");
-const { wantsJson } = require("../../shared/utils/wantsJson");
 
-// Serves both the EJS page-load route ("/", "/shop", ...) and its /api
-// counterpart, which are the same mounted router during the SPA-conversion
-// transition (see src/app.js) — render HTML for normal navigation, JSON for
-// the React client or any XHR/Accept:json caller.
-const respond = (req, res, view, data) =>
-  wantsJson(req) ? res.json({ success: true, ...data }) : res.render(view, data);
+const respond = (req, res, view, data) => res.json({ success: true, ...data });
 
 // code for secure password
 
@@ -121,8 +115,7 @@ const loadHomepage = async (req, res) => {
     });
   } catch (error) {
     console.error("Error loading home page:", error);
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Server error" });
-    res.status(500).send("Server error");
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -175,7 +168,7 @@ const loadContactpage = async (req, res) => {
 
     if (!userId) {
       const products = await Product.find({ isBlocked: false });
-      return res.render("contact", {
+      return res.json({ success: true,
         products,
         cartCount: 0,
         wishlistCount: 0,
@@ -243,7 +236,7 @@ const loadContactpage = async (req, res) => {
       isValidProduct(product)
     );
 
-    return res.render("contact", {
+    return res.json({ success: true,
       user: userData,
       products: filteredProducts,
       cartCount,
@@ -268,7 +261,7 @@ const loadAboutpage = async (req, res) => {
         Coupon.find({}),
       ]);
 
-      return res.render("About", {
+      return res.json({ success: true,
         products,
         coupons,
         cartCount: 0,
@@ -338,7 +331,7 @@ const loadAboutpage = async (req, res) => {
       isValidProduct(product)
     );
 
-    return res.render("About", {
+    return res.json({ success: true,
       user: userData,
       products: filteredProducts,
       coupons,
@@ -360,7 +353,7 @@ const loadFaqpage = async (req, res) => {
 
     if (!userId) {
       const products = await Product.find({ isBlocked: false });
-      return res.render("FAQ", {
+      return res.json({ success: true,
         products,
         cartCount: 0,
         wishlistCount: 0,
@@ -428,7 +421,7 @@ const loadFaqpage = async (req, res) => {
       isValidProduct(product)
     );
 
-    return res.render("FAQ", {
+    return res.json({ success: true,
       user: userData,
       products: filteredProducts,
       cartCount,
@@ -526,20 +519,14 @@ const loadBrandpage = async (req, res) => {
     }
   } catch (error) {
     console.error("Error loading brand page:", error);
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Server error" });
-    res.status(500).send("Server error");
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
 //code for page not found
 
 const pageNotFound = async (req, res) => {
-  try {
-    res.render("page-404");
-  } catch (error) {
-    console.log("error loading page not found", error);
-    res.redirect("/pageNotFound");
-  }
+  res.status(404).json({ success: false, message: "Page not found" });
 };
 
 // code load signup page
@@ -571,10 +558,10 @@ const loadSignup = async (req, res) => {
 
      req.session.userData = null; 
 
-     res.render("signup", { data: userData });
+     res.json({ success: true, data: userData });
    } catch (error) {
      console.log("Signup page not loading", error);
-     res.status(500).redirect("/pageNotFound");
+     res.status(500).json({ success: false, message: "Server error" });
    }
 };
 
@@ -585,7 +572,7 @@ const loadOtpverify = async (req, res) => {
   try {
     const userData = req.session.userData;
     if (!userData) {
-      return res.redirect("/signup");
+      return res.status(400).json({ success: false, redirect: "/signup" });
     }
 
     const userId = userData._id; 
@@ -606,7 +593,7 @@ const loadOtpverify = async (req, res) => {
 
     req.session.countdownTime = 120;
 
-    res.render("verify-otp", {
+    res.json({ success: true,
       userData,
       countdownTime: req.session.countdownTime,
       cartCount,
@@ -614,7 +601,7 @@ const loadOtpverify = async (req, res) => {
     });
   } catch (error) {
     console.log("Verify OTP page not loading", error);
-    res.status(500).send("server error");
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -852,7 +839,7 @@ const loadLogin = async (req, res) => {
   try {
 
     if (!req.session.user) {
-      return res.render("login", { data: null }); 
+      return res.json({ success: true, data: null }); 
     } else {
       const userId = req.session.user; 
       const user = await User.findById(userId)
@@ -864,13 +851,13 @@ const loadLogin = async (req, res) => {
       const wishlistCount =
         user.wishlist && user.wishlist.length > 0
           ? user.wishlist[0].items.length
-          : 0; 
+          : 0;
 
-      res.redirect("/");
+      res.json({ success: true, data: null, alreadyLoggedIn: true, redirect: "/", cartCount, wishlistCount });
     }
   } catch (error) {
     console.log("Error loading login page:", error);
-    res.redirect("/pageNotFound");
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -1002,21 +989,17 @@ const login = async (req, res) => {
 //code to logout the user
 
 const logout = async (req, res) => {
-  const wantsJson = req.originalUrl.startsWith("/api") || req.xhr;
   try {
     req.session.destroy((err) => {
       if (err) {
         console.log("session logout error", err);
-        if (wantsJson) return res.status(500).json({ success: false, message: "Logout failed" });
-        return res.redirect("/pageNotFound");
+        return res.status(500).json({ success: false, message: "Logout failed" });
       }
-      if (wantsJson) return res.json({ success: true });
-      return res.redirect("/");
+      return res.json({ success: true });
     });
   } catch (error) {
     console.log("logout error", error);
-    if (wantsJson) return res.status(500).json({ success: false, message: "Logout failed" });
-    res.redirect("/pageNotFound");
+    res.status(500).json({ success: false, message: "Logout failed" });
   }
 };
 
@@ -1069,9 +1052,17 @@ const loadShopPage = async (req, res) => {
     };
 
     if (search) {
+      // category is a ref, not a string — resolve name matches against the
+      // already-fetched activeCategories list instead of a $lookup.
+      const matchingCategoryIds = activeCategories
+        .filter((cat) => cat.name && cat.name.toLowerCase().includes(search.toLowerCase()))
+        .map((cat) => cat._id);
+
       productsQuery.$or = [
         { productName: { $regex: search, $options: "i" } },
         { description: { $regex: search, $options: "i" } },
+        { brand: { $regex: search, $options: "i" } },
+        ...(matchingCategoryIds.length ? [{ category: { $in: matchingCategoryIds } }] : []),
       ];
     }
 
@@ -1200,15 +1191,9 @@ const loadShopPage = async (req, res) => {
     }
   } catch (error) {
     console.error("Error in loadShopPage:", error.message, error.stack);
-    if (wantsJson(req)) {
-      return res.status(500).json({
-        success: false,
-        message: "An error occurred while loading the shop page",
-      });
-    }
-    return res.status(500).render("error", {
+    return res.status(500).json({
+      success: false,
       message: "An error occurred while loading the shop page",
-      error: process.env.NODE_ENV === "development" ? error : null,
     });
   }
 };
@@ -1258,10 +1243,7 @@ const loadProductDetails = async (req, res) => {
     };
 
     if (!product || !isValidProduct(product)) {
-      if (wantsJson(req)) {
-        return res.status(404).json({ success: false, message: "Product not found or unavailable" });
-      }
-      return res.status(404).send("Product not found or unavailable");
+      return res.status(404).json({ success: false, message: "Product not found or unavailable" });
     }
 
     const discount =
@@ -1352,23 +1334,11 @@ const loadProductDetails = async (req, res) => {
       templateData.wishlistCount = 0;
     }
 
-    if (wantsJson(req)) {
-      return res.json({ success: true, ...templateData });
-    }
-
-    const productScript = `
-      <script>
-        const product = ${JSON.stringify(templateData.product)};
-        console.log('Product data loaded:', product);
-      </script>
-    `;
-
-    return res.render("ProductDetails", { ...templateData, productScript });
+    return res.json({ success: true, ...templateData });
   } catch (error) {
     console.error("Error loading product details:", error);
     console.error("Error stack:", error.stack);
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Server error" });
-    res.status(500).send("Server error");
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 module.exports = {

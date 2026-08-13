@@ -6,24 +6,22 @@ const Product = require("../product/productSchema");
 const { session } = require("passport");
 const Transaction = require("../payment/transactionSchema");
 const { asString } = require("../../shared/utils/sanitize");
-const { wantsJson } = require("../../shared/utils/wantsJson");
+const { computeOrderFinancials } = require("../../shared/utils/orderFinancials");
 
 
 //admin side page error
 
 const pageerror = async (req, res) => {
-  res.render("admin-error");
+  res.json({ success: true });
 };
 
 //admin login 
 
 const loadLogin = (req, res) => {
   if (req.session.admin) {
-    if (wantsJson(req)) return res.json({ success: true, redirect: "/admin/dashboard" });
-    return res.redirect("/admin/dashboard");
+    return res.json({ success: true, redirect: "/admin/dashboard" });
   }
-  if (wantsJson(req)) return res.json({ success: true, admin: false });
-  res.render("admin-login", { message: null });
+  res.json({ success: true, admin: false });
 };
 
 const getCurrentAdmin = (req, res) => {
@@ -65,15 +63,12 @@ const login = async (req, res) => {
 const loadDashboard = async (req, res) => {
   if (req.session.admin) {
     try {
-      if (wantsJson(req)) return res.json({ success: true });
-      res.render("dashboard");
+      res.json({ success: true });
     } catch (error) {
-      if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading dashboard" });
-      res.redirect("/admin/pageerror");
+      res.status(500).json({ success: false, message: "Error loading dashboard" });
     }
   } else {
-    if (wantsJson(req)) return res.status(401).json({ success: false, message: "Not authenticated as admin" });
-    res.redirect("/admin/login");
+    res.status(401).json({ success: false, message: "Not authenticated as admin" });
   }
 };
 
@@ -128,13 +123,16 @@ const loadOrderlist = async (req, res) => {
     
     const totalPages = Math.ceil(totalOrders / limit);
 
-    const orderlistData = { orders, currentPage: page, totalPages, search };
-    if (wantsJson(req)) return res.json({ success: true, ...orderlistData });
-    res.render("orderlist", orderlistData);
+    const ordersWithFinancials = orders.map((order) => ({
+      ...order.toObject(),
+      financials: computeOrderFinancials(order),
+    }));
+
+    const orderlistData = { orders: ordersWithFinancials, currentPage: page, totalPages, search };
+    res.json({ success: true, ...orderlistData });
   } catch (error) {
     console.error("Error loading orders:", error);
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Server error" });
-    res.status(500).send("Server Error");
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -153,13 +151,19 @@ const updateOrderStatusByAdmin = async (req, res) => {
       });
     }
 
+    // Must match cartItemSchema's orderStatus enum exactly (it uses
+    // lowercase "canceled" and "Return requested", not the capitalized
+    // forms this used to list) — a mismatch here made order.save() below
+    // throw a validation error for any admin attempt to cancel or flag a
+    // return, surfaced to the client as an opaque 500.
     const validStatuses = [
       "Placed",
       "Shipped",
       "Delivered",
       "Returned",
-      "Canceled",
-      "Return Requested",
+      "canceled",
+      "Return requested",
+      "Failed",
     ];
     if (!validStatuses.includes(newStatus)) {
       return res.status(400).json({
@@ -167,6 +171,25 @@ const updateOrderStatusByAdmin = async (req, res) => {
         message: "Invalid status provided",
       });
     }
+
+    // State machine: without this, any status could jump to any other
+    // status in one call — including moving an item OUT of "Returned" and
+    // back INTO it, which re-runs the refund-to-wallet and restock-inventory
+    // logic below every time. That's a double-refund / stock-inflation bug,
+    // not just a UX nicety. Terminal states (Returned, canceled) have no
+    // outgoing transitions here, closing that off. This mirrors exactly the
+    // transitions the admin UI's nextStatusFor() ever sends, plus a couple
+    // of reasonable admin-initiated equivalents (cancel from Placed/Shipped,
+    // decline a return request back to Delivered).
+    const ALLOWED_TRANSITIONS = {
+      Placed: ["Shipped", "canceled"],
+      Shipped: ["Delivered", "canceled"],
+      Delivered: ["Return requested"],
+      "Return requested": ["Returned", "Delivered"],
+      Returned: [],
+      canceled: [],
+      Failed: ["canceled"],
+    };
 
     const order = await Order.findById(orderId);
     if (!order) {
@@ -208,6 +231,14 @@ const updateOrderStatusByAdmin = async (req, res) => {
       });
     }
 
+    const allowedNext = ALLOWED_TRANSITIONS[orderItem.orderStatus] || [];
+    if (!allowedNext.includes(newStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot change status from "${orderItem.orderStatus}" to "${newStatus}".`,
+      });
+    }
+
     const productIdFromOrder = orderItem.productId;
 
     let refundAmount = 0;
@@ -233,8 +264,11 @@ const updateOrderStatusByAdmin = async (req, res) => {
       );
 
       const itemShare = orderItem.totalPrice / totalOrderPrice;
-      const discountForItem = Math.floor(order.discount * itemShare);
-      refundAmount = Math.floor(orderItem.totalPrice - discountForItem);
+      // Round rather than floor — flooring both the discount share and the
+      // refund systematically shortchanges the customer by up to a couple
+      // rupees on every return.
+      const discountForItem = Math.round(order.discount * itemShare);
+      refundAmount = Math.round(orderItem.totalPrice - discountForItem);
 
       const user = await User.findById(order.userId);
       if (!user) {
@@ -258,20 +292,35 @@ const updateOrderStatusByAdmin = async (req, res) => {
 
     order.items[orderItemIndex].orderStatus = newStatus;
 
+    // Timestamp the transition so sales reporting can tell WHEN a return was
+    // processed, separately from when the item was originally sold
+    // (orderedAt). Without this, a return could only be dated by looking at
+    // the order's original purchase date, which is what caused the return to
+    // retroactively vanish from the sales figures of the month it was
+    // actually SOLD in — see buildSalesRows / buildReturnRows.
+    if (newStatus === "Returned") {
+      order.items[orderItemIndex].returnedAt = new Date();
+    } else if (newStatus === "canceled") {
+      order.items[orderItemIndex].canceledAt = new Date();
+    }
 
-    if (newStatus === "Shipped" && order.paymentMethod === "COD") {
-
-    } else {
- 
+    // Previously this ran on every transition EXCEPT Shipped+COD — which
+    // meant canceling or returning an item also stamped the order's
+    // paymentStatus as "Completed". A canceled order should not read as
+    // paid-in-full. Only mark it Completed when it's actually collected:
+    // COD payment is collected on delivery; prepaid methods are already
+    // Completed at order placement and don't need touching here.
+    if (newStatus === "Delivered" && order.paymentMethod === "COD") {
       order.paymentStatus = "Completed";
     }
 
-    const allItemsSameStatus = order.items.every(
-      (item) => item.orderStatus === newStatus
-    );
-    if (allItemsSameStatus) {
-      order.orderStatus = newStatus;
-    }
+    // order.orderStatus used to be written here, but it isn't a field this
+    // schema declares (see orderSchema.js) — Mongoose's default strict mode
+    // silently drops writes to undeclared paths, so this never actually
+    // persisted, and nothing in the codebase ever read it back. Removed
+    // rather than "fixed": a per-item order has no single meaningful
+    // order-level status to store — the UI already renders each item's
+    // status independently, which is the correct source of truth.
 
     await order.save();
 
@@ -305,8 +354,7 @@ const loadOrderDetails = async (req, res) => {
         .populate("shippingAddress");
 
       if (!order) {
-        if (wantsJson(req)) return res.status(404).json({ success: false, message: "Order not found" });
-        return res.redirect("/admin/pageerror");
+        return res.status(404).json({ success: false, message: "Order not found" });
       }
 
 
@@ -315,23 +363,17 @@ const loadOrderDetails = async (req, res) => {
       );
 
       if (!orderItem) {
-        if (wantsJson(req)) return res.status(404).json({ success: false, message: "Order item not found" });
-        return res.redirect("/admin/pageerror");
+        return res.status(404).json({ success: false, message: "Order item not found" });
       }
 
-      if (wantsJson(req)) return res.json({ success: true, order, orderItem });
-      res.render("orderDetails", {
-        order,
-        orderItem,
-      });
+      const financials = computeOrderFinancials(order);
+      res.json({ success: true, order, orderItem, financials });
     } catch (error) {
       console.error("Error loading order details:", error);
-      if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading order details" });
-      res.redirect("/admin/pageerror");
+      res.status(500).json({ success: false, message: "Error loading order details" });
     }
   } else {
-    if (wantsJson(req)) return res.status(401).json({ success: false, message: "Not authenticated as admin" });
-    res.redirect("/admin/login");
+    res.status(401).json({ success: false, message: "Not authenticated as admin" });
   }
 };
 module.exports = {

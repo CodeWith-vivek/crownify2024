@@ -36,6 +36,15 @@ router.get(
 router.post("/verify-otp", otpLimiter, userController.verifyOtp);
 router.post("/resend-otp", otpLimiter, userController.resendOtp);
 
+// Where the browser should land after the OAuth round-trip. In production the
+// API and the built client share an origin, so a relative redirect is correct
+// and CLIENT_ORIGIN stays unset. In development the client is served by Vite
+// on a different port, so a relative redirect would strand the user on the
+// API origin (showing a stale client/dist build) — set CLIENT_ORIGIN to the
+// Vite URL there.
+const CLIENT_ORIGIN = (process.env.CLIENT_ORIGIN || "").replace(/\/$/, "");
+const clientUrl = (path) => `${CLIENT_ORIGIN}${path}`;
+
 router.get("/auth/google", (req, res, next) => {
   req.session.authOrigin = req.query.from || "signup";
   passport.authenticate("google", {
@@ -46,11 +55,13 @@ router.get("/auth/google", (req, res, next) => {
 router.get(
   "/auth/google/callback",
   (req, res, next) => {
+    const conflictMessage =
+      "This email is already associated with a local account. Please log in with that account.";
     passport.authenticate("google", {
       failureRedirect:
         req.session.authOrigin === "login"
-          ? "/login?error=This email is already associated with a local account. Please log in with that account."
-          : "/signup?error=This email is already associated with a local account. Please log in with that account.",
+          ? clientUrl(`/login?error=${encodeURIComponent(conflictMessage)}`)
+          : clientUrl(`/signup?error=${encodeURIComponent(conflictMessage)}`),
     })(req, res, next);
   },
   async (req, res) => {
@@ -58,7 +69,7 @@ router.get(
       req.session.user = req.user._id;
 
       delete req.session.authOrigin;
-      return res.redirect("/?success=Login successful!");
+      return res.redirect(clientUrl(`/?success=${encodeURIComponent("Login successful!")}`));
     } catch (error) {
       console.log("Error during Google authentication:", error);
 
@@ -66,7 +77,7 @@ router.get(
         req.session.authOrigin === "login" ? "/login" : "/signup";
       delete req.session.authOrigin;
       return res.redirect(
-        `${errorPath}?error=Something went wrong. Please try again.`
+        clientUrl(`${errorPath}?error=${encodeURIComponent("Something went wrong. Please try again.")}`)
       );
     }
   }

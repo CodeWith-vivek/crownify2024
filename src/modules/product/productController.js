@@ -5,7 +5,6 @@ const User = require("../user/userSchema");
 const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
-const { wantsJson } = require("../../shared/utils/wantsJson");
 
 //code to load product add page
 
@@ -13,11 +12,9 @@ const getProductAddPage = async (req, res) => {
   try {
     const category = await Category.find({ isListed: true });
     const brand = await Brand.find({ isBlocked: false });
-    if (wantsJson(req)) return res.json({ success: true, cat: category, brand: brand });
-    res.render("product-add", { cat: category, brand: brand });
+    res.json({ success: true, cat: category, brand: brand });
   } catch (error) {
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading page" });
-    res.redirect("/admin/pageerror");
+    res.status(500).json({ success: false, message: "Error loading page" });
   }
 };
 
@@ -165,15 +162,12 @@ const getAllProducts = async (req, res) => {
         cat: category,
         brand: brand,
       };
-      if (wantsJson(req)) return res.json({ success: true, ...productsPageData });
-      res.render("products", productsPageData);
+      res.json({ success: true, ...productsPageData });
     } else {
-      if (wantsJson(req)) return res.status(404).json({ success: false, message: "Not found" });
-      res.render("page-404");
+      res.status(404).json({ success: false, message: "Not found" });
     }
   } catch (error) {
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading products" });
-    res.redirect("/admin/pageerror");
+    res.status(500).json({ success: false, message: "Error loading products" });
   }
 };
 
@@ -278,7 +272,7 @@ const removeProductOffer = async (req, res) => {
     res.json({ status: true, message: "Product offer removed successfully" });
   } catch (error) {
     console.error("Error removing product offer:", error);
-    res.status(500).redirect("/admin/pageerror");
+    res.status(500).json({ status: false, message: "Internal server error" });
   }
 };
 
@@ -288,11 +282,9 @@ const blockProduct = async (req, res) => {
   try {
     let id = req.query.id;
     await Product.updateOne({ _id: id }, { $set: { isBlocked: true } });
-    if (wantsJson(req)) return res.json({ success: true, message: "Product blocked" });
-    res.redirect("/admin/products");
+    res.json({ success: true, message: "Product blocked" });
   } catch (error) {
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Could not block product" });
-    res.redirect("/admin/pageerror");
+    res.status(500).json({ success: false, message: "Could not block product" });
   }
 };
 
@@ -303,11 +295,9 @@ const unblockProduct = async (req, res) => {
   try {
     let id = req.query.id;
     await Product.updateOne({ _id: id }, { $set: { isBlocked: false } });
-    if (wantsJson(req)) return res.json({ success: true, message: "Product unblocked" });
-    res.redirect("/admin/products");
+    res.json({ success: true, message: "Product unblocked" });
   } catch (error) {
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Could not unblock product" });
-    res.redirect("/admin/pageerror");
+    res.status(500).json({ success: false, message: "Could not unblock product" });
   }
 };
 
@@ -320,11 +310,9 @@ const getEditProduct = async (req, res) => {
     const category = await Category.find({});
     const brand = await Brand.find({});
     const editData = { product: product, cat: category, brand: brand };
-    if (wantsJson(req)) return res.json({ success: true, ...editData });
-    res.render("edit-product", editData);
+    res.json({ success: true, ...editData });
   } catch (error) {
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading product" });
-    res.redirect("/admin/pageerror");
+    res.status(500).json({ success: false, message: "Error loading product" });
   }
 };
 

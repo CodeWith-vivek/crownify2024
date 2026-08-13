@@ -39,6 +39,15 @@ async function request(path, { method = "GET", body, headers, isFormData } = {})
   }
 
   if (!response.ok || response.redirected || !contentType.includes("application/json")) {
+    // A 401 means the session expired or was never established. Broadcast it
+    // so AuthProvider can clear local auth state and bounce the user to the
+    // right login screen, instead of every page surfacing a generic error.
+    // /auth/me is exempt — it 401s by design for anonymous visitors.
+    if (response.status === 401 && !path.includes("/auth/me")) {
+      window.dispatchEvent(
+        new CustomEvent("auth:unauthorized", { detail: { admin: path.startsWith("/api/admin") } })
+      );
+    }
     const message = parsed?.message || `Unexpected response (status ${response.status})`;
     throw new ApiError(message, response.status, parsed);
   }

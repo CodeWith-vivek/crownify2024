@@ -496,6 +496,7 @@ const cancelOrder = async (req, res) => {
       }
 
       order.items[orderItemIndex].orderStatus = "canceled";
+      order.items[orderItemIndex].canceledAt = new Date();
       order.items[orderItemIndex].paymentStatus = "Failed";
 
 
@@ -538,9 +539,13 @@ const cancelOrder = async (req, res) => {
 
     const itemShare = orderItem.totalPrice / totalOrderPrice;
 
-    const discountForItem = order.discount * itemShare;
+    const discountForItem = Math.round(order.discount * itemShare);
 
-    const refundAmount = Math.floor(orderItem.totalPrice - discountForItem);
+    // Math.round, not Math.floor — flooring both this and the shipping
+    // refund below systematically shortchanges the customer by rounding
+    // every cancellation down. Same fix already applied to the admin return
+    // flow (adminController.updateOrderStatusByAdmin).
+    const refundAmount = Math.round(orderItem.totalPrice - discountForItem);
     let refundShipping = 0;
 
     if (
@@ -559,7 +564,7 @@ const cancelOrder = async (req, res) => {
 
       const totalShippingCharge = order.shipping || 0;
 
-      refundShipping = Math.floor(totalShippingCharge * itemShare);
+      refundShipping = Math.round(totalShippingCharge * itemShare);
       user.wallet += refundShipping;
 
       order.shipping -= refundShipping;
@@ -576,6 +581,7 @@ const cancelOrder = async (req, res) => {
     }
 
     order.items[orderItemIndex].orderStatus = "canceled";
+    order.items[orderItemIndex].canceledAt = new Date();
     if (cancelComment) {
       order.items[orderItemIndex].cancelComment = cancelComment;
     }
@@ -723,29 +729,63 @@ const returnItem = async (req, res) => {
 //code to cancel return request
 
 const cancelReturn = async (req, res) => {
-  const { orderNumber, itemIndex } = req.body;
+  // Was destructured as { orderNumber, itemIndex } — but the client (same
+  // as cancelOrder/returnItem) has only ever sent { orderNumber,
+  // productSize, productColor }. itemIndex was always undefined,
+  // order.items[undefined] is undefined, and orderItem.orderStatus below
+  // threw on that — caught by the try/catch as an opaque 500, so "Cancel
+  // Return" silently failed on every click. Matched to the same
+  // variant-based lookup its sibling functions already use.
+  const { orderNumber, productSize, productColor } = req.body;
 
   try {
+    if (!orderNumber || !productSize || !productColor) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+        receivedData: req.body,
+      });
+    }
 
-    const order = await Order.findOne({ orderNumber: orderNumber }); 
+    // Scope to the session user, same as cancelOrder/returnItem do. Without
+    // the userId here any logged-in user could cancel someone else's return
+    // request just by passing their order number.
+    const order = await Order.findOne({
+      orderNumber: orderNumber,
+      userId: req.session.user,
+    });
     if (!order) {
       return res
         .status(404)
         .json({ success: false, message: "Order not found" });
     }
 
-    if (itemIndex < 0 || itemIndex >= order.items.length) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid item index" });
+    const orderItemIndex = order.items.findIndex((item) => {
+      if (!item.variant) return false;
+      return (
+        item.variant.size.toUpperCase() === productSize.toUpperCase() &&
+        item.variant.color.toUpperCase() === productColor.toUpperCase()
+      );
+    });
+
+    if (orderItemIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found in order",
+      });
     }
 
-    const orderItem = order.items[itemIndex];
+    const orderItem = order.items[orderItemIndex];
 
-    if (orderItem.orderStatus === "Canceled") {
+    // Was checking orderStatus === "Canceled" — a value this field never
+    // actually holds (the enum uses lowercase "canceled", and cancelling a
+    // RETURN REQUEST has nothing to do with the item being cancelled
+    // anyway). The check that actually matches this action's precondition:
+    // there must be a return request in flight to cancel.
+    if (orderItem.orderStatus !== "Return requested") {
       return res.status(400).json({
         success: false,
-        message: "This item return request is already canceled",
+        message: "This item has no pending return request to cancel",
       });
     }
 
@@ -786,7 +826,9 @@ const verifyRazorpayPayment = async (req, res) => {
 
     const isSignatureValid = generatedSignature === razorpay_signature;
 
-    const order = await Order.findById(orderId);
+    // Scoped to the session user so a caller can't drive the payment-status
+    // update against an order they don't own by passing someone else's id.
+    const order = await Order.findOne({ _id: orderId, userId: req.session.user });
 
     if (!order) {
       return res.status(404).json({
@@ -875,7 +917,12 @@ const verifyRazorpayPayment = async (req, res) => {
     console.error("Payment verification error:", error);
 
     if (req.body.orderId) {
-      const order = await Order.findById(req.body.orderId);
+      // Same scoping as the success path — otherwise this error branch would
+      // let a caller mark an arbitrary order as Failed.
+      const order = await Order.findOne({
+        _id: req.body.orderId,
+        userId: req.session.user,
+      });
       if (order) {
         order.paymentStatus = "Failed";
         order.paymentDetails = {

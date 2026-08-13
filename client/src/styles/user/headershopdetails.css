@@ -1,0 +1,132 @@
+
+        .img-magnifier-container {
+            position: relative;
+        }
+
+        .img-magnifier-glass {
+            position: absolute;
+            border: 2px solid #8c8c8c;
+            border-radius: 50%;
+            width: 200px;
+            height: 200px;
+            display: none;
+            /* Initially hidden */
+        }
+
+        .zoomable-image {
+            cursor: none;
+            /* Hide the cursor over the image */
+        }
+
+        .color-option {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin: 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+
+        .color-swatch {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-block;
+            border: 2px solid #fdfdfd;
+        }
+
+  
+        .color-name:active {
+
+            background-color: black;
+
+        }
+
+        .qtybtn {
+            background-color: transparent;
+            border: none;
+            font-size: 20px;
+            /* Adjust size as needed */
+            cursor: pointer;
+            padding: 5px;
+            color: black;
+            /* Set the text color to black */
+        }
+
+     .color-swatch.selected {
+    border: 2px solid blue; /* Change this to your desired highlight style */
+}
+.product__item__pic {
+    background-size: cover;
+    background-position: center;
+    transition: background-image 0.3s ease; /* Smooth transition */
+}
+
+.product__item__pic:hover {
+   
+    background-image: url(""); 
+}
+body, html {
+            margin: 0;
+            padding: 0;
+            font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+            background-color: #9b8178;
+            color: #000;
+            line-height: 1;
+        }
+                .site-cart,
+.site-header__wishlist {
+    position: relative;
+}
+
+/* Cart badge styling */
+.cart-count {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: #dc0909;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Wishlist badge styling */
+.wishlist-count {
+    position: absolute;
+    top: -10px;
+    right: 7px;
+    background-color: #291616;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    
+}
+
+/* Hover effects */
+.site-cart:hover .cart-count {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+.site-header__wishlist:hover .wishlist-count {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+    

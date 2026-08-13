@@ -4,7 +4,6 @@ const crypto = require("crypto");
 const Transaction=require("../payment/transactionSchema")
 const Category=require("../category/categorySchema")
 const Brand=require("../brand/brandSchema")
-const { wantsJson } = require("../../shared/utils/wantsJson");
 
 
 
@@ -51,7 +50,7 @@ const loadwalletpage = async (req, res) => {
       Transaction.find({ userId })
         .sort({ date: -1 })
         .skip(
-          (parseInt(req.query.page) || 1 - 1) * (parseInt(req.query.limit) || 5)
+          ((parseInt(req.query.page) || 1) - 1) * (parseInt(req.query.limit) || 5)
         )
         .limit(parseInt(req.query.limit) || 5),
     ]);
@@ -96,12 +95,10 @@ const loadwalletpage = async (req, res) => {
       wishlistCount,
     };
 
-    if (wantsJson(req)) return res.json({ success: true, ...renderData });
-    return res.render("wallet", renderData);
+    return res.json({ success: true, ...renderData });
   } catch (error) {
     console.error("Error loading wallet page:", error);
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Server error" });
-    res.status(500).send("Server error");
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 

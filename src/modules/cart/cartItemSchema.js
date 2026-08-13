@@ -63,7 +63,18 @@ const cartItemSchema = new Schema({
   },
   cancelComment: {
     type: String,
-   
+
+  },
+  // When the item's status actually changed to Returned/canceled — distinct
+  // from the order's orderedAt (when it was originally sold). Sales
+  // reporting needs both: the original sale stays booked in the period it
+  // happened, and the return is booked as a separate, negative entry in the
+  // period it was actually processed, which can be a different month.
+  returnedAt: {
+    type: Date,
+  },
+  canceledAt: {
+    type: Date,
   },
 });
 

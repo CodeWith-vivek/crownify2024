@@ -10,7 +10,7 @@ const Order = require("../order/orderSchema");
 const Category = require("../category/categorySchema");
 const Brand = require("../brand/brandSchema");
 const { asString } = require("../../shared/utils/sanitize");
-const { wantsJson } = require("../../shared/utils/wantsJson");
+const { computeOrderFinancials } = require("../../shared/utils/orderFinancials");
 
 const multer = require("multer");
 const path = require("path");
@@ -59,19 +59,19 @@ const getForgotPassPage = async (req, res) => {
         .populate("wishlist");
 
       const cartCount =
-        user.cart && user.cart.length > 0 ? user.cart[0].items.length : 0; 
+        user.cart && user.cart.length > 0 ? user.cart[0].items.length : 0;
       const wishlistCount =
         user.wishlist && user.wishlist.length > 0
           ? user.wishlist[0].items.length
-          : 0; 
+          : 0;
 
-      return res.redirect("/");
+      return res.json({ success: true, alreadyLoggedIn: true, redirect: "/", cartCount, wishlistCount });
     }
 
-    res.render("forgot-password", { cartCount: 0, wishlistCount: 0 });
+    res.json({ success: true, cartCount: 0, wishlistCount: 0 });
   } catch (error) {
     console.log("Error loading forgot-password page:", error);
-    res.status(500).redirect("/pageNotFound");
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -128,7 +128,7 @@ const sendVerificationEmail = async (email, otp) => {
 const loadOtpPage = async (req, res) => {
   try {
     if (!req.session.userOtp || !req.session.email) {
-      return res.redirect("/forget-password");
+      return res.status(400).json({ success: false, redirect: "/forget-password" });
     }
 
     let cartCount = 0;
@@ -148,7 +148,7 @@ const loadOtpPage = async (req, res) => {
     }
 
     const countdownTime = req.session.countdownTime || 120;
-    res.render("forgetPass-otp", {
+    res.json({ success: true,
       userData: req.session.email,
       countdownTime,
       cartCount,
@@ -390,7 +390,7 @@ const resendOtpForgot = async (req, res) => {
 const getResetPassPage = async (req, res) => {
   try {
     if (req.session.isLoggedIn) {
-      return res.redirect("/");
+      return res.json({ success: true, alreadyLoggedIn: true, redirect: "/" });
     }
 
     let cartCount = 0;
@@ -406,16 +406,16 @@ const getResetPassPage = async (req, res) => {
       wishlistCount =
         user.wishlist && user.wishlist.length > 0
           ? user.wishlist[0].items.length
-          : 0; 
+          : 0;
     }
 
-    res.render("reset-password", {
+    res.json({ success: true,
       cartCount,
       wishlistCount,
     });
   } catch (error) {
     console.log("Error loading reset-password page:", error);
-    res.redirect("/pageNotFound");
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -557,16 +557,10 @@ const userProfile = async (req, res) => {
       wishlistCount,
     };
 
-    if (wantsJson(req)) {
-      return res.json({ success: true, ...profileData });
-    }
-    res.render("profile", profileData);
+    res.json({ success: true, ...profileData });
   } catch (error) {
     console.error("Error retrieving user profile data:", error);
-    if (wantsJson(req)) {
-      return res.status(500).json({ success: false, message: "Error loading profile" });
-    }
-    res.redirect("/pageNotFound");
+    res.status(500).json({ success: false, message: "Error loading profile" });
   }
 };
 
@@ -634,12 +628,10 @@ const loadAddAddressPage = async (req, res) => {
       : 0;
 
     const pageData = { user: userData, cartCount, wishlistCount };
-    if (wantsJson(req)) return res.json({ success: true, ...pageData });
-    res.render("addAddress", pageData);
+    res.json({ success: true, ...pageData });
   } catch (error) {
     console.error("Error loading add address page:", error);
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Server error" });
-    res.status(500).send("Server error");
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -778,13 +770,11 @@ const editUserAddress = async (req, res) => {
       ]);
 
     if (!userData) {
-      if (wantsJson(req)) return res.status(401).json({ success: false, message: "Please log in", redirect: "/login" });
-      return res.redirect("/login");
+      return res.status(401).json({ success: false, message: "Please log in", redirect: "/login" });
     }
 
     if (!address) {
-      if (wantsJson(req)) return res.status(404).json({ success: false, message: "Address not found", redirect: "/profile" });
-      return res.redirect("/profile");
+      return res.status(404).json({ success: false, message: "Address not found", redirect: "/profile" });
     }
 
     const listedCategoryIds = new Set(
@@ -822,12 +812,10 @@ const editUserAddress = async (req, res) => {
       wishlistCount,
     };
 
-    if (wantsJson(req)) return res.json({ success: true, ...renderData });
-    res.render("editAddress", renderData);
+    res.json({ success: true, ...renderData });
   } catch (error) {
     console.error("Edit Address Error:", error);
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading address" });
-    res.redirect("/user/profile#address");
+    res.status(500).json({ success: false, message: "Error loading address" });
   }
 };
 
@@ -1082,6 +1070,10 @@ const loadUserOrder = async (req, res) => {
         return {
           ...order.toObject(),
           items: processedItems,
+          // order.grandTotal is frozen at checkout — this is the live figure
+          // reflecting any cancellations/returns since, without mutating the
+          // stored historical total.
+          financials: computeOrderFinancials(order),
         };
       })
       .filter((order) => order !== null);
@@ -1097,12 +1089,10 @@ const loadUserOrder = async (req, res) => {
       cartCount,
       wishlistCount,
     };
-    if (wantsJson(req)) return res.json({ success: true, ...orderData });
-    res.render("Order", orderData);
+    res.json({ success: true, ...orderData });
   } catch (error) {
     console.error("Error retrieving user orders:", error);
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading orders" });
-    res.redirect("/pageNotFound");
+    res.status(500).json({ success: false, message: "Error loading orders" });
   }
 };
 
@@ -1188,12 +1178,10 @@ const loadUserAddress = async (req, res) => {
       .filter((order) => order.items.length > 0);
 
     const addressData = { user: userData, orders: filteredOrders, addressCount, cartCount, wishlistCount };
-    if (wantsJson(req)) return res.json({ success: true, ...addressData });
-    res.render("Address", addressData);
+    res.json({ success: true, ...addressData });
   } catch (error) {
     console.error("Error retrieving user address data:", error);
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading addresses" });
-    res.redirect("/pageNotFound");
+    res.status(500).json({ success: false, message: "Error loading addresses" });
   }
 };
 
@@ -1277,12 +1265,10 @@ const loadUserAccountDetails = async (req, res) => {
       .filter((order) => order.items.length > 0);
 
     const accountData = { user: userData, orders: filteredOrders, cartCount, wishlistCount };
-    if (wantsJson(req)) return res.json({ success: true, ...accountData });
-    res.render("AccountDetails", accountData);
+    res.json({ success: true, ...accountData });
   } catch (error) {
     console.error("Error retrieving user account details:", error);
-    if (wantsJson(req)) return res.status(500).json({ success: false, message: "Error loading account details" });
-    res.redirect("/pageNotFound");
+    res.status(500).json({ success: false, message: "Error loading account details" });
   }
 };
 

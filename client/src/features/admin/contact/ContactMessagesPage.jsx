@@ -1,66 +1,100 @@
-import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
 import { adminApi } from "../adminApi";
+import { AdminPagination } from "@/components/admin/AdminPagination";
+import { AdminError } from "@/components/admin/AdminError";
 
 export function ContactMessagesPage() {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = parseInt(searchParams.get("page") || "1", 10);
+  const search = searchParams.get("search") || "";
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["admin-contact-messages", page, search],
     queryFn: () => adminApi.contactMessages(page, search),
   });
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const value = new FormData(e.target).get("search") || "";
+    setSearchParams({ search: value, page: "1" });
+  };
+
+  const messages = data?.messages || [];
+  const currentPage = data?.currentPage || page;
+  const totalPages = data?.totalPages || 1;
+
+  if (isError) return <AdminError onRetry={refetch} />;
+
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="font-heading text-3xl font-bold text-primary">Contact Messages</h1>
-        <Input
-          placeholder="Search messages..."
-          className="max-w-xs"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-        />
+    <>
+      <div className="adm-page-head">
+        <div>
+          <h1>Enquiries</h1>
+          <p>Messages submitted through the contact form.</p>
+        </div>
+        <div className="adm-page-head__actions">
+          <form onSubmit={handleSearch}>
+            <div className="adm-searchbar">
+              <i className="material-icons">search</i>
+              <input type="text" className="form-control" placeholder="Search messages" name="search" defaultValue={search} />
+            </div>
+          </form>
+        </div>
       </div>
 
-      {isLoading ? (
-        <Skeleton className="mt-6 h-96 w-full" />
-      ) : (
-        <div className="mt-6 space-y-3">
-          {data?.messages?.map((m) => (
-            <Card key={m._id}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <p className="font-medium">{m.name}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(m.submittedOn).toLocaleString()}</p>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {m.email} · {m.phone}
-                </p>
-                <p className="mt-2 text-sm">{m.message}</p>
-              </CardContent>
-            </Card>
-          ))}
-          {!data?.messages?.length && <p className="text-sm text-muted-foreground">No messages found.</p>}
+      <div className="adm-card">
+        <div className="adm-tablewrap">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>From</th>
+                <th>Phone</th>
+                <th>Message</th>
+                <th>Received</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={4} className="adm-empty">
+                    Loading messages…
+                  </td>
+                </tr>
+              ) : messages.length === 0 ? (
+                <tr>
+                  <td colSpan={4}>
+                    <div className="adm-empty">
+                      <i className="material-icons">forum</i>
+                      <p style={{ margin: 0 }}>No messages found.</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                messages.map((msg) => (
+                  <tr key={msg._id}>
+                    <td>
+                      <div className="adm-cell-title">{msg.name}</div>
+                      <div className="adm-cell-sub">{msg.email}</div>
+                    </td>
+                    <td>
+                      <span className="adm-cell-sub">{msg.phone}</span>
+                    </td>
+                    <td style={{ maxWidth: 460 }}>
+                      <span className="adm-cell-sub">{msg.message}</span>
+                    </td>
+                    <td>
+                      <span className="adm-cell-sub">{msg.submittedOn ? new Date(msg.submittedOn).toLocaleDateString() : "—"}</span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
 
-      {data?.totalPages > 1 && (
-        <div className="mt-6 flex justify-center gap-2">
-          {Array.from({ length: data.totalPages }).map((_, i) => (
-            <Button key={i} size="sm" variant={data.currentPage === i + 1 ? "default" : "outline"} onClick={() => setPage(i + 1)}>
-              {i + 1}
-            </Button>
-          ))}
-        </div>
-      )}
-    </div>
+      <AdminPagination currentPage={currentPage} totalPages={totalPages} onChange={(p) => setSearchParams({ search, page: String(p) })} />
+    </>
   );
 }

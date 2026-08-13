@@ -1,19 +1,68 @@
 <!doctype html>
-<html lang="en">
+<html class="no-js" lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
-      rel="stylesheet"
-    />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
     <title>CROWNIFY</title>
+    <meta name="description" content="description" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="shortcut icon" href="/assets/images/logoCrownify.png" />
+    <link rel="preload" as="image" href="/assets/images/loader.gif" />
   </head>
-  <body>
+  <body class="template-index belle home12-category">
+    <!--
+      Static first-paint preloader. The React <Preloader/> can only render
+      once the app bundle has downloaded and executed, which on a refresh
+      leaves a blank white page for that whole window. This markup is part
+      of the HTML document, so the browser paints it on the very first
+      frame. React removes it (see usePreloaderVisible) the moment its own
+      preloader is no longer needed, so the two never both disappear early.
+
+      Styles are inline because none of the app's stylesheets have loaded
+      at this point either.
+    -->
+    <div
+      id="initial-preloader"
+      style="
+        background-color: #fff;
+        height: 100%;
+        width: 100%;
+        position: fixed;
+        margin: 0;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        overflow: hidden;
+        z-index: 999999;
+      "
+    >
+      <img
+        src="/assets/images/loader.gif"
+        alt="Loading..."
+        style="
+          text-align: center;
+          left: 0;
+          right: 0;
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          margin: 0 auto;
+          z-index: 99;
+        "
+      />
+    </div>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // Failsafe: if the app bundle fails to boot, a permanently blank page
+      // is far worse than a late flash. Long enough that it never fires on
+      // a normal (even slow) load.
+      setTimeout(function () {
+        var el = document.getElementById("initial-preloader");
+        if (el) el.remove();
+      }, 15000);
+    </script>
   </body>
 </html>

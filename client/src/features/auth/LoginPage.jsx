@@ -1,24 +1,37 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/store/AuthContext";
+import { usePageAssets } from "@/lib/usePageAssets";
+import { userProfiles } from "@/styles/userProfiles";
 import { authApi } from "./authApi";
 import { GoogleButton } from "./GoogleButton";
+import { validateEmailStrict, validateStrongPassword } from "@/lib/validators";
 
 export function LoginPage() {
+  usePageAssets("user", "header2", userProfiles);
+
   const [form, setForm] = useState({ email: "", password: "" });
+  const [fieldErrors, setFieldErrors] = useState({ email: "", password: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
   const { refreshMe } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const nextForm = { ...form, [e.target.name]: e.target.value };
+    setForm(nextForm);
+    if (e.target.name === "email") setFieldErrors((prev) => ({ ...prev, email: validateEmailStrict(nextForm.email) }));
+    if (e.target.name === "password") setFieldErrors((prev) => ({ ...prev, password: validateStrongPassword(nextForm.password) }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+    const emailErr = validateEmailStrict(form.email);
+    const passErr = validateStrongPassword(form.password);
+    setFieldErrors({ email: emailErr, password: passErr });
+    if (emailErr || passErr) return;
     setSubmitting(true);
     try {
       const res = await authApi.login(form);
@@ -27,57 +40,128 @@ export function LoginPage() {
         await refreshMe();
         navigate("/");
       } else {
-        toast.error(res?.message || "Login failed");
+        setError(res?.message || "Login failed");
       }
     } catch (err) {
-      toast.error(err.message || "Login failed");
+      setError(err.message || "Login failed");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="mx-auto flex max-w-md flex-col justify-center px-4 py-16">
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-heading text-2xl text-primary">Sign In</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" required value={form.email} onChange={handleChange} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" required value={form.password} onChange={handleChange} />
-            </div>
-            <div className="text-right text-sm">
-              <Link to="/forget-password" className="text-accent hover:underline">
-                Forgot password?
-              </Link>
-            </div>
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "Signing in..." : "Sign In"}
-            </Button>
-          </form>
+    <section className="ftco-section">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-lg-10">
+            <div className="wrap d-md-flex">
+              <div
+                className="text-wrap p-4 p-lg-5 d-flex img d-flex align-items-end"
+                style={{ backgroundImage: "url(/assets/images/loginpic.webp)" }}
+              >
+                <div className="text w-100">
+                  <h2 className="mb-4">Welcome Back to Crownify</h2>
+                  <p style={{ lineHeight: 1.6, color: "white" }}>
+                    Log in to your account to continue exploring our exclusive headwear collection and personalized offers!
+                  </p>
+                </div>
+              </div>
 
-          <div className="my-4 flex items-center gap-2 text-xs text-muted-foreground">
-            <div className="h-px flex-1 bg-border" />
-            OR
-            <div className="h-px flex-1 bg-border" />
+              <div
+                className="login-wrap p-4 p-md-5"
+                style={{
+                  backgroundImage: "url(/assets/images/logindesign4.png)",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                  lineHeight: 1.6,
+                }}
+              >
+                <h3 className="mb-3" style={{ fontWeight: 600 }}>
+                  Login
+                </h3>
+                {error && <div style={{ color: "red" }}>{error}</div>}
+
+                <form onSubmit={handleSubmit} className="signup-form" id="signform">
+                  <div className="row">
+                    <div className="col-md-12">
+                      <div className="form-group">
+                        <label className="label" htmlFor="email">
+                          Email Address
+                        </label>
+                        <input
+                          type="email"
+                          className="form-control"
+                          name="email"
+                          id="email"
+                          placeholder="Enter email"
+                          value={form.email}
+                          onChange={handleChange}
+                        />
+                        <div id="error1" className="error-message" style={{ display: fieldErrors.email ? "block" : "none", color: "red" }}>{fieldErrors.email}</div>
+                      </div>
+                    </div>
+
+                    <div className="col-md-12">
+                      <div className="form-group">
+                        <label className="label" htmlFor="password">
+                          Password
+                        </label>
+                        <div className="input-group">
+                          <input
+                            type="password"
+                            id="password"
+                            className="form-control"
+                            name="password"
+                            placeholder="Password"
+                            value={form.password}
+                            onChange={handleChange}
+                          />
+                          <span className="input-group-text" style={{ cursor: "pointer" }}>
+                            <i className="fa fa-eye"></i>
+                          </span>
+                        </div>
+                        <div id="error2" className="error-message" style={{ display: fieldErrors.password ? "block" : "none", color: "red" }}>{fieldErrors.password}</div>
+                      </div>
+                    </div>
+
+                    <div className="col-md-12 my-4">
+                      <div className="form-group">
+                        <div className="w-100">
+                          <label className="checkbox-wrap checkbox-primary">
+                            <Link to="/forget-password">Forgot Password ?</Link>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-12 text-center">
+                      <div className="form-group">
+                        <button type="submit" className="btn btn-secondary submit" disabled={submitting}>
+                          {submitting ? "Logging in..." : "Login"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+                <div className="social-wrap">
+                  <p className="or">
+                    <span>or</span>
+                  </p>
+                  <p className="mb-3 text-center">Sign in with Google</p>
+                  <p className="social-media d-flex justify-content-center">
+                    <GoogleButton from="login" />
+                  </p>
+                </div>
+                <div className="w-100 text-center">
+                  <p className="mt-4">
+                    Don't have an account? <Link to="/signup">Sign up here</Link>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-
-          <GoogleButton from="login" />
-
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
-            <Link to="/signup" className="text-accent hover:underline">
-              Sign up
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </div>
+    </section>
   );
 }

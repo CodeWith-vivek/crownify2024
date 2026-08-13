@@ -1,0 +1,7 @@
+/* Old Evara admin theme overrides removed — the admin panel now uses the
+   modern design system in styles/admin-modern.css. Only genuinely
+   page-functional rules are kept here. */
+
+.product-detail-column {
+  min-width: 260px;
+}
