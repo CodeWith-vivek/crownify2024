@@ -23,7 +23,9 @@ export function MainLayout() {
     <div className="pageWrapper" style={{ backgroundColor: "white" }}>
       {showPreloader && <Preloader />}
       <Header />
-      <Outlet />
+      <main>
+        <Outlet />
+      </main>
       <Footer />
     </div>
   );

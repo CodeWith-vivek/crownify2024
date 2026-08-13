@@ -87,7 +87,7 @@ export function Header() {
           <div className="row align-items-center">
             <div className="logo col-md-2 col-lg-2 d-none d-lg-block">
               <Link to="/">
-                <img className="logo1" src="/assets/images/logoCrownify.png" alt="Belle Multipurpose Html Template" title="CROWNIFY" />
+                <img className="logo1" src="/assets/images/logoCrownify.png" alt="Belle Multipurpose Html Template" title="CROWNIFY" width={188} height={188} />
               </Link>
             </div>
             <div className="col-2 col-sm-3 col-md-3 col-lg-8">
@@ -151,7 +151,7 @@ export function Header() {
             <div className="col-6 col-sm-6 col-md-6 col-lg-2 d-block d-lg-none mobile-logo">
               <div className="logo">
                 <Link to="/">
-                  <img src="/assets/images/logoCrownify.png" className="logo2" alt="Belle Multipurpose Html Template" title="CROWNIFY" />
+                  <img src="/assets/images/logoCrownify.png" className="logo2" alt="Belle Multipurpose Html Template" title="CROWNIFY" width={188} height={188} />
                 </Link>
               </div>
             </div>
@@ -176,6 +176,7 @@ export function Header() {
                     type="button"
                     id="userDropdown"
                     aria-expanded={userDropdownOpen}
+                    aria-label="User account"
                     onClick={() => setUserDropdownOpen((o) => !o)}
                   >
                     <i className="fa-solid fa-user" style={{ color: "#e14141" }}></i>

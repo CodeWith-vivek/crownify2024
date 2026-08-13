@@ -8290,7 +8290,8 @@ Copyright (c) 2015 Daniel Eden
 	src: url(../fonts/annimex-icons0f29.eot?fq2zl9);
 	src: url(../fonts/annimex-icons0f29.eot?fq2zl9#iefix) format('embedded-opentype'), url(../fonts/annimex-icons0f29.ttf?fq2zl9) format('truetype'), url(../fonts/annimex-icons0f29.woff?fq2zl9) format('woff'), url(../fonts/annimex-icons0f29.svg?fq2zl9#annimex-icons) format('svg');
 	font-weight: 400;
-	font-style: normal
+	font-style: normal;
+	font-display: swap
 }
 
 .anm {
