@@ -2,6 +2,7 @@ import { useParams, useSearchParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { adminApi } from "../adminApi";
 import { AdminError } from "@/components/admin/AdminError";
+import { productImageUrl } from "@/lib/imageUrl";
 
 function InfoCard({ icon, title, children }) {
   return (
@@ -94,7 +95,7 @@ export function OrderDetailsPage() {
               <tr>
                 <td>
                   <div className="adm-cell-media">
-                    <img className="adm-thumb adm-thumb--lg" src={`/uploads/product-image/${orderItem.productImage}`} alt="" />
+                    <img className="adm-thumb adm-thumb--lg" src={productImageUrl(orderItem.productImage)} alt="" />
                     <div style={{ minWidth: 0 }}>
                       <div className="adm-cell-title">{orderItem.productName}</div>
                       {orderItem.variant && (

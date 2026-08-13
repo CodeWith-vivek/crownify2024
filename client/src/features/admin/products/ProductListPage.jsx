@@ -5,6 +5,7 @@ import { adminApi } from "../adminApi";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { AdminError } from "@/components/admin/AdminError";
 import { confirm } from "@/components/ui/ConfirmDialog";
+import { productImageUrl } from "@/lib/imageUrl";
 
 export function ProductListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -136,7 +137,7 @@ export function ProductListPage() {
                   <tr key={product._id}>
                     <td>
                       <div className="adm-cell-media">
-                        {product.productImage?.[0] && <img className="adm-thumb" src={`/uploads/product-image/${product.productImage[0]}`} alt="" />}
+                        {product.productImage?.[0] && <img className="adm-thumb" src={productImageUrl(product.productImage[0])} alt="" />}
                         <div style={{ minWidth: 0 }}>
                           <div className="adm-cell-title">{product.productName}</div>
                           <div className="adm-cell-sub">{product.brand}</div>

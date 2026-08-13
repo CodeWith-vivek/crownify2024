@@ -5,6 +5,7 @@ import { adminApi } from "../adminApi";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { AdminError } from "@/components/admin/AdminError";
 import { confirm } from "@/components/ui/ConfirmDialog";
+import { productImageUrl } from "@/lib/imageUrl";
 
 function nextStatusFor(status) {
   if (status === "Placed") return "Shipped";
@@ -112,7 +113,7 @@ export function OrderListPage() {
                         </td>
                         <td className="product-detail-column">
                           <div className="adm-cell-media">
-                            <img className="adm-thumb" src={`/uploads/product-image/${item.productImage}`} alt="" />
+                            <img className="adm-thumb" src={productImageUrl(item.productImage)} alt="" />
                             <div style={{ minWidth: 0 }}>
                               <div className="adm-cell-title">{item.productName}</div>
                               <div className="adm-cell-sub">

@@ -5,6 +5,7 @@ import { userProfiles } from "@/styles/userProfiles";
 import { productApi } from "@/features/product/productApi";
 import { Carousel } from "@/components/ui/Carousel";
 import { PageError } from "@/components/layout/PageError";
+import { productImageUrl } from "@/lib/imageUrl";
 
 const PRODUCT_SLIDER_BASE = 4;
 const PRODUCT_SLIDER_BREAKPOINTS = [
@@ -44,7 +45,7 @@ function ProductRow({ product }) {
         <Link to={`/product/${product._id}`} className="grid-view-item__link">
           <img
             className="primary blur-up lazyload"
-            src={`/uploads/product-image/${product.productImage[0]}`}
+            src={productImageUrl(product.productImage[0])}
             alt={product.productName}
             title={product.productName}
             style={{ borderRadius: 14 }}
@@ -53,7 +54,7 @@ function ProductRow({ product }) {
           {product.productImage[1] && (
             <img
               className="hover blur-up lazyload"
-              src={`/uploads/product-image/${product.productImage[1]}`}
+              src={productImageUrl(product.productImage[1])}
               alt={product.productName}
               title={product.productName}
               style={{ borderRadius: 14 }}

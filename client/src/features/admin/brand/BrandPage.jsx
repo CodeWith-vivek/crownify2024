@@ -6,6 +6,7 @@ import { adminApi } from "../adminApi";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { AdminError } from "@/components/admin/AdminError";
 import { confirm } from "@/components/ui/ConfirmDialog";
+import { brandImageUrl } from "@/lib/imageUrl";
 
 export function BrandPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -156,7 +157,7 @@ export function BrandPage() {
                     <tr key={brand._id}>
                       <td>
                         <div className="adm-cell-media">
-                          <img className="adm-thumb" style={{ borderRadius: "50%", background: "#111" }} src={`/uploads/re-image/${brand.brandImage[0]}`} alt="" />
+                          <img className="adm-thumb" style={{ borderRadius: "50%", background: "#111" }} src={brandImageUrl(brand.brandImage[0])} alt="" />
                           <span className="adm-cell-title">{brand.brandName}</span>
                         </div>
                       </td>

@@ -9,6 +9,7 @@ import { productApi } from "./productApi";
 import { cartApi } from "@/features/cart/cartApi";
 import { wishlistApi } from "@/features/wishlist/wishlistApi";
 import { MagnifierImage } from "@/components/ui/MagnifierImage";
+import { productImageUrl } from "@/lib/imageUrl";
 
 export function ProductDetailsPage() {
   usePageAssets("user", "headershopdetails", userProfiles);
@@ -132,7 +133,7 @@ export function ProductDetailsPage() {
                           setActiveImage(index);
                         }}
                       >
-                        <div className="product__thumb__pic set-bg" style={{ backgroundImage: `url(/uploads/product-image/${img})`, borderRadius: 10 }}></div>
+                        <div className="product__thumb__pic set-bg" style={{ backgroundImage: `url(${productImageUrl(img)})`, borderRadius: 10 }}></div>
                       </a>
                     </li>
                   ))}
@@ -144,7 +145,7 @@ export function ProductDetailsPage() {
                     <div className={`tab-pane${activeImage === index ? " active" : ""}`} key={img} style={{ display: activeImage === index ? "block" : "none" }}>
                       <div className="product__details__pic__item img-magnifier-container">
                         <MagnifierImage
-                          src={`/uploads/product-image/${img}`}
+                          src={productImageUrl(img)}
                           alt={product.productName}
                           className="zoomable-image"
                           style={{ borderRadius: 14 }}
@@ -373,7 +374,7 @@ export function ProductDetailsPage() {
               {data.relatedProducts.map((p) => (
                 <div className="col-lg-3 col-md-6 col-sm-6" key={p._id}>
                   <Link to={`/product/${p._id}`} className={`product__item${p.isBlocked ? " blocked" : ""}`} style={{ display: "block" }}>
-                    <div className="product__item__pic set-bg" style={{ backgroundImage: `url(/uploads/product-image/${p.productImage[0]})` }}></div>
+                    <div className="product__item__pic set-bg" style={{ backgroundImage: `url(${productImageUrl(p.productImage[0])})` }}></div>
                     <div className="product__item__text">
                       <h6>{p.productName}</h6>
                       <div className="rating">

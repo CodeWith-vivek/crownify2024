@@ -6,6 +6,7 @@ import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
 import { adminApi } from "../adminApi";
 import { AdminError } from "@/components/admin/AdminError";
+import { productImageUrl } from "@/lib/imageUrl";
 
 const SIZE_OPTIONS = ["ONESIZE", "S / M", "M / L", "L / XL", "YOUTH"];
 const emptyVariant = { size: "", color: "", quantity: "" };
@@ -321,7 +322,7 @@ export function ProductFormPage() {
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 18 }}>
                   {existingImages.map((img) => (
                     <div key={img} style={{ position: "relative" }}>
-                      <img src={`/uploads/product-image/${img}`} alt="" style={{ width: 84, height: 84, objectFit: "cover", borderRadius: 10, border: "1px solid var(--adm-border)" }} />
+                      <img src={productImageUrl(img)} alt="" style={{ width: 84, height: 84, objectFit: "cover", borderRadius: 10, border: "1px solid var(--adm-border)" }} />
                       <button
                         type="button"
                         onClick={() => handleDeleteExistingImage(img)}

@@ -9,6 +9,7 @@ import { productApi } from "./productApi";
 import { cartApi } from "@/features/cart/cartApi";
 import { wishlistApi } from "@/features/wishlist/wishlistApi";
 import { PageError } from "@/components/layout/PageError";
+import { productImageUrl } from "@/lib/imageUrl";
 
 const PRICE_PRESETS = [
   { value: "0-1000", label: "₹0.00 - ₹1000.00" },
@@ -468,8 +469,8 @@ export function ShopPage() {
                         <Link to={`/product/${product._id}`} className="product-click-wrapper" style={{ display: "block" }}>
                           <div className="product__item__pic" style={{ borderRadius: 25 }}>
                             <div className="image-container">
-                              <img src={`/uploads/product-image/${product.productImage[0]}`} className="default-image" alt="Product" />
-                              {product.productImage[1] && <img src={`/uploads/product-image/${product.productImage[1]}`} className="hover-image" alt="Hover" />}
+                              <img src={productImageUrl(product.productImage[0])} className="default-image" alt="Product" />
+                              {product.productImage[1] && <img src={productImageUrl(product.productImage[1])} className="hover-image" alt="Hover" />}
                             </div>
                             <ul className="product__hover">
                               <li>

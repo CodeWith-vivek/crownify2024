@@ -13,6 +13,7 @@ import { useAuth } from "@/store/AuthContext";
 import { AddressFormFields, validateAddressForm } from "@/features/address/AddressFormFields";
 import { Modal } from "@/components/ui/Modal";
 import { confirm } from "@/components/ui/ConfirmDialog";
+import { productImageUrl } from "@/lib/imageUrl";
 
 const emptyAddress = {
   addressType: "",
@@ -439,7 +440,7 @@ export function CheckoutPage() {
                           <td>
                             <div className="product-info">
                               <div className="product-image">
-                                <img src={`/uploads/product-image/${product.productImage}`} style={{ width: 50, height: 50, marginRight: 10 }} />
+                                <img src={productImageUrl(product.productImage)} style={{ width: 50, height: 50, marginRight: 10 }} />
                               </div>
                               <div className="product-details product-details-small">
                                 <p>

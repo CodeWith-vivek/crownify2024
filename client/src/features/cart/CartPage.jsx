@@ -6,6 +6,7 @@ import { userProfiles } from "@/styles/userProfiles";
 import { useAuth } from "@/store/AuthContext";
 import { PageError } from "@/components/layout/PageError";
 import { cartApi } from "./cartApi";
+import { productImageUrl } from "@/lib/imageUrl";
 
 function stockColor(stock) {
   if (stock === 0) return "rgb(237, 50, 50)";
@@ -149,7 +150,7 @@ export function CartPage() {
                           <tr className="cart-item" key={`${item.product._id}-${item.size}-${item.color}`}>
                             <td className="product-details d-flex col">
                               <img
-                                src={item.productImage ? `/uploads/product-image/${item.productImage}` : "/path/to/default-image.jpg"}
+                                src={item.productImage ? productImageUrl(item.productImage) : "/path/to/default-image.jpg"}
                                 alt={item.productName}
                                 className="img-fluid"
                                 style={{ paddingRight: 4, maxWidth: "49%", height: 38 }}

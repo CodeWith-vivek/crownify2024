@@ -8,6 +8,7 @@ import { orderApi } from "./orderApi";
 import { paymentApi } from "@/features/payment/paymentApi";
 import { useRazorpayScript } from "@/lib/useRazorpayScript";
 import { confirm } from "@/components/ui/ConfirmDialog";
+import { productImageUrl } from "@/lib/imageUrl";
 
 function actionForStatus(status, order, item, onCancel, onReturn, onCancelReturn) {
   if (["Placed", "Confirmed", "Failed"].includes(status)) {
@@ -269,7 +270,7 @@ export function OrdersPage() {
                   *Note: Refund amounts may vary based on the cancellation of items in your order. Shipping costs are calculated proportionately, which may affect the total refund.
                 </p>
                 <div className="d-flex align-items-start mb-3">
-                  <img src={`/uploads/product-image/${cancelTarget.item.productImage}`} alt="Product Image" className="me-3 rounded" width="100" height="100" />
+                  <img src={productImageUrl(cancelTarget.item.productImage)} alt="Product Image" className="me-3 rounded" width="100" height="100" />
                   <div>
                     <p>
                       <strong>Product Name:</strong> {cancelTarget.item.productId?.productName}
@@ -317,7 +318,7 @@ export function OrdersPage() {
                   <strong>Order ID:</strong> {returnTarget.order.orderNumber}
                 </p>
                 <div className="d-flex align-items-start mb-3">
-                  <img src={`/uploads/product-image/${returnTarget.item.productImage}`} alt="Product Image" className="me-3 rounded" width="100" height="100" />
+                  <img src={productImageUrl(returnTarget.item.productImage)} alt="Product Image" className="me-3 rounded" width="100" height="100" />
                   <div>
                     <p>
                       <strong>Product Name:</strong> {returnTarget.item.productId?.productName}
@@ -387,7 +388,7 @@ export function OrdersPage() {
                           <div key={idx}>
                             <div className="product-info row ">
                               <div className="col-3 col-md-2">
-                                <img src={`/uploads/product-image/${item.productImage}`} alt={item.productId?.productName || "Product Image"} className="product-image" />
+                                <img src={productImageUrl(item.productImage)} alt={item.productId?.productName || "Product Image"} className="product-image" />
                               </div>
                               <div className="col-9 col-md-10">
                                 <div className="product-details">

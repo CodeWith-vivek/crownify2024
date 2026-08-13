@@ -8,6 +8,7 @@ import { useAuth } from "@/store/AuthContext";
 import { PageError } from "@/components/layout/PageError";
 import { wishlistApi } from "./wishlistApi";
 import { cartApi } from "@/features/cart/cartApi";
+import { productImageUrl } from "@/lib/imageUrl";
 
 function WishlistRow({ item, onRemoved }) {
   const [size, setSize] = useState("");
@@ -88,7 +89,7 @@ function WishlistRow({ item, onRemoved }) {
       <td className="product-thumbnail text-center">
         <Link to={`/product/${item.productId}`}>
           <img
-            src={item.productImage ? `/uploads/product-image/${item.productImage}` : "/assets/images/default-product.jpg"}
+            src={item.productImage ? productImageUrl(item.productImage) : "/assets/images/default-product.jpg"}
             alt={item.productName || "Product"}
             title={item.productName || "Product"}
           />

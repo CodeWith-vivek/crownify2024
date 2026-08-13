@@ -2,9 +2,8 @@ const Product = require("./productSchema");
 const Category = require("../category/categorySchema");
 const Brand = require("../brand/brandSchema");
 const User = require("../user/userSchema");
-const fs = require("fs");
-const path = require("path");
 const sharp = require("sharp");
+const { uploadBufferToCloudinary, destroyByUrl } = require("../../shared/utils/cloudinaryUpload");
 
 //code to load product add page
 
@@ -36,19 +35,15 @@ const addProducts = async (req, res) => {
     }
 
     const images = [];
-    const uploadDir = path.join(__dirname, "../../../public/uploads/product-image");
 
     if (req.files && req.files.length > 0) {
       for (let i = 0; i < req.files.length; i++) {
-        const originalImagePath = req.files[i].path;
-        const resizedImagePath = path.join(uploadDir, req.files[i].filename);
-
-        await sharp(originalImagePath)
+        const resizedBuffer = await sharp(req.files[i].buffer)
           .resize({ width: 440, height: 440, fit: "cover" })
-          .toFile(resizedImagePath);
+          .toBuffer();
 
-        images.push(req.files[i].filename);
-        fs.unlinkSync(originalImagePath);
+        const result = await uploadBufferToCloudinary(resizedBuffer, "crownify/products");
+        images.push(result.secure_url);
       }
     }
 
@@ -391,7 +386,6 @@ const editProduct = async (req, res) => {
     }
 
     const images = product.productImage || [];
-    const uploadDir = path.join(__dirname, "../../../public/uploads/product-image");
 
     if (req.files && req.files.length > 0) {
       const totalImages = images.length + req.files.length;
@@ -404,15 +398,12 @@ const editProduct = async (req, res) => {
       }
 
       for (let i = 0; i < req.files.length; i++) {
-        const originalImagePath = req.files[i].path;
-        const resizedImagePath = path.join(uploadDir, req.files[i].filename);
-
-        await sharp(originalImagePath)
+        const resizedBuffer = await sharp(req.files[i].buffer)
           .resize({ width: 440, height: 440, fit: "cover" })
-          .toFile(resizedImagePath);
+          .toBuffer();
 
-        images.push(req.files[i].filename);
-        fs.unlinkSync(originalImagePath);
+        const result = await uploadBufferToCloudinary(resizedBuffer, "crownify/products");
+        images.push(result.secure_url);
       }
       product.productImage = images;
     }
@@ -470,20 +461,12 @@ const editProduct = async (req, res) => {
 const deleteSingleImage = async (req, res) => {
   try {
     const { imageNameToServer, productIdToServer } = req.body;
-    const product = await Product.findByIdAndUpdate(productIdToServer, {
+    await Product.findByIdAndUpdate(productIdToServer, {
       $pull: { productImage: imageNameToServer },
     });
-    const imagePath = path.join(
-      "public",
-      "uploads",
-      "re-image",
-      imageNameToServer
-    );
-    if (fs.existsSync(imagePath)) {
-      await fs.unlinkSync(imagePath);
-    } else {
-   
-    }
+    // No-ops for pre-Cloudinary images (bare local filenames rather than
+    // Cloudinary URLs) — those were never findable by public_id anyway.
+    await destroyByUrl(imageNameToServer);
     res.json({ status: true, success: true });
   } catch (error) {
     res.status(500).json({ status: false, success: false, message: "Could not delete image" });

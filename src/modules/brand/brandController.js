@@ -1,5 +1,6 @@
 const Brand=require("./brandSchema")
 const Product=require("../product/productSchema")
+const { uploadBufferToCloudinary, destroyByUrl } = require("../../shared/utils/cloudinaryUpload")
 
 
 //code to load brand page admin side
@@ -37,10 +38,10 @@ const addBrand = async (req, res) => {
     });
 
     if (!findBrand) {
-      const image = req.file.filename;
+      const result = await uploadBufferToCloudinary(req.file.buffer, "crownify/brands");
       const newBrand = new Brand({
         brandName: brand,
-        brandImage: image,
+        brandImage: result.secure_url,
       });
       await newBrand.save();
       res.status(201).json({ success: true, message: "Brand added successfully", brand: newBrand });
@@ -87,7 +88,10 @@ const deleteBrand=async(req,res)=>{
         if(!id){
             return res.status(400).json({ success: false, message: "Brand id required" });
         }
-        await Brand.deleteOne({_id:id})
+        const brand = await Brand.findByIdAndDelete(id)
+        if (brand?.brandImage?.[0]) {
+            await destroyByUrl(brand.brandImage[0])
+        }
         res.json({ success: true, message: "Brand deleted" });
     } catch (error) {
         console.error("Error deleting brand",error);

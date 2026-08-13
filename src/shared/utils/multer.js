@@ -1,5 +1,4 @@
 const multer=require("multer")
-const path=require("path")
 
 const ALLOWED_MIME_TYPES = new Set([
     "image/jpeg",
@@ -8,15 +7,12 @@ const ALLOWED_MIME_TYPES = new Set([
     "image/gif",
 ]);
 
-const storage = multer.diskStorage({
-    destination:(req,file,cb)=>{
-        cb(null,path.join(__dirname,"../../../public/uploads/re-image"));
-    },
-    filename:(req,file,cb)=>{
-        const safeName = path.basename(file.originalname).replace(/[^a-zA-Z0-9._-]/g, "_");
-        cb(null,Date.now()+"-"+safeName)
-    }
-})
+// Memory storage, not disk: uploaded files go straight to Cloudinary from
+// the in-memory buffer (see cloudinaryUpload.js). Render's free tier and
+// serverless hosts don't guarantee local disk survives a redeploy/cold
+// start, so nothing here should ever depend on the file still being there
+// after the request that wrote it.
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
     if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
