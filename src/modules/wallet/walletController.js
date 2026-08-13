@@ -4,9 +4,7 @@ const crypto = require("crypto");
 const Transaction=require("../payment/transactionSchema")
 const Category=require("../category/categorySchema")
 const Brand=require("../brand/brandSchema")
-
-
-
+const { buildIsValidProduct, computeCartWishlistCounts } = require("../../shared/utils/catalogVisibility");
 
 //cod eto load wallet page
 
@@ -55,32 +53,8 @@ const loadwalletpage = async (req, res) => {
         .limit(parseInt(req.query.limit) || 5),
     ]);
 
-    const listedCategoryIds = new Set(
-      listedCategories.map((cat) => cat._id.toString())
-    );
-    const unblockedBrandNames = new Set(
-      unblockedBrands.map((brand) => brand.brandName)
-    );
-
-    const isValidProduct = (product) => {
-      return (
-        product &&
-        !product.isBlocked &&
-        listedCategoryIds.has(product.category?._id?.toString()) &&
-        unblockedBrandNames.has(product.brand)
-      );
-    };
-
-    const cartCount = userData?.cart?.[0]?.items
-      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
-          .length
-      : 0;
-
-    const wishlistCount = userData?.wishlist?.[0]?.items
-      ? userData.wishlist[0].items.filter((item) =>
-          isValidProduct(item.productId)
-        ).length
-      : 0;
+    const isValidProduct = buildIsValidProduct(listedCategories, unblockedBrands);
+    const { cartCount, wishlistCount } = computeCartWishlistCounts(userData, isValidProduct);
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;

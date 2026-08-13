@@ -6,8 +6,9 @@ const User = require("../user/userSchema");
 const Coupon = require("../coupon/couponSchema");
 const Category = require("../category/categorySchema");
 const Brand = require("../brand/brandSchema");
+const { buildIsValidProduct, computeCartWishlistCounts } = require("../../shared/utils/catalogVisibility");
 
-// code to lad cart page 
+// code to lad cart page
 
 const loadCartPage = async (req, res) => {
   try {
@@ -73,22 +74,7 @@ const loadCartPage = async (req, res) => {
       ]);
 
   
-    const listedCategoryIds = new Set(
-      listedCategories.map((cat) => cat._id.toString())
-    );
-    const unblockedBrandNames = new Set(
-      unblockedBrands.map((brand) => brand.brandName)
-    );
-
- 
-    const isValidProduct = (product) => {
-      return (
-        product &&
-        !product.isBlocked &&
-        listedCategoryIds.has(product.category?._id?.toString()) &&
-        unblockedBrandNames.has(product.brand)
-      );
-    };
+    const isValidProduct = buildIsValidProduct(listedCategories, unblockedBrands);
 
     // Process cart items
     if (cart && cart.items.length > 0) {
@@ -139,15 +125,7 @@ const loadCartPage = async (req, res) => {
     const total = Math.floor(subtotal + shippingCharge);
 
  
-    const cartCount = user?.cart?.[0]?.items
-      ? user.cart[0].items.filter((item) => isValidProduct(item.productId))
-          .length
-      : 0;
-
-    const wishlistCount = user?.wishlist?.[0]?.items
-      ? user.wishlist[0].items.filter((item) => isValidProduct(item.productId))
-          .length
-      : 0;
+    const { cartCount, wishlistCount } = computeCartWishlistCounts(user, isValidProduct);
 
     const cartData = {
       user,

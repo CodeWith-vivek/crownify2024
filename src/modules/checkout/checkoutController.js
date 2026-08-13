@@ -4,6 +4,7 @@ const Product = require("../product/productSchema");
 const Coupon=require("../coupon/couponSchema")
 const Brand = require("../brand/brandSchema");
 const Category=require("../category/categorySchema")
+const { buildIsValidProduct, computeCartWishlistCounts } = require("../../shared/utils/catalogVisibility");
 
 //code to load checkout page
 
@@ -53,32 +54,8 @@ const loadCheckout = async (req, res) => {
       return res.status(401).json({ success: false, message: "Please log in", redirect: "/login" });
     }
 
-    const listedCategoryIds = new Set(
-      listedCategories.map((cat) => cat._id.toString())
-    );
-    const unblockedBrandNames = new Set(
-      unblockedBrands.map((brand) => brand.brandName)
-    );
-
-    const isValidProduct = (product) => {
-      return (
-        product &&
-        !product.isBlocked &&
-        listedCategoryIds.has(product.category?._id?.toString()) &&
-        unblockedBrandNames.has(product.brand)
-      );
-    };
-
-    const cartCount = userData?.cart?.[0]?.items
-      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
-          .length
-      : 0;
-
-    const wishlistCount = userData?.wishlist?.[0]?.items
-      ? userData.wishlist[0].items.filter((item) =>
-          isValidProduct(item.productId)
-        ).length
-      : 0;
+    const isValidProduct = buildIsValidProduct(listedCategories, unblockedBrands);
+    const { cartCount, wishlistCount } = computeCartWishlistCounts(userData, isValidProduct);
 
     const cartItems = await Cart.findOne({ userId }).populate({
       path: "items.productId",

@@ -14,6 +14,7 @@ import {
 import { reportApi } from "./reportApi";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { AdminError } from "@/components/admin/AdminError";
+import { inr } from "@/lib/format";
 
 const TYPE_OPTIONS = [
   { value: "daily", label: "Today" },
@@ -22,9 +23,6 @@ const TYPE_OPTIONS = [
   { value: "yearly", label: "This year" },
   { value: "custom", label: "Custom range" },
 ];
-
-const inr = (n) =>
-  `₹${Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
 
 function Stat({ icon, tone, label, value, hint }) {
   return (

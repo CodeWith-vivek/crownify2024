@@ -7,6 +7,7 @@ const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const Coupon = require("../coupon/couponSchema");
 const { asString } = require("../../shared/utils/sanitize");
+const { buildIsValidProduct, computeCartWishlistCounts } = require("../../shared/utils/catalogVisibility");
 
 const respond = (req, res, view, data) => res.json({ success: true, ...data });
 
@@ -75,36 +76,9 @@ const loadHomepage = async (req, res) => {
             },
           }),
       ]);
-    const listedCategoryIds = new Set(
-      listedCategories.map((cat) => cat._id.toString())
-    );
-    const unblockedBrandNames = new Set(
-      unblockedBrands.map((brand) => brand.brandName)
-    );
-
-    const isValidProduct = (product) => {
-      return (
-        product &&
-        !product.isBlocked &&
-        listedCategoryIds.has(product.category?._id?.toString()) &&
-        unblockedBrandNames.has(product.brand)
-      );
-    };
-
-    const filteredProducts = products.filter((product) =>
-      isValidProduct(product)
-    );
-
-    const cartCount = userData?.cart?.[0]?.items
-      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
-          .length
-      : 0;
-
-    const wishlistCount = userData?.wishlist?.[0]?.items
-      ? userData.wishlist[0].items.filter((item) =>
-          isValidProduct(item.productId)
-        ).length
-      : 0;
+    const isValidProduct = buildIsValidProduct(listedCategories, unblockedBrands);
+    const filteredProducts = products.filter((product) => isValidProduct(product));
+    const { cartCount, wishlistCount } = computeCartWishlistCounts(userData, isValidProduct);
 
     return respond(req, res, "Home", {
       user: userData,
@@ -205,36 +179,9 @@ const loadContactpage = async (req, res) => {
           }),
       ]);
 
-    const listedCategoryIds = new Set(
-      listedCategories.map((cat) => cat._id.toString())
-    );
-    const unblockedBrandNames = new Set(
-      unblockedBrands.map((brand) => brand.brandName)
-    );
-
-    const isValidProduct = (product) => {
-      return (
-        product &&
-        !product.isBlocked &&
-        listedCategoryIds.has(product.category?._id?.toString()) &&
-        unblockedBrandNames.has(product.brand)
-      );
-    };
-
-    const cartCount = userData?.cart?.[0]?.items
-      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
-          .length
-      : 0;
-
-    const wishlistCount = userData?.wishlist?.[0]?.items
-      ? userData.wishlist[0].items.filter((item) =>
-          isValidProduct(item.productId)
-        ).length
-      : 0;
-
-    const filteredProducts = products.filter((product) =>
-      isValidProduct(product)
-    );
+    const isValidProduct = buildIsValidProduct(listedCategories, unblockedBrands);
+    const { cartCount, wishlistCount } = computeCartWishlistCounts(userData, isValidProduct);
+    const filteredProducts = products.filter((product) => isValidProduct(product));
 
     return res.json({ success: true,
       user: userData,
@@ -300,36 +247,9 @@ const loadAboutpage = async (req, res) => {
           }),
       ]);
 
-    const listedCategoryIds = new Set(
-      listedCategories.map((cat) => cat._id.toString())
-    );
-    const unblockedBrandNames = new Set(
-      unblockedBrands.map((brand) => brand.brandName)
-    );
-
-    const isValidProduct = (product) => {
-      return (
-        product &&
-        !product.isBlocked &&
-        listedCategoryIds.has(product.category?._id?.toString()) &&
-        unblockedBrandNames.has(product.brand)
-      );
-    };
-
-    const cartCount = userData?.cart?.[0]?.items
-      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
-          .length
-      : 0;
-
-    const wishlistCount = userData?.wishlist?.[0]?.items
-      ? userData.wishlist[0].items.filter((item) =>
-          isValidProduct(item.productId)
-        ).length
-      : 0;
-
-    const filteredProducts = products.filter((product) =>
-      isValidProduct(product)
-    );
+    const isValidProduct = buildIsValidProduct(listedCategories, unblockedBrands);
+    const { cartCount, wishlistCount } = computeCartWishlistCounts(userData, isValidProduct);
+    const filteredProducts = products.filter((product) => isValidProduct(product));
 
     return res.json({ success: true,
       user: userData,
@@ -390,36 +310,9 @@ const loadFaqpage = async (req, res) => {
           }),
       ]);
 
-    const listedCategoryIds = new Set(
-      listedCategories.map((cat) => cat._id.toString())
-    );
-    const unblockedBrandNames = new Set(
-      unblockedBrands.map((brand) => brand.brandName)
-    );
-
-    const isValidProduct = (product) => {
-      return (
-        product &&
-        !product.isBlocked &&
-        listedCategoryIds.has(product.category?._id?.toString()) &&
-        unblockedBrandNames.has(product.brand)
-      );
-    };
-
-    const cartCount = userData?.cart?.[0]?.items
-      ? userData.cart[0].items.filter((item) => isValidProduct(item.productId))
-          .length
-      : 0;
-
-    const wishlistCount = userData?.wishlist?.[0]?.items
-      ? userData.wishlist[0].items.filter((item) =>
-          isValidProduct(item.productId)
-        ).length
-      : 0;
-
-    const filteredProducts = products.filter((product) =>
-      isValidProduct(product)
-    );
+    const isValidProduct = buildIsValidProduct(listedCategories, unblockedBrands);
+    const { cartCount, wishlistCount } = computeCartWishlistCounts(userData, isValidProduct);
+    const filteredProducts = products.filter((product) => isValidProduct(product));
 
     return res.json({ success: true,
       user: userData,
@@ -483,26 +376,8 @@ const loadBrandpage = async (req, res) => {
           },
         });
 
-      const isValidProduct = (product) => {
-        return (
-          product &&
-          !product.isBlocked &&
-          listedCategoryIds.has(product.category?._id?.toString()) &&
-          unblockedBrandNames.has(product.brand)
-        );
-      };
-
-      const cartCount = userData?.cart?.[0]?.items
-        ? userData.cart[0].items.filter((item) =>
-            isValidProduct(item.productId)
-          ).length
-        : 0;
-
-      const wishlistCount = userData?.wishlist?.[0]?.items
-        ? userData.wishlist[0].items.filter((item) =>
-            isValidProduct(item.productId)
-          ).length
-        : 0;
+      const isValidProduct = buildIsValidProduct(listedCategories, unblockedBrands);
+      const { cartCount, wishlistCount } = computeCartWishlistCounts(userData, isValidProduct);
 
       return respond(req, res, "Brand", {
         user: userData,
@@ -1168,17 +1043,7 @@ const loadShopPage = async (req, res) => {
         );
       };
 
-      const cartCount = userData?.cart?.[0]?.items
-        ? userData.cart[0].items.filter((item) =>
-            isValidProduct(item.productId)
-          ).length
-        : 0;
-
-      const wishlistCount = userData?.wishlist?.[0]?.items
-        ? userData.wishlist[0].items.filter((item) =>
-            isValidProduct(item.productId)
-          ).length
-        : 0;
+      const { cartCount, wishlistCount } = computeCartWishlistCounts(userData, isValidProduct);
 
       return respond(req, res, "Shop", {
         user: userData,
@@ -1226,21 +1091,7 @@ const loadProductDetails = async (req, res) => {
         .exec(),
     ]);
 
-    const listedCategoryIds = new Set(
-      listedCategories.map((cat) => cat._id.toString())
-    );
-    const unblockedBrandNames = new Set(
-      unblockedBrands.map((brand) => brand.brandName)
-    );
-
-    const isValidProduct = (checkProduct) => {
-      return (
-        checkProduct &&
-        !checkProduct.isBlocked &&
-        listedCategoryIds.has(checkProduct.category?._id?.toString()) &&
-        unblockedBrandNames.has(checkProduct.brand)
-      );
-    };
+    const isValidProduct = buildIsValidProduct(listedCategories, unblockedBrands);
 
     if (!product || !isValidProduct(product)) {
       return res.status(404).json({ success: false, message: "Product not found or unavailable" });

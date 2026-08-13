@@ -5,6 +5,7 @@ import { reportApi } from "./report/reportApi";
 import { usePageAssets } from "@/lib/usePageAssets";
 import { adminProfiles } from "@/styles/adminProfiles";
 import { AdminError } from "@/components/admin/AdminError";
+import { inr } from "@/lib/format";
 
 function StatCard({ icon, tone, label, value, loading }) {
   return (
@@ -81,8 +82,6 @@ export function DashboardPage() {
         orders: chartQuery.data.monthly.orders[i],
       }))
     : [];
-
-  const inr = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
 
   // Every stat here falls back to 0 when its request fails, so an
   // unreachable server renders a dashboard reporting ₹0 revenue and 0

@@ -1,4 +1,5 @@
 const { startTestDb } = require("../setup/testDb");
+const { mockRes } = require("../setup/mockRes");
 const { addCategory } = require("../../src/modules/category/categoryController");
 const Category = require("../../src/modules/category/categorySchema");
 
@@ -16,18 +17,6 @@ afterAll(async () => {
   await db.stop();
 });
 
-function mockRes() {
-  const res = { statusCode: 200 };
-  res.status = jest.fn((code) => {
-    res.statusCode = code;
-    return res;
-  });
-  res.json = jest.fn((payload) => {
-    res.body = payload;
-    return res;
-  });
-  return res;
-}
 
 describe("addCategory", () => {
   test("creates a category, name stored uppercase", async () => {

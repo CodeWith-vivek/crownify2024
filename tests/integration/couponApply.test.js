@@ -1,4 +1,5 @@
 const { startTestDb } = require("../setup/testDb");
+const { mockRes } = require("../setup/mockRes");
 const { couponApply } = require("../../src/modules/coupon/couponController");
 const Coupon = require("../../src/modules/coupon/couponSchema");
 
@@ -16,18 +17,6 @@ afterAll(async () => {
   await db.stop();
 });
 
-function mockRes() {
-  const res = { statusCode: 200 };
-  res.status = jest.fn((code) => {
-    res.statusCode = code;
-    return res;
-  });
-  res.json = jest.fn((payload) => {
-    res.body = payload;
-    return res;
-  });
-  return res;
-}
 
 function futureDate(days) {
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
