@@ -88,7 +88,7 @@ export function Header() {
           <div className="row align-items-center">
             <div className="logo col-md-2 col-lg-2 d-none d-lg-block">
               <Link to="/">
-                <img className="logo1" src="/assets/images/logoCrownify.webp" alt="Belle Multipurpose Html Template" title="CROWNIFY" width={188} height={188} />
+                <img className="logo1" src="/assets/images/logoCrownify.webp" alt="Belle Multipurpose Html Template" title="CROWNIFY" width={75} height={75} />
               </Link>
             </div>
             <div className="col-2 col-sm-3 col-md-3 col-lg-8">
@@ -153,7 +153,7 @@ export function Header() {
             <div className="col-6 col-sm-6 col-md-6 col-lg-2 d-block d-lg-none mobile-logo">
               <div className="logo">
                 <Link to="/">
-                  <img src="/assets/images/logoCrownify.webp" className="logo2" alt="Belle Multipurpose Html Template" title="CROWNIFY" width={188} height={188} />
+                  <img src="/assets/images/logoCrownify.webp" className="logo2" alt="Belle Multipurpose Html Template" title="CROWNIFY" width={75} height={75} />
                 </Link>
               </div>
             </div>
