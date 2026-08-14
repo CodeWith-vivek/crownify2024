@@ -1,280 +1,33 @@
-const User = require("../user/userSchema");
-const Cart = require("../cart/cartSchema");
-const Product = require("../product/productSchema");
-const Coupon=require("../coupon/couponSchema")
-const Brand = require("../brand/brandSchema");
-const Category=require("../category/categorySchema")
-const { buildIsValidProduct, computeCartWishlistCounts } = require("../../shared/utils/catalogVisibility");
+const checkoutService = require("./checkout.service");
+const { sendError } = require("../../shared/errors/respond");
 
-//code to load checkout page
-
+// HTTP adapter only — rules live in checkout.service.js.
 
 const loadCheckout = async (req, res) => {
   try {
-    const userId = req.session.user;
-
-
-    if (!userId) {
-      return res.status(401).json({ success: false, message: "Please log in", redirect: "/login" });
-    }
-
-    const [listedCategories, unblockedBrands, userData] = await Promise.all([
-      Category.find({ isListed: true }),
-      Brand.find({ isBlocked: false }),
-      User.findById(userId)
-        .populate({
-          path: "addresses",
-        })
-        .populate({
-          path: "cart",
-          populate: {
-            path: "items.productId",
-            model: "Product",
-            populate: {
-              path: "category",
-              model: "Category",
-            },
-          },
-        })
-        .populate({
-          path: "wishlist",
-          populate: {
-            path: "items.productId",
-            model: "Product",
-            populate: {
-              path: "category",
-              model: "Category",
-            },
-          },
-        }),
-    ]);
-
-
-    if (!userData) {
-      return res.status(401).json({ success: false, message: "Please log in", redirect: "/login" });
-    }
-
-    const isValidProduct = buildIsValidProduct(listedCategories, unblockedBrands);
-    const { cartCount, wishlistCount } = computeCartWishlistCounts(userData, isValidProduct);
-
-    const cartItems = await Cart.findOne({ userId }).populate({
-      path: "items.productId",
-      model: "Product",
-      populate: {
-        path: "category",
-        model: "Category",
-      },
+    const { clearSessionCoupon, result } = await checkoutService.getCheckoutPage({
+      userId: req.session.user,
+      sessionCoupon: req.session.coupon,
     });
 
-    if (!cartItems || !cartItems.items || cartItems.items.length === 0) {
-      return res.status(400).json({ success: false, message: "Your cart is empty", redirect: "/cart" });
-    }
+    // Cleared before responding, not after: express-session persists on
+    // response end, so a mutation after res.json() races the save. The
+    // coupon value is already captured in `result`.
+    if (clearSessionCoupon) req.session.coupon = null;
 
-    const validCartItems = cartItems.items.filter(
-      (item) => isValidProduct(item.productId) && item.quantity > 0
-    );
-
-    if (validCartItems.length === 0) {
-      return res.status(400).json({ success: false, message: "Your cart is empty", redirect: "/cart" });
-    }
-
-    const subtotal = validCartItems.reduce((total, item) => {
-      const product = item.productId;
-      const price = product.salePrice || product.regularPrice || 0;
-      return total + item.quantity * price;
-    }, 0);
-
-    const shipping = 40;
-    let total = subtotal + shipping;
-    let discountAmount = 0;
-
-    if (req.session.coupon) {
-      const { discount } = req.session.coupon;
-      if (discount) {
-        let originalDiscountAmount = discount.calculatedAmount || 0;
-        discountAmount = originalDiscountAmount;
-
-        if (discount.maxCap) {
-          discountAmount = Math.min(discountAmount, discount.maxCap);
-        }
-      }
-    }
-
-    total = Math.max(0, total - discountAmount);
-
-    const products = validCartItems.map((item) => {
-      const product = item.productId;
-      const price = product.salePrice || product.regularPrice || 0;
-      return {
-        productId: product._id,
-        productName: product.productName,
-        productImage: product.productImage?.[0],
-        productBrand: product.brand,
-        quantity: item.quantity,
-        itemTotal: item.quantity * price,
-        size: item.variant?.size || null,
-        color: item.variant?.color || null,
-        price,
-      };
-    });
-
-    const coupons = await Coupon.find({ isActive: true });
-
-    const checkoutData = {
-      coupons,
-      user: userData,
-      addressCount: userData.addresses ? userData.addresses.length : 0,
-      products,
-      addresses: userData.addresses,
-      cartItems: validCartItems,
-      subtotal,
-      shipping,
-      discountAmount,
-      total,
-      coupon: req.session.coupon || null,
-      cartCount,
-      wishlistCount,
-    };
-
-    res.json({ success: true, ...checkoutData });
-
-    req.session.coupon = null;
+    return res.json({ success: true, ...result });
   } catch (error) {
-    console.error("Error on loading checkout:", error);
-    res.status(500).json({ success: false, message: "Error loading checkout" });
+    return sendError(res, error, "Error on loading checkout");
   }
 };
-
-
-//code to validate the quantity
 
 const validateQuantity = async (req, res) => {
   try {
-    const userId = req.session.user;
-    const cart = await Cart.findOne({ userId }).populate("items.productId");
-
-    if (!cart || !cart.items || cart.items.length === 0) {
-      return res.json({
-        success: false,
-        message: "Your cart is empty",
-      });
-    }
-
-    const outOfStockItems = [];
-    const blockedItems = [];
-    const validCartItems = [];
-
-    for (const item of cart.items) {
-      const currentProduct = await Product.findById(item.productId)
-        .populate("category")
-        .populate("brand")
-        .lean();
-
-      if (!currentProduct) {
-        outOfStockItems.push({
-          productName: "Unknown Product",
-          message: "Product no longer exists",
-        });
-        continue;
-      }
-
-      if (currentProduct.isBlocked) {
-        blockedItems.push({
-          productName: currentProduct.productName,
-          reason: "The product itself is blocked.",
-        });
-        continue;
-      }
-
-      if (currentProduct.category && !currentProduct.category.isListed) {
-        blockedItems.push({
-          productName: currentProduct.productName,
-          reason: `Category "${currentProduct.category.name}" is blocked.`,
-        });
-        continue;
-      }
-
-      const brand = await Brand.findOne({ brandName: currentProduct.brand });
-      if (brand && brand.isBlocked) {
-        blockedItems.push({
-          productName: currentProduct.productName,
-          reason: `Brand "${currentProduct.brand}" is blocked.`,
-        });
-        continue;
-      }
-
-      const cartItemVariant = item.variant;
-
-      const variant = currentProduct.variants.find(
-        (v) =>
-          v.color.toLowerCase() === cartItemVariant.color.toLowerCase() &&
-          v.size.toLowerCase() === cartItemVariant.size.toLowerCase()
-      );
-
-      if (!variant) {
-        outOfStockItems.push({
-          productName: currentProduct.productName,
-          size: cartItemVariant.size,
-          color: cartItemVariant.color,
-          message: "Product variant no longer available",
-        });
-        continue;
-      }
-
-      if (variant.quantity === 0) {
-        outOfStockItems.push({
-          productName: currentProduct.productName,
-          size: cartItemVariant.size,
-          color: cartItemVariant.color,
-          message: "Out of stock",
-        });
-      } else if (variant.quantity < item.quantity) {
-        outOfStockItems.push({
-          productName: currentProduct.productName,
-          size: cartItemVariant.size,
-          color: cartItemVariant.color,
-          availableStock: variant.quantity,
-          requestedQuantity: item.quantity,
-          message: `Only ${variant.quantity} items available`,
-        });
-      } else {
-
-        validCartItems.push(item);
-      }
-    }
-
-    cart.items = cart.items.filter((item) =>
-      validCartItems.some((validItem) =>
-        validItem.productId.equals(item.productId)
-      )
-    );
-    await cart.save();
-
-    if (outOfStockItems.length > 0 || blockedItems.length > 0) {
-      return res.json({
-        success: false,
-        message:
-          "Some items in your cart are out of stock or restricted due to blocked categories/brands.",
-        outOfStockItems,
-        blockedItems,
-      });
-    }
-
-    return res.json({
-      success: true,
-      message: "Stock and restriction validation successful",
-    });
+    const result = await checkoutService.validateCartForCheckout(req.session.user);
+    return res.json(result);
   } catch (error) {
-    console.error("Error during checkout validation:", error);
-    return res.status(500).json({
-      success: false,
-      message: "An error occurred while validating your cart",
-    });
+    return sendError(res, error, "Error during checkout validation");
   }
 };
 
-module.exports = {
-  loadCheckout,
-  validateQuantity,
- 
-};
+module.exports = { loadCheckout, validateQuantity };
