@@ -20,7 +20,6 @@ export default defineConfig({
       // public/, reused as-is for pixel-perfect fidelity instead of
       // duplicating them into client/public/.
       '/assets': 'http://localhost:3000',
-      '/assets2': 'http://localhost:3000',
       '/js': 'http://localhost:3000',
     },
   },
