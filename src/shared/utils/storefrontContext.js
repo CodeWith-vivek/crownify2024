@@ -31,8 +31,10 @@ const CART_WISHLIST_POPULATE = {
   },
 };
 
-function findUserWithCartAndWishlist(userId) {
-  return User.findById(userId)
+function findUserWithCartAndWishlist(userId, { withAddresses = false } = {}) {
+  const query = User.findById(userId);
+  if (withAddresses) query.populate("addresses");
+  return query
     .populate({ path: "cart", ...CART_WISHLIST_POPULATE })
     .populate({ path: "wishlist", ...CART_WISHLIST_POPULATE });
 }
@@ -42,13 +44,15 @@ function findUserWithCartAndWishlist(userId) {
  *
  * @param {string|null|undefined} userId  req.session.user — may be absent
  *   for a guest, in which case userData is null and both counts are 0.
+ * @param {{ withAddresses?: boolean }} [options]  profile-area pages also
+ *   render the saved address list, so they opt into that populate.
  * @returns {Promise<{userData, isValidProduct, listedCategories, unblockedBrands, cartCount, wishlistCount}>}
  */
-async function loadStorefrontContext(userId) {
+async function loadStorefrontContext(userId, options = {}) {
   const [listedCategories, unblockedBrands, userData] = await Promise.all([
     Category.find({ isListed: true }),
     Brand.find({ isBlocked: false }),
-    userId ? findUserWithCartAndWishlist(userId) : null,
+    userId ? findUserWithCartAndWishlist(userId, options) : null,
   ]);
 
   const isValidProduct = buildIsValidProduct(listedCategories, unblockedBrands);
