@@ -1,319 +1,94 @@
+const paymentService = require("./payment.service");
+const { sendError } = require("../../shared/errors/respond");
 
-const User = require("../user/userSchema");
-const Product=require("../product/productSchema")
-
-const Order = require("../order/orderSchema");
-const Cart=require("../cart/cartSchema")
-const crypto = require("crypto");
-const { getRazorpay } = require("../../shared/config/razorpay");
-
-//code to load payment Success page
+// HTTP adapters for the post-checkout payment screens and actions. Rules
+// live in payment.service.js. Every route here is behind userAuth, so
+// req.session.user is always a live account — which is what lets the
+// service scope every order lookup to its owner.
 
 const loadPayment = async (req, res) => {
   try {
-    const user = req.session.user;
-    const { orderId } = req.query;
-
-    const order = await Order.findOne({ _id: orderId })
-      .populate({
-        path: "items.productId",
-        strictPopulate: false,
-      })
-      .populate({
-        path: "shippingAddress",
-        strictPopulate: false,
-      })
-      .exec();
-
-    if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
-    }
-
-    const userData = user ? await User.findById(user) : null;
-
-    return res.json({ success: true, user: userData, order });
+    const result = await paymentService.getOrderForReceipt({
+      userId: req.session.user,
+      orderId: req.query.orderId,
+    });
+    return res.json({ success: true, ...result });
   } catch (error) {
-    console.error("Error loading payment success page:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    return sendError(res, error, "Error loading payment success page");
   }
 };
-
-//code to load payment failure page
 
 const loadFailure = async (req, res) => {
   try {
-    const user = req.session.user;
-    const { orderId } = req.query;
-
-    const order = await Order.findOne({ _id: orderId })
-      .populate({
-        path: "items.productId",
-        strictPopulate: false,
-      })
-      .populate({
-        path: "shippingAddress",
-        strictPopulate: false,
-      })
-      .exec();
-
-    if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
-    }
-
-    const userData = user ? await User.findById(user) : null;
-
-    return res.json({ success: true, user: userData, order });
+    const result = await paymentService.getOrderForReceipt({
+      userId: req.session.user,
+      orderId: req.query.orderId,
+    });
+    return res.json({ success: true, ...result });
   } catch (error) {
-    console.error("Error loading payment success page:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    return sendError(res, error, "Error loading payment failure page");
   }
 };
-
-//code for payment failure case
-
 
 const paymentFailure = async (req, res) => {
-  const { orderId, paymentId, razorpayOrderId, reason, description } = req.body;
-
   try {
-    const order = await Order.findById(orderId);
-    if (order) {
-  
-      const user = await User.findById(order.userId);
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: "User not found.",
-        });
-      }
-
-      const cart = await Cart.findOne({ userId: order.userId });
-
-      order.paymentStatus = "Failed";
-      order.items.forEach((item) => {
-        item.orderStatus = "Failed";
-      });
-
-      order.paymentDetails = {
-        paymentId,
-        razorpayOrderId,
-        failureReason: reason,
-        failureDescription: description,
-        paymentDate: new Date(),
-      };
-      await order.save();
-
-      if (cart) {
-
-        user.cart = user.cart.filter((cartId) => !cartId.equals(cart._id));
-        await user.save();
-      }
-
-      req.session.coupon = null;
-      await Cart.deleteOne({ userId: order.userId });
-
-      return res.status(200).json({
-        success: true,
-        message: "Payment failure recorded and cart deleted.",
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "Order not found.",
-      });
-    }
-  } catch (error) {
-    console.error("DEBUG: Error handling payment failure:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error.",
+    const { clearSessionCoupon, result } = await paymentService.recordPaymentFailure({
+      userId: req.session.user,
+      orderId: req.body.orderId,
+      paymentId: req.body.paymentId,
+      razorpayOrderId: req.body.razorpayOrderId,
+      reason: req.body.reason,
+      description: req.body.description,
     });
+
+    if (clearSessionCoupon) req.session.coupon = null;
+
+    return res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    return sendError(res, error, "Error handling payment failure");
   }
 };
-
-//code for retry payment
 
 const retryPayment = async (req, res) => {
   try {
-  
-    const { orderId } = req.body;
-
-    if (!orderId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "orderId is required" });
-    }
-
-    const existingOrder = await Order.findOne({
-      orderNumber: orderId,
-    }).populate("items.productId"); 
-    if (!existingOrder) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found" });
-    }
-
-    if (!existingOrder.grandTotal || existingOrder.grandTotal <= 0) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid order amount" });
-    }
-
-  
-    for (const item of existingOrder.items) {
-      const product = await Product.findById(item.productId); 
-      if (product) {
-        const variantIndex = product.variants.findIndex(
-          (v) => v.size === item.variant.size && v.color === item.variant.color
-        );
-
-        if (variantIndex !== -1) {
-          if (product.variants[variantIndex].quantity < item.quantity) {
-            return res.status(400).json({
-              success: false,
-              message: `Insufficient stock for ${product.productName}. Available: ${product.variants[variantIndex].quantity}, Requested: ${item.quantity}`,
-            });
-          }
-        } else {
-          return res.status(400).json({
-            success: false,
-            message: `Variant not found for product ${product.productName}`,
-          });
-        }
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: `Product not found for item ${item.productId}`,
-        });
-      }
-    }
-
-    const amountInPaise = Math.round(existingOrder.grandTotal * 100);
-
-
-    const razorpayOrder = await getRazorpay().orders.create({
-      amount: amountInPaise, 
-      currency: "INR",
-      receipt: `retry_${existingOrder.orderNumber}`, 
+    const result = await paymentService.retryPayment({
+      userId: req.session.user,
+      // The client posts the order NUMBER under the name `orderId`.
+      orderNumber: req.body.orderId,
     });
-
-    existingOrder.razorpayOrderId = razorpayOrder.id;
-
-
-    await existingOrder.save();
-  
-    res.json({
-      success: true,
-      key: process.env.RAZORPAY_KEY_ID, 
-      amount: razorpayOrder.amount, 
-      orderId: razorpayOrder.id, 
-      orderNumber: existingOrder.orderNumber,
-    });
+    return res.json({ success: true, ...result });
   } catch (error) {
-    console.error("Error in retry payment:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    return sendError(res, error, "Error in retry payment");
   }
 };
-
-//cod to update order status
 
 const updateOrderStatus = async (req, res) => {
   try {
-    const {
-      orderNumber,
-      paymentId,
-      razorpayOrderId,
-      razorpaySignature,
-      items,
-    } = req.body;
-
-    if (!orderNumber || !paymentId || !items || !razorpayOrderId || !razorpaySignature) {
-      return res.status(400).json({
-        success: false,
-        message: "orderNumber, paymentId, razorpayOrderId, razorpaySignature, and items are required",
-      });
-    }
-
-    const generatedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(`${razorpayOrderId}|${paymentId}`)
-      .digest("hex");
-
-    if (generatedSignature !== razorpaySignature) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid payment signature. Payment not verified.",
-      });
-    }
-
-    const existingOrder = await Order.findOne({
-      orderNumber: orderNumber,
+    const result = await paymentService.confirmRetriedPayment({
       userId: req.session.user,
+      orderNumber: req.body.orderNumber,
+      paymentId: req.body.paymentId,
+      razorpayOrderId: req.body.razorpayOrderId,
+      razorpaySignature: req.body.razorpaySignature,
+      items: req.body.items,
     });
-    if (!existingOrder) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found" });
-    }
-
-    existingOrder.paymentStatus = "Completed";
-    existingOrder.items.forEach((item) => {
-      item.orderStatus = "Placed";
-    });
-
-    await existingOrder.save();
-
-    for (const item of items) {
-      const product = await Product.findById(item.productId);
-      if (product) {
-        const variantIndex = product.variants.findIndex(
-          (v) => v.size === item.variant.size && v.color === item.variant.color
-        );
-
-        if (variantIndex !== -1) {
-
-          product.variants[variantIndex].quantity -= item.quantity; 
-          await product.save();
-
-        } else {
-          console.error(
-            "Variant not found for product:",
-            product.productName
-          );
-        }
-      } else {
-        console.error("Product not found for item:", item);
-      }
-    }
-
-    res.json({ success: true, message: "Order status updated successfully" });
+    return res.json({ success: true, ...result });
   } catch (error) {
-    console.error("Error updating order status:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    return sendError(res, error, "Error updating order status");
   }
 };
 
-//code to get orderDetails
-
-const getOrderDetails=async(req,res)=>{
+const getOrderDetails = async (req, res) => {
   try {
-    const { orderNumber } = req.params;
-    const order = await Order.findOne({ orderNumber }).populate(
-      "items.productId"
-    ); 
-
-    if (!order) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found" });
-    }
-
-    res.json({ success: true, order });
+    const order = await paymentService.getOrderByNumber({
+      userId: req.session.user,
+      orderNumber: req.params.orderNumber,
+    });
+    return res.json({ success: true, order });
   } catch (error) {
-    console.error("Error fetching order details:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    return sendError(res, error, "Error fetching order details");
   }
-}
+};
 
 module.exports = {
   loadPayment,
@@ -321,5 +96,5 @@ module.exports = {
   paymentFailure,
   retryPayment,
   updateOrderStatus,
-  getOrderDetails
+  getOrderDetails,
 };

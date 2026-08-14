@@ -52,6 +52,30 @@ const orderSchema = new Schema(
       type: Number,
       required: true, 
     },
+    // The Razorpay order this was last opened against — rewritten on each
+    // retry so a later attempt can be traced back.
+    razorpayOrderId: {
+      type: String,
+    },
+    // Audit trail for the payment attempt: which gateway ids were
+    // involved, when, and why it failed.
+    //
+    // Five separate places already wrote this object (order/payment.service
+    // on success, on a bad signature and on a verification error;
+    // payment/payment.service on a reported failure and on retry), but
+    // neither this nor razorpayOrderId was declared here — so Mongoose's
+    // strict mode silently discarded every one of those writes and no
+    // payment history was ever persisted. Same class of bug as the
+    // order.orderStatus write noted in adminOrders.service.js.
+    paymentDetails: {
+      paymentId: { type: String },
+      razorpayOrderId: { type: String },
+      razorpayPaymentId: { type: String },
+      paymentStatus: { type: String },
+      failureReason: { type: String },
+      failureDescription: { type: String },
+      paymentDate: { type: Date },
+    },
     orderedAt: {
       type: Date,
       default: Date.now,

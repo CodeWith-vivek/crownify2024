@@ -1,170 +1,66 @@
-const Coupon = require("./couponSchema");
+const couponService = require("./coupon.service");
+const { sendError } = require("../../shared/errors/respond");
 
-// Admin-side coupon CRUD. Customer-facing apply/remove lives in
-// couponApply.controller.js.
+// HTTP adapters for admin coupon CRUD. Rules live in coupon.service.js.
+//
+// Every route here is behind adminAuth, so the `if (req.session.admin)`
+// wrapper each of these handlers used to carry was unreachable.
 
 const loadCouponManagement = async (req, res) => {
-  if (req.session.admin) {
-    try {
-      const coupons = await Coupon.find({}).sort({ createdAt: -1 });
-      res.json({ success: true, coupons });
-    } catch (error) {
-      console.error("Error loading coupon management page:", error.message);
-      res.status(500).json({ success: false, message: "Error loading coupons" });
-    }
-  } else {
-    res.status(401).json({ success: false, message: "Not authenticated as admin" });
+  try {
+    return res.json({ success: true, coupons: await couponService.listCoupons() });
+  } catch (error) {
+    return sendError(res, error, "Error loading coupon management page");
   }
 };
 
 const getCoupons = async (req, res) => {
-  if (req.session.admin) {
-    try {
-      const coupons = await Coupon.find({}).sort({ createdAt: -1 });
-      res.json(coupons);
-    } catch (error) {
-      console.error("Error fetching coupons:", error.message);
-      res.status(500).json({ error: "Failed to fetch coupons" });
-    }
-  } else {
-    res.status(401).json({ error: "Unauthorized" });
+  try {
+    // Answers with a bare array, not an envelope — the admin coupon table
+    // consumes it directly.
+    return res.json(await couponService.listCoupons());
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    return res.status(500).json({ error: "Failed to fetch coupons" });
   }
 };
 
 const addCoupon = async (req, res) => {
-  if (!req.session.admin) {
-    return res.status(401).json({ success: false, message: "Unauthorized access" });
-  }
-
   try {
-    const {
-      code,
-      discountType,
-      discountAmount,
-      maxDiscount,
-      minPurchase,
-      expiryDate,
-      usageLimit,
-      description,
-    } = req.body;
-
-    const existingCoupon = await Coupon.findOne({ code });
-    if (existingCoupon) {
-      return res.status(400).json({
-        success: false,
-        message: "Coupon code already exists",
-      });
-    }
-
-    // 0 means unlimited; anything below that is meaningless.
-    if (usageLimit < 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Usage limit must be 0 or greater.",
-      });
-    }
-
-    const newCoupon = new Coupon({
-      code,
-      discountType,
-      discountAmount: Number(discountAmount),
-      maxDiscount: Number(maxDiscount),
-      minPurchase: Number(minPurchase),
-      expiryDate: new Date(expiryDate),
-      usageLimit: Number(usageLimit),
-      description: description ? description.trim() : undefined,
-    });
-
-    await newCoupon.save();
-    res.json({
-      success: true,
-      message: "Coupon added successfully!",
-      coupon: newCoupon,
-    });
+    const result = await couponService.createCoupon(req.body);
+    return res.json({ success: true, ...result });
   } catch (error) {
-    console.error("Error adding coupon:", error.message);
-    res.status(500).json({
-      success: false,
-      message: "Failed to add coupon. " + error.message,
-    });
+    return sendError(res, error, "Error adding coupon");
   }
 };
 
 const deleteCoupon = async (req, res) => {
-  if (req.session.admin) {
-    try {
-      const { id } = req.params;
-
-      const coupon = await Coupon.findByIdAndDelete(id);
-      if (!coupon) {
-        return res.status(404).json({ success: false, message: "Coupon not found" });
-      }
-
-      res.json({ success: true, message: "Coupon deleted successfully!" });
-    } catch (error) {
-      console.error("Error deleting coupon:", error.message);
-      res.status(500).json({ success: false, message: "Failed to delete coupon." });
-    }
-  } else {
-    res.status(401).json({ success: false, message: "Unauthorized" });
+  try {
+    const result = await couponService.deleteCoupon(req.params.id);
+    return res.json({ success: true, ...result });
+  } catch (error) {
+    return sendError(res, error, "Error deleting coupon");
   }
 };
 
 const editCoupon = async (req, res) => {
   try {
-    const couponId = req.params.id;
-
-    const coupon = await Coupon.findById(couponId);
-
-    if (!coupon) {
-      return res.status(404).json({ success: false, message: "Coupon not found" });
-    }
-
-    res.json({ success: true, coupon });
+    const coupon = await couponService.getCoupon(req.params.id);
+    return res.json({ success: true, coupon });
   } catch (error) {
-    console.error("Error fetching coupon:", error.message);
-    res.status(500).json({ success: false, message: "Server error" });
+    return sendError(res, error, "Error fetching coupon");
   }
 };
 
 const updateCoupon = async (req, res) => {
-  const couponId = req.params.id;
-  const {
-    couponCode,
-    discountType,
-    discountAmount,
-    maxDiscount,
-    minPurchase,
-    expiryDate,
-    usageLimit,
-    description,
-  } = req.body;
-
   try {
-    const updatedCoupon = await Coupon.findByIdAndUpdate(
-      couponId,
-      {
-        code: couponCode,
-        discountType,
-        discountAmount,
-        maxDiscount,
-        minPurchase,
-        expiryDate,
-        usageLimit,
-        description,
-      },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedCoupon) {
-      console.error("Coupon not found with ID:", couponId);
-      return res.status(404).json({ message: "Coupon not found" });
-    }
-
-    res.json({ message: "Coupon updated successfully" });
+    const result = await couponService.updateCoupon({
+      couponId: req.params.id,
+      body: req.body,
+    });
+    return res.json(result);
   } catch (error) {
-    console.error("Error updating coupon:", error);
-    res.status(500).json({ message: "Server error" });
+    return sendError(res, error, "Error updating coupon");
   }
 };
 

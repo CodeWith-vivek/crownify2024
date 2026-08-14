@@ -1,11 +1,7 @@
-const bcrypt = require("bcrypt");
-const User = require("../user/userSchema");
-const { asString } = require("../../shared/utils/sanitize");
+const adminAuthService = require("./adminAuth.service");
 
-// Admin session lifecycle. Admin auth is deliberately a separate session
-// flag (req.session.admin) from the shopper session (req.session.user) —
-// the two are independent, so being signed in as a customer never grants
-// admin access.
+// HTTP adapters for the admin session. Rules live in adminAuth.service.js;
+// the session is written here.
 
 const pageerror = async (req, res) => {
   res.json({ success: true });
@@ -15,7 +11,7 @@ const loadLogin = (req, res) => {
   if (req.session.admin) {
     return res.json({ success: true, redirect: "/admin/dashboard" });
   }
-  res.json({ success: true, admin: false });
+  return res.json({ success: true, admin: false });
 };
 
 // Lets the admin SPA hydrate its auth state on load/refresh.
@@ -25,41 +21,27 @@ const getCurrentAdmin = (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const admin = await User.findOne({ email: asString(email), isAdmin: true }).select("+password");
+    const { ok, message, redirectUrl, session } = await adminAuthService.login({
+      email: req.body.email,
+      password: req.body.password,
+    });
 
-    if (admin) {
-      const passwordMatch = await bcrypt.compare(password, admin.password);
-      if (passwordMatch) {
-        req.session.admin = true;
+    if (!ok) return res.json({ success: false, message });
 
-        return res.json({
-          success: true,
-          message: "Login Successful",
-          redirectUrl: "/admin/dashboard",
-        });
-      } else {
-        return res.json({ success: false, message: "Invalid Password" });
-      }
-    } else {
-      return res.json({ success: false, message: "You are not Admin !" });
-    }
+    Object.assign(req.session, session);
+
+    return res.json({ success: true, message, redirectUrl });
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Admin login error:", error);
+    // Answered as 200 for the same reason a rejected login is: a 401 here
+    // triggers the client's unauthorized handler on the login page itself.
     return res.json({ success: false, message: "An error occurred" });
   }
 };
 
+// Reached only through adminAuth, so arriving here IS the success case.
 const loadDashboard = async (req, res) => {
-  if (req.session.admin) {
-    try {
-      res.json({ success: true });
-    } catch (error) {
-      res.status(500).json({ success: false, message: "Error loading dashboard" });
-    }
-  } else {
-    res.status(401).json({ success: false, message: "Not authenticated as admin" });
-  }
+  res.json({ success: true });
 };
 
 const logout = async (req, res) => {
@@ -69,12 +51,11 @@ const logout = async (req, res) => {
         console.log("Error in logging out", err);
         return res.json({ success: false, message: "Error logging out" });
       }
-
-      res.json({ success: true, message: "Logged out successfully" });
+      return res.json({ success: true, message: "Logged out successfully" });
     });
   } catch (error) {
     console.log("Unexpected error occurred", error);
-    res.json({ success: false, message: "An unexpected error occurred" });
+    return res.json({ success: false, message: "An unexpected error occurred" });
   }
 };
 
