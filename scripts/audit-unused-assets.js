@@ -23,11 +23,10 @@ function toPublicRelative(absPath) {
   return "/" + path.relative(PUBLIC, absPath).split(path.sep).join("/");
 }
 
-// 1. All files that physically exist under assets/assets2.
-const allAssetFiles = [
-  ...walk(path.join(PUBLIC, "assets")),
-  ...walk(path.join(PUBLIC, "assets2")),
-].map(toPublicRelative);
+// 1. All files that physically exist under assets. (assets2 was folded
+//    into assets/profile once everything under it turned out to be small
+//    and genuinely used — no separate top-level folder left to scan.)
+const allAssetFiles = walk(path.join(PUBLIC, "assets")).map(toPublicRelative);
 
 // 2. Every /assets... or /assets2... string literal anywhere in client/src
 //    (JSX image refs, and the profile files' own CSS/JS bundle lists).
@@ -108,7 +107,7 @@ for (const f of unreferenced) {
   unreferencedSize += fs.statSync(path.join(PUBLIC, f)).size;
 }
 
-console.log("Total files under assets/assets2:", allAssetFiles.length, "(", (totalSize / 1024 / 1024).toFixed(1), "MB )");
+console.log("Total files under assets:", allAssetFiles.length, "(", (totalSize / 1024 / 1024).toFixed(1), "MB )");
 console.log("Reachable (referenced somewhere):", allAssetFiles.length - unreferenced.length);
 console.log("UNREFERENCED:", unreferenced.length, "(", (unreferencedSize / 1024 / 1024).toFixed(1), "MB )");
 console.log();

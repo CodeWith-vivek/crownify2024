@@ -270,12 +270,12 @@ export const userProfiles = {
   "headerprofile": {
     "links": [
       "/assets/css/plugins.css",
-      // assets2/main.css bundles its own @import'd Bootstrap for the
-      // dashboard-menu/fi-rs-* icon styles it provides. Loaded first, so the
-      // site's own bootstrap/style/style2 below win the cascade for shared
-      // .row/.col-*/.top-header rules — otherwise the shared header's grid
-      // breaks only on profile-family pages.
-      "/assets2/css/main.css",
+      // assets/profile/css/main.css bundles its own @import'd Bootstrap for
+      // the dashboard-menu/fi-rs-* icon styles it provides. Loaded first, so
+      // the site's own bootstrap/style/style2 below win the cascade for
+      // shared .row/.col-*/.top-header rules — otherwise the shared
+      // header's grid breaks only on profile-family pages.
+      "/assets/profile/css/main.css",
       "/assets/css/bootstrap.min.css",
       "/assets/css/style.css",
       "/assets/css/responsive.css",
