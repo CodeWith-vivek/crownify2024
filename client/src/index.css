@@ -5,3 +5,16 @@
 * {
   box-sizing: border-box;
 }
+
+/* The original theme's CSS/markup never fully guarded against horizontal
+   overflow on narrow viewports (stray fixed-width elements, Bootstrap's
+   .row negative margins, absolutely-positioned carousel arrows, etc.) —
+   whichever specific element is the culprit on a given page, this is the
+   standard safety net: the page itself should never be able to scroll
+   sideways, only individual elements that explicitly opt into it (tables
+   wrapped in .table-responsive already do their own overflow-x: auto). */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
