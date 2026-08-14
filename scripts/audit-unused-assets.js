@@ -52,23 +52,48 @@ for (const file of scanFiles) {
 }
 
 // 3. Every loaded CSS file might itself reference more assets via url(...)
-//    (fonts, background sprites) using paths relative to ITS OWN directory.
-const loadedCssFiles = [...reachable].filter((p) => p.endsWith(".css"));
+//    or @import (fonts, background sprites, chain-imported vendor/plugin
+//    CSS), using paths relative to ITS OWN directory — and any CSS file
+//    discovered THAT way can itself import/reference further files, so this
+//    has to be a worklist processed to a fixpoint, not a single pass. A
+//    single pass is exactly the bug that shipped once already: it missed
+//    fonts referenced by vendor CSS that was only reachable via a chain
+//    import (main.css -> @import vendors/evara-font.css -> @font-face
+//    url(../../fonts/evara-font/...)), and silently deleted live files.
 const urlPattern = /url\(\s*['"]?([^'")]+)['"]?\s*\)/g;
+const importPattern = /@import\s+(?:url\()?['"]?([^'")\s;]+)['"]?\)?/g;
+const processedCss = new Set();
 
-for (const cssRelPath of loadedCssFiles) {
+function processCssForReferences(cssRelPath) {
+  if (processedCss.has(cssRelPath)) return;
+  processedCss.add(cssRelPath);
+
   const cssAbsPath = path.join(PUBLIC, cssRelPath);
-  if (!fs.existsSync(cssAbsPath)) continue;
+  if (!fs.existsSync(cssAbsPath)) return;
   const content = fs.readFileSync(cssAbsPath, "utf8");
+  const dir = path.dirname(cssAbsPath);
+
+  const refs = [];
   let m;
-  while ((m = urlPattern.exec(content))) {
-    const ref = m[1];
+  urlPattern.lastIndex = 0;
+  while ((m = urlPattern.exec(content))) refs.push(m[1]);
+  importPattern.lastIndex = 0;
+  while ((m = importPattern.exec(content))) refs.push(m[1]);
+
+  for (const ref of refs) {
     if (ref.startsWith("data:") || ref.startsWith("http")) continue;
-    const resolved = path.normalize(path.join(path.dirname(cssAbsPath), ref));
-    if (resolved.startsWith(PUBLIC)) {
-      addReachable(toPublicRelative(resolved));
-    }
+    const cleanRef = ref.split("?")[0].split("#")[0];
+    const resolved = path.normalize(path.join(dir, cleanRef));
+    if (!resolved.startsWith(PUBLIC)) continue;
+    const relResolved = toPublicRelative(resolved);
+    addReachable(relResolved);
+    if (relResolved.endsWith(".css")) processCssForReferences(relResolved);
   }
+}
+
+// Seed with every directly loaded CSS file, then let it cascade.
+for (const p of [...reachable].filter((p) => p.endsWith(".css"))) {
+  processCssForReferences(p);
 }
 
 // Report
