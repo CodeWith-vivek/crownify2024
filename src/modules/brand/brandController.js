@@ -1,108 +1,58 @@
-const Brand=require("./brandSchema")
-const Product=require("../product/productSchema")
-const { uploadBufferToCloudinary, destroyByUrl } = require("../../shared/utils/cloudinaryUpload")
+const brandService = require("./brand.service");
+const { sendError } = require("../../shared/errors/respond");
 
+// HTTP adapters for admin brand management. Rules live in
+// brand.service.js. Every route here is behind adminAuth.
 
-//code to load brand page admin side
-
-const getBrandPage=async(req,res)=>{
-    try {
-        const page=parseInt(req.query.page) || 1
-        const limit=4
-        const skip =(page-1)*limit
-        const brandData =await Brand.find({}).sort({createdAt:-1}).skip(skip).limit(limit)
-        const totalBrands= await Brand.countDocuments()
-        const totalPages =Math.ceil(totalBrands/limit)
-        const reverseBrand =brandData.reverse()
-        const brandPageData = {
-            data:reverseBrand,
-            currentPage:page,
-            totalPages:totalPages,
-            totalBrands:totalBrands,
-        };
-        res.json({ success: true, ...brandPageData });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Error loading brands" });
-    }
-}
-
-//code to add new brand
-
-const addBrand = async (req, res) => {
+const getBrandPage = async (req, res) => {
   try {
-    const brand = req.body.name;
-
-
-    const findBrand = await Brand.findOne({
-      brandName: new RegExp(`^${brand}$`, "i"),
-    });
-
-    if (!findBrand) {
-      const result = await uploadBufferToCloudinary(req.file.buffer, "crownify/brands");
-      const newBrand = new Brand({
-        brandName: brand,
-        brandImage: result.secure_url,
-      });
-      await newBrand.save();
-      res.status(201).json({ success: true, message: "Brand added successfully", brand: newBrand });
-    } else {
-      res.status(409).json({ success: false, message: "Brand already exists" });
-    }
+    const result = await brandService.listBrands({ page: parseInt(req.query.page) || 1 });
+    return res.json({ success: true, ...result });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Error adding brand" });
+    return sendError(res, error, "Error loading brands");
   }
 };
 
-//code to block brand
+const addBrand = async (req, res) => {
+  try {
+    const result = await brandService.createBrand({ name: req.body.name, file: req.file });
+    return res.status(201).json({ success: true, ...result });
+  } catch (error) {
+    return sendError(res, error, "Error adding brand");
+  }
+};
 
-const blockBrand =async(req,res)=>{
-    try {
-        const id=req.query.id
-        await Brand.updateOne({_id:id},{$set:{isBlocked:true}})
-        res.json({ success: true, message: "Brand blocked" });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Could not block brand" });
-    }
-}
+const blockBrand = async (req, res) => {
+  try {
+    const result = await brandService.setBrandBlocked({
+      brandId: req.query.id,
+      isBlocked: true,
+    });
+    return res.json({ success: true, ...result });
+  } catch (error) {
+    return sendError(res, error, "Could not block brand");
+  }
+};
 
+const unBlockBrand = async (req, res) => {
+  try {
+    const result = await brandService.setBrandBlocked({
+      brandId: req.query.id,
+      isBlocked: false,
+    });
+    return res.json({ success: true, ...result });
+  } catch (error) {
+    return sendError(res, error, "Could not unblock brand");
+  }
+};
 
-// code to block brand
+const deleteBrand = async (req, res) => {
+  try {
+    const result = await brandService.deleteBrand(req.query.id);
+    return res.json({ success: true, ...result });
+  } catch (error) {
+    return sendError(res, error, "Error deleting brand");
+  }
+};
 
-const unBlockBrand =async(req,res)=>{
-    try{
-        const id = req.query.id;
-        await Brand.updateOne({ _id: id }, { $set: { isBlocked: false } });
-        res.json({ success: true, message: "Brand unblocked" });
-    }catch(error){
-        res.status(500).json({ success: false, message: "Could not unblock brand" });
-    }
-}
-
-// code to delete brand
-
-
-const deleteBrand=async(req,res)=>{
-    try {
-        const {id} =req.query;
-        if(!id){
-            return res.status(400).json({ success: false, message: "Brand id required" });
-        }
-        const brand = await Brand.findByIdAndDelete(id)
-        if (brand?.brandImage?.[0]) {
-            await destroyByUrl(brand.brandImage[0])
-        }
-        res.json({ success: true, message: "Brand deleted" });
-    } catch (error) {
-        console.error("Error deleting brand",error);
-        res.status(500).json({ success: false, message: "Could not delete brand" });
-    }
-}
-
-module.exports={
-    getBrandPage,
-    addBrand,
-    blockBrand,
-    unBlockBrand,
-    deleteBrand
-}
+module.exports = { getBrandPage, addBrand, blockBrand, unBlockBrand, deleteBrand };
