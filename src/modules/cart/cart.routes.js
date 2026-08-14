@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const cartController = require("./cartContoller");
+const cartController = require("./cartController");
 const { userAuth } = require("../../shared/middlewares/auth");
 
 router.get("/cart", userAuth, cartController.loadCartPage);
