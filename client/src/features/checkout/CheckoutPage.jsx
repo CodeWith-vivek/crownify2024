@@ -438,9 +438,16 @@ export function CheckoutPage() {
                       {products.map((product) => (
                         <tr key={`${product.productId}-${product.size}-${product.color}`}>
                           <td>
-                            <div className="product-info">
-                              <div className="product-image">
-                                <img src={productImageUrl(product.productImage)} style={{ width: 50, height: 50, marginRight: 10 }} />
+                            <div className="product-info" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <div
+                                className="product-image"
+                                style={{ width: 50, height: 50, flexShrink: 0, borderRadius: 4, overflow: "hidden" }}
+                              >
+                                <img
+                                  src={productImageUrl(product.productImage)}
+                                  alt={product.productName}
+                                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                                />
                               </div>
                               <div className="product-details product-details-small">
                                 <p>

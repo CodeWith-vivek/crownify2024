@@ -921,9 +921,32 @@ textarea:-ms-input-placeholder {
   padding-left: 0;
 }
 
-.site-cart {
+.site-cart,
+.site-header__wishlist {
   float: right;
   position: relative;
+}
+
+/* React's cart-count/wishlist-count spans never matched this rule's
+   original .site-header__cart-count selector — the badge circle styling
+   silently never applied to either, and .site-header__wishlist never had
+   position:relative to begin with, so its badge positioned itself against
+   whatever ancestor WAS positioned instead (the whole header), floating it
+   off into the top bar rather than sitting on the icon's corner. */
+.cart-count,
+.wishlist-count {
+  font-size: 11px;
+  display: inline-block;
+  color: #fff;
+  background-color: #000;
+  border-radius: 50%;
+  text-align: center;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+  position: absolute;
+  right: -5px;
+  bottom: 0;
 }
 
 .site-header__cart {
