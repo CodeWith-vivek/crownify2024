@@ -173,7 +173,7 @@ export function Header() {
             <div className="col-4 col-sm-3 col-md-3 col-lg-2 d-flex align-items-center justify-content-end">
               <div className="site-header__wishlist">
                 <Link to="/wishlist" className="wishlist-trigger" title="Cart">
-                  <i className="icon anm anm-heart-l"></i>
+                  <i className="icon anm anm-heart-l" style={{ position: "relative", top: 3 }}></i>
                   <span className="wishlist-count">{wishlistCount ? (wishlistCount > 9 ? "10+" : wishlistCount) : "0"}</span>
                 </Link>
               </div>
