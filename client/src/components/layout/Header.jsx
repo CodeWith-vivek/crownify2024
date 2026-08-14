@@ -9,8 +9,6 @@ export function Header() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [mobilePagesOpen, setMobilePagesOpen] = useState(false);
   const [mobileUserMenuOpen, setMobileUserMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const [stuck, setStuck] = useState(false);
@@ -70,7 +68,6 @@ export function Header() {
       if (event.key !== "Escape") return;
       setUserDropdownOpen(false);
       setMobileUserMenuOpen(false);
-      setSearchOpen(false);
     };
 
     document.addEventListener("mousedown", handlePointerDown);
@@ -89,41 +86,8 @@ export function Header() {
     navigate("/");
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const term = searchTerm.trim();
-    if (!term) return;
-    setSearchOpen(false);
-    setSearchTerm("");
-    navigate(`/shop?search=${encodeURIComponent(term)}`);
-  };
-
   return (
     <>
-      {/* Search Form Drawer */}
-      <div className={`search${searchOpen ? " active" : ""}`}>
-        <div className="search__form">
-          <form className="search-bar__form" onSubmit={handleSearch}>
-            <button className="go-btn search__button" type="submit" aria-label="Search">
-              <i className="icon anm anm-search-l"></i>
-            </button>
-            <input
-              className="search__input"
-              type="search"
-              name="q"
-              placeholder="Search entire store..."
-              aria-label="Search"
-              autoComplete="off"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </form>
-          <button type="button" className="search-trigger close-btn" onClick={() => setSearchOpen(false)}>
-            <i className="anm anm-times-l"></i>
-          </button>
-        </div>
-      </div>
-
       {/* Top Header */}
       <div className="top-header">
         <div className="container-fluid">
@@ -262,20 +226,6 @@ export function Header() {
               </div>
             </div>
             <div className="col-4 col-sm-3 col-md-3 col-lg-2 d-flex align-items-center justify-content-end">
-              {/* The search drawer markup existed but nothing ever opened it —
-                  there was no trigger in the original EJS header either, so
-                  the whole feature was unreachable rather than merely
-                  unported. This is that missing trigger. */}
-              <button
-                type="button"
-                className="btn--link site-header__search-toggle mr-3"
-                aria-label="Search"
-                aria-expanded={searchOpen}
-                onClick={() => setSearchOpen((o) => !o)}
-                style={{ display: "inline-flex", alignItems: "center", padding: 0, border: "none", background: "none", color: "#000" }}
-              >
-                <i className="icon anm anm-search-l" style={{ fontSize: 22 }}></i>
-              </button>
               <div className="site-header__wishlist">
                 <Link to="/wishlist" className="wishlist-trigger" title="Wishlist">
                   <i className="icon anm anm-heart-l" style={{ position: "relative", top: 3 }}></i>

@@ -239,3 +239,25 @@
     transform: none;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Header opacity
+   --------------------------------------------------------------------------
+   .header-wrap has no background rule anywhere in the theme's stylesheets —
+   the only background it ever gets is from .stickyNav (#fff), which applies
+   after 145px of scroll. Combined with .classicHeader:not(.stickyNav) being
+   position:absolute (so it sits OVER the next element rather than above it),
+   the header is see-through against whatever it overlaps.
+
+   On the home page what's behind it is the hero area, so it reads as
+   intentional. Everywhere else it overlaps that page's breadcrumb bar —
+   .breadcrumb-option is a solid #291616 — so the nav rendered dark-on-dark
+   and looked broken.
+
+   Giving it the same #fff the sticky state already uses makes the header
+   consistent on every page and at every scroll position, instead of
+   changing appearance at the 145px threshold.
+   -------------------------------------------------------------------------- */
+.pageWrapper .header-wrap {
+  background-color: #fff;
+}
