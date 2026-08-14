@@ -2,6 +2,15 @@ import { getCsrfToken } from "./csrf";
 
 const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
+// Browser fetch() resolves a root-relative path ("/api/...") against
+// location.href; Node's global fetch has no page origin and throws
+// `TypeError: Failed to parse URL` on the same path. SSR (entry-server.jsx)
+// calls this same apiClient to prefetch data, so on the server every
+// request is made absolute via a loopback call to this same Express
+// process — same port it binds to (see src/server.js's PORT handling).
+const isServer = typeof window === "undefined";
+const SSR_BASE_URL = isServer ? `http://127.0.0.1:${process.env.PORT || 3000}` : "";
+
 export class ApiError extends Error {
   constructor(message, status, body) {
     super(message);
@@ -25,7 +34,7 @@ async function request(path, { method = "GET", body, headers, isFormData } = {})
     if (token) finalHeaders["X-CSRF-Token"] = token;
   }
 
-  const response = await fetch(path, {
+  const response = await fetch(isServer ? `${SSR_BASE_URL}${path}` : path, {
     method,
     headers: finalHeaders,
     body: finalBody,
@@ -43,7 +52,7 @@ async function request(path, { method = "GET", body, headers, isFormData } = {})
     // so AuthProvider can clear local auth state and bounce the user to the
     // right login screen, instead of every page surfacing a generic error.
     // /auth/me is exempt — it 401s by design for anonymous visitors.
-    if (response.status === 401 && !path.includes("/auth/me")) {
+    if (!isServer && response.status === 401 && !path.includes("/auth/me")) {
       window.dispatchEvent(
         new CustomEvent("auth:unauthorized", { detail: { admin: path.startsWith("/api/admin") } })
       );

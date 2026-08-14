@@ -9,6 +9,7 @@ const passport=require("./shared/config/passport")
 const db = require("./shared/config/db");
 const nocache=require("nocache")
 const csrf = require("./shared/middlewares/csrf");
+const { renderPage } = require("./ssr/renderPage");
 
 
 const userRoutes = require("./modules/user/user.routes");
@@ -105,14 +106,40 @@ app.use("/api/admin", nocache(), couponAdminRoutes);
 app.use("/api/admin", nocache(), reportAdminRoutes);
 app.use("/api/admin", nocache(), topsellingRoutes);
 
-// The built React app (client/dist) — served as static files, with a
-// catch-all so client-side routes (React Router) resolve correctly on a
+// The built React app (client/dist/client) — served as static files, with
+// a catch-all so client-side routes (React Router) resolve correctly on a
 // full page load/refresh. Must come after the /api mounts and the public/
 // static mount above so neither is shadowed by this fallback.
-app.use(express.static(path.join(__dirname, "..", "client", "dist")));
-app.get(/^\/(?!api\/).*/, (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "client", "dist", "index.html"));
+// index:false — express.static's default `index: 'index.html'` behavior
+// would otherwise auto-serve the static shell for GET / before the SSR
+// route below ever runs (static middleware is registered first and short-
+// circuits the request), silently defeating SSR for the home route only.
+// Every other path here is a real hashed asset file with no such name
+// collision, so this only changes "/" specifically.
+const CLIENT_DIST = path.join(__dirname, "..", "client", "dist", "client");
+app.use(express.static(CLIENT_DIST, { index: false }));
+
+const CLIENT_SHELL = path.join(CLIENT_DIST, "index.html");
+const sendClientShell = (req, res) => res.sendFile(CLIENT_SHELL);
+
+// Server-rendered for these 4 public, unauthenticated-safe routes only —
+// real product/shop/brand HTML and per-page <title>/<meta description> in
+// the initial response, for crawlers and first paint. Every other route
+// (40+, including auth-gated ones) is untouched by this: it never matches
+// here, and falls through to the plain catch-all below exactly as before.
+// A failed/unavailable SSR render (renderPage returns null — see
+// src/ssr/renderPage.js) always degrades to the same static shell the
+// catch-all would have served, so this can only ever fail safe.
+app.get(["/", "/shop", "/brand", "/product/:id"], async (req, res) => {
+  const html = await renderPage(req);
+  if (html) {
+    res.type("html").send(html);
+  } else {
+    sendClientShell(req, res);
+  }
 });
+
+app.get(/^\/(?!api\/).*/, sendClientShell);
 
 // Anything left unmatched at this point is an unknown /api/* route.
 app.use((req, res) => {

@@ -12,6 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
     <link rel="preconnect" href="https://stackpath.bootstrapcdn.com" />
+    <!--app-head-->
   </head>
   <body class="template-index belle home12-category">
     <!--
@@ -57,7 +58,13 @@
       />
     </div>
 
-    <div id="root"></div>
+    <div id="root"><!--app-html--></div>
+    <!-- Always present, always empty in the initial HTML — sonner's
+         <Toaster/> reads `document` at render time and can't be
+         server-rendered (see entry-server.jsx), so main.jsx mounts it here
+         via its own createRoot call, fully outside the hydrated #root tree. -->
+    <div id="toaster-root"></div>
+    <!--app-state-->
     <script type="module" src="/src/main.jsx"></script>
     <script>
       // Failsafe: if the app bundle fails to boot, a permanently blank page

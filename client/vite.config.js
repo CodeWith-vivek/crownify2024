@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
   plugins: [react()],
   resolve: {
     alias: {
@@ -23,4 +23,16 @@ export default defineConfig({
       '/js': 'http://localhost:3000',
     },
   },
-})
+  build: isSsrBuild
+    ? {
+        // src/ssr/renderPage.js on the Express side loads this file by an
+        // exact, hardcoded name. Forcing an explicit .mjs extension makes
+        // Node parse it as ESM off the extension alone, rather than only
+        // via the directory-walk to client/package.json's "type": "module"
+        // — cheap insurance against this breaking if the output ever moves.
+        rollupOptions: {
+          output: { entryFileNames: 'entry-server.mjs' },
+        },
+      }
+    : undefined,
+}))

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --outDir dist/client && vite build --ssr src/entry-server.jsx --outDir dist/server",
     "lint": "oxlint",
     "preview": "vite preview"
   },
