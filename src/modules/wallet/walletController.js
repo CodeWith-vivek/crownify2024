@@ -1,6 +1,6 @@
 const User = require("../user/userSchema");
-const Razorpay = require("razorpay");
 const crypto = require("crypto");
+const { getRazorpay } = require("../../shared/config/razorpay");
 const Transaction=require("../payment/transactionSchema")
 const Category=require("../category/categorySchema")
 const Brand=require("../brand/brandSchema")
@@ -76,11 +76,6 @@ const loadwalletpage = async (req, res) => {
   }
 };
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
-
 //code to add money in wallet
 
 
@@ -108,7 +103,7 @@ const addMoneyToWallet = async (req, res) => {
       receipt: `receipt_${new Date().getTime()}`,
     };
 
-    const order = await razorpay.orders.create(options);
+    const order = await getRazorpay().orders.create(options);
 
     return res.status(200).json({
       success: true,

@@ -4,12 +4,8 @@ const Product=require("../product/productSchema")
 
 const Order = require("../order/orderSchema");
 const Cart=require("../cart/cartSchema")
-const Razorpay = require("razorpay");
 const crypto = require("crypto");
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+const { getRazorpay } = require("../../shared/config/razorpay");
 
 //code to load payment Success page
 
@@ -195,7 +191,7 @@ const retryPayment = async (req, res) => {
     const amountInPaise = Math.round(existingOrder.grandTotal * 100);
 
 
-    const razorpayOrder = await razorpay.orders.create({
+    const razorpayOrder = await getRazorpay().orders.create({
       amount: amountInPaise, 
       currency: "INR",
       receipt: `retry_${existingOrder.orderNumber}`, 

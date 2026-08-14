@@ -1,8 +1,3 @@
-// The Razorpay client is constructed at module load and throws if key_id
-// is missing, so env has to be loaded before that line runs — this module
-// can be required directly (tests, scripts) without app.js having done it.
-require("dotenv").config();
-const Razorpay = require("razorpay");
 const Order = require("./orderSchema");
 const Cart = require("../cart/cartSchema");
 const Address = require("../address/addressSchema");
@@ -19,11 +14,7 @@ const {
   CheckoutError,
 } = require("./helpers/checkout");
 const { decrementStockForItems } = require("./helpers/orderItems");
-
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+const { getRazorpay } = require("../../shared/config/razorpay");
 
 // Checkout. Three payment paths that share everything up to the point of
 // payment: validate the cart against live catalog state, resolve the
@@ -179,7 +170,7 @@ const placeOrder = async (req, res) => {
     if (paymentMethod === "RazorPay") {
       let razorpayOrder;
       try {
-        razorpayOrder = await razorpay.orders.create({
+        razorpayOrder = await getRazorpay().orders.create({
           amount: Math.round(grandTotal * 100),
           currency: "INR",
           receipt: `order_${Date.now()}`,
