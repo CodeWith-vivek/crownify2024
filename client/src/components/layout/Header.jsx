@@ -193,8 +193,9 @@ export function Header() {
                     aria-expanded={userDropdownOpen}
                     aria-label="User account"
                     onClick={() => setUserDropdownOpen((o) => !o)}
+                    style={{ display: "inline-flex", alignItems: "center", padding: 0, border: "none", background: "none" }}
                   >
-                    <i className="fa-solid fa-user" style={{ color: "#e14141" }}></i>
+                    <i className="fa-solid fa-user" style={{ color: "#e14141", fontSize: 22 }}></i>
                   </button>
                   <ul
                     className={`dropdown-menu dropdown-menu-start${userDropdownOpen ? " show" : ""}`}
