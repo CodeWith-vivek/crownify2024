@@ -1,74 +1,43 @@
-const User=require("../user/userSchema")
+const customerService = require("./customer.service");
+const { sendError } = require("../../shared/errors/respond");
 
-//code to load users list
+// HTTP adapters for admin customer management. Rules live in
+// customer.service.js.
 
-const customerInfo=async(req,res)=>{
-    try{
-        let search=""
-        if(req.query.search){
-            search=req.query.search
+const customerInfo = async (req, res) => {
+  try {
+    const result = await customerService.listCustomers({
+      search: req.query.search || "",
+      page: parseInt(req.query.page) || 1,
+    });
+    return res.json({ success: true, ...result });
+  } catch (error) {
+    return sendError(res, error, "Error loading customer info");
+  }
+};
 
-        }
-        let page = parseInt(req.query.page) || 1;
-        const limit = 4;
-        const userData=await User.find({
-            isAdmin:false,
-            $or:[{name:{$regex:".*"+search+".*"}},
-                {email:{$regex:".*"+search+".*"}},
-            ],
-        })
-        .limit(limit*1)
-        .skip((page-1)*limit)
-        .exec();
-        const count = await User.find({
-          isAdmin: false,
-          $or: [
-            { name: { $regex: ".*" + search + ".*" } },
-            { email: { $regex: ".*" + search + ".*" } },
-          ],
-        }).countDocuments()
-        const customerData = {
-          users: userData,
-          search,
-          currentPage: page,
-          totalPages: Math.ceil(count / limit),
-        };
-        res.json({ success: true, ...customerData });
+const customerBlocked = async (req, res) => {
+  try {
+    const result = await customerService.setCustomerBlocked({
+      customerId: req.query.id,
+      isBlocked: true,
+    });
+    return res.json({ success: true, ...result });
+  } catch (error) {
+    return sendError(res, error, "Could not block customer");
+  }
+};
 
-    }catch(error){
-      console.log("error in loading customer info",error);
-      res.status(500).json({ success: false, message: "Error loading customers" });
-    }
-}
+const customerUnblocked = async (req, res) => {
+  try {
+    const result = await customerService.setCustomerBlocked({
+      customerId: req.query.id,
+      isBlocked: false,
+    });
+    return res.json({ success: true, ...result });
+  } catch (error) {
+    return sendError(res, error, "Could not unblock customer");
+  }
+};
 
-//code to block the user
-
-const customerBlocked=async(req,res)=>{
-     try {
-       let id = req.query.id;
-       await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
-       res.json({ success: true, message: "Customer blocked" });
-     } catch (error) {
-       res.status(500).json({ success: false, message: "Could not block customer" });
-     }
-
-}
-
-//code to unlblock the user
-
-const customerUnblocked=async(req,res)=>{
-      try {
-        let id = req.query.id;
-        await User.updateOne({ _id: id }, { $set: { isBlocked: false } });
-        res.json({ success: true, message: "Customer unblocked" });
-      } catch (error) {
-        res.status(500).json({ success: false, message: "Could not unblock customer" });
-      }
-}
-
-
-module.exports={
-    customerInfo,
-    customerBlocked,
-    customerUnblocked
-}
+module.exports = { customerInfo, customerBlocked, customerUnblocked };

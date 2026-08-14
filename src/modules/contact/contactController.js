@@ -1,75 +1,32 @@
-const Contact = require("./contactSchema");
+const contactService = require("./contact.service");
+const { sendError } = require("../../shared/errors/respond");
 
-//code to submit contact form
+// HTTP adapters. Rules live in contact.service.js.
 
 const submitContactForm = async (req, res) => {
-  const { email, message, phone, name } = req.body;
-
   try {
-  
-    const newContact = new Contact({
-      email,
-      message,
-      phone,
-      name,
+    const result = await contactService.submitContactForm({
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+      message: req.body.message,
     });
-    await newContact.save();
-
-  
-    res
-      .status(200)
-      .json({ success: true, message: "Your message has been submitted!" });
+    return res.status(200).json({ success: true, ...result });
   } catch (error) {
-    console.error("Error submitting contact form:", error);
-
-  
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to submit your message. Please try again.",
-      });
+    return sendError(res, error, "Error submitting contact form");
   }
 };
-
-//code to get contactPage
 
 const customerMessages = async (req, res) => {
   try {
-    let search = req.query.search || ""; 
-    let page = parseInt(req.query.page) || 1; 
-    const limit = 8; 
-
-   
-    const messages = await Contact.find({
-      $or: [
-        { email: { $regex: ".*" + search + ".*", $options: "i" } },
-        { message: { $regex: ".*" + search + ".*", $options: "i" } },
-      ],
-    })
-      .sort({ submittedOn :-1})
-      .limit(limit)
-      .skip((page - 1) * limit)
-      .exec();
-
- 
-    const count = await Contact.find({
-      $or: [
-        { email: { $regex: ".*" + search + ".*", $options: "i" } },
-        { message: { $regex: ".*" + search + ".*", $options: "i" } },
-      ],
-    }).countDocuments();
-
-   
-    const messagesData = { messages, search, currentPage: page, totalPages: Math.ceil(count / limit) };
-    res.json({ success: true, ...messagesData });
+    const result = await contactService.getCustomerMessages({
+      search: req.query.search || "",
+      page: parseInt(req.query.page) || 1,
+    });
+    return res.json({ success: true, ...result });
   } catch (error) {
-    console.error("Error fetching customer messages:", error);
-    res.status(500).json({ success: false, message: "Error loading messages" });
+    return sendError(res, error, "Error fetching customer messages");
   }
 };
 
-module.exports={
-    submitContactForm,
-    customerMessages
-}
+module.exports = { submitContactForm, customerMessages };
