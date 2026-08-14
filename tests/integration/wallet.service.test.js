@@ -8,7 +8,7 @@ process.env.RAZORPAY_KEY_ID = "test-key";
 
 // Razorpay's own record of the order is what the service credits from, so
 // the stub has to be able to disagree with what the client claims.
-const razorpayOrders = new Map();
+const mockRazorpayOrders = new Map();
 
 jest.mock("../../src/shared/config/razorpay", () => ({
   getRazorpay: () => ({
@@ -16,11 +16,11 @@ jest.mock("../../src/shared/config/razorpay", () => ({
       create: jest.fn(async ({ amount }) => {
         const id = `order_${Math.random().toString(36).slice(2)}`;
         // Freshly created orders are unpaid until the stub is told otherwise.
-        razorpayOrders.set(id, { id, amount, amount_paid: 0, status: "created" });
+        mockRazorpayOrders.set(id, { id, amount, amount_paid: 0, status: "created" });
         return { id, amount };
       }),
       fetch: jest.fn(async (id) => {
-        const order = razorpayOrders.get(id);
+        const order = mockRazorpayOrders.get(id);
         if (!order) throw new Error("no such order");
         return order;
       }),
@@ -42,7 +42,7 @@ beforeAll(async () => {
 
 afterEach(async () => {
   await db.clear();
-  razorpayOrders.clear();
+  mockRazorpayOrders.clear();
 });
 
 afterAll(async () => {
@@ -56,7 +56,7 @@ const signatureFor = (orderId, paymentId) =>
 
 /** Marks a stubbed Razorpay order as settled for the given rupee amount. */
 function markPaid(orderId, rupees) {
-  const order = razorpayOrders.get(orderId);
+  const order = mockRazorpayOrders.get(orderId);
   order.status = "paid";
   order.amount_paid = rupees * 100;
 }
@@ -79,7 +79,7 @@ describe("walletService.createTopUpOrder", () => {
     });
 
     expect(res.orderId).toMatch(/^order_/);
-    expect(razorpayOrders.get(res.orderId).amount).toBe(50000);
+    expect(mockRazorpayOrders.get(res.orderId).amount).toBe(50000);
     // Nothing credited until the payment is confirmed.
     expect((await User.findById(user._id)).wallet).toBe(0);
   });
