@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/store/AuthContext";
@@ -10,7 +10,41 @@ export function Header() {
   const [mobilePagesOpen, setMobilePagesOpen] = useState(false);
   const [mobileUserMenuOpen, setMobileUserMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+
+  const userDropdownRef = useRef(null);
+  const userMenuRef = useRef(null);
+
+  // The dropdowns previously only closed by clicking their own toggle or a
+  // link inside them — clicking anywhere else on the page left them hanging
+  // open. The original theme got this from jQuery; it needed reimplementing
+  // rather than porting.
+  useEffect(() => {
+    if (!userDropdownOpen && !mobileUserMenuOpen) return;
+
+    const handlePointerDown = (event) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+        setUserDropdownOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setMobileUserMenuOpen(false);
+      }
+    };
+    const handleEscape = (event) => {
+      if (event.key !== "Escape") return;
+      setUserDropdownOpen(false);
+      setMobileUserMenuOpen(false);
+      setSearchOpen(false);
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [userDropdownOpen, mobileUserMenuOpen]);
 
   const handleLogout = async (e) => {
     e.preventDefault();
@@ -20,13 +54,22 @@ export function Header() {
     navigate("/");
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const term = searchTerm.trim();
+    if (!term) return;
+    setSearchOpen(false);
+    setSearchTerm("");
+    navigate(`/shop?search=${encodeURIComponent(term)}`);
+  };
+
   return (
     <>
       {/* Search Form Drawer */}
       <div className={`search${searchOpen ? " active" : ""}`}>
         <div className="search__form">
-          <form className="search-bar__form" action="#" onSubmit={(e) => e.preventDefault()}>
-            <button className="go-btn search__button" type="submit">
+          <form className="search-bar__form" onSubmit={handleSearch}>
+            <button className="go-btn search__button" type="submit" aria-label="Search">
               <i className="icon anm anm-search-l"></i>
             </button>
             <input
@@ -36,6 +79,8 @@ export function Header() {
               placeholder="Search entire store..."
               aria-label="Search"
               autoComplete="off"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </form>
           <button type="button" className="search-trigger close-btn" onClick={() => setSearchOpen(false)}>
@@ -54,19 +99,28 @@ export function Header() {
               </div>
             </div>
             <div className="col-10 col-sm-8 col-md-5 col-lg-4"></div>
-            <div className="col-2 col-sm-4 col-md-3 col-lg-4 text-right">
-              <span
+            <div className="col-2 col-sm-4 col-md-3 col-lg-4 text-right" ref={userMenuRef}>
+              {/* A real <button>, not a clickable <span> whose only content
+                  was an aria-hidden icon — that combination is invisible to
+                  screen readers and unreachable by keyboard. */}
+              <button
+                type="button"
                 className="user-menu d-block d-lg-none"
+                aria-label="Account menu"
+                aria-expanded={mobileUserMenuOpen}
                 onClick={() => setMobileUserMenuOpen((o) => !o)}
-                style={{ cursor: "pointer" }}
+                style={{ cursor: "pointer", border: "none", background: "none", padding: 0 }}
               >
                 <i className="anm anm-user-al" aria-hidden="true"></i>
-              </span>
+              </button>
               <ul className="customer-links list-inline" style={{ display: mobileUserMenuOpen ? "block" : undefined }}>
                 {user ? (
                   <li>
                     <Link to="/" onClick={() => setMobileUserMenuOpen(false)}>
-                      {user.name.split(" ")[0]}
+                      {/* name is required by the schema, but a Google
+                          profile without a displayName would render
+                          "undefined" here rather than crash. */}
+                      {user.name ? user.name.split(" ")[0] : "Account"}
                     </Link>
                   </li>
                 ) : (
@@ -76,7 +130,9 @@ export function Header() {
                         SIGN IN
                       </Link>
                     </li>
-                    <span>/</span>
+                    {/* Was a bare <span> directly inside the <ul>, which is
+                        invalid — only <li> may be a child of a list. */}
+                    <li aria-hidden="true">/</li>
                     <li>
                       <Link to="/signup" onClick={() => setMobileUserMenuOpen(false)}>
                         SIGN UP
@@ -101,7 +157,7 @@ export function Header() {
           <div className="row align-items-center">
             <div className="logo col-md-2 col-lg-2 d-none d-lg-block">
               <Link to="/">
-                <img className="logo1" src="/assets/images/logoCrownify.webp" alt="Belle Multipurpose Html Template" title="CROWNIFY" width={75} height={75} />
+                <img className="logo1" src="/assets/images/logoCrownify.webp" alt="Crownify" title="CROWNIFY" width={75} height={75} />
               </Link>
             </div>
             <div className="col-2 col-sm-3 col-md-3 col-lg-8">
@@ -166,13 +222,27 @@ export function Header() {
             <div className="col-6 col-sm-6 col-md-6 col-lg-2 d-block d-lg-none mobile-logo">
               <div className="logo">
                 <Link to="/">
-                  <img src="/assets/images/logoCrownify.webp" className="logo2" alt="Belle Multipurpose Html Template" title="CROWNIFY" width={75} height={75} />
+                  <img src="/assets/images/logoCrownify.webp" className="logo2" alt="Crownify" title="CROWNIFY" width={75} height={75} />
                 </Link>
               </div>
             </div>
             <div className="col-4 col-sm-3 col-md-3 col-lg-2 d-flex align-items-center justify-content-end">
+              {/* The search drawer markup existed but nothing ever opened it —
+                  there was no trigger in the original EJS header either, so
+                  the whole feature was unreachable rather than merely
+                  unported. This is that missing trigger. */}
+              <button
+                type="button"
+                className="btn--link site-header__search-toggle mr-3"
+                aria-label="Search"
+                aria-expanded={searchOpen}
+                onClick={() => setSearchOpen((o) => !o)}
+                style={{ display: "inline-flex", alignItems: "center", padding: 0, border: "none", background: "none", color: "#000" }}
+              >
+                <i className="icon anm anm-search-l" style={{ fontSize: 22 }}></i>
+              </button>
               <div className="site-header__wishlist">
-                <Link to="/wishlist" className="wishlist-trigger" title="Cart">
+                <Link to="/wishlist" className="wishlist-trigger" title="Wishlist">
                   <i className="icon anm anm-heart-l" style={{ position: "relative", top: 3 }}></i>
                   <span className="wishlist-count">{wishlistCount ? (wishlistCount > 9 ? "10+" : wishlistCount) : "0"}</span>
                 </Link>
@@ -185,7 +255,7 @@ export function Header() {
               </div>
 
               {user && (
-                <div className="dropdown" style={{ display: "inline-block" }}>
+                <div className="dropdown" style={{ display: "inline-block" }} ref={userDropdownRef}>
                   <button
                     className="btn dropdown-toggle"
                     type="button"
