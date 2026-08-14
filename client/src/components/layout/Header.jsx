@@ -13,8 +13,43 @@ export function Header() {
   const [searchTerm, setSearchTerm] = useState("");
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
+  const [stuck, setStuck] = useState(false);
+
   const userDropdownRef = useRef(null);
   const userMenuRef = useRef(null);
+
+  // Sticky header. The theme's CSS defines the whole behaviour —
+  // .classicHeader:not(.stickyNav) is position:absolute, .stickyNav is
+  // position:fixed;top:0 — but the class was applied by the theme's jQuery
+  // (public/assets/js/main.js), which was deleted along with the EJS views.
+  // Nothing has added .stickyNav since, so the header simply scrolled away.
+  //
+  // Same breakpoint (>1199px) and threshold (145px) the original used, so
+  // it re-sticks at exactly the same point it always did. Desktop-only is
+  // deliberate — on mobile the fixed header would eat scarce vertical
+  // space, which is why the original gated it too.
+  useEffect(() => {
+    const STICKY_AFTER = 145;
+    const DESKTOP_MIN_WIDTH = 1200;
+
+    const update = () => {
+      if (window.innerWidth < DESKTOP_MIN_WIDTH) {
+        setStuck(false);
+        return;
+      }
+      setStuck(window.scrollY > STICKY_AFTER);
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    // The original only recomputed on scroll, so resizing from desktop to
+    // mobile left a fixed header stranded until the next scroll.
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
 
   // The dropdowns previously only closed by clicking their own toggle or a
   // link inside them — clicking anywhere else on the page left them hanging
@@ -152,7 +187,7 @@ export function Header() {
       </div>
 
       {/* Header */}
-      <div className="header-wrap classicHeader animated d-flex">
+      <div className={`header-wrap classicHeader animated d-flex${stuck ? " stickyNav fadeInDown" : ""}`}>
         <div className="container-fluid">
           <div className="row align-items-center">
             <div className="logo col-md-2 col-lg-2 d-none d-lg-block">
