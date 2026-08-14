@@ -32,15 +32,19 @@ async function recordCouponUsage(coupon, userId) {
 }
 
 /**
- * Post-order cart teardown: unlink the cart from the user, drop the
- * session coupon, delete the cart document.
+ * Post-order cart teardown: unlink the cart from the user and delete the
+ * cart document.
+ *
+ * Deliberately does NOT clear the session coupon any more — that's
+ * request state, and this runs inside the service layer which has no
+ * access to (and no business knowing about) the session. Callers get a
+ * `clearSessionCoupon` flag back from the service instead.
  */
-async function clearCartAfterOrder(user, cart, req) {
+async function clearCartAfterOrder(user, cart) {
   if (user && cart) {
     user.cart = user.cart.filter((cartId) => !cartId.equals(cart._id));
     await user.save();
   }
-  if (req.session) req.session.coupon = null;
   await Cart.deleteOne({ userId: user._id });
 }
 
