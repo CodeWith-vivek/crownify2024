@@ -59,7 +59,7 @@ function AddressForm({ title, form, setForm, onSubmit, submitting, onCancel, ban
     errors[field] ? <div className="error-message" style={{ color: "red" }}>{errors[field]}</div> : null;
 
   return (
-    <div className="wrap d-md-flex" style={{ overflow: "visible", maxHeight: "90vh" }}>
+    <div className="wrap d-md-flex" style={{ overflowY: "auto", maxHeight: "90vh" }}>
       <style>{`
         .address-modal-scroll::-webkit-scrollbar { width: 9px; }
         .address-modal-scroll::-webkit-scrollbar-track { background: #f1e9e7; }
