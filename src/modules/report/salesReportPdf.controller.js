@@ -1,7 +1,6 @@
 const PDFDocument = require("pdfkit");
-const { resolveReportRange } = require("../../shared/utils/reportRange");
-const { buildSalesRows, buildReturnRows, combineSalesAndReturns } = require("../../shared/utils/salesAggregate");
-const { fetchSalesAndReturns } = require("./helpers/salesQuery");
+const reportService = require("./report.service");
+const { sendError } = require("../../shared/errors/respond");
 
 // PDF export of the admin sales report. Uses its own percentage-width
 // table renderer (generateTable below) rather than the fixed-column
@@ -332,24 +331,19 @@ const reportPdf = async (req, res) => {
   const { type, startDate, endDate } = req.body;
 
   try {
-    const range = resolveReportRange(type, startDate, endDate);
-    if (range.error) {
-      return res.status(400).json({ status: false, message: range.error });
-    }
-
     // This query previously had NO orderStatus filter, so the PDF counted
     // cancelled, returned and failed items as revenue while the on-screen
     // table and the Excel export both counted only Delivered. The three
-    // never agreed. All of them now share fetchSalesAndReturns() +
-    // buildSalesRows(), and returns are booked separately by when they were
-    // processed — see helpers/salesQuery.js and shared/utils/salesAggregate.js.
-    const { salesOrders, returnOrders } = await fetchSalesAndReturns(range);
+    // never agreed. All of them now go through reportService.loadSalesData,
+    // and returns are booked separately by when they were processed — see
+    // helpers/salesQuery.js and shared/utils/salesAggregate.js.
+    const {
+      orders: reportData,
+      returnRows,
+      totals,
+    } = await reportService.loadSalesData({ type, startDate, endDate });
 
-    const gross = buildSalesRows(salesOrders);
-    const returnsAgg = buildReturnRows(returnOrders, range);
-    const { orders: reportData, totals } = combineSalesAndReturns(gross, returnsAgg);
-
-    if (reportData.length === 0 && returnsAgg.rows.length === 0) {
+    if (reportData.length === 0 && returnRows.length === 0) {
       return res.status(404).json({
         status: false,
         message: "No sales or returns found for the specified period",
@@ -379,17 +373,12 @@ const reportPdf = async (req, res) => {
       endDate,
       reportData,
       totals,
-      returnsAgg.rows
+      returnRows
     );
 
     doc.end();
   } catch (error) {
-    console.error("Error generating PDF report:", error);
-    res.status(500).json({
-      status: false,
-      message: "Error generating PDF report",
-      error: error.message,
-    });
+    return sendError(res, error, "Error generating PDF report", { flag: "status" });
   }
 };
 

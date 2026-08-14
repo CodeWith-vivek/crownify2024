@@ -1,28 +1,22 @@
 const xlsx = require("xlsx");
-const { resolveReportRange, describeRange } = require("../../shared/utils/reportRange");
-const { buildSalesRows, buildReturnRows, combineSalesAndReturns } = require("../../shared/utils/salesAggregate");
-const { fetchSalesAndReturns } = require("./helpers/salesQuery");
+const reportService = require("./report.service");
+const { sendError } = require("../../shared/errors/respond");
 
 // Excel export of the sales report — two sheets: per-line Order Details
-// and a Summary of the period's totals. Goes through the same
-// fetchSalesAndReturns + buildSalesRows/buildReturnRows pipeline as the
-// on-screen table and the PDF so all three always report identical figures.
+// and a Summary of the period's totals. Goes through reportService's
+// loadSalesData, the same pipeline as the on-screen table and the PDF, so
+// all three always report identical figures. Only the rendering below is
+// this file's own.
 
 const downloadExcel = async (req, res) => {
   const { type, startDate, endDate } = req.body;
 
   try {
-    const range = resolveReportRange(type, startDate, endDate);
-    if (range.error) {
-      return res.status(400).json({ status: false, message: range.error });
-    }
-
-    const { salesOrders, returnOrders } = await fetchSalesAndReturns(range);
-
-    const { rows, totals } = combineSalesAndReturns(
-      buildSalesRows(salesOrders),
-      buildReturnRows(returnOrders, range)
-    );
+    const { rows, totals, label } = await reportService.loadSalesData({
+      type,
+      startDate,
+      endDate,
+    });
 
     if (rows.length === 0) {
       return res.status(400).json({
@@ -69,7 +63,7 @@ const downloadExcel = async (req, res) => {
     const summaryData = [
       ["Crownify - Sales Report"],
       [""],
-      ["Period", describeRange(type, range)],
+      ["Period", label],
       ["Generated On", new Date().toLocaleString("en-IN")],
       ["Basis", "Sales booked when ordered; returns booked when processed (may span a different period)"],
       [""],
@@ -136,12 +130,7 @@ const downloadExcel = async (req, res) => {
 
     res.status(200).send(excelBuffer);
   } catch (error) {
-    console.error("Error generating Excel report:", error);
-    res.status(500).json({
-      status: false,
-      message: "Error generating Excel report",
-      error: error.message,
-    });
+    return sendError(res, error, "Error generating Excel report", { flag: "status" });
   }
 };
 

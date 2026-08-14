@@ -1,82 +1,39 @@
-const Product = require("./productSchema");
-const Category = require("../category/categorySchema");
-const Brand = require("../brand/brandSchema");
+const productService = require("./product.service");
+const { sendError } = require("../../shared/errors/respond");
 
-// Admin-side read endpoints: the data behind the add/edit forms and the
-// paginated product list.
+// HTTP adapters for the admin read endpoints. Queries live in
+// product.service.js.
 
 const getProductAddPage = async (req, res) => {
   try {
-    const category = await Category.find({ isListed: true });
-    const brand = await Brand.find({ isBlocked: false });
-    res.json({ success: true, cat: category, brand: brand });
+    const result = await productService.getAddFormOptions();
+    return res.json({ success: true, ...result });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error loading page" });
+    return sendError(res, error, "Error loading product add page");
   }
 };
 
 const getAllProducts = async (req, res) => {
   try {
-    const search = req.query.search || "";
-    const page = parseInt(req.query.page) || 1;
-    const limit = 6;
-
-    const searchFilter = {
-      $or: [
-        { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
-        { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
-      ],
-    };
-
-    const [productData, count, category, brand] = await Promise.all([
-      Product.find(searchFilter)
-        .limit(limit)
-        .skip((page - 1) * limit)
-        .populate("category")
-        .lean(),
-      Product.countDocuments(searchFilter),
-      Category.find({ isListed: true }),
-      Brand.find({ isBlocked: false }),
-    ]);
-
-    // Stock is per-variant; the list shows one combined figure per product.
-    productData.forEach((product) => {
-      product.totalQuantity = product.variants
-        ? product.variants.reduce((sum, variant) => sum + (variant.quantity || 0), 0)
-        : 0;
+    // The old handler guarded this response behind `if (category && brand)`
+    // with a 404 fallback, but both are arrays from .find() and so always
+    // truthy — the fallback was unreachable.
+    const result = await productService.listProducts({
+      search: req.query.search || "",
+      page: parseInt(req.query.page) || 1,
     });
-
-    if (category && brand) {
-      res.json({
-        success: true,
-        data: productData,
-        currentPage: page,
-        totalPages: Math.ceil(count / limit),
-        cat: category,
-        brand: brand,
-      });
-    } else {
-      res.status(404).json({ success: false, message: "Not found" });
-    }
+    return res.json({ success: true, ...result });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error loading products" });
+    return sendError(res, error, "Error loading products");
   }
 };
 
 const getEditProduct = async (req, res) => {
   try {
-    const id = req.query.id;
-    const [product, category, brand] = await Promise.all([
-      Product.findOne({ _id: id }),
-      // Unfiltered on purpose: an existing product may reference a category
-      // or brand that has since been unlisted/blocked, and the edit form
-      // still has to render its current value in the dropdown.
-      Category.find({}),
-      Brand.find({}),
-    ]);
-    res.json({ success: true, product, cat: category, brand });
+    const result = await productService.getEditFormData(req.query.id);
+    return res.json({ success: true, ...result });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error loading product" });
+    return sendError(res, error, "Error loading product");
   }
 };
 

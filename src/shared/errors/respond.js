@@ -10,11 +10,15 @@
  * @param {object} res
  * @param {Error} error
  * @param {string} logLabel  context for the server log
+ * @param {{flag?: string}} [options]  which boolean key names the outcome.
+ *   Defaults to `success`; the admin report and product-offer endpoints
+ *   answer with `status` instead and their clients read that key, so they
+ *   pass it explicitly rather than being silently renamed.
  */
-function sendError(res, error, logLabel) {
+function sendError(res, error, logLabel, { flag = "success" } = {}) {
   if (error && error.isAppError) {
     return res.status(error.status).json({
-      success: false,
+      [flag]: false,
       message: error.message,
       ...(error.details || {}),
     });
@@ -23,7 +27,7 @@ function sendError(res, error, logLabel) {
   // Not an AppError: a real bug. Log it in full, tell the client nothing.
   console.error(`${logLabel}:`, error);
   return res.status(500).json({
-    success: false,
+    [flag]: false,
     message: "Something went wrong. Please try again.",
   });
 }

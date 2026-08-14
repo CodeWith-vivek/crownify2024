@@ -1,115 +1,47 @@
-const Order = require("../order/orderSchema");
-const Product = require("../product/productSchema");
-const Category = require("../category/categorySchema");
+const reportService = require("./report.service");
+const { sendError } = require("../../shared/errors/respond");
 
-// Simple count/aggregate endpoints backing the admin dashboard's stat
-// cards. Each is its own request so a slow or failing one doesn't block
-// the rest of the dashboard from rendering.
+// HTTP adapters for the admin dashboard's stat cards. Each is its own
+// request so a slow or failing one doesn't block the rest of the dashboard
+// from rendering. Queries live in report.service.js.
 
 const getOverallRevenue = async (req, res) => {
   try {
-    const overallRevenue = await Order.aggregate([
-      { $unwind: "$items" },
-      { $match: { "items.orderStatus": "Delivered" } },
-      {
-        $group: {
-          _id: "$_id",
-          orderTotal: { $sum: "$items.salePrice" },
-          orderDiscount: { $first: "$discount" },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalRevenue: { $sum: "$orderTotal" },
-          totalDiscount: { $sum: "$orderDiscount" },
-        },
-      },
-    ]);
-
-    if (overallRevenue.length === 0) {
-      console.warn("No revenue data available.");
-      return res.json({
-        status: true,
-        message: "No revenue data available",
-        revenue: {
-          totalRevenue: 0,
-          totalDiscount: 0,
-          netRevenue: 0,
-        },
-      });
-    }
-
-    const { totalRevenue, totalDiscount } = overallRevenue[0];
-    const netRevenue = totalRevenue - totalDiscount;
-
-    return res.json({
-      status: true,
-      revenue: {
-        totalRevenue,
-        totalDiscount,
-        netRevenue,
-      },
-    });
+    const result = await reportService.getOverallRevenue();
+    return res.json({ status: true, ...result });
   } catch (error) {
-    console.error("Error calculating overall revenue:", error);
-    return res
-      .status(500)
-      .json({ status: false, message: "Internal server error" });
+    return sendError(res, error, "Error calculating overall revenue", { flag: "status" });
   }
 };
 
-const getTotalOrders = async (req, res) => {
+/**
+ * The three count cards differ only in which collection they count and
+ * what the field is called, so they share one adapter.
+ */
+const countCard = (load, key, logLabel) => async (req, res) => {
   try {
-    const totalOrders = await Order.countDocuments({});
-
-    return res.json({
-      status: true,
-      totalOrders,
-    });
+    return res.json({ status: true, [key]: await load() });
   } catch (error) {
-    console.error("Error fetching total orders:", error);
-    return res
-      .status(500)
-      .json({ status: false, message: "Internal server error" });
+    return sendError(res, error, logLabel, { flag: "status" });
   }
 };
 
-const getTotalProducts = async (req, res) => {
-  try {
-    const totalProducts = await Product.countDocuments({});
+const getTotalOrders = countCard(
+  reportService.getTotalOrders,
+  "totalOrders",
+  "Error fetching total orders"
+);
 
-    return res.json({
-      status: true,
-      totalProducts,
-    });
-  } catch (error) {
-    console.error("Error fetching total products:", error);
-    return res
-      .status(500)
-      .json({ status: false, message: "Internal server error" });
-  }
-};
+const getTotalProducts = countCard(
+  reportService.getTotalProducts,
+  "totalProducts",
+  "Error fetching total products"
+);
 
-const getTotalCategories = async (req, res) => {
-  try {
-    const totalCategories = await Category.countDocuments({});
+const getTotalCategories = countCard(
+  reportService.getTotalCategories,
+  "totalCategories",
+  "Error fetching total categories"
+);
 
-    return res.json({
-      status: true,
-      totalCategories,
-    });
-  } catch (error) {
-    console.error("Error fetching total categories:", error);
-    return res
-      .status(500)
-      .json({ status: false, message: "Internal server error" });
-  }
-};
-
-module.exports = {
-  getOverallRevenue,
-  getTotalOrders,
-  getTotalProducts,
-  getTotalCategories,
-};
+module.exports = { getOverallRevenue, getTotalOrders, getTotalProducts, getTotalCategories };
