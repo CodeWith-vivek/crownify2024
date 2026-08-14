@@ -30,21 +30,31 @@ export function Header() {
     const STICKY_AFTER = 145;
     const DESKTOP_MIN_WIDTH = 1200;
 
+    // Read from whichever element is actually scrolling. The document is
+    // the scroll container on every page (see the html/body rule in
+    // user-polish.css), but a stylesheet that gives body its own scroll
+    // context would otherwise pin window.scrollY at 0 and silently disable
+    // the sticky header — which is exactly what happened on the shop pages.
+    const scrollTop = () =>
+      window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+
     const update = () => {
       if (window.innerWidth < DESKTOP_MIN_WIDTH) {
         setStuck(false);
         return;
       }
-      setStuck(window.scrollY > STICKY_AFTER);
+      setStuck(scrollTop() > STICKY_AFTER);
     };
 
     update();
-    window.addEventListener("scroll", update, { passive: true });
+    // Capture phase: scroll events don't bubble, so a listener on window
+    // alone misses scrolling that happens inside a nested container.
+    document.addEventListener("scroll", update, { passive: true, capture: true });
     // The original only recomputed on scroll, so resizing from desktop to
     // mobile left a fixed header stranded until the next scroll.
     window.addEventListener("resize", update);
     return () => {
-      window.removeEventListener("scroll", update);
+      document.removeEventListener("scroll", update, { capture: true });
       window.removeEventListener("resize", update);
     };
   }, []);

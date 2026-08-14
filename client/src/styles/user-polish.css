@@ -261,3 +261,28 @@
 .pageWrapper .header-wrap {
   background-color: #fff;
 }
+
+/* --------------------------------------------------------------------------
+   Keep the document the scroll container
+   --------------------------------------------------------------------------
+   usershop/css/style.css sets `html, body { height: 100% }`. That file is
+   loaded by the shop/cart/checkout profiles but NOT by the home/brand ones,
+   which is why scroll behaviour differed between those pages.
+
+   On its own the height is harmless. Combined with the `overflow-x: hidden`
+   in index.css (added to stop sideways scrolling on mobile) it is not: per
+   the CSS overflow spec, when one axis is not `visible` the other computes
+   to `auto`, so body became `height: viewport` + `overflow-y: auto` — its
+   own scroll container. The document then never scrolls, window.scrollY
+   stays pinned at 0, and anything reading it (the sticky header) never
+   fires, while the doubled scroll context leaves a gap at the top.
+
+   min-height preserves what the theme actually wanted (full-viewport
+   layouts / sticky footer) without capping body to the viewport, so the
+   document stays the scroll container on every page.
+   -------------------------------------------------------------------------- */
+html,
+body {
+  height: auto;
+  min-height: 100%;
+}
