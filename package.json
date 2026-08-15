@@ -13,7 +13,7 @@
   "jest": {
     "testEnvironment": "node",
     "testTimeout": 30000,
-    "testPathIgnorePatterns": ["/node_modules/", "<rootDir>/tests/e2e/"]
+    "testPathIgnorePatterns": ["/node_modules/", "<rootDir>/tests/e2e/", "<rootDir>/client/"]
   },
   "keywords": [],
   "author": "",

@@ -22,6 +22,25 @@ jobs:
 
       - run: npm test
 
+  client-unit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json
+
+      # Self-contained in client/ — no browser download, no full build,
+      # no root install. Component/unit tests only (Vitest); the
+      # click-through-the-real-app coverage lives in the e2e job below.
+      - run: cd client && npm ci
+
+      - run: cd client && npm test
+
   e2e:
     runs-on: ubuntu-latest
 
